@@ -6,9 +6,9 @@ Copyright © 2021 Eric G. Falkenstone
 */
 
 contract Token {
-    uint8 public decimals;
+    uint32 public decimals;
     uint32 public totalSupply;
-    uint32 public constant MINT_AMT = 1e3;
+    uint32 public constant MINT_AMT = 1e9;
     mapping(address => uint32) public balanceOf;
     mapping(address => mapping(address => uint32)) public allowance;
     string public name;
@@ -22,7 +22,7 @@ contract Token {
         balanceOf[msg.sender] = MINT_AMT;
         totalSupply = MINT_AMT;
         name = "SportEth Token";
-        decimals = 0;
+        decimals = 6;
         symbol = "SET";
     }
 
@@ -41,8 +41,10 @@ contract Token {
     {
         uint32 senderBalance = balanceOf[msg.sender];
         require(balanceOf[msg.sender] >= _value);
-        balanceOf[msg.sender] = senderBalance - _value;
-        balanceOf[_recipient] += _value;
+        unchecked {
+            balanceOf[msg.sender] = senderBalance - _value;
+            balanceOf[_recipient] += _value;
+        }
         emit Transfer(msg.sender, _recipient, _value);
         return true;
     }
@@ -56,9 +58,11 @@ contract Token {
         require(
             balanceOf[_from] >= _value && allowance[_from][msg.sender] >= _value
         );
-        balanceOf[_from] = senderBalance - _value;
-        balanceOf[_recipient] += _value;
-        allowance[_from][msg.sender] -= _value;
+        unchecked {
+            balanceOf[_from] = senderBalance - _value;
+            balanceOf[_recipient] += _value;
+            allowance[_from][msg.sender] -= _value;
+        }
         emit Transfer(_from, _recipient, _value);
         return true;
     }

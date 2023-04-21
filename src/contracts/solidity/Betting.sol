@@ -5,6 +5,7 @@ SPDX-License-Identifier: MIT
 @author Eric Falkenstein
 */
 
+
 import "./Token.sol";
 
 
@@ -14,7 +15,7 @@ contract Betting {
         3 betEpoch, 4 totalShares, 5 concentrationLimit, 6 nonce, 7 firstStart
         */
     uint32[8] public margin;
-    /// betLong[home/away], betPayout, starttime, odds
+    /// betLong[home]/away], betPayout, starttime, odds
     uint256[32] public betData;
     address payable public oracleAdmin;
     /// this struct contains the parameters of a bet
@@ -106,7 +107,7 @@ contract Betting {
         uint8 _team0or1,
         uint32 _betAmt
     ) external {
-        require(_betAmt <= userBalance[msg.sender], "NSF ");
+        require(_betAmt <= userBalance[msg.sender] && _betAmt > 10 , "NSF ");
         (uint32[7] memory betDatav) = decodeNumber(betData[_matchNumber]);
         require(betDatav[4] > block.timestamp, "game started or not playing");
         int32 betPayoff = int32(_betAmt) * int32(betDatav[5 + _team0or1]) / 1000;
@@ -265,20 +266,22 @@ contract Betting {
         {
         uint32 redemptionPot;
         uint32 payoffPot;
-        uint epochMatchWinner;
-            uint winningTeam;
+        uint epochMatch;
+        uint winningTeam;
         for (uint i = 0; i < 32; i++) {
             winningTeam = _winner[i];
             (uint32[7] memory betDatav) = decodeNumber(betData[i]);
-            epochMatchWinner = i * 10 + margin[3] * 1000;
+            epochMatch = i * 10 + margin[3] * 1000;
+            if (betDatav[5] != 999) {
             if (winningTeam != 2) {
                 redemptionPot += betDatav[winningTeam];
                 payoffPot += betDatav[winningTeam+2];
-                outcomeMap[uint32(epochMatchWinner + winningTeam)] = 2;
+                outcomeMap[uint32(epochMatch + winningTeam)] = 2;
             } else {
                 redemptionPot += (betDatav[0] + betDatav[1]);
-                outcomeMap[uint32(epochMatchWinner)] = 1;
-                outcomeMap[uint32(1 + epochMatchWinner)] = 1;
+                outcomeMap[uint32(epochMatch)] = 1;
+                outcomeMap[uint32(1 + epochMatch)] = 1;
+            }
             }
         }
         margin[0] = addSafe(margin[0] + margin[2], -int32(redemptionPot + payoffPot));
@@ -321,11 +324,11 @@ contract Betting {
     */
     function redeem(bytes32 _subkId) external {
         require(betContracts[_subkId].bettor == msg.sender, "wrong account");
-        uint32 epochMatchWinner = betContracts[_subkId].epoch * 1000 +
+        uint32 epochMatch = betContracts[_subkId].epoch * 1000 +
             betContracts[_subkId].matchNum * 10 + betContracts[_subkId].pick;
-        require(outcomeMap[epochMatchWinner] != 0, "need win or tie");
+        require(outcomeMap[epochMatch] != 0, "need win or tie");
         uint32 payoff = betContracts[_subkId].betAmount;
-        if (outcomeMap[epochMatchWinner] == 2) {
+        if (outcomeMap[epochMatch] == 2) {
             payoff += (betContracts[_subkId].payoff * 95) / 100;
         }
         delete betContracts[_subkId];
@@ -402,9 +405,9 @@ contract Betting {
 * @param _subkID is used to lookup the contract Hash ID for a specific bet.
 */
     function checkRedeem(bytes32 _subkID) external view returns (bool) {
-        uint32 epochMatchWinner = betContracts[_subkID].epoch * 1000 +
+        uint32 epochMatch = betContracts[_subkID].epoch * 1000 +
             betContracts[_subkID].matchNum * 10 + betContracts[_subkID].pick;
-        bool redeemable = (outcomeMap[epochMatchWinner] > 0);
+        bool redeemable = (outcomeMap[epochMatch] > 0);
         return redeemable;
     }
 

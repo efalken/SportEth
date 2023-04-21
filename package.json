@@ -18,9 +18,10 @@
     "bn.js": "^5.2.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
+    "dotenv": "16.0.3",
     "eslint": "^7.32.0",
     "eth-crypto": "^2.0.0",
-    "ethers": "^5.4.6",
+    "ethers": "^5.7.2",
     "framer-motion": "4",
     "ganache-core": "^2.13.2",
     "moment": "^2.29.1",
@@ -70,14 +71,19 @@
     ]
   },
   "devDependencies": {
+    "@matterlabs/hardhat-zksync-deploy": "^0.6.3",
+    "@matterlabs/hardhat-zksync-solc": "^0.3.16",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.5.1",
-    "hardhat": "^2.6.8",
+    "ethers": "^5.7.2",
+    "hardhat": "2.12.7",
     "hardhat-contract-sizer": "^2.1.1",
     "hardhat-deploy": "^0.9.3",
     "hardhat-gas-reporter": "^1.0.4",
-    "hardhat-tracer": "^1.0.0-alpha.6"
+    "hardhat-tracer": "^1.0.0-alpha.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
+    "zksync-web3": "^0.14.3"
   }
 }

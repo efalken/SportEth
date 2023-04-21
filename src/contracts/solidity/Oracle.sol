@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity 0.8.0;
+pragma solidity ^0.8.0;
 
 import "./Token.sol";
 import "./Betting.sol";
@@ -39,8 +38,9 @@ contract Oracle {
     Token public token;
     // link to communicate with the betting contract
     Betting public bettingContract;
-    uint32 public constant CURE_TIME = 5 hours;
+    uint32 public constant CURE_TIME = 12 hours;
     uint32 public constant HOUR_START = 0;
+    uint32 public constant HOUR_END = 24;
     uint32 public constant MIN_SUBMIT = 50;
 
     /** tokens are held in the custody of this contract. Only tokens deposited in this contract can
@@ -81,8 +81,7 @@ contract Oracle {
         );
 
     event ParamsPosted(
-        uint32 concLimit,
-        uint32 epoch
+        uint32 concLimit
     );
 
     event StartTimesPosted(
@@ -180,6 +179,8 @@ contract Oracle {
             );
             emit VoteOutcome(true, params[0], params[2]);
         } else {
+            params[4] -= (MIN_SUBMIT/2);
+            adminStruct[proposer].tokens -= (MIN_SUBMIT/2);
             emit VoteOutcome(false, params[0], params[2]);
         }
         // resets various data (eg, params[3])
@@ -196,6 +197,8 @@ contract Oracle {
             bettingContract.transmitUpdate(propOddsUpdate);
             emit VoteOutcome(true, params[0], params[2]);
         } else {
+            params[4] -= (MIN_SUBMIT/2);
+            adminStruct[proposer].tokens -= (MIN_SUBMIT/2);
             emit VoteOutcome(false, params[0], params[2]);
         }
         reset();
@@ -213,6 +216,8 @@ contract Oracle {
             params[7] += ethDividend / params[4];
             emit VoteOutcome(true, params[0], params[2]);
         } else {
+            params[4] -= (MIN_SUBMIT/2);
+            adminStruct[proposer].tokens -= (MIN_SUBMIT/2);
             emit VoteOutcome(false, params[0], params[2]);
         }
         reset();
@@ -222,11 +227,10 @@ contract Oracle {
         // In the first case, an immediate send allows a simple way to protect against stale odds
         // a high minimum bet would prevent new bets while odds are voted upon
         // in the second case, a large token holder can , "Low Balance");
-        require(adminStruct[msg.sender].tokens >= 500);
+        require(adminStruct[msg.sender].tokens >= 5e8);
         bettingContract.adjustParams(_concentrationLim);
         emit ParamsPosted(
-            _concentrationLim,
-            params[0]
+            _concentrationLim
         );
     }
 
@@ -268,18 +272,21 @@ contract Oracle {
         // this is used so users do not have to delegate someone else to monitor the contract 24/7
         // 86400 is seconds in a day, and 3600 is seconds in an hour
         // restricts contract submission to between 5am-8pm in summer, 6am-9pm in winter
-    function hourOfDay() public view returns (uint hour1) {
-        hour1 = (block.timestamp - 7600) % 86400 / 3600;
+    function hourOfDay() public view returns (uint hour) {
+        hour = (block.timestamp  % 86400) / 3600;
+        require(hour >= HOUR_START);
+        //require(hour >= HOUR_START && hour < HOUR_END);
     }
 
     function post() internal {
         // constraining the hourOfDay to be > 10 gives users a block of time where they can be confident that their
         // inattention to the contract poses no risk of a malicious data submission.
-        require(hourOfDay() >= HOUR_START, "hour");
+        hourOfDay();
         // this ensures only significant token holders are making proposals, blocks trolls
         require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Low Balance");
         params[3] = uint32(block.timestamp) + CURE_TIME;
         params[5] = adminStruct[msg.sender].tokens;
+        proposer = msg.sender;
         // If strict majority of total tokens, time delay irrelevant
         if (adminStruct[msg.sender].tokens > 500) params[3] = 0;
         // this prevents proposer from voting again with his tokens on this submission
@@ -299,7 +306,7 @@ contract Oracle {
         uint32 g;
         uint96 out;
         for (uint i = 0; i < 32; i++) {
-            require(_odds[i] > 100 && _odds[i] < 9999);
+            require(_odds[i] > 125 && _odds[i] < 8000);
             g = 1e6 / (41 + _odds[i]) - 41;
             out |= uint96(_time[i]) << 64;
             out |= uint96(_odds[i]) << 32;
@@ -313,7 +320,7 @@ contract Oracle {
         uint32 f;
         uint64 out;
         for (uint i = 0; i < 32; i++) {
-            require(_odds[i] > 100 && _odds[i] < 9999);
+            require(_odds[i] > 125 && _odds[i] < 8000);
             f = 1e6 / (41 + _odds[i]) - 41;
             out |= uint64(_odds[i]) << 32;
             out |= uint64(f);
