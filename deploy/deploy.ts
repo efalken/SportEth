@@ -9,246 +9,52 @@ dotenv.config();
 export default async function (hre: HardhatRuntimeEnvironment) {
     console.log(`Running deploy script`);
 
-    // Initialize the wallet.
-    //   const wallet = new Wallet("<WALLET-PRIVATE-KEY>");
-    var price;
-    var liq;
-    const pHigh=1e12;
-    const pLow=1e7;
-    const eth0 = BigInt('100000000000000');
-    const eth2 = BigInt('1000000000000');
-    const oneExp11 = BigInt('100000000000');
-    const one3 = BigInt('1000');
-    const one9 = BigInt('1000000000');
-    const one14 = BigInt('1000');
-    const usdInK = BigInt('100');
-    const ethInK = BigInt('100000');
-    const usd0 = BigInt('1000000');
-    const usd2 = BigInt('100000000');
-    const usd3 = BigInt('1000000000');
-    const sqrtp2 = BigInt('10000000');
-
 
     const mnemonic = process.env.GOERLI_WALLET_MNEMONIC || "";
     const account_0 = Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/0`);
-    const account_1 = Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/1`);
-    const account_2 = Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/2`);
-    const account_3 = Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/3`);
-    console.log("account_0: " + account_0.address);
-    console.log("account_1: " + account_1.address);
-    console.log("account_2: " + account_2.address);
-    console.log("account_3: " + account_3.address);
 
-    const deployer = new Deployer(hre, account_2);
 
-    // Create deployer object and load the artifact of the contract you want to deploy.
+    const deployer = new Deployer(hre, account_0);
+
     
     console.log("Deploying contracts");
 
-    // epoch 1
-    const token_artifact = await deployer.loadArtifact("Token");
-    const token_contract = await deployer.deploy(token_artifact, []);
-    await token_contract.deployed();
-    console.log(`${token_contract.contractName} was deployed to ${token_contract.address}`);
+    const bbb_artifact = await deployer.loadArtifact("Bbb");
+    const bbb_contract = await deployer.deploy(bbb_artifact, []);
+    await bbb_contract.deployed();
+    console.log(`${bbb_contract.contractName} was deployed to ${bbb_contract.address}`);
 
-    console.log("Deployed token");
+    const aaa_artifact = await deployer.loadArtifact("Aaa");
+    const aaa_contract = await deployer.deploy(aaa_artifact, [bbb_contract.address]);
+    await aaa_contract.deployed();
+    console.log(`${aaa_contract.contractName} was deployed to ${aaa_contract.address}`);
 
-
-    // epoch 2
-    const betting_artifact = await deployer.loadArtifact("Betting");
-    // deploymentFee = await deployer.estimateDeployFee(betting_artifact, []);
-    // parsedFee = ethers.utils.formatEther(deploymentFee.toString());
-    // console.log(`The deployment is estimated to cost ${parsedFee} ETH`);
-    const betting_contract = await deployer.deploy(betting_artifact, [token_contract.address]);
-    await betting_contract.deployed();
-    console.log(`${betting_artifact.contractName} was deployed to ${betting_contract.address}`);
-
-    console.log("Deployed betting");
-
-    // epoch 3
-    const oracle_artifact = await deployer.loadArtifact("Oracle");
-    // deploymentFee = await deployer.estimateDeployFee(oracle_artifact, [token_contract.address]);
-    // parsedFee = ethers.utils.formatEther(deploymentFee.toString());
-    // console.log(`The deployment is estimated to cost ${parsedFee} ETH`);
-    const oracle_contract = await deployer.deploy(oracle_artifact, [betting_contract.address, token_contract.address]);
-    console.log(`${oracle_contract.contractName} was deployed to ${oracle_contract.address}`);
-
-    console.log("Deployed oracle");
-
-
-
-    console.log("Deployed all contracts and setting up initial state");
-    // epoch 6
-    let result = await betting_contract.setSpecial(oracle_contract.address);
+    let result = await bbb_contract.setAdmin(aaa_contract.address);
     let receipt = await result.wait();
-    console.log("Done setting special addresses");
+    console.log("Done setting aaa Adress in bbb");
 
-    // epoch 7
-    result = await betting_contract.mint(account_0.address, 400n*usd3);
+    result = await bbb_contract.sendEth({value: 101});
     receipt = await result.wait();
-    console.log("Done minting USDC to : ", account_0.address);
+    console.log("Done sending eth to bbb");
 
-    // epoch 8
-    result = await betting_contract.mint(account_1.address, 400n*usd3);
+    result = await aaa_contract.setData([1,2,3,4,5,6,7,8]);
     receipt = await result.wait();
-    console.log("Done minting USDC to : ", account_1.address);
+    console.log("Done setting data");
 
-    // epoch 9
-    result = await betting_contract.mint(account_2.address, 400n*usd3);
+    result = await aaa_contract.sendData();
     receipt = await result.wait();
-    console.log("Done minting USDC to : ", account_2.address);
+    console.log("Done sending data");
 
-    let provider = new ethers.providers.JsonRpcProvider("https://zksync2-testnet.zksync.dev");
-
-    // epoch 10
-    let account_0_test = new ethers.Wallet(account_0.privateKey, provider);
-    result = await betting_contract.connect(account_0_test).approve(betting_contract.address, 400n*usd3);
-    receipt = await result.wait();
-    console.log("Done approving USDC for : ", account_0.address);
-
-    // epoch 11
-    let account_1_test = new ethers.Wallet(account_1.privateKey, provider);
-    result = await betting_contract.connect(account_1_test).approve(stableperp_contract.address, 400n*usd3);
-    receipt = await result.wait();
-    console.log("Done approving USDC for : ", account_1.address);
     
-    // epoch 12
-    let account_2_test = new ethers.Wallet(account_2.privateKey, provider);
-    let account_3_test = new ethers.Wallet(account_3.privateKey, provider);
-    result = await betting_contract.connect(account_2_test).approve(stableperp_contract.address, 400n*usd3);
+    result = await aaa_contract.sendData3();
     receipt = await result.wait();
-    console.log("Done approving USDC for : ", account_2.address);
-
-    // epoch 13
-    result = await stableperp_contract.connect(account_1_test).fundETH({value: 100n*eth0});
-    receipt = await result.wait();
-    console.log("Done funding ETH for : ", account_1.address);
-
-    // epoch 14
-    result = await stableperp_contract.connect(account_1_test).fundUSDC(100n*usd3);
-    receipt = await result.wait();
-    console.log("Done funding USDC for : ", account_1.address);
+    console.log("Done getting paid");
     
-    // epoch 14
-    result = await stableperp_contract.connect(account_0_test).addLiquidity({value: 30n*eth0});
+    result = await aaa_contract.sendData2();
     receipt = await result.wait();
-    console.log("Done adding liquidity for : ", account_0.address);
+    console.log("Done sending and receiving data");
 
-    // epoch 15
-    result = await stableperp_contract.connect(account_2_test).addLiquidity({value: 30n*eth0});
-    receipt = await result.wait();
-    console.log("Done adding liquidity for : ", account_2.address);
-
-    // epoch 16
-    result = await stableperp_contract.connect(account_2_test).updateTrader(account_1_test.address);
-    receipt = await result.wait();
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-
-    // epoch 17
-    let vEth0 = (await stableperp_contract.tradeAccount(account_0_test.address)).vETH;
-    let vUsd0 = (await stableperp_contract.tradeAccount(account_0_test.address)).vUSD;
-    console.log(`eth for ${account_0_test.address} is ${(vEth0) / 1e5}`);
-    console.log(`usd for ${account_0_test.address} is ${(vUsd0) / 1e2}`);
-    vEth0 = (await stableperp_contract.tradeAccount(account_1_test.address)).vETH;
-    vUsd0 = (await stableperp_contract.tradeAccount(account_1_test.address)).vUSD;
-    console.log(`eth for ${account_1_test.address} is ${(vEth0) / 1e5}`);
-    console.log(`usd for ${account_1_test.address} is ${(vUsd0) / 1e2}`);
-    vEth0 = (await stableperp_contract.tradeAccount(account_2_test.address)).vETH;
-    vUsd0 = (await stableperp_contract.tradeAccount(account_2_test.address)).vUSD;
-    console.log(`eth for ${account_2_test.address} is ${(vEth0) / 1e5}`);
-    console.log(`usd for ${account_2_test.address} is ${(vUsd0) / 1e2}`);
-
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-    result = await stableperp_contract.connect(account_1_test).swap(-"1.5e2", pLow, account_2_test.address);
-    receipt = await result.wait();
-    console.log(account_1.address, "swapped tokens");
-
-    // epoch 18
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-
-    result = await stableperp_contract.connect(account_1_test).swap(+"1.0e6", pHigh, account_2_test.address);
-    receipt = await result.wait();
-
-    let [mktval0, reqm0] = await pullaccount_contract.mktValReqMargin2(account_0_test.address);
-    console.log(`mktval account 0 is ${mktval0/1e2} reqm is ${reqm0/1e2}`);
-
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-
-    // epoch 19
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-    result = await stableperp_contract.connect(account_2_test).swap(-"1.2e6", pLow, account_2_test.address);
-    receipt = await result.wait();
-
-    // epoch 20
-    result = await stableperp_contract.connect(account_0_test).updateTrader(account_1_test.address);
-    receipt = await result.wait();
-
-    // epoch 21
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-    result = await stableperp_contract.connect(account_1_test).swap(-"1.2e6", pLow, account_1_test.address);
-    vEth0 = (await stableperp_contract.tradeAccount(account_0_test.address)).vETH;
-    vUsd0 = (await stableperp_contract.tradeAccount(account_0_test.address)).vUSD;
-    console.log(`eth  is ${(vEth0) / 1e5}`);
-    console.log(`usd  is ${(vUsd0) / 1e2}`);
-
-    // epoch 22
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-    result = await stableperp_contract.connect(account_2_test).swap(-"1.2e6", pLow, account_2_test.address);
-    vEth0 = (await stableperp_contract.tradeAccount(account_2_test.address)).vETH;
-    vUsd0 = (await stableperp_contract.tradeAccount(account_2_test.address)).vUSD;
-    console.log(`eth  is ${(vEth0) / 1e5}`);
-    console.log(`usd  is ${(vUsd0) / 1e2}`);
-
-    // epoch 23
-    try {
-        result = await stableperp_contract.connect(account_3_test).swap(-"1.2e6", pLow, account_2_test.address);
-        receipt = await result.wait();
-    } catch (error) {
-        console.log("account 3 failed to swap. Good thing.");
-    }
-
-    // epoch 24
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
-    result = await stableperp_contract.connect(account_1_test).swap(+"1.2e6", pHigh, account_1_test.address);
-    receipt = await result.wait();
-    console.log(`stableperp acct  is ${stableperp_contract.address}`);
-    console.log(`equitytoken  is ${oracle_contract.address}`);
-    console.log(`usdXtoken is ${token_contract.address}`);
-    console.log(`USDCtoken is ${betting_contract.address}`);
-
-    // epoch 25
-    result = await stableperp_contract.connect(account_0_test).sellLP(-"1.0e6", pLow, account_0_test.address);
-    result = await stableperp_contract.connect(account_2_test).buyLP(+"1.0e6", pHigh, account_2_test.address);
-    receipt = await result.wait();
-    price = (await stableperp_contract.tradeParams()).sqrtPrice;
-    liq = (await stableperp_contract.tradeParams()).totLiquidity;
-    console.log(`currPrice, liq is ${price / 1e9}, ${liq / 1e3}`);
     
     console.log("Done prepping the contracts!!!");
-    // OPTIONAL: Deposit funds to L2
-    // Comment this block if you already have funds on zkSync.
-    // const depositHandle = await deployer.zkWallet.deposit({
-    //     to: deployer.zkWallet.address,
-    //     token: utils.ETH_ADDRESS,
-    //     amount: deploymentFee.mul(2),
-    // });
-    // // Wait until the deposit is processed on zkSync
-    // await depositHandle.wait();
     
 }

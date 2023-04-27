@@ -291,7 +291,9 @@ contract Betting {
         margin[2] = 0;
         delete betData;
         margin[7] = FUTURE_START;
-        oracleAdmin.transfer(oracleDiv);
+        //oracleAdmin.transfer(oracleDiv);
+        (bool success,) = oracleAdmin.call{value: oracleDiv}("");
+        require(success, "Call failed");
         return (margin[3], uint32(5 * payoffPot));
     }
 
@@ -333,9 +335,6 @@ contract Betting {
         }
         delete betContracts[_subkId];
         userBalance[msg.sender] += payoff;
-        if (token.balanceOf(address(this)) > 0) {
-            token.transfer(payable(msg.sender), 1);
-        }
         emit Funding(msg.sender, payoff, margin[3], 2);
     }
 
@@ -346,7 +345,9 @@ contract Betting {
         require(_amt <= userBalance[msg.sender]);
         userBalance[msg.sender] -= _amt;
         uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
-        payable(msg.sender).transfer(amt256);
+        // payable(msg.sender).transfer(amt256);
+        (bool success,) = payable(msg.sender).call{value: amt256}("");
+        require(success, "Call failed");
         emit Funding(msg.sender, amt256, margin[3], 3);
     }
 
@@ -367,12 +368,15 @@ contract Betting {
         lpStruct[msg.sender].shares -= _sharesToSell;
         margin[0] -= ethWithdraw;
         uint256 ethWithdraw256 = uint256(ethWithdraw) * UNITS_TRANS14;
-        payable(msg.sender).transfer(ethWithdraw256);
+        //payable(msg.sender).transfer(ethWithdraw256);
+        (bool success,) = payable(msg.sender).call{value: ethWithdraw256}("");
+        require(success, "Call failed");
         emit Funding(msg.sender, ethWithdraw256, margin[3], 4);
     }
 
 /** @dev processes initial odds and start times
 * @param _oddsAndStart is the epoch's set of odds and start times for matches. Data are packed into uint96.
+* the first event is stored into margin[7] as when LPs can no longe add or remove liquidity
 */
     function transmitInit(uint96[32] memory _oddsAndStart) external onlyAdmin {
         require(margin[2] == 0);

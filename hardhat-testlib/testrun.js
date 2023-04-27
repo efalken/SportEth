@@ -21,8 +21,8 @@ var hash12;
 var gasUsed;
 var receipt;
 var result;
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+//const { expect } = require("chai");
+//const { ethers } = require("hardhat");
 const {assert} = require('chai');
 
 require("chai").use(require("chai-as-promised")).should();
@@ -31,6 +31,7 @@ describe("test1", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
+    [owner, account1, account2, account3, _] = await ethers.getSigners();
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
@@ -38,7 +39,7 @@ describe("test1", function () {
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
-    [owner, account1, account2, account3, _] = await ethers.getSigners();
+    
   })
 
   describe("set up contract", async () => {

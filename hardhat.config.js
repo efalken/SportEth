@@ -1,5 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
-//require('hardhat-contract-sizer');
+require('hardhat-contract-sizer');
 require('dotenv').config();
 
 require("@matterlabs/hardhat-zksync-deploy");
@@ -19,8 +19,9 @@ require("@matterlabs/hardhat-zksync-solc");
     tests: "./hardhat-testlib",
     artifacts: "./artifacts"
   },
+  
   solidity: {
-    version: "0.8.17",
+    version: "0.8.0",
     settings: {
       optimizer: {
         runs: 2000,
@@ -53,9 +54,8 @@ require("@matterlabs/hardhat-zksync-solc");
         count: 20,
         passphrase: "",
       },
-      gas: 21000000, 
-      gasPrice: 9000000000
-     
+      gas: 23000000, 
+      gasPrice: 15000000000     
     },
     arbitrum: {
       url: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_RINKEBY_PROJECT_ID}`,
@@ -77,10 +77,10 @@ require("@matterlabs/hardhat-zksync-solc");
         mnemonic: `${process.env.DEFAULT_WALLET_MNEMONIC}`,
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
-        count: 20,
+        count: 4,
         passphrase: "",
       }, 
-      gasPrice: 20e9,
+      gasPrice: 22e9,
       gas: 25e6
     },
   },

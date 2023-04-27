@@ -7,49 +7,44 @@ dotenv.config();
 
 // An example of a deploy script that will deploy and call a simple contract.
 export default async function (hre: HardhatRuntimeEnvironment) {
+    console.log(`Running deploy script`);
+
+    // Initialize the wallet.
+    //   const wallet = new Wallet("<WALLET-PRIVATE-KEY>");
 
 
     const mnemonic = process.env.GOERLI_WALLET_MNEMONIC || "";
     const account_0 = Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/0`);
+    console.log("account_0: " + account_0.address);
 
 
     const deployer = new Deployer(hre, account_0);
-
-console.log("Deploying contracts");
+    
+    console.log("Deploying contracts");
 
     // epoch 1
-    const token_artifact = await deployer.loadArtifact("Token");
-    const token_contract = await deployer.deploy(token_artifact, []);
-    await token_contract.deployed();
-    console.log(`${token_contract.contractName} was deployed to ${token_contract.address}`);
+    const bbb_artifact = await deployer.loadArtifact("Bbb");
+    const bbb_contract = await deployer.deploy(bbb_artifact, []);
+    await bbb_contract.deployed();
+    console.log(`${bbb_contract.contractName} was deployed to ${bbb_contract.address}`);
+    console.log("Deployed bbb");
 
 
     // epoch 2
-    const betting_artifact = await deployer.loadArtifact("Betting");
-    const betting_contract = await deployer.deploy(betting_artifact, [token_contract.address]);
-    await betting_contract.deployed();
-    console.log(`${betting_artifact.contractName} was deployed to ${betting_contract.address}`);
+    const aaa_artifact = await deployer.loadArtifact("Aaa");
+    const aaa_contract = await deployer.deploy(aaa_artifact, [bbb_contract.address]);
+    await aaa_contract.deployed();
+    console.log(`${aaa_artifact.contractName} was deployed to ${aaa_contract.address}`);
+    console.log("Deployed aaa");
 
-    // epoch 3
-    const oracle_artifact = await deployer.loadArtifact("Oracle");
-    const oracle_contract = await deployer.deploy(oracle_artifact, [betting_contract.address, token_contract.address]);
-    console.log(`${oracle_contract.contractName} was deployed to ${oracle_contract.address}`);
 
-    console.log("Deployed all contracts and setting up initial state");
-    let result = await token_contract.approve(oracle_contract.address, 56e7);
+    let result = await bbb_contract.setAdmin(aaa_contract.address);
     let receipt = await result.wait();
-    console.log("Done setting approve");
+    console.log("Done setting aaa Adress in bbb");
 
-    // epoch 7
-    result = await oracle_contract.depositTokens(56e7);
-    receipt = await result.wait();
-    console.log("Done depositing ");
 
-    let provider = new ethers.providers.JsonRpcProvider("https://zksync2-testnet.zksync.dev");
-
-    _timestamp = (await provider.getBlock(await provider.getBlockNumber())).timestamp;
-
-        
+    let provider = new ethers.providers.JsonRpcProvider("https://testnet.era.zksync.dev");
+    let _timestamp = (await provider.getBlock(await provider.getBlockNumber())).timestamp;
     var nextStart = _timestamp + 7 * 86400;
 
     // epoch 8
@@ -156,12 +151,15 @@ console.log("Deploying contracts");
         800,
       ]);
     receipt = await result.wait();
-    console.log("Done setting up init");
-
-    result = await oracle_contract.initProcess({gasLimit: eth0});
     receipt = await result.wait();
-    console.log("Done processing init");
-
+    gasUsed = receipt.gasUsed;
+    console.log(`gas on initsend ${gasUsed}`);
+    console.log("Done with init ", account_1.address);
+    const options = {gasLimit: 8e7, gasPrice: 25e7};
+    result = await oracle_contract.initProcess(options);
+    receipt = await result.wait();
+   
+    
     console.log("Done prepping the contracts!!!");
     // OPTIONAL: Deposit funds to L2
     // Comment this block if you already have funds on zkSync.

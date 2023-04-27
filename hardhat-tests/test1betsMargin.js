@@ -41,10 +41,10 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, "560");
+      await token.approve(oracle.address, "560000000");
     });
     it("Deposit Tokens in Oracle Contract2", async () => {
-      await oracle.connect(owner).depositTokens("560");
+      await oracle.connect(owner).depositTokens("560000000");
     });
   });
 

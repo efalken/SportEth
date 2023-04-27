@@ -11,6 +11,11 @@ module.exports = {
       }  
     },
   },
+  paths: {
+    sources: "./src/contracts/solidity",
+    tests: "./hardhat-testlib",
+    artifacts: "./artifacts"
+  },
   mocha: {
     timeout: 100000000
   },
@@ -18,7 +23,7 @@ module.exports = {
 
   networks: {
     zkSyncTestnet: {
-      url: "https://zksync2-testnet.zksync.dev",
+      url: "https://testnet.era.zksync.dev",
       ethNetwork: `https://goerli.infura.io/v3/3e4616a1aed64da3b29e20c2970e23b7`,
       zksync: true,
     },

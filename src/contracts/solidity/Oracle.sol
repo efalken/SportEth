@@ -38,7 +38,7 @@ contract Oracle {
     Token public token;
     // link to communicate with the betting contract
     Betting public bettingContract;
-    uint32 public constant CURE_TIME = 12 hours;
+    uint32 public constant CURE_TIME = 0 hours;
     uint32 public constant HOUR_START = 0;
     uint32 public constant HOUR_END = 24;
     uint32 public constant MIN_SUBMIT = 50;
@@ -175,8 +175,7 @@ contract Oracle {
         // only sent if 'null' vote does not win
         if (params[5] > params[6]) {
             // sends to the betting contrac
-            bettingContract.transmitInit(propOddsStarts
-            );
+            bettingContract.transmitInit(propOddsStarts);
             emit VoteOutcome(true, params[0], params[2]);
         } else {
             params[4] -= (MIN_SUBMIT/2);
@@ -245,7 +244,9 @@ contract Oracle {
         adminStruct[msg.sender].initFeePool = params[7];
         params[4] -= _amtTokens;
         adminStruct[msg.sender].tokens -= _amtTokens;
-        payable(msg.sender).transfer(ethClaim);
+        //payable(msg.sender).transfer(ethClaim);
+        (bool success,) = payable(msg.sender).call{value: ethClaim}("");
+        require(success, "Call failed");
         token.transfer(msg.sender, _amtTokens);
         emit Funding(_amtTokens, ethClaim, msg.sender);
     }
@@ -256,7 +257,9 @@ contract Oracle {
             //uint userTokens = adminStruct[msg.sender].tokens;
             ethClaim = uint256(adminStruct[msg.sender].tokens * (params[7] -
                 adminStruct[msg.sender].initFeePool))*1e12;
-            payable(msg.sender).transfer(ethClaim);
+            //payable(msg.sender).transfer(ethClaim);
+            (bool success,) = payable(msg.sender).call{value: ethClaim}("");
+            require(success, "Call failed");
         }
         token.transferFrom(msg.sender, address(this), _amt);
         adminStruct[msg.sender].initFeePool = params[7];
