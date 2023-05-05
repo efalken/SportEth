@@ -1,22 +1,21 @@
 const helper = require("../hardhat-helpers");
 const { Wallet } = require(`zksync-web3`);
-//const { Wallet, utils } = require('ethers');
 const gas1 = 1e9;
 const gas2 = 3e9;
 const gas3 = 3e9;
 const {assert} = require('chai');
 const { ethers } = require("hardhat");
-//const { ethers }  = require('ethers');
 require("chai").use(require("chai-as-promised")).should();
 
 describe("test1", function () {
   let token, aaa, bbb, account_0, account_1, account_2;
 
   before(async () => {
-    [account_0, account_1, account_2, _] = await ethers.getSigners();
-    
-console.log(account_0.address);
-console.log(account_1.address);
+   [account_0, account_1, account_2, _] = await ethers.getSigners();
+
+
+console.log("account_0: " + account_0.address);
+console.log("account_1: " + account_1.address);
     const Token = await ethers.getContractFactory('Token')
     const Bbb = await ethers.getContractFactory('Bbb')
     const Aaa = await ethers.getContractFactory('Aaa')
@@ -27,10 +26,6 @@ console.log(account_1.address);
   
   describe("set up contract", async () => {
 
-    it("see addresses", async () => {
-    console.log("account_0: " + account_0.address);
-    console.log("account_1: " + account_1.address);
-  });
   
 
     it("basic transactions", async () => {

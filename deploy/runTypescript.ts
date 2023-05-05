@@ -3,8 +3,7 @@ const helper = require("../hardhat-helpers");
 import * as ethers from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
-import dotenv from "dotenv";
-dotenv.config();
+
 
 export default async function (hre: HardhatRuntimeEnvironment) {
     console.log(`Running deploy script`);
@@ -14,12 +13,22 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     const gas1 = 5650000;
     const gas2 = 8650000;
     const gas3 = 9650000;
-
+/*
     const mnemonic = process.env.GOERLI_WALLET_MNEMONIC || "";
     const account_0 = Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/0`);
     const account_1 = Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/1`);
     console.log("account_0: " + account_0.address);
     console.log("account_1: " + account_1.address);
+*/
+    const account_0 = new Wallet("0xdc63c0436707975689036ad87b2dcbec81ac4ff488501115995ae84e7f9a1286");
+    const account_1 = new Wallet("0x4765ce94f9ef7d4ea3f4023e9a1e2936f47fb2cbb8be104d3883b6ef721f5aa4");
+    console.log("account_0: " + account_0.address);
+    console.log("account_1: " + account_1.address);
+
+    let provider = new ethers.providers.JsonRpcProvider("https://testnet.era.zksync.dev");
+
+    //const account_0_signer = await provider.getSigner(account_0.address)
+    //const account_1_signer = await provider.getSigner(account_1.address)
 
     const deployer = new Deployer(hre, account_0);
 
@@ -58,6 +67,9 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     receipt = await result.wait();
     console.log("Done sending ETH ");
 
+    //const foo = await provider.aaa_contract(account_1.address);
+    //result = await aaa_contract.connect(account_1_signer).sendOnly(gas1);
+    //result = await aaa_contract.connect(account_1).sendOnly(gas1);
     result = await aaa_contract.sendOnly(gas1);
     receipt = await result.wait();
     console.log("sendOnly ");
@@ -77,7 +89,6 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     result = await aaa_contract.sendGet(gas3);
     receipt = await result.wait();
     console.log("sendget");
-/*
-    let provider = new ethers.providers.JsonRpcProvider("https://zksync2-testnet.zksync.dev");*/
+
 
 }

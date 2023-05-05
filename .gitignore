@@ -40,6 +40,10 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+artifacts/
+artifacts-zk/
+cache/
+cache-zk/
 
 # TypeScript v1 declaration files
 typings/

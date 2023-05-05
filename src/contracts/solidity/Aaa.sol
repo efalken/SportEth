@@ -10,11 +10,13 @@ contract Aaa {
   uint256 public a;
   uint32 public b;
   Token public token;
+  address public admin;
 
   constructor(address payable _Bbb, address _token) {
     bbbinternal = Bbb(_Bbb);
     params = 10;
     token = Token(_token);
+    admin = msg.sender;
   }
 
   receive() external payable {}
@@ -24,6 +26,7 @@ contract Aaa {
   }
 
   function set() external {
+    require(msg.sender == admin);
     params++;
   }
 
@@ -39,7 +42,7 @@ contract Aaa {
       abi.encodeWithSignature("pullPay(uint256)", params)
     );
     require(success);
-  } 
+  }
 
   function sendGet(uint256 _gas) external {
     (bool success, bytes memory _x) = address(bbbinternal).call{ gas: _gas }(
