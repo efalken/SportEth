@@ -1,5 +1,5 @@
 
-const web3bn = require("web3-utils");
+const web3 = require("web3-utils");
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
@@ -8,8 +8,10 @@ var _timestamp;
 var _date;
 var _hour;
 const { assert } = require('chai');
+//const { expect } = require("chai");
 
 require("chai").use(require("chai-as-promised")).should();
+const { expect } = require("chai");
 
 describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
@@ -219,9 +221,10 @@ describe("Betting", function () {
     });
 
     it("fail: try to send too soon", async () => {
-      await oracle.initProcess();
-      const result = await oracle.underReview();
-      console.log(`review2 ${result}`);
+      //await oracle.initProcess();
+      await expect(oracle.connect(owner).initProcess()).to.be.reverted;
+      //const result = await oracle.underReview();
+      //console.log(`review2 ${result}`);
     });
 
     it("fast forward 6 hours", async () => {
@@ -236,7 +239,7 @@ describe("Betting", function () {
     it("fail: try post odds to oracle", async () => {
       const _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       var nextStart = _timestamp + 86400;
-      await oracle.updatePost(
+      await expect(oracle.updatePost(
         [
           800,
           999,
@@ -271,13 +274,14 @@ describe("Betting", function () {
           1050,
           1310,
         ]
-      );
+      )).to.be.reverted;
     });
 
     it("fail:try to send results, not initial data", async () => {
-      await oracle.settleProcess();
-      await timeout(5000);
-      await web3.utils.advanceBlockAtTime(now.toNumber());
+      await expect(oracle.settleProcess()).to.be.reverted;
+      //await timeout(5000);
+      //await web3.utils.advanceBlockAtTime(now.toNumber());
+
     });
 
     it("fast forward 3 days", async () => {

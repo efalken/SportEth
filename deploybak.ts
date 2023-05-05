@@ -45,12 +45,12 @@ console.log("Deploying contracts");
     receipt = await result.wait();
     console.log("Done depositing ");
 
-    let provider = new ethers.providers.JsonRpcProvider("https://zksync2-testnet.zksync.dev");
+    let provider = new ethers.providers.JsonRpcProvider("https://testnet.era.zksync.dev");
 
-    _timestamp = (await provider.getBlock(await provider.getBlockNumber())).timestamp;
+    var _timestamp = (await provider.getBlock(await provider.getBlockNumber())).timestamp;
 
         
-    var nextStart = _timestamp + 7 * 86400;
+    var nextStart = 1682698899 + 7 * 86400;
 
     // epoch 8
     result = await oracle_contract.initPost([
@@ -158,7 +158,7 @@ console.log("Deploying contracts");
     receipt = await result.wait();
     console.log("Done setting up init");
 
-    result = await oracle_contract.initProcess({gasLimit: eth0});
+    result = await oracle_contract.initProcess([]);
     receipt = await result.wait();
     console.log("Done processing init");
 

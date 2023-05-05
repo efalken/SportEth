@@ -9,7 +9,7 @@ var _hour;
 var nextStart;
 var nextStart5;
 const { assert } = require('chai');
-
+const { expect } = require("chai");
 require("chai").use(require("chai-as-promised")).should();
 
 describe("Betting", function () {
@@ -530,7 +530,7 @@ describe("Betting", function () {
     });
 
     it("Fail: Excess Amount Should Fail because max size is 2000 (10000/5), and the bet size is ", async () => {
-      const result = await betting.connect(account1).bet(5, 0, "2001");
+      const result = await expect(betting.connect(account1).bet(5, 0, "2001")).to.be.reverted;
     });
 
     it("Test 1", async () => {
@@ -550,9 +550,7 @@ describe("Betting", function () {
     });
 
     it("fail: attempt to withdraw 6001 too much", async () => {
-      const ethout0 = await betting.withdrawBook("6001", {
-        from: accounts[0],
-      });
+      const ethout0 = await expect(betting.withdrawBook("6001")).to.be.reverted;
       const bookiePool = await betting.margin(0);
       const bookieLocked = await betting.margin(1);
       console.log(`bookiePool ${bookiePool}`);
@@ -573,19 +571,17 @@ describe("Betting", function () {
       await helper.advanceTimeAndBlock(2 * 86400);
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       console.log(`currTime is ${_timestamp}`);
-      await betting.fundBook({
+      await expect(betting.fundBook({
         value: "3000000000000000000",
-      });
+      })).to.be.reverted;
     });
 
     it("Fail: withdraw after earliest start prohibited", async () => {
-      await betting.fundBook({
-        value: "3000000000000000000",
-      });
+      await expect(betting.withdrawBook(777)).to.be.reverted;
     });
 
     it("Fail:betting after match 0 that has started", async () => {
-      await betting.connect(account1).bet(0, 1, "1000");
+      await expect(betting.connect(account1).bet(0, 1, "1000")).to.be.reverted;
     });
 
     it("succeed: funding on match 5 which has not started", async () => {

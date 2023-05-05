@@ -9,6 +9,7 @@ var _hour;
 var account2eo;
 
 const {assert} = require('chai');
+const { expect } = require("chai");
 require("chai").use(require("chai-as-promised")).should();
 
 describe("Betting", function () {
@@ -296,7 +297,8 @@ describe("Betting", function () {
     });
 
     it("fail: redeem attempt for bet on 0:1 from wrong account", async () => {
-      const result = await betting.connect(account3).redeem(contractHash1);
+    //  const result = await betting.connect(account3).redeem(contractHash1);
+      await expect(betting.connect(account3).redeem(contractHash1)).to.be.reverted;
     });
 
     it("redeem  bet on 0:1 ", async () => {
@@ -307,11 +309,13 @@ describe("Betting", function () {
     });
 
     it("fail: redeem attempt for losing bet on 0:0", async () => {
-      const result = await betting.connect(account3).redeem(contractHash0);
+     // const result = await betting.connect(account3).redeem(contractHash0);
+      await expect(betting.connect(account3).redeem(contractHash0)).to.be.reverted;
     });
 
     it("fail: redeem bet on 0:1 second time", async () => {
-      const result = await betting.connect(account2).redeem(contractHash1);
+     // const result = await betting.connect(account2).redeem(contractHash1);
+      await expect(betting.connect(account2).redeem(contractHash1)).to.be.reverted;
     });
 
     it("redeem  bet on 2:1 ", async () => {

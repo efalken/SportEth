@@ -2,43 +2,68 @@
 pragma solidity ^0.8.0;
 
 import "./Bbb.sol";
-
+import "./Token.sol";
 
 contract Aaa {
+  uint256 public params;
+  Bbb public bbbinternal;
+  uint256 public a;
+  uint32 public b;
+  Token public token;
 
-    uint256[8] public params;
-    Bbb public bbbinternal;
+  constructor(address payable _Bbb, address _token) {
+    bbbinternal = Bbb(_Bbb);
+    params = 10;
+    token = Token(_token);
+  }
 
-    constructor(address payable _Bbb) {
-        bbbinternal = Bbb(_Bbb);
-    }
+  receive() external payable {}
 
-    receive() external payable {}
+  function seeBalance() external view returns (uint256 ethHere) {
+    ethHere = address(this).balance;
+  }
 
-    function seeBalance() external view returns(uint ethHere) {
-        ethHere = address(this).balance;
-    }
+  function set() external {
+    params++;
+  }
 
-    function setData(
-        uint256[8] memory _data
-        ) external {
-        params = _data;
-    }
+  function sendOnly(uint256 _gas) external {
+    (bool success, ) = address(bbbinternal).call{ gas: _gas }(
+      abi.encodeWithSignature("pullOnly(uint256)", params)
+    );
+    require(success);
+  }
 
-    function sendData() external {
-            bbbinternal.pullOnly(params);
-    }
+  function sendPay(uint256 _gas) external {
+    (bool success, ) = address(bbbinternal).call{ gas: _gas }(
+      abi.encodeWithSignature("pullPay(uint256)", params)
+    );
+    require(success);
+  } 
 
-    function sendData3() external {
-            (uint256 _one,uint256 _two) = bbbinternal.pullPush(params);
-            params[0] = _one;
-            params[7] = _two;
-    }
-    
-        function sendData2() external {
-            bbbinternal.pullPay(params);
-    }
+  function sendGet(uint256 _gas) external {
+    (bool success, bytes memory _x) = address(bbbinternal).call{ gas: _gas }(
+      abi.encodeWithSignature("pullGet(uint256)", params)
+    );
+    require(success);
+    (a, b) = abi.decode(_x, (uint256, uint32));
+  }
 
-
-
+  function sendToken(
+    address payor,
+    address payee,
+    uint32 amt
+  ) external {
+    bool success = token.transferFrom(payor, payee, amt);
+    /*
+    (bool success, ) = address(token).call{ gas: 5650000 }(
+      abi.encodeWithSignature(
+        "transferFrom(address, address, uint32)",
+        payor,
+        payee,
+        amt
+      )
+    );*/
+    require(success);
+  }
 }

@@ -77,7 +77,7 @@ require("@matterlabs/hardhat-zksync-solc");
         mnemonic: `${process.env.DEFAULT_WALLET_MNEMONIC}`,
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
-        count: 4,
+        count: 10,
         passphrase: "",
       }, 
       gasPrice: 22e9,

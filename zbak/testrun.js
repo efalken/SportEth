@@ -6,24 +6,13 @@ const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
 var _timestamp;
 var _date;
 var _hour;
-var hash1;
-var hash2;
-var hash3;
-var hash4;
-var hash5;
-var hash6;
-var hash7;
-var hash8;
-var hash9;
-var hash10;
-var hash11;
-var hash12;
 var gasUsed;
 var receipt;
 var result;
+var ethBalance;
 //const { expect } = require("chai");
 //const { ethers } = require("hardhat");
-const {assert} = require('chai');
+//const {assert} = require('chai');  
 
 require("chai").use(require("chai-as-promised")).should();
 
@@ -32,6 +21,8 @@ describe("test1", function () {
 
   before(async () => {
     [owner, account1, account2, account3, _] = await ethers.getSigners();
+    ethBalance = ethers.utils.formatUnits(await ethers.provider.getBalance(owner.address), "finney");
+    console.log(`gas1 ${ethBalance}`);
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
@@ -39,6 +30,7 @@ describe("test1", function () {
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    
     
   })
 
@@ -61,12 +53,19 @@ describe("test1", function () {
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on authorize ${gasUsed}`);
+      const numTokens = ethers.utils.formatUnits(
+        (await oracle.adminStruct(owner.address)).tokens,
+        "wei"
+      );
+      console.log(`tokens ${numTokens}`);
     });
   });
-  
+
 
   describe("send init", async () => {
     it("part1", async () => {
+      ethBalance = ethers.utils.formatUnits(await ethers.provider.getBalance(owner.address), "finney");
+    console.log(`gas2 ${ethBalance}`);
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       var nextStart = _timestamp + 7 * 86400;
       result = await oracle.initPost(
@@ -183,6 +182,8 @@ describe("test1", function () {
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on authorize ${gasUsed}`);
+      ethBalance = ethers.utils.formatUnits(await ethers.provider.getBalance(owner.address), "finney");
+    console.log(`gas2 ${ethBalance}`);
     });
   });
   
