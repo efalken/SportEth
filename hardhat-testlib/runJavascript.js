@@ -1,11 +1,9 @@
 const helper = require("../hardhat-helpers");
-const { Wallet } = require(`zksync-web3`);
 const gas1 = 1e9;
 const gas2 = 3e9;
 const gas3 = 3e9;
-const {assert} = require('chai');
 const { ethers } = require("hardhat");
-require("chai").use(require("chai-as-promised")).should();
+
 
 describe("test1", function () {
   let token, aaa, bbb, account_0, account_1, account_2;
