@@ -12,7 +12,7 @@ contract Aaa {
   Token public token;
   address public admin;
 
-  constructor(address payable _Bbb, address _token) {
+  constructor(address payable _Bbb, address payable _token) {
     bbbinternal = Bbb(_Bbb);
     params = 10;
     token = Token(_token);
@@ -58,15 +58,22 @@ contract Aaa {
     uint32 amt
   ) external {
     bool success = token.transferFrom(payor, payee, amt);
-    /*
-    (bool success, ) = address(token).call{ gas: 5650000 }(
-      abi.encodeWithSignature(
-        "transferFrom(address, address, uint32)",
-        payor,
-        payee,
-        amt
-      )
-    );*/
     require(success);
+  }
+
+  function sendToken2(address payee, uint32 _amt) external {
+    (bool success, ) = address(token).call{ gas: 150000 }(
+      abi.encodeWithSignature("transfer(address,uint32)", payee, _amt)
+    );
+    //bool success = token.transfer(payee, amt);
+    require(success, "failed call");
+  }
+
+  function sendToken3(address payee, uint32 amt) external {
+    //bool success = token.transfer(payee, amt);
+    (bool success, ) = address(token).call{ gas: 150000 }(
+      abi.encodeWithSignature("transfer2(address)", payee)
+    );
+    require(success, "failed transfer");
   }
 }

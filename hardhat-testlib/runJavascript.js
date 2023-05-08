@@ -2,6 +2,7 @@ const helper = require("../hardhat-helpers");
 const gas1 = 1e9;
 const gas2 = 3e9;
 const gas3 = 3e9;
+var oracleBal;
 const { ethers } = require("hardhat");
 
 
@@ -32,13 +33,53 @@ console.log("account_1: " + account_1.address);
       gasUsed = receipt.gasUsed;
       console.log(`gas on authorize ${gasUsed}`);
 
-      result = await aaa_contract.sendToken(account_0.address, account_1.address, 56e7);
+      result = await token_contract.transfer(aaa_contract.address, 4e7);
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
-      console.log(`gas on authorize ${gasUsed}`);
+      console.log(`sendToken`);
 
-      const tokBal2 = await token_contract.balanceOf(account_1.address);
-      console.log(`total 2 shares ${tokBal2}`);
+      oracleBal = await token_contract.balanceOf(account_1.address);
+      console.log(`acct1 tokens1 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(account_0.address);
+      console.log(`acct0 tokens1 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(aaa_contract.address);
+      console.log(`aaa tokens ${oracleBal}`);
+
+      result = await aaa_contract.sendToken2(account_1.address,123);
+      receipt = await result.wait();
+      gasUsed = receipt.gasUsed;
+      console.log(`sendToken`);
+
+      oracleBal = await token_contract.balanceOf(account_1.address);
+      console.log(`acct1 tokens2 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(account_0.address);
+      console.log(`acct0 tokens2 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(aaa_contract.address);
+      console.log(`aaa tokens2 ${oracleBal}`);
+
+      result = await aaa_contract.sendToken3(account_1.address,123000);
+      receipt = await result.wait();
+      gasUsed = receipt.gasUsed;
+      console.log(`sendToken2`);
+
+      oracleBal = await token_contract.balanceOf(account_1.address);
+      console.log(`acct1 tokens3 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(account_0.address);
+      console.log(`acct0 tokens3 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(aaa_contract.address);
+      console.log(`aaa tokens3 ${oracleBal}`);
+
+      result = await token_contract.transfer(account_1.address, 321);
+      receipt = await result.wait();
+      console.log(`transferToken`);
+
+
+      oracleBal = await token_contract.balanceOf(account_1.address);
+      console.log(`acct1 tokens4 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(account_0.address);
+      console.log(`acct0 tokens4 ${oracleBal}`);
+      oracleBal = await token_contract.balanceOf(aaa_contract.address);
+      console.log(`aaa tokens4 ${oracleBal}`);
 
       result = await aaa_contract.set();
       receipt = await result.wait();

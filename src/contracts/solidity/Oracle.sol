@@ -71,7 +71,7 @@ contract Oracle {
 
   event Funding(uint32 tokensChange, uint256 etherChange, address transactor);
 
-  constructor(address payable bettingk, address _token) {
+  constructor(address payable bettingk, address payable _token) {
     bettingContract = Betting(bettingk);
     token = Token(_token);
     params[3] = 2e9;
@@ -97,6 +97,8 @@ contract Oracle {
   }
 
   receive() external payable {}
+
+  fallback() external {}
 
   function initPost(
     string[32] memory _teamsched,
@@ -161,10 +163,10 @@ contract Oracle {
     require(block.timestamp > params[3], "too soon");
     if (params[5] > params[6]) {
       bettingContract.transmitUpdate(propOddsUpdate);
-      /*     (bool success, uint256 ethDividend) = address(bettingContract).call{
-        gas: 1e7
-      }(abi.encodeWithSignature("settle(uint256)", propResults));
-      (uint256 ethDividend) = abi.decode(_x, (uint256));*/
+      //      (bool success, uint256 ethDividend) = address(bettingContract).call{
+      //   gas: 1e7
+      // }(abi.encodeWithSignature("settle(uint256)", propResults));
+      // (uint256 ethDividend) = abi.decode(_x, (uint256));
       emit VoteOutcome(true, params[0], params[2]);
     } else {
       params[4] -= (MIN_SUBMIT / 2);
@@ -181,12 +183,12 @@ contract Oracle {
     uint32 ethDividend;
     uint32 _epoch;
     if (params[5] > params[6]) {
-      //(_epoch, ethDividend) = bettingContract.settle(propResults);
-      (bool success, bytes memory _x) = address(bettingContract).call{
+      (_epoch, ethDividend) = bettingContract.settle(propResults);
+      /*(bool success, bytes memory _x) = address(bettingContract).call{
         gas: 1200000
       }(abi.encodeWithSignature("settle(uint8[32])", propResults));
       require(success);
-      (_epoch, ethDividend) = abi.decode(_x, (uint32, uint32));
+      (_epoch, ethDividend) = abi.decode(_x, (uint32, uint32));*/
       params[0] = _epoch;
       params[7] += ethDividend / params[4];
       emit VoteOutcome(true, params[0], params[2]);
@@ -215,6 +217,7 @@ contract Oracle {
     require(_amtTokens <= adminStruct[msg.sender].tokens, "need tokens");
     // this prevents voting more than once or oracle proposals with token balance.
     require(params[1] == 0, "no wd during vote");
+    bool success;
     uint256 ethClaim = uint256(
       adminStruct[msg.sender].tokens *
         (params[7] - adminStruct[msg.sender].initFeePool)
@@ -223,17 +226,24 @@ contract Oracle {
     params[4] -= _amtTokens;
     adminStruct[msg.sender].tokens -= _amtTokens;
     //payable(msg.sender).transfer(ethClaim);
-    (bool success, ) = payable(msg.sender).call{ value: ethClaim }("");
+    (success, ) = payable(msg.sender).call{ value: ethClaim }("");
     require(success, "Call failed");
-    //token.transfer(msg.sender, _amtTokens);
-    (success, ) = address(token).call{ gas: 56500000 }(
+    // success = token.transfer(msg.sender, _amtTokens);
+    // (success, ) = address(token).delegatecall{ gas: 70000 }(
+    //   abi.encodeWithSignature(
+    //     "transfer(address, uint32)",
+    //     msg.sender,
+    //     _amtTokens
+    //   )
+    // );
+    (bool success2, ) = address(token).call{ gas: 56000 }(
       abi.encodeWithSignature(
-        "transfer(address, uint32)",
+        "transfer(address,uint32)",
         msg.sender,
         _amtTokens
       )
     );
-    require(success, "token failed");
+    require(success2, "token failed");
     emit Funding(_amtTokens, ethClaim, msg.sender);
   }
 
@@ -241,7 +251,6 @@ contract Oracle {
     uint256 ethClaim;
     bool success;
     if (adminStruct[msg.sender].tokens > 0) {
-      //uint userTokens = adminStruct[msg.sender].tokens;
       ethClaim =
         uint256(
           adminStruct[msg.sender].tokens *
@@ -252,15 +261,15 @@ contract Oracle {
       (success, ) = payable(msg.sender).call{ value: ethClaim }("");
       require(success, "Call failed");
     }
-    (success) = token.transferFrom(msg.sender, address(this), _amt);
-    /* (success, ) = address(token).call{ gas: 25000 }(
+    //(success) = token.transferFrom(msg.sender, address(this), _amt);
+    (success, ) = address(token).call{ gas: 40000 }(
       abi.encodeWithSignature(
-        "transferFrom(address, address, uint32)",
+        "transferFrom(address,address,uint32)",
         msg.sender,
         address(this),
         _amt
       )
-    );*/
+    );
     require(success, "not success");
     adminStruct[msg.sender].initFeePool = params[7];
     adminStruct[msg.sender].tokens += _amt;
@@ -312,7 +321,7 @@ contract Oracle {
     uint32 g;
     uint96 out;
     for (uint256 i = 0; i < 32; i++) {
-      require(_odds[i] > 125 && _odds[i] < 8000);
+      require(_odds[i] > 125 && _odds[i] < 1000 && _time[i] >= _time[0]);
       g = 1e6 / (41 + _odds[i]) - 41;
       out |= uint96(_time[i]) << 64;
       out |= uint96(_odds[i]) << 32;
@@ -330,7 +339,7 @@ contract Oracle {
     uint32 f;
     uint64 out;
     for (uint256 i = 0; i < 32; i++) {
-      require(_odds[i] > 125 && _odds[i] < 8000);
+      require(_odds[i] > 125 && _odds[i] < 2000);
       f = 1e6 / (41 + _odds[i]) - 41;
       out |= uint64(_odds[i]) << 32;
       out |= uint64(f);

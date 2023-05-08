@@ -1,4 +1,4 @@
-const {assert} = require('chai')
+
 const helper = require('../hardhat-helpers');
 const secondsInHour = 3600;
 _dateo = new Date();
@@ -6,9 +6,9 @@ const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
 var _timestamp;
 var _date;
 var _hour;
-
-
+const {assert} = require('chai')
 require('chai').use(require('chai-as-promised')).should();
+
 describe('Test2b', function () {
   let betting, oracle, token, owner, account1, account2, account3;
 

@@ -17,7 +17,7 @@ contract Token {
   event Transfer(address _from, address _to, uint32 _value);
 
   event Approval(address _owner, address _spender, uint32 _value);
- 
+
   constructor() {
     balanceOf[msg.sender] = MINT_AMT;
     totalSupply = MINT_AMT;
@@ -25,6 +25,10 @@ contract Token {
     decimals = 6;
     symbol = "SET";
   }
+
+  receive() external payable {}
+
+  fallback() external {}
 
   function approve(address _spender, uint32 _value)
     external
@@ -49,11 +53,24 @@ contract Token {
     return true;
   }
 
+  /*
+  function transfer2(address _recipient) external returns (bool success) {
+    uint32 _value = 123;
+    uint32 senderBalance = balanceOf[msg.sender];
+    require(balanceOf[msg.sender] >= _value);
+    unchecked {
+      balanceOf[msg.sender] = senderBalance - _value;
+      balanceOf[_recipient] += _value;
+    }
+    emit Transfer(msg.sender, _recipient, _value);
+    return true;
+  }
+*/
   function transferFrom(
     address _from,
     address _recipient,
     uint32 _value
-  ) public returns (bool) {
+  ) external returns (bool) {
     uint32 senderBalance = balanceOf[_from];
     require(
       balanceOf[_from] >= _value && allowance[_from][msg.sender] >= _value

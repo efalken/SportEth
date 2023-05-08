@@ -11,7 +11,7 @@ contract Aaav {
   uint32 public b;
   Token public token;
 
-  constructor(address payable _Bbb, address _token) {
+  constructor(address payable _Bbb, address payable _token) {
     bbbinternal = Bbbv(_Bbb);
     params[0] = 10;
     params[1] = 2;

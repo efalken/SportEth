@@ -723,8 +723,8 @@ describe("Betting", function () {
       assert.equal(Math.floor(sharesAcct0), "40000", "Must be equal");
       assert.equal(Math.floor(sharesAcct1), "30000", "Must be equal");
 
-      assert.equal(Math.floor(excessCapital), "84118", "Must be equal");
-      assert.equal(Math.floor(shares2), "79444", "Must be equal");
+      assert.equal(Math.floor(excessCapital), "74118", "Must be equal");
+      assert.equal(Math.floor(shares2), "70000", "Must be equal");
 
     });
 

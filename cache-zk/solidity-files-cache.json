@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\Eric\\Documents\\Github\\sporteth\\src\\contracts\\solidity\\Aaa.sol": {
-      "lastModificationDate": 1683306890075,
-      "contentHash": "13d485bda30c99c0510d85b77ef0c785",
+      "lastModificationDate": 1683554027284,
+      "contentHash": "a246bd2d3ed66921f48627e7b4cc9140",
       "sourceName": "src/contracts/solidity/Aaa.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -93,8 +93,8 @@
       ]
     },
     "C:\\Users\\Eric\\Documents\\Github\\sporteth\\src\\contracts\\solidity\\Token.sol": {
-      "lastModificationDate": 1683218454472,
-      "contentHash": "65812cb8b865bdcc9802daef2a7530b2",
+      "lastModificationDate": 1683481906983,
+      "contentHash": "b1039625db2922265e9046d8f3ec8cf8",
       "sourceName": "src/contracts/solidity/Token.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -137,8 +137,8 @@
       ]
     },
     "C:\\Users\\Eric\\Documents\\Github\\sporteth\\src\\contracts\\solidity\\Oracle.sol": {
-      "lastModificationDate": 1683227903769,
-      "contentHash": "e802890bfe5a5d4211f499f930f960c9",
+      "lastModificationDate": 1683554630440,
+      "contentHash": "1baebd0129b6eb400f949d82ec3258e1",
       "sourceName": "src/contracts/solidity/Oracle.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -184,8 +184,8 @@
       ]
     },
     "C:\\Users\\Eric\\Documents\\Github\\sporteth\\src\\contracts\\solidity\\Betting.sol": {
-      "lastModificationDate": 1683244853427,
-      "contentHash": "67230828c43495df7a689e5abd2d2b99",
+      "lastModificationDate": 1683475614090,
+      "contentHash": "8e80d4b74c6e9a07be42572a7abb3834",
       "sourceName": "src/contracts/solidity/Betting.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -230,8 +230,8 @@
       ]
     },
     "C:\\Users\\Eric\\Documents\\Github\\sporteth\\src\\contracts\\solidity\\Aaav.sol": {
-      "lastModificationDate": 1683041462577,
-      "contentHash": "0c215c4d62e3f9f808e56b02666459e0",
+      "lastModificationDate": 1683475578556,
+      "contentHash": "23cd48784375bef48908a4b52b4b8ed5",
       "sourceName": "src/contracts/solidity/Aaav.sol",
       "solcConfig": {
         "version": "0.8.17",

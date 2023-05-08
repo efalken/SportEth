@@ -75,7 +75,7 @@ contract Betting {
     uint32 action
   );
 
-  constructor(address _tokenAddress) {
+  constructor(address payable _tokenAddress) {
     margin[5] = 5;
     margin[3] = 1;
     token = Token(_tokenAddress);
@@ -307,14 +307,14 @@ contract Betting {
 
   /// @dev bettor funds account for bets
   function fundBettor() external payable {
-    //uint32 amt = uint32(msg.value / UNITS_TRANS14);
-    //userBalance[msg.sender] += amt;
+    uint32 amt = uint32(msg.value / UNITS_TRANS14);
+    userBalance[msg.sender] += amt;
     emit Funding(msg.sender, msg.value, margin[3], 0);
   }
 
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
-    //require(block.timestamp < uint32(margin[7]), "only prior to first event");
+    require(block.timestamp < uint32(margin[7]), "only prior to first event");
     uint32 netinvestment = uint32(msg.value / UNITS_TRANS14);
     uint32 _shares = 0;
     if (margin[0] > 0) {
@@ -366,7 +366,7 @@ contract Betting {
    * @param _sharesToSell is the LP's ownership stake withdrawn.
    */
   function withdrawBook(uint32 _sharesToSell) external {
-    //require(block.timestamp < uint32(margin[7]), "only prior to first event");
+    require(block.timestamp < uint32(margin[7]), "only prior to first event");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
     //require(margin[3] > lpStruct[msg.sender].outEpoch, "too soon");
     uint32 ethWithdraw = multiply(_sharesToSell, margin[0]) / margin[4];
