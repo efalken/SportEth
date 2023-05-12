@@ -13,10 +13,15 @@ contract Betting {
         3 betEpoch, 4 totalShares, 5 concentrationLimit, 6 nonce, 7 firstStart
         */
   uint32[8] public margin;
-  /// betLong[home]/away], betPayout, starttime, odds
+  uint8[2] public paused;
+  /// betLong[favorite], betLong[away], betPayout[favorite], betPayout[underdog], starttime, odds
   uint256[32] public betData;
   address payable public oracleAdmin;
   /// this struct contains the parameters of a bet
+  Token public token;
+  uint256 public constant UNITS_TRANS14 = 1e14;
+  uint32 public constant FUTURE_START = 2e9;
+  uint256 public constant ORACLE_5PERC = 5e12;
   mapping(bytes32 => Subcontract) public betContracts;
   mapping(bytes32 => Subcontract) public offerContracts;
   /// this maps the set {epoch, match, team} to its event outcome,
@@ -29,10 +34,6 @@ contract Betting {
   /// this struct holds a user's ETH balance
   mapping(address => uint32) public userBalance;
   /// Schedule is a string where Sport:FavoriteTeam:UnderdogTeam
-  Token public token;
-  uint256 public constant UNITS_TRANS14 = 1e14;
-  uint32 public constant FUTURE_START = 2e9;
-  uint256 public constant ORACLE_5PERC = 5e12;
 
   struct Subcontract {
     uint8 epoch;
@@ -76,7 +77,7 @@ contract Betting {
   );
 
   constructor(address payable _tokenAddress) {
-    margin[5] = 5;
+    margin[5] = 1;
     margin[3] = 1;
     token = Token(_tokenAddress);
   }
@@ -106,6 +107,7 @@ contract Betting {
     uint32 _betAmt
   ) external {
     require(_betAmt <= userBalance[msg.sender] && _betAmt > 10, "NSF ");
+    require(_matchNumber != paused[0] && _matchNumber != paused[1]);
     uint32[7] memory betDatav = decodeNumber(betData[_matchNumber]);
     require(betDatav[4] > block.timestamp, "game started or not playing");
     int32 betPayoff = (int32(_betAmt) * int32(betDatav[5 + _team0or1])) / 1000;
@@ -254,7 +256,7 @@ contract Betting {
   }
 
   /* @dev cancels outstanding offered bet
-   * @param _subkid is the contract's HashID
+   * @param _subkid is the bet's unique ID
    */
   function cancelBigBet(bytes32 _subkid) external {
     require(offerContracts[_subkid].bettor == msg.sender, "wrong account");
@@ -330,7 +332,7 @@ contract Betting {
   }
 
   /** @dev redeems winning bet and allocates winnings to user's balance for later withdrawal or future betting
-   * @param _subkId is the contract's HashID
+   * @param _subkId is the bet's unique ID
    */
   function redeem(bytes32 _subkId) external {
     require(betContracts[_subkId].bettor == msg.sender, "wrong account");
@@ -392,6 +394,8 @@ contract Betting {
     require(margin[2] == 0);
     betData = _oddsAndStart;
     margin[7] = uint32(_oddsAndStart[0] >> 64);
+    paused[0] = 99;
+    paused[1] = 99;
   }
 
   /** @dev processes updates to epoch's odds
@@ -405,6 +409,8 @@ contract Betting {
       encoded |= uint256(_updateBetData[i]);
       betData[i] = encoded;
       delete encoded;
+      paused[0] = 99;
+      paused[1] = 99;
     }
   }
 
@@ -415,30 +421,14 @@ contract Betting {
     margin[5] = _maxPos;
   }
 
-  /** @dev allows users to check if prior bet can be redeemed
-   * @param _subkID is used to lookup the contract Hash ID for a specific bet.
+  /** @dev It limits the amount of LP capital that can be applied to a single match.
+   * @param _bad1 is the first of two potential paused matches
+   * @param _bad2 is the second of two potential paused matches
+   * these are reset to 99 on updates sets the parameter that defines how much diversification is enforced.
    */
-  function checkRedeem(bytes32 _subkID) external view returns (bool) {
-    uint32 epochMatch = betContracts[_subkID].epoch *
-      1000 +
-      betContracts[_subkID].matchNum *
-      10 +
-      betContracts[_subkID].pick;
-    bool redeemable = (outcomeMap[epochMatch] > 0);
-    return redeemable;
-  }
-
-  /** @dev allows users to check if prior big bet offer is still open
-   * @param _subkID is used to lookup the contract Hash ID for a specific offer.
-   */
-  function checkOffer(bytes32 _subkID) external view returns (bool) {
-    bool takeable = (offerContracts[_subkID].betAmount > 0);
-    return takeable;
-  }
-
-  /// @dev allows users to see epoch's match odds, start times, and bet amounts
-  function showBetData() external view returns (uint256[32] memory) {
-    return betData;
+  function pauseMatch(uint8 _bad1, uint8 _bad2) external onlyAdmin {
+    paused[0] = _bad1;
+    paused[1] = _bad2;
   }
 
   // @dev unpacks uint256 to reveal match's odds and bet amounts

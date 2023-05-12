@@ -638,7 +638,7 @@ describe("Betting", function () {
       assert.equal(ethout, "21.25", "Must be equal");
         });
   });
-/*
+
   describe("fourth epoch with three oracles", async () => {
     it("checkHour", async () => {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
@@ -1033,5 +1033,5 @@ describe("Betting", function () {
       console.log(`eth in Oracle Contract at end ${oracleBal}`);
     });
   });
-  */
+  
 });

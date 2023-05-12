@@ -18,6 +18,10 @@ var hash9;
 var hash10;
 var hash11;
 var hash12;
+var result;
+var receipt;
+var gasUsed;
+const finneys = BigInt('1000000000000000');
 const {assert} = require('chai')
 require("chai").use(require("chai-as-promised")).should();
 
@@ -34,12 +38,15 @@ describe("Betting", function () {
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
     reader = await Reader.deploy(betting.address, token.address);
-    [owner, account1, account2, account3, _] = await ethers.getSigners();
+    [owner, account1, _] = await ethers.getSigners();
   })
 
   describe("set up contract", async () => {
     it("Get Oracle Contract Address", async () => {
+      console.log(`Betting Address is ${betting.address}`);
       console.log(`Oracle Address is ${oracle.address}`);
+      console.log(`Token Address is ${token.address}`);
+      console.log(`ReadSportEth Address is ${reader.address}`);
     });
 
     it("Authorize Oracle Token", async () => {
@@ -64,7 +71,7 @@ describe("Betting", function () {
       //var nextStart = firstStart;
       //console.log(`startTime is ${nextStart}`);
       //console.log(`time is ${_timestamp}`);
-      await oracle.initPost(
+      result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
           "NFL:ATL:LAR",
@@ -168,13 +175,19 @@ describe("Betting", function () {
           800,
         ]
       );
+      receipt = await result.wait()
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on initProcess = ${gasUsed}`);
       const tracker0 = await oracle.params(1);
       console.log(`tracker0000 ${tracker0}`);
     });
 
     it("approve and send to betting contract", async () => {
       //await helper.advanceTimeAndBlock(secondsInHour * 6);
-      await oracle.initProcess();
+      result = await oracle.initProcess();
+      receipt = await result.wait()
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on initProcess = ${gasUsed}`);
 
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);
@@ -182,11 +195,6 @@ describe("Betting", function () {
       console.log(`tracker111 ${tracker1}`);
     });
 
-    it("HHHHHHHHHHHHHHHHHHHHHHH", async () => {
-
-      const tracker2 = await oracle.params(1);
-      console.log(`tracker111 ${tracker2}`);
-    });
 
     it("Fund Contract", async () => {
       //  console.log(`startTime is ${nextStart}`);
@@ -195,23 +203,36 @@ describe("Betting", function () {
       console.log(`currTime is ${_timestamp}`);
       //const startNow = await betting.startTime(0);
       //console.log(`startTime is ${startNow}`);
-       await betting.connect(owner).fundBook({
-        value: "3000000000000000000",
+      result = await betting.connect(owner).fundBook({
+        value: 30n*finneys,
       });
-
-      await betting.connect(account2).fundBettor({
-        value: "1000000000000000000",
+      receipt = await result.wait()
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on fundbettor = ${gasUsed}`);
+      result = await betting.connect(account1).fundBettor({
+        value: 30n*finneys,
       });
-      await betting.connect(account3).fundBettor({
-        value: "1000000000000000000",
+      receipt = await result.wait()
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on fundbettor = ${gasUsed}`);
+      /*result = await betting.connect(account2).fundBettor({
+        value: "10000000000000000",
       });
+      receipt = await result.wait()
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on fundbettor = ${gasUsed}`);*/
       const excessCapital = await betting.margin(0);
       console.log(`margin0 is ${excessCapital} szabo`);
+      console.log(`owner is ${owner.address}`);
       console.log(`acct1 is ${account1.address}`);
+      //console.log(`acct2 is ${account2.address}`);
     });
 
     it("bets", async () => {
-      var result = await betting.connect(account2).bet(0, 0, "1000");
+      result = await betting.connect(account1).bet(0, 0, 100);
+      receipt = await result.wait()
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on betting = ${gasUsed}`);
       /*
       var receipt = await result.wait();
       hash1 = receipt.events[0].args.contractHash;

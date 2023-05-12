@@ -39,10 +39,7 @@ contract Token {
     return true;
   }
 
-  function transfer(address _recipient, uint32 _value)
-    external
-    returns (bool success)
-  {
+  function transfer(address _recipient, uint32 _value) external returns (bool) {
     uint32 senderBalance = balanceOf[msg.sender];
     require(balanceOf[msg.sender] >= _value);
     unchecked {
@@ -53,19 +50,6 @@ contract Token {
     return true;
   }
 
-  /*
-  function transfer2(address _recipient) external returns (bool success) {
-    uint32 _value = 123;
-    uint32 senderBalance = balanceOf[msg.sender];
-    require(balanceOf[msg.sender] >= _value);
-    unchecked {
-      balanceOf[msg.sender] = senderBalance - _value;
-      balanceOf[_recipient] += _value;
-    }
-    emit Transfer(msg.sender, _recipient, _value);
-    return true;
-  }
-*/
   function transferFrom(
     address _from,
     address _recipient,

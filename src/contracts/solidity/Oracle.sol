@@ -6,48 +6,37 @@ import "./Betting.sol";
 
 contract Oracle {
   /**
-    // after each settlement, a new epoch commences. Bets cannot consummate on games referring to prior epochs
-    // This is true if there is a proposal under consideration, other proposals are not allowed while a current proposal
-    // is under review: 0 null, 1 init, 2 odds, 3 settle
-    // this tracking number is for submissions, needed for tracking whether someone already voted on a data proposal
-    // incremented at each processing
-    // timer is used so that each proposal has at least a 5 hours for voters to respond
-    // tracks the current local token balance of active oracle contract administrators, as
-    // documented by the deposit of their tokens within this contract
-    // A proposal goes through via a simple rule of more yes than no votes.
-      Thus, a trivial vote does not need more yes votes
-    // if a troll rejects a vote that has few Yes votes, a vote later than evening takes a large bond amount, so
-    // and submitters should anticipate such an event
+
     // 0 betEpoch, 1 reviewStatus, 2 propNumber, 3 timer, 4 totKontract Tokens, 5 yesVotes, 6 noVotes, 7 feePool
     */
   uint32[8] public params;
   // propStartTime in UTC is used to stop active betting. No bets are taken after this time.
   uint96[32] public propOddsStarts;
+  // smaller data from propOddsStarts because one cannot change the start times
   uint64[32] public propOddsUpdate;
+  // results are 0 for team 0 winning, 1 for team 1 winning
+  // slots are 0 for the initial favorite, 1 for initial underdog
   uint8[32] public propResults;
   /** the schedule is a record of "sport:home:away", such as "NFL:NYG:SF" for us football,
     New York Giants vs San Francisco
     */
+  uint256 public top;
+  uint32 public constant HOUR_POST_INIT = 0;
+  uint32 public constant HOUR_PROCESS_INIT = 0;
+  // minimum bet in 0.1 finneys
+  uint32 public constant MIN_SUBMIT = 50;
   string[32] public matchSchedule;
-  // keeps track of those who supplied data proposals. Proposers have to deposit tokens as a bond, and if their
-  // proposal is rejected, they lose that bond.
+  // keeps track of those who supplied data proposals.
   address public proposer;
+  // track token holders: amount, whether they voted, their basis for the token fees
   mapping(address => AdminStruct) public adminStruct;
   // this allows the contract to send the tokens
   Token public token;
   // link to communicate with the betting contract
   Betting public bettingContract;
-  uint32 public constant CURE_TIME = 0 hours;
-  uint32 public constant HOUR_START = 0;
-  uint32 public constant HOUR_END = 24;
-  uint32 public constant MIN_SUBMIT = 50;
 
   /** tokens are held in the custody of this contract. Only tokens deposited in this contract can
-    // be used for voting or for claiming oracle ether. Note these tokens are owned by the oracle contract while deposited
-    // as far as the ERC-20 contract is concerned, but they are credited to the token depositors within this contract
-    // voteTrackr keeps track of the proposals in this contract, so that token holders can only vote once for each proposal
-    // with the tokens they have in this contract. initFeePool references the start date to allocate correct oracleDiv
-    // token revenue
+    // be used for voting or for claiming oracle ether.
     */
   struct AdminStruct {
     uint32 tokens;
@@ -64,6 +53,8 @@ contract Oracle {
   event BetDataPosted(uint32 epoch, uint32 propnum, uint32[32] oddsStart);
 
   event ParamsPosted(uint32 concLimit);
+
+  event PausePosted(uint8 pausedMatch1, uint8 pausedMatch2);
 
   event StartTimesPosted(uint32 propnum, uint32 epoch, uint32[32] starttimes);
 
@@ -105,45 +96,34 @@ contract Oracle {
     uint32[32] memory _starts,
     uint32[32] memory _decimalOdds
   ) external {
-    // this requirement makes sure a post occurs only if there is not a current post under consideration, or
-    // it is an amend for an earlier post with these data
+    // this requirement makes sure a post occurs only if there is not a current post under consideration
     require(params[1] == 0, "Already under Review");
     propOddsStarts = create96(_starts, _decimalOdds);
-    params[1] = 1;
     post();
     matchSchedule = _teamsched;
-    // this tells users that an inimtial proposal has been sent, which is useful
-    // for oracle administrators who are monitoring this contract
+    // this tells users that an initial proposal has been sent
     emit SchedulePosted(params[0], params[2], _teamsched);
     emit StartTimesPosted(params[0], params[2], _starts);
     emit DecOddsPosted(params[0], params[2], _decimalOdds);
+    params[1] = 10;
   }
 
   function updatePost(uint32[32] memory _decimalOdds) external {
-    require(params[1] == 0, "Already under Review");
-    params[1] = 2;
+    require(params[1] == 2, "wrong sequence");
     post();
     propOddsUpdate = create64(_decimalOdds);
     emit DecOddsPosted(params[0], params[2], _decimalOdds);
-  }
-
-  function settlePost(uint8[32] memory _resultVector) external {
-    // this prevents a settle post when other posts have been made
-    require(params[1] == 0, "Already under Review");
-    params[1] = 3;
-    post();
-    propResults = _resultVector;
-    emit ResultsPosted(params[0], params[2], _resultVector);
+    params[1] = 20;
   }
 
   function initProcess() external {
     // this prevents an odds or results proposal from  being sent
-    require(params[1] == 1, "wrong data");
-    // needs at least 5 hours
-    require(block.timestamp > params[3], "too soon");
+    require(params[1] == 10, "wrong data");
+    // can only send after 8 PM GMT
+    require(hourOfDay() >= HOUR_PROCESS_INIT, "too soon");
     // only sent if 'null' vote does not win
     if (params[5] > params[6]) {
-      // sends to the betting contrac
+      // sends to the betting contract
       bettingContract.transmitInit(propOddsStarts);
       emit VoteOutcome(true, params[0], params[2]);
     } else {
@@ -151,16 +131,16 @@ contract Oracle {
       adminStruct[proposer].tokens -= (MIN_SUBMIT / 2);
       emit VoteOutcome(false, params[0], params[2]);
     }
-    // resets various data (eg, params[3])
     reset();
+    params[1] = 2;
   }
 
-  // these have the same logic as for the initProcess, just for the different datasets
+  // updates odds on existing odds
   function updateProcess() external {
     // this prevents an 'initProcess' set being sent as an odds transmit
-    require(params[1] == 2, "wrong data");
+    require(params[1] == 20, "wrong data");
     // needs at least 5 hours
-    require(block.timestamp > params[3], "too soon");
+    require(hourOfDay() >= HOUR_PROCESS_INIT, "too soon");
     if (params[5] > params[6]) {
       bettingContract.transmitUpdate(propOddsUpdate);
       //      (bool success, uint256 ethDividend) = address(bettingContract).call{
@@ -174,21 +154,25 @@ contract Oracle {
       emit VoteOutcome(false, params[0], params[2]);
     }
     reset();
+    params[1] = 2;
+  }
+
+  function settlePost(uint8[32] memory _resultVector) external {
+    // this prevents a settle post when other posts have been made
+    require(params[1] == 2, "wrong sequence");
+    post();
+    propResults = _resultVector;
+    emit ResultsPosted(params[0], params[2], _resultVector);
+    params[1] = 30;
   }
 
   function settleProcess() external {
-    require(params[1] == 3, "wrong data");
-    // needs at least 5 hours
-    require(block.timestamp > params[3], "too soon");
+    require(params[1] == 30, "wrong data");
+    require(hourOfDay() >= HOUR_PROCESS_INIT, "too soon");
     uint32 ethDividend;
     uint32 _epoch;
     if (params[5] > params[6]) {
       (_epoch, ethDividend) = bettingContract.settle(propResults);
-      /*(bool success, bytes memory _x) = address(bettingContract).call{
-        gas: 1200000
-      }(abi.encodeWithSignature("settle(uint8[32])", propResults));
-      require(success);
-      (_epoch, ethDividend) = abi.decode(_x, (uint32, uint32));*/
       params[0] = _epoch;
       params[7] += ethDividend / params[4];
       emit VoteOutcome(true, params[0], params[2]);
@@ -198,53 +182,20 @@ contract Oracle {
       emit VoteOutcome(false, params[0], params[2]);
     }
     reset();
+    params[1] = 0;
   }
 
   function paramUpdate(uint32 _concentrationLim) external {
-    // In the first case, an immediate send allows a simple way to protect against stale odds
-    // a high minimum bet would prevent new bets while odds are voted upon
-    // in the second case, a large token holder can , "Low Balance");
     require(adminStruct[msg.sender].tokens >= 5e8);
-    //bettingContract.adjustParams(_concentrationLim);
-    (bool success, ) = address(bettingContract).call{ gas: 1e7 }(
-      abi.encodeWithSignature("adjustParams(uint32)", _concentrationLim)
-    );
-    require(success);
+    bettingContract.adjustParams(_concentrationLim);
     emit ParamsPosted(_concentrationLim);
   }
 
-  function withdrawTokens(uint32 _amtTokens) external {
-    require(_amtTokens <= adminStruct[msg.sender].tokens, "need tokens");
-    // this prevents voting more than once or oracle proposals with token balance.
-    require(params[1] == 0, "no wd during vote");
-    bool success;
-    uint256 ethClaim = uint256(
-      adminStruct[msg.sender].tokens *
-        (params[7] - adminStruct[msg.sender].initFeePool)
-    ) * 1e12;
-    adminStruct[msg.sender].initFeePool = params[7];
-    params[4] -= _amtTokens;
-    adminStruct[msg.sender].tokens -= _amtTokens;
-    //payable(msg.sender).transfer(ethClaim);
-    (success, ) = payable(msg.sender).call{ value: ethClaim }("");
-    require(success, "Call failed");
-    // success = token.transfer(msg.sender, _amtTokens);
-    // (success, ) = address(token).delegatecall{ gas: 70000 }(
-    //   abi.encodeWithSignature(
-    //     "transfer(address, uint32)",
-    //     msg.sender,
-    //     _amtTokens
-    //   )
-    // );
-    (bool success2, ) = address(token).call{ gas: 56000 }(
-      abi.encodeWithSignature(
-        "transfer(address,uint32)",
-        msg.sender,
-        _amtTokens
-      )
-    );
-    require(success2, "token failed");
-    emit Funding(_amtTokens, ethClaim, msg.sender);
+  function pauseMatches(uint8 _match1, uint8 _match2) external {
+    // submitter must have at least 5% of outstanding tokens for this emergency function
+    require(adminStruct[msg.sender].tokens >= 5e7);
+    bettingContract.pauseMatch(_match1, _match2);
+    emit PausePosted(_match1, _match2);
   }
 
   function depositTokens(uint32 _amt) external {
@@ -261,15 +212,7 @@ contract Oracle {
       (success, ) = payable(msg.sender).call{ value: ethClaim }("");
       require(success, "Call failed");
     }
-    //(success) = token.transferFrom(msg.sender, address(this), _amt);
-    (success, ) = address(token).call{ gas: 40000 }(
-      abi.encodeWithSignature(
-        "transferFrom(address,address,uint32)",
-        msg.sender,
-        address(this),
-        _amt
-      )
-    );
+    (success) = token.transferFrom(msg.sender, address(this), _amt);
     require(success, "not success");
     adminStruct[msg.sender].initFeePool = params[7];
     adminStruct[msg.sender].tokens += _amt;
@@ -277,74 +220,88 @@ contract Oracle {
     emit Funding(_amt, ethClaim, msg.sender);
   }
 
-  function showSchedString() external view returns (string[32] memory) {
-    return matchSchedule;
-  }
-
-  // this is used so users do not have to delegate someone else to monitor the contract 24/7
-  // 86400 is seconds in a day, and 3600 is seconds in an hour
-  // restricts contract submission to between 5am-8pm in summer, 6am-9pm in winter
-  function hourOfDay() public view returns (uint256 hour) {
-    hour = (block.timestamp % 86400) / 3600;
-    require(hour >= HOUR_START);
-    //require(hour >= HOUR_START && hour < HOUR_END);
+  function withdrawTokens(uint32 _amtTokens) external {
+    require(_amtTokens <= adminStruct[msg.sender].tokens, "need tokens");
+    // this prevents voting more than once or oracle proposals with token balance.
+    require(params[1] < 10, "no wd during vote");
+    bool success;
+    uint256 ethClaim = uint256(
+      adminStruct[msg.sender].tokens *
+        (params[7] - adminStruct[msg.sender].initFeePool)
+    ) * 1e12;
+    adminStruct[msg.sender].initFeePool = params[7];
+    params[4] -= _amtTokens;
+    adminStruct[msg.sender].tokens -= _amtTokens;
+    payable(msg.sender).transfer(ethClaim);
+    (success, ) = payable(msg.sender).call{ value: ethClaim }("");
+    require(success, "Call failed");
+    (success) = token.transfer(address(this), _amtTokens);
+    require(success, "token failed");
+    emit Funding(_amtTokens, ethClaim, msg.sender);
   }
 
   function post() internal {
-    // constraining the hourOfDay to be > 10 gives users a block of time where they can be confident that their
-    // inattention to the contract poses no risk of a malicious data submission.
-    hourOfDay();
+    uint256 hour = hourOfDay();
+    // ************ change 24
+    require(hour >= HOUR_POST_INIT && hour < (HOUR_POST_INIT + 24));
     // this ensures only significant token holders are making proposals, blocks trolls
-    require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Low Balance");
-    params[3] = uint32(block.timestamp) + CURE_TIME;
+    require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
     params[5] = adminStruct[msg.sender].tokens;
     proposer = msg.sender;
-    // If strict majority of total tokens, time delay irrelevant
-    if (adminStruct[msg.sender].tokens > 500) params[3] = 0;
     // this prevents proposer from voting again with his tokens on this submission
     adminStruct[msg.sender].voteTracker = params[2];
   }
 
   function reset() internal {
-    params[1] = 0;
+    // adds to nonce tracking proposals
     params[2]++;
-    params[3] = 0;
+    // resets yes votes
     params[5] = 0;
+    // resets no votes
     params[6] = 0;
   }
 
   function create96(uint32[32] memory _time, uint32[32] memory _odds)
     internal
-    pure
     returns (uint96[32] memory outv)
   {
     uint32 g;
     uint96 out;
     for (uint256 i = 0; i < 32; i++) {
-      require(_odds[i] > 125 && _odds[i] < 1000 && _time[i] >= _time[0]);
-      g = 1e6 / (41 + _odds[i]) - 41;
-      out |= uint96(_time[i]) << 64;
-      out |= uint96(_odds[i]) << 32;
-      out |= uint96(g);
-      outv[i] = out;
+      require(_odds[i] > 125 && _odds[i] < 5000);
+      if (_time[i] != 0) {
+        require(_time[i] >= _time[0]);
+        g = 1e6 / (41 + _odds[i]) - 41;
+        out |= uint96(_time[i]) << 64;
+        out |= uint96(_odds[i]) << 32;
+        out |= uint96(g);
+        outv[i] = out;
+      } else {
+        top = i;
+        i = 32;
+      }
       delete out;
     }
   }
 
   function create64(uint32[32] memory _odds)
     internal
-    pure
+    view
     returns (uint64[32] memory outv)
   {
     uint32 f;
     uint64 out;
-    for (uint256 i = 0; i < 32; i++) {
-      require(_odds[i] > 125 && _odds[i] < 2000);
+    for (uint256 i = 0; i < top; i++) {
+      require(_odds[i] > 125 && _odds[i] < 3000);
       f = 1e6 / (41 + _odds[i]) - 41;
       out |= uint64(_odds[i]) << 32;
       out |= uint64(f);
       outv[i] = out;
       delete out;
     }
+  }
+
+  function hourOfDay() internal view returns (uint256 hour) {
+    hour = (block.timestamp % 86400) / 3600;
   }
 }

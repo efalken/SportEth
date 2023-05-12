@@ -2,12 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require('hardhat-contract-sizer');
 require('dotenv').config();
 
-require("@matterlabs/hardhat-zksync-deploy");
-require("@matterlabs/hardhat-zksync-solc");
 
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
  module.exports = {
   zksolc: {
     version: "1.3.1",
@@ -45,6 +40,19 @@ require("@matterlabs/hardhat-zksync-solc");
         passphrase: "",
       }
     },
+    avaxtest: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      ethNetwork: `https://api.avax-test.network/ext/bc/C/rpc'`,
+      /*ethNetwork: `https://api.avax-test.network/ext/bc/C/4eZPCfp4pJVUK6wTvhl7i1Mf3T18ZNomEVEHNbCrN8VOBgejZkNpw8WDaYZlO0NC*/
+      avaxtest: true,
+      accounts: {
+        mnemonic: `${process.env.GOERLI_WALLET_MNEMONIC}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+        passphrase: "",
+      }
+    },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_GOERLI_PROJECT_ID}`,
       accounts: {
@@ -54,8 +62,8 @@ require("@matterlabs/hardhat-zksync-solc");
         count: 20,
         passphrase: "",
       },
-      gas: 23000000, 
-      gasPrice: 15000000000     
+      gas: 3000000, 
+      gasPrice: 5000000000   
     },
     arbitrum: {
       url: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_RINKEBY_PROJECT_ID}`,
