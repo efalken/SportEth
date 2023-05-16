@@ -7,6 +7,9 @@ var _timestamp;
 var _date;
 var _hour;
 const {assert} = require('chai')
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 require('chai').use(require('chai-as-promised')).should();
 
 describe('Test2b', function () {
@@ -29,10 +32,10 @@ describe('Test2b', function () {
     })
 
     it('Authorize Oracle Token', async () => {
-      await token.approve(oracle.address, "560");
+      await token.approve(oracle.address, 560n*million);
     })
     it("Deposit Tokens in Oracle Contract2", async () => {
-      await oracle.connect(owner).depositTokens("560");
+      await oracle.connect(owner).depositTokens(560n*million);
     })
   })
 
@@ -61,9 +64,9 @@ describe('Test2b', function () {
 
     it("Fund Contract", async () => {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await betting.connect(owner).fundBook({ value: '3000000000000000000' });
-      await betting.connect(account2).fundBettor({ value: '800000000000000000' });
-      await betting.connect(account3).fundBettor({ value: '700000000000000000' });
+      await betting.connect(owner).fundBook({ value: 3n*eths });
+      await betting.connect(account2).fundBettor({ value: 800n*finneys });
+      await betting.connect(account3).fundBettor({ value: 700n*finneys });
       const excessCapital = await betting.margin(0);
       console.log(`margin0 is ${excessCapital} szabo`);
     })

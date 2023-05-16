@@ -18,22 +18,24 @@ var hash9;
 var hash10;
 var hash11;
 var hash12;
-const {assert} = require('chai')
+const {assert} = require("chai")
 require("chai").use(require("chai-as-promised")).should();
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 
-describe("Betting", function () {
+
+describe("Test2", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
-    const Reader = await ethers.getContractFactory('ReadSportEth')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
-    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
@@ -43,10 +45,10 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, "560000000");
+      await token.approve(oracle.address, 560n*million);
     });
     it("Deposit Tokens in Oracle Contract2", async () => {
-      await oracle.connect(owner).depositTokens("560000000");
+      await oracle.connect(owner).depositTokens(560n*million);
     });
   });
 
@@ -168,8 +170,6 @@ describe("Betting", function () {
           800,
         ]
       );
-      const tracker0 = await oracle.params(1);
-      console.log(`tracker0000 ${tracker0}`);
     });
 
     it("approve and send to betting contract", async () => {
@@ -178,14 +178,6 @@ describe("Betting", function () {
 
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);
-      const tracker1 = await oracle.params(1);
-      console.log(`tracker111 ${tracker1}`);
-    });
-
-    it("HHHHHHHHHHHHHHHHHHHHHHH", async () => {
-
-      const tracker2 = await oracle.params(1);
-      console.log(`tracker111 ${tracker2}`);
     });
 
     it("Fund Contract", async () => {
@@ -196,23 +188,21 @@ describe("Betting", function () {
       //const startNow = await betting.startTime(0);
       //console.log(`startTime is ${startNow}`);
        await betting.connect(owner).fundBook({
-        value: "3000000000000000000",
+        value: 3n*eths,
       });
 
       await betting.connect(account2).fundBettor({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
       await betting.connect(account3).fundBettor({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
       const excessCapital = await betting.margin(0);
       console.log(`margin0 is ${excessCapital} szabo`);
-      console.log(`acct1 is ${account1.address}`);
     });
 
     it("bets", async () => {
       var result = await betting.connect(account2).bet(0, 0, "1000");
-      /*
       var receipt = await result.wait();
       hash1 = receipt.events[0].args.contractHash;
       result = await betting.connect(account3).bet(0, 1, "2000");
@@ -248,20 +238,6 @@ describe("Betting", function () {
       result = await betting.connect(account3).bet(3, 1, "1000");
       receipt = await result.wait();
       hash12 = receipt.events[0].args.contractHash;
-      */
-    });
-/*
-    it("Test 1", async () => {
-      const checkbet = await reader.checkSingleBet(hash1);
-      const checkData = await reader.showBetData(0);
-      const schedule = await oracle.matchSchedule(0);
-      console.log(`BBBBBBBBBBBB`);
-      console.log(checkbet);
-      console.log(`BBBBBBBBBBBB`);
-      console.log(checkData);
-      console.log(`BBBBBBBBBBBB`);
-      console.log(`sched ${schedule}`);
-      console.log(`bookiePool ${checkData}`);
     });
 
     it("Test 1", async () => {
@@ -294,17 +270,14 @@ describe("Betting", function () {
       if (_hour < 10) {
         await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
       }
-      const tracker = await oracle.params(1);
-      console.log(`tracker ${tracker}`);
     });
-    
 
     it("Send Event Results to oracle", async () => {
       await oracle.settlePost([
-        1,
-        1,
+        0,
         0,
         2,
+        1,
         0,
         0,
         1,
@@ -335,7 +308,6 @@ describe("Betting", function () {
         0,
       ]);
     });
-    
 
     it("send result data to betting contract", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 6);
@@ -354,30 +326,30 @@ describe("Betting", function () {
       console.log(`oracleBal ${oracleBal}`);
       console.log(`bettingk balance ${ethbal}`);
 
-    //  await betting.redeem(hash1, 1000, { from: accounts[2] });
-      await betting.connect(account3).redeem(hash2);
-    //  await betting.redeem(hash3, 1000, { from: accounts[2] });
-    //  await betting.redeem(hash4, 1010, { from: accounts[2] });
-      await betting.connect(account3).redeem(hash5);
-    //  await betting.redeem(hash6, 1010, { from: accounts[2] });
+      await betting.connect(account2).redeem(hash1);
+    //  await betting.connect(account3).redeem(hash2, 1001);
+      await betting.connect(account2).redeem(hash3);
+      await betting.connect(account2).redeem(hash4);
+    //  await betting.connect(account3).redeem(hash5, 1011);
+      await betting.connect(account2).redeem(hash6);
       await betting.connect(account2).redeem(hash7);
-    //  await betting.redeem(hash8, 1021, { from: accounts[3] });
+      await betting.connect(account3).redeem(hash8);
       await betting.connect(account2).redeem(hash9);
-      await betting.connect(account2).redeem(hash10);
-      await betting.connect(account2).redeem(hash11);
+    //  await betting.connect(account2).redeem(hash10, 1030);
+    //  await betting.connect(account2).redeem(hash11, 1030);
       await betting.connect(account3).redeem(hash12);
       const userBalanceAcct2 = await betting.userBalance(account2.address);
       console.log(`acct2 ${userBalanceAcct2}`);
       const userBalanceAcct3 = await betting.userBalance(account3.address);
       console.log(`acct3 ${userBalanceAcct3}`);
-      assert.equal(bookiePool, "32266", "mustBe equal");
+      assert.equal(bookiePool, "29081", "mustBe equal");
       assert.equal(bettorLocked, "0", "Must be equal");
       assert.equal(bookieLocked, "0", "Must be equal");
-      assert.equal(oracleBal, "18.67", "Must be equal");
-      assert.equal(ethbal, "4981.33", "Must be equal");
-      assert.equal(userBalanceAcct2, "6950", "Must be equal");
-      assert.equal(userBalanceAcct3, "10597", "Must be equal");
+      assert.equal(oracleBal, "34.595", "Must be equal");
+      assert.equal(ethbal, "4965.405", "Must be equal");
+      assert.equal(userBalanceAcct2, "13700", "Must be equal");
+      assert.equal(userBalanceAcct3, "6873", "Must be equal");
     });
-*/
+
   });
 });

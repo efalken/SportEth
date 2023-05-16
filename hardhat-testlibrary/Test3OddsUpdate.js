@@ -11,6 +11,9 @@ var gasUsed;
 var result;
 const {assert} = require('chai')
 require("chai").use(require("chai-as-promised")).should();
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 
 describe("Betting", function () {
   let betting, oracle, token, reader, owner, account1, account2, account3;
@@ -33,11 +36,11 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, "560");
+      await token.approve(oracle.address, 560n*million);
     });
 
     it("Deposit Tokens in Oracle Contract", async () => {
-      await oracle.connect(owner).depositTokens("560");
+      await oracle.connect(owner).depositTokens(560n*million);
     });
   });
 
@@ -176,25 +179,25 @@ describe("Betting", function () {
 
     it("approve and send to betting contract", async () => {
        await betting.connect(owner).fundBook({
-        value: "3000000000000000000",
+        value: 3n*eths,
       });
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account1).fundBettor({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account2).fundBettor({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
     });
 
   it("checkTime", async () => {
     await betting.connect(account2).fundBettor({
-      value: "1000000000000000000",
+      value: 1n*eths,
     });
     let betdata0 = await reader.showBetData(0);
     console.log(`initBetData`);

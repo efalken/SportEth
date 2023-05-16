@@ -13,6 +13,7 @@ contract Betting {
         3 betEpoch, 4 totalShares, 5 concentrationLimit, 6 nonce, 7 firstStart
         */
   uint32[8] public margin;
+  // for emergency shutdown
   uint8[2] public paused;
   /// betLong[favorite], betLong[away], betPayout[favorite], betPayout[underdog], starttime, odds
   uint256[32] public betData;
@@ -22,6 +23,7 @@ contract Betting {
   uint256 public constant UNITS_TRANS14 = 1e14;
   uint32 public constant FUTURE_START = 2e9;
   uint256 public constant ORACLE_5PERC = 5e12;
+  uint32 public constant MIN_BET = 10; // 1 finney aka 0.001 ETH
   mapping(bytes32 => Subcontract) public betContracts;
   mapping(bytes32 => Subcontract) public offerContracts;
   /// this maps the set {epoch, match, team} to its event outcome,
@@ -77,7 +79,9 @@ contract Betting {
   );
 
   constructor(address payable _tokenAddress) {
-    margin[5] = 1;
+    // concentration limit
+    margin[5] = 5;
+    // initial bet epoch one
     margin[3] = 1;
     token = Token(_tokenAddress);
   }
@@ -106,7 +110,7 @@ contract Betting {
     uint8 _team0or1,
     uint32 _betAmt
   ) external {
-    require(_betAmt <= userBalance[msg.sender] && _betAmt > 10, "NSF ");
+    require(_betAmt <= userBalance[msg.sender] && _betAmt > MIN_BET, "NSF ");
     require(_matchNumber != paused[0] && _matchNumber != paused[1]);
     uint32[7] memory betDatav = decodeNumber(betData[_matchNumber]);
     require(betDatav[4] > block.timestamp, "game started or not playing");
@@ -174,7 +178,7 @@ contract Betting {
     uint32 _betAmount,
     uint32 _decOddsBB
   ) external {
-    require(_betAmount >= margin[0] / margin[5], "concLimit");
+    require(_betAmount >= margin[0] / margin[5], "too small");
     require(_betAmount <= userBalance[msg.sender], "NSF");
     require(_decOddsBB > 1000 && _decOddsBB < 9999, "invalid odds");
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));

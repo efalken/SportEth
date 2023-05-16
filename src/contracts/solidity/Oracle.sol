@@ -21,10 +21,10 @@ contract Oracle {
     New York Giants vs San Francisco
     */
   uint256 public top;
-  uint32 public constant HOUR_POST_INIT = 0;
-  uint32 public constant HOUR_PROCESS_INIT = 0;
+  uint32 public constant HOUR_POST = 0;
+  uint32 public constant HOUR_PROCESS = 0;
   // minimum bet in 0.1 finneys
-  uint32 public constant MIN_SUBMIT = 50;
+  uint32 public constant MIN_SUBMIT = 5e7;
   string[32] public matchSchedule;
   // keeps track of those who supplied data proposals.
   address public proposer;
@@ -120,7 +120,7 @@ contract Oracle {
     // this prevents an odds or results proposal from  being sent
     require(params[1] == 10, "wrong data");
     // can only send after 8 PM GMT
-    require(hourOfDay() >= HOUR_PROCESS_INIT, "too soon");
+    require(hourOfDay() >= HOUR_PROCESS, "too soon");
     // only sent if 'null' vote does not win
     if (params[5] > params[6]) {
       // sends to the betting contract
@@ -140,7 +140,7 @@ contract Oracle {
     // this prevents an 'initProcess' set being sent as an odds transmit
     require(params[1] == 20, "wrong data");
     // needs at least 5 hours
-    require(hourOfDay() >= HOUR_PROCESS_INIT, "too soon");
+    require(hourOfDay() >= HOUR_PROCESS, "too soon");
     if (params[5] > params[6]) {
       bettingContract.transmitUpdate(propOddsUpdate);
       //      (bool success, uint256 ethDividend) = address(bettingContract).call{
@@ -168,7 +168,7 @@ contract Oracle {
 
   function settleProcess() external {
     require(params[1] == 30, "wrong data");
-    require(hourOfDay() >= HOUR_PROCESS_INIT, "too soon");
+    require(hourOfDay() >= HOUR_PROCESS, "too soon");
     uint32 ethDividend;
     uint32 _epoch;
     if (params[5] > params[6]) {
@@ -243,7 +243,7 @@ contract Oracle {
   function post() internal {
     uint256 hour = hourOfDay();
     // ************ change 24
-    require(hour >= HOUR_POST_INIT && hour < (HOUR_POST_INIT + 24));
+    require(hour >= HOUR_POST && hour < (HOUR_POST + 24));
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
     params[5] = adminStruct[msg.sender].tokens;

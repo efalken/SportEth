@@ -11,6 +11,9 @@ var nextStart5;
 const { assert } = require('chai');
 const { expect } = require("chai");
 require("chai").use(require("chai-as-promised")).should();
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 
 describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
@@ -19,10 +22,12 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
+    const Reader = await ethers.getContractFactory('ReadSportEth')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
@@ -32,10 +37,10 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, "560");
+      await token.approve(oracle.address, 560n*million);
     });
     it("Deposit Tokens in Oracle Contract2", async () => {
-      await oracle.connect(owner).depositTokens("560");
+      await oracle.connect(owner).depositTokens(560n*million);
     });
   });
 
@@ -171,11 +176,11 @@ describe("Betting", function () {
       //const startNow = await betting.startTime(0);
       //console.log(`startTime is ${startNow}`);
       await betting.fundBook({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
 
       await betting.connect(account1).fundBettor({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
       const excessCapital = await betting.margin(0);
       console.log(`margin0 is ${excessCapital} szabo`);
@@ -572,7 +577,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       console.log(`currTime is ${_timestamp}`);
       await expect(betting.fundBook({
-        value: "3000000000000000000",
+        value: 3n*eths,
       })).to.be.reverted;
     });
 

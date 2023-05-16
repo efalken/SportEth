@@ -54,12 +54,17 @@ export default async function (hre: HardhatRuntimeEnvironment) {
     let gasUsed = receipt.gasUsed;
     console.log(`gas on authorize ${gasUsed}`);
 
+    result = await token_contract.transfer(aaa_contract.address, 4e7);
+      receipt = await result.wait();
+      gasUsed = receipt.gasUsed;
+      console.log(`transfer`);
+/*
     result = await aaa_contract.sendToken(account_0.address, account_1.address, 56e7);
     receipt = await result.wait();
     console.log("send22");
     const tokBal2 = await token_contract.balanceOf(account_1.address);
     console.log(`total 22 shares ${tokBal2}`);
-/*
+
     result = await aaa_contract.set([]);
     receipt = await result.wait();
     console.log("Done setting data ");

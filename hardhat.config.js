@@ -10,7 +10,7 @@ module.exports = {
   },
   paths: {
     sources: "./src/contracts/solidity",
-    tests: "./hardhat-testlib",
+    tests: "./hardhat-test",
     artifacts: "./artifacts",
   },
   solidity: {

@@ -9,6 +9,9 @@ var _date;
 var _hour;
 var nextStart;
 const {assert} = require('chai');
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 
 require("chai").use(require("chai-as-promised")).should();
 
@@ -19,10 +22,12 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
+    const Reader = await ethers.getContractFactory('ReadSportEth')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
@@ -32,11 +37,11 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, "560");
+      await token.approve(oracle.address, 560n*million);
     });
 
     it("Deposit Tokens in Oracle Contract", async () => {
-      await oracle.connect(owner).depositTokens("560");
+      await oracle.connect(owner).depositTokens(560n*million);
     });
   });
 
@@ -167,7 +172,7 @@ describe("Betting", function () {
 
     it("approve and send to betting contract", async () => {
        await betting.connect(owner).fundBook({
-        value: "3000000000000000000",
+        value: 3n*eths,
       });
       await betting.connect(account1).fundBettor({
         value: "2000000000000000000",

@@ -36,8 +36,9 @@ console.log("account_1: " + account_1.address);
       result = await token_contract.transfer(aaa_contract.address, 4e7);
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
+      console.log(`gas on send ${gasUsed}`);
       console.log(`sendToken`);
-
+/*
       oracleBal = await token_contract.balanceOf(account_1.address);
       console.log(`acct1 tokens1 ${oracleBal}`);
       oracleBal = await token_contract.balanceOf(account_0.address);
@@ -105,6 +106,7 @@ console.log("account_1: " + account_1.address);
       result = await aaa_contract.sendGet(gas3);
       receipt = await result.wait();
       console.log("sendGet");
+      */
     });
 
   });

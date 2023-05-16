@@ -8,6 +8,9 @@ var _date;
 var _hour;
 const firstStart = 1635695609;
 const { assert } = require('chai');
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 
 require("chai").use(require("chai-as-promised")).should();
 
@@ -18,10 +21,12 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
+    const Reader = await ethers.getContractFactory('ReadSportEth')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
@@ -730,7 +735,7 @@ describe("Betting", function () {
 
     it("Acct 3 Funds Betting Contract", async () => {
       await betting.connect(account3).fundBook({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
     });
 

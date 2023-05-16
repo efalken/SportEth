@@ -7,6 +7,9 @@ var _timestamp;
 var _date;
 var _hour;
 const { assert } = require('chai');
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 
 require("chai").use(require("chai-as-promised")).should();
 
@@ -17,10 +20,12 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
-    token = await Token.deploy();
+    const Reader = await ethers.getContractFactory('ReadSportEth')
+    token = await Token.deploy(); 
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
@@ -160,19 +165,19 @@ describe("Betting", function () {
 
     it("Fund Betting Contract", async () => {
       await betting.connect(owner).fundBook({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account2).fundBettor({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account3).fundBettor({
-        value: "1000000000000000000",
+        value: 1n*eths,
       });
     });
 
@@ -217,7 +222,7 @@ describe("Betting", function () {
       contractHash3 = receipt.events[0].args.contractHash;
       const gasUsed = receipt.gasUsed;
       console.log(`gas on big bet ${gasUsed}`);
-      const check0 = await betting.checkRedeem(contractHash3);
+      const check0 = await reader.checkRedeem(contractHash3);
       const check1 = (await betting.betContracts(contractHash3)).betAmount;
       console.log(`checkOfferFn ${check0}`);
       console.log(`checkOfferGetter ${check1}`);
@@ -225,7 +230,7 @@ describe("Betting", function () {
       receipt = await result6.wait();
       contractHash6 = receipt.events[0].args.contractHash;
 
-      const check2 = await betting.checkRedeem(contractHash6);
+      const check2 = await reader.checkRedeem(contractHash6);
       const check3 = (await betting.betContracts(contractHash6)).betAmount;
       console.log(`checkOfferFn2 ${check2}`);
       console.log(`checkOfferGetter3 ${check3}`);
