@@ -3,11 +3,16 @@ const web3 = require("web3-utils");
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+var hourOffset;
+var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
 const { assert } = require('chai');
+const finneys = BigInt('1000000000000000');
+const eths = BigInt('1000000000000000000');
+const million = BigInt('1000000');
 //const { expect } = require("chai");
 
 require("chai").use(require("chai-as-promised")).should();
@@ -20,9 +25,11 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
+    const Reader = await ethers.getContractFactory('ReadSportEth')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
+    reader = await Reader.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
@@ -31,18 +38,25 @@ describe("Betting", function () {
     it("New token balance", async () => {
       const tokBala = ethers.utils.formatUnits(
         await token.balanceOf(owner.address),
-        "wei"
+        "gwei"
       );
-      console.log(`tokenBal is ${tokBala} 1e18`);
+      console.log(`tokenBal is ${tokBala} 1e9`);
     });
 
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+        var nextStart = _timestamp + 7 * 86400;
+      console.log(`time is ${nextStart}`);
     });
   });
 
@@ -53,56 +67,63 @@ describe("Betting", function () {
     });
 
     it("transfer tokens to acct1", async () => {
-      await token.transfer(account1.address, "250");
-      await token.transfer(account2.address, "150");
-      await token.approve(oracle.address, "400");
-      await token.connect(account1).approve(oracle.address, "250");
-      await token.connect(account2).approve(oracle.address, "150");
-      await oracle.depositTokens("400");
-      await oracle.connect(account1).depositTokens("250");
-      await oracle.connect(account2).depositTokens("150");
+      await token.transfer(account1.address, 250n*million);
+      await token.transfer(account2.address, 150n*million);
+      await token.approve(oracle.address, 400n*million);
+      await token.connect(account1).approve(oracle.address, 250n*million);
+      await token.connect(account2).approve(oracle.address, 150n*million);
+      await oracle.depositTokens(400n*million);
+      await oracle.connect(account1).depositTokens(250n*million);
+      await oracle.connect(account2).depositTokens(150n*million);
     });
 
     it("New token balance", async () => {
       const tokBal10 = ethers.utils.formatUnits(
         (await oracle.adminStruct(owner.address)).tokens,
-        "wei"
+        "gwei"
       );
+      console.log(`tokBal10 ${tokBal10}`);
       const tokBal11 = ethers.utils.formatUnits(
         (await oracle.adminStruct(account1.address)).tokens,
-        "wei"
+        "gwei"
       );
       const tokBal12 = ethers.utils.formatUnits(
         (await oracle.adminStruct(account2.address)).tokens,
-        "wei"
+        "gwei"
       );
       const tokBal13 = ethers.utils.formatUnits(
         await token.balanceOf(oracle.address),
-        "wei"
+        "gwei"
       );
-      console.log(`tokBal10 ${tokBal10}`);
+
       console.log(`tokBal11 ${tokBal11}`);
       console.log(`tokBal12 ${tokBal12}`);
       console.log(`tokBal13 ${tokBal13}`);
-      /*
-          assert.equal(tokBal10, "40000", "Must be equal");
-          assert.equal(tokBal11, "25000", "Must be equal");
-          assert.equal(tokBal12, "15000", "Must be equal");
-          assert.equal(tokBal13, "80000", "Must be equal");*/
+
+      
+          assert.equal(tokBal10, "0.4", "Must be equal");
+          assert.equal(tokBal11, "0.25", "Must be equal");
+          assert.equal(tokBal12, "0.15", "Must be equal");
+          assert.equal(tokBal13, "0.8", "Must be equal");
     });
+
   });
 
   describe("setupBets", async () => {
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      //  await helper.advanceTimeAndBlock(secondsInHour * 2.02);
-      _date = new Date(1000 * _timestamp + offset);
-      //  await helper.advanceTimeAndBlock(secondsInHour * 2);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      var nextStart = _timestamp + 7 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+        var nextStart = _timestamp + 7 * 86400;
+      console.log(`time is ${nextStart}`);
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -173,38 +194,7 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          955,
-          1000,
-          500,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
@@ -228,7 +218,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("pull reviewData3 ", async () => {
@@ -241,47 +231,13 @@ describe("Betting", function () {
       var nextStart = _timestamp + 86400;
       await expect(oracle.updatePost(
         [
-          800,
-          999,
-          600,
-          1200,
-          1000,
-          800,
-          580,
-          900,
-          1120,
-          1010,
-          1340,
-          610,
-          1320,
-          1400,
-          1240,
-          610,
-          740,
-          560,
-          1450,
-          830,
-          590,
-          870,
-          750,
-          1430,
-          1370,
-          930,
-          570,
-          1420,
-          510,
-          820,
-          1050,
-          1310,
+          900,500,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       )).to.be.reverted;
     });
 
     it("fail:try to send results, not initial data", async () => {
       await expect(oracle.settleProcess()).to.be.reverted;
-      //await timeout(5000);
-      //await web3.utils.advanceBlockAtTime(now.toNumber());
-
     });
 
     it("fast forward 3 days", async () => {
@@ -293,47 +249,22 @@ describe("Betting", function () {
     });
 
     it("send updated odds data: 2000 for match 1, team 0", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      var nextStart = _timestamp + 14 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+        var nextStart = _timestamp + 7 * 86400;
+      console.log(`time is ${nextStart}`);
       await oracle.updatePost(
         [
-          800,
-          2000,
-          600,
-          1200,
-          1000,
-          800,
-          580,
-          900,
-          1120,
-          1010,
-          1340,
-          610,
-          1320,
-          1400,
-          1240,
-          610,
-          740,
-          560,
-          1450,
-          830,
-          590,
-          870,
-          750,
-          1430,
-          1370,
-          930,
-          570,
-          1420,
-          510,
-          820,
-          1050,
-          1310,
+          800,600,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
@@ -349,13 +280,23 @@ describe("Betting", function () {
     it("show votes", async () => {
       const yesvote = await oracle.params(5);
       const novote = await oracle.params(6);
-      console.log(`Yes Votes ${yesvote}: No Votes ${novote}`);
-      assert.equal(yesvote, "550", "Must be equal");
-      assert.equal(novote, "250", "Must be equal");
+      console.log(`Yes Vote 1 ${yesvote}: No Vote 1 ${novote}`);
+       assert.equal(yesvote, "550000000", "Must be equal");
+       assert.equal(novote, "250000000", "Must be equal");
+       const tokBal99 = ethers.utils.formatUnits(
+        (await oracle.adminStruct(owner.address)).tokens,
+        "wei"
+      );
+      console.log(`tokBal10 ${tokBal99}`);
+      const tokBal98 = ethers.utils.formatUnits(
+        (await oracle.adminStruct(owner.address)).tokens,
+        "gwei"
+      );
+      console.log(`tokBal10 ${tokBal98}`);
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("process vote, should send odds", async () => {
@@ -378,61 +319,36 @@ describe("Betting", function () {
         );
       const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
       console.log(ints)
-      assert.equal(ints[6], "2000", "Must be equal");
+      assert.equal(ints[6], "600", "Must be equal");
       console.log(`tokBal ${ints[6]}`);
     });
 
     it("New token balance", async () => {
       const tokBal1 = ethers.utils.formatUnits(
         (await oracle.adminStruct(owner.address)).tokens,
-        "wei"
+        "gwei"
       );
       console.log(`tokBal ${tokBal1}`);
-      assert.equal(tokBal1, "400", "Must be equal");
+      assert.equal(tokBal1, "0.4", "Must be equal");
     });
 
     it("update odds", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      var nextStart = _timestamp + 14 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+        var nextStart = _timestamp + 7 * 86400;
+      console.log(`time is ${nextStart}`);
       await oracle.updatePost(
         [
-          3000,
-          999,
-          600,
-          1200,
-          1000,
-          800,
-          580,
-          900,
-          1120,
-          1010,
-          1340,
-          610,
-          1320,
-          1400,
-          1240,
-          610,
-          740,
-          560,
-          1450,
-          830,
-          590,
-          870,
-          750,
-          1430,
-          1370,
-          930,
-          570,
-          1420,
-          510,
-          820,
-          1050,
-          1310,
+          700,700,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
@@ -446,7 +362,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("show votes", async () => {
@@ -454,15 +370,32 @@ describe("Betting", function () {
       const novote = await oracle.params(6);
       console.log(`Yes Votes ${yesvote}: No Votes ${novote}`);
 
-      assert.equal(yesvote, "400", "Must be equal");
-      assert.equal(novote, "400", "Must be equal");
+       assert.equal(yesvote, "400000000", "Must be equal");
+       assert.equal(novote, "400000000", "Must be equal");
+
+      
     });
 
     it("process should not send", async () => {
       await oracle.updateProcess();
+      const tokBal98 = ethers.utils.formatUnits(
+        (await oracle.adminStruct(owner.address)).tokens,
+        "gwei"
+      );
+      console.log(`tokBal10 ${tokBal98}`);
+      const tokBal97 = ethers.utils.formatUnits(
+        (await token.totalSupply()),
+        "mwei"
+      );
+      console.log(`totalSupply ${tokBal97}`);
+      const tokBal96 = ethers.utils.formatUnits(
+        (await token.balanceOf(oracle.address)),
+        "mwei"
+      );
+      console.log(`oracleAddress takens ${tokBal97}`);
     });
 
-    it("should be old 2000, not new 3000", async () => {
+    it("should be old 600, not new 700", async () => {
       const result3 = await betting.betData(1);
       console.log(`result3 ${result3}`);
       //const str = bn.toString(16);
@@ -479,7 +412,8 @@ describe("Betting", function () {
             .join("")
         );
       const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
-      assert.equal(ints[6], "2000", "Must be equal");
+      assert.equal(ints[6], "600", "Must be equal");
     });
   });
+
 });

@@ -25,6 +25,7 @@
     "zksync-web3": "^0.14.3"
   },
   "dependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@rari-capital/solmate": "^6.4.0",
     "chai-as-promised": "7.1.1",
     "dotenv": "^16.0.1",

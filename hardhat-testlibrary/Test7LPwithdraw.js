@@ -2,8 +2,11 @@
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = 0; //_dateo.getTimezoneOffset() * 60  * 1000 - 7200000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+var hourOffset;
+var _hourSolidity;
 var _timestamp;
+var nextStart;
 var _date;
 var _hour;
 const firstStart = 1635695609;
@@ -43,27 +46,33 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, "550");
+      await token.approve(oracle.address, 550n*million);
     });
 
     it("Deposit Tokens in Oracle Contract1", async () => {
-      await oracle.depositTokens("550");
+      await oracle.depositTokens(550n*million);
     });
 
     it("transfer tokens to betting account", async () => {
-      await token.transfer(betting.address, "100");
+      await token.transfer(betting.address, 100n*million);
     });
   });
 
   describe("set up Betting contract", async () => {
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      var nextStart = _timestamp + 7 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+        var nextStart = _timestamp + 7 * 86400;
+      console.log(`time is ${nextStart}`);
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -134,38 +143,7 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          1000,
-          1000,
-          500,
-          1000,
-          909,
-          800,
-          580,
-          900,
-          1120,
-          1010,
-          1340,
-          610,
-          1320,
-          1400,
-          1240,
-          610,
-          740,
-          560,
-          1450,
-          830,
-          590,
-          870,
-          750,
-          1430,
-          1370,
-          930,
-          570,
-          1420,
-          510,
-          820,
-          1050,
-          1310,
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
@@ -174,7 +152,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("approve and send to betting contract", async () => {
@@ -203,18 +181,20 @@ describe("Betting", function () {
                 await betting.fundBettor({ from: accounts[3], value: '4000000000000000000' });
             })*/
 
-    it("bumpTime", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(86404);
-    });
 
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+        nextStart = _timestamp + 7 * 86400;
     });
 
     it("Send Initial Event Results", async () => {
@@ -255,10 +235,18 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+     await helper.advanceTimeAndBlock(3*secondsInHour);
     });
 
     it("Approve and send result data", async () => {
@@ -287,13 +275,18 @@ describe("Betting", function () {
     });
 
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      var nextStart = _timestamp + 14 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
       const result2 = await oracle.initPost(
         [
           "NFL:ATL:LAR",
@@ -364,38 +357,7 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          1000,
-          1000,
-          500,
-          1000,
-          909,
-          800,
-          580,
-          900,
-          1120,
-          1010,
-          1340,
-          610,
-          1320,
-          1400,
-          1240,
-          610,
-          740,
-          560,
-          1450,
-          830,
-          590,
-          870,
-          750,
-          1430,
-          1370,
-          930,
-          570,
-          1420,
-          510,
-          820,
-          1050,
-          1310,
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
       const receipt = await result2.wait();
@@ -407,7 +369,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("approve and send to betting contract #2", async () => {
@@ -417,18 +379,20 @@ describe("Betting", function () {
       console.log(`gas on initial send ${gasUsed}`);
     });
 
-    it("bumpTime", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(86404);
-    });
 
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
     });
 
     it("Send Event Results 2", async () => {
@@ -472,7 +436,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("Approve and send result data 2", async () => {
@@ -511,13 +475,18 @@ describe("Betting", function () {
     });
 
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      var nextStart = _timestamp + 21 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
       const result2 = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -588,38 +557,7 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          1000,
-          2000,
-          500,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
       const receipt = await result2.wait()
@@ -631,7 +569,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("approve and send to betting contract #3", async () => {
@@ -647,18 +585,19 @@ describe("Betting", function () {
       await betting.connect(account2).bet(0, 0, "5000");
     });
 
-    it("bumpTime", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(86404);
-    });
-
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
     });
 
     it("Send Event Results 3", async () => {
@@ -671,7 +610,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("Approve and send result data 3", async () => {

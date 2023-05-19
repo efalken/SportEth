@@ -2,7 +2,9 @@
 const helper = require('../hardhat-helpers');
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+var hourOffset;
+var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
@@ -19,10 +21,12 @@ describe('Test2b', function () {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
+    const Reader = await ethers.getContractFactory('ReadSportEth')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
@@ -42,19 +46,27 @@ describe('Test2b', function () {
   describe("set up contract for taking bets", async () => {
 
     it('checkHour', async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      console.log(`time is ${_timestamp}`);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
       var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
-      await oracle.initPost(["NFL:ARI:LAC", "NFL:ATL:LAR", "NFL:BAL:MIA", "NFL:BUF:MIN", "NFL:CAR:NE", "NFL:CHI:NO", "NFL:CIN:NYG", "NFL:CLE:NYJ", "NFL:DAL:OAK", "NFL:DEN:PHI", "NFL:DET:PIT", "NFL:GB:SEA", "NFL:HOU:SF", "NFL:IND:TB", "NFL:JAX:TEN", "NFL:KC:WSH", "UFC:Holloway:Kattar", "UFC:Ponzinibbio:Li", "UFC:Kelleher:Simon", "UFC:Hernandez:Vieria", "UFC:Akhemedov:Breese", "UFC:Memphis:Brooklyn", "UFC:Boston:Charlotte", "UFC:Milwaukee:Dallas", "UFC:miami:LALakers", "UFC:Atlanta:SanAntonia", "NHL:Colorado:Washington", "NHL:Vegas:StLouis", "NHL:TampaBay:Dallas", "NHL:Boston:Carolina", "NHL:Philadelphia:Edmonton", "NHL:Pittsburgh:NYIslanders"], [nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart], [1000, 2000, 500, 1000, 909, 800, 510, 1240, 1470, 960, 650, 1330, 970, 730, 1310, 1040, 520, 1020, 1470, 1200, 1080, 820, 770, 790, 730, 690, 970, 760, 1000, 720, 1360, 800]);
+      await oracle.initPost(["NFL:ARI:LAC", "NFL:ATL:LAR", "NFL:BAL:MIA", "NFL:BUF:MIN", "NFL:CAR:NE", "NFL:CHI:NO", "NFL:CIN:NYG", "NFL:CLE:NYJ", "NFL:DAL:OAK", "NFL:DEN:PHI", "NFL:DET:PIT", "NFL:GB:SEA", "NFL:HOU:SF", "NFL:IND:TB", "NFL:JAX:TEN", "NFL:KC:WSH", "UFC:Holloway:Kattar", "UFC:Ponzinibbio:Li", "UFC:Kelleher:Simon", "UFC:Hernandez:Vieria", "UFC:Akhemedov:Breese", "UFC:Memphis:Brooklyn", "UFC:Boston:Charlotte", "UFC:Milwaukee:Dallas", "UFC:miami:LALakers", "UFC:Atlanta:SanAntonia", "NHL:Colorado:Washington", "NHL:Vegas:StLouis", "NHL:TampaBay:Dallas", "NHL:Boston:Carolina", "NHL:Philadelphia:Edmonton", "NHL:Pittsburgh:NYIslanders"], [nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart, nextStart], [
+        999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
+      ]);
     })
 
     it("approve and send to betting contract", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       await oracle.initProcess();
       const startNow = await betting.betData(5);
       console.log(`startTime is ${startNow}`);
@@ -133,20 +145,22 @@ describe('Test2b', function () {
       console.log(`ethbal ${ethbal}`);
       assert.equal(bookiePool, "30000", "mustBe equal");
       assert.equal(bettorLocked, "15000", "Must be equal");
-      assert.equal(bookieLocked, "4614", "Must be equal");
+      assert.equal(bookieLocked, "4458", "Must be equal");
       assert.equal(oracleBal, "0.0", "Must be equal");
       assert.equal(ethbal, "4500.0", "Must be equal");
     })
 
     it('checkHour', async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      console.log(`ts0 = ${_timestamp}`);
-      _hour = _date.getHours();
-      console.log(`hour = ${_hour}`);
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
     })
 
     it("Send Event Results to oracle", async () => {
@@ -155,7 +169,7 @@ describe('Test2b', function () {
     });
 
     it("send result data to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       await oracle.settleProcess();
     });
 
@@ -170,11 +184,11 @@ describe('Test2b', function () {
       console.log(`bookieLocked ${bookieLocked}`);
       console.log(`oracleBal ${oracleBal}`);
       console.log(`bettingk balance ${ethbal}`);
-      assert.equal(bookiePool, "25386", "mustBe equal");
+      assert.equal(bookiePool, "28654", "mustBe equal");
       assert.equal(bettorLocked, "0", "Must be equal");
       assert.equal(bookieLocked, "0", "Must be equal");
-      assert.equal(oracleBal, "58.07", "Must be equal");
-      assert.equal(ethbal, "4441.93", "Must be equal");
+      assert.equal(oracleBal, "41.73", "Must be equal");
+      assert.equal(ethbal, "4458.27", "Must be equal");
     })
   })
 })

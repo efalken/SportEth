@@ -1,5 +1,5 @@
 
-const helper = require("../hardhat-helpers");
+const helper = require("../../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
 const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;

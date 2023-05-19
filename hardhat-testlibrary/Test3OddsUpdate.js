@@ -2,7 +2,9 @@
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+var hourOffset;
+var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
@@ -16,7 +18,7 @@ const eths = BigInt('1000000000000000000');
 const million = BigInt('1000000');
 
 describe("Betting", function () {
-  let betting, oracle, token, reader, owner, account1, account2, account3;
+  let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
     const Betting = await ethers.getContractFactory('Betting')
@@ -26,13 +28,14 @@ describe("Betting", function () {
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
-    reader = await Reader.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
   describe("Preliminaries", async () => {
     it("Get Oracle Contract Address", async () => {
+      console.log(`Oracle Address is ${oracle.address}`);
     });
 
     it("Authorize Oracle Token", async () => {
@@ -46,15 +49,20 @@ describe("Betting", function () {
 
   describe("setupBets", async () => {
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
 
+      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       var nextStart = _timestamp + 7 * 86400;
-      console.log(`start time: ${nextStart}`);
+      console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -125,38 +133,7 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          1000,
-          2000,
-          500,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
       receipt = await result.wait()
@@ -165,12 +142,13 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("Send Initial Data", async () => {
-      result = await oracle.initProcess();
+      await oracle.initProcess();
       const betdata0 = await betting.betData(0);
+      console.log(`betdata0 ${betdata0}`);
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
       console.log(`gas on initSend = ${gasUsed}`);
@@ -194,112 +172,118 @@ describe("Betting", function () {
         value: 1n*eths,
       });
     });
-
-  it("checkTime", async () => {
-    await betting.connect(account2).fundBettor({
-      value: 1n*eths,
-    });
-    let betdata0 = await reader.showBetData(0);
-    console.log(`initBetData`);
-    console.log(betdata0);
-
   });
-});
 
   describe("Send Bets, update Odds, send more bets", async () => {
     let contractHash1;
     it("bet 10 on 0:0 (match 0: team 0)", async () => {
       result = await betting.connect(account1).bet(0, 0, "1000");
       receipt = await result.wait();
-
+      contractHash1 = receipt.events[0].args.contractHash;
+      const betdata0 = await betting.betData(0);
+      console.log(`betdata preSettle ${betdata0}`);
+      const betdata1 = await betting.betData(1);
+      console.log(`betdata preSettle ${betdata1}`);
     });
 
     it("checkHour", async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      var nextStart = _timestamp + 7 * 86400;
+      console.log(`time is ${nextStart}`);
     });
 
     it("send updated odds data", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      var nextStart = _timestamp + 86400;
       result = await oracle.updatePost(
-          [
-          1111,
-          2000,
-          500,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
+        [
+          800,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
-      console.log(`gas on updatePost0 = ${gasUsed}`);
+      console.log(`gas on initPost = ${gasUsed}`);
     });
 
     it("fast forward 4 hours", async () => {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("approve and send to betting contract", async () => {
+      const betdata0 = await betting.betData(0);
+      console.log(`betdata pre ${betdata0}`);
       result = await oracle.updateProcess();
+      const betdata2 = await betting.betData(0);
+      console.log(`betdata post ${betdata2}`);
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
-      console.log(`gas on updateSend0 = ${gasUsed}`);
+      console.log(`gas on initPost = ${gasUsed}`);
     });
 
     let contractHash2;
     it("bet on 0:0 after odds update", async () => {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+      console.log(`time is ${_timestamp}`);
       result12 = await betting.connect(account2).bet(0, 0, "1000");
       receipt = await result12.wait();
-
+      contractHash2 = receipt.events[0].args.contractHash;
+      const betdata0 = await betting.betData(0);
+      console.log(`betdata preSettle ${betdata0}`);
+      const betdata1 = await betting.betData(1);
+      console.log(`betdata preSettle ${betdata1}`);
     });
 
+    it("Check State Variables before Settle", async () => {
+      const bookiePool = await betting.margin(0);
+      const bettorLocked = await betting.margin(2);
+      const bookieLocked = await betting.margin(1);
+      const oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
+      const ethbal = ethers.utils.formatUnits(await ethers.provider.getBalance(betting.address), "finney");
+      const userBalanceAcct1 = await betting.userBalance(account1.address);
+      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      console.log(`acct1 ${userBalanceAcct1}`);
+      console.log(`acct3 ${userBalanceAcct2}`);
+      console.log(`bookiePool ${bookiePool}`);
+      console.log(`bettorLocked ${bettorLocked}`);
+      console.log(`bookieLocked ${bookieLocked}`);
+      console.log(`oracleBal ${oracleBal}`);
+      console.log(`ethbal ${ethbal}`);
 
-    it("bumpTime", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(86400);
+      assert.equal(userBalanceAcct2, "9000", "Must be equal");
+      assert.equal(userBalanceAcct2, "9000", "Must be equal");
+      assert.equal(bookiePool, "30000", "Must be equal");
+      assert.equal(bettorLocked, "2000", "Must be equal");
+      assert.equal(bookieLocked, "1799", "Must be equal");
+      assert.equal(oracleBal, "0.0", "Must be equal");
+      assert.equal(ethbal, "5000.0", "Must be equal");
     });
+
 
     it("checkHour", async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      var nextStart = _timestamp + 7 * 86400;
+      console.log(`time is ${nextStart}`);
     });
 
     it("Send Event Results", async () => {
@@ -340,200 +324,42 @@ describe("Betting", function () {
     });
 
     it("Approve results and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      const betdata0 = await betting.betData(0);
+      console.log(`betdata preSettle ${betdata0}`);
+      const betdata1 = await betting.betData(1);
+      console.log(`betdata preSettle ${betdata1}`);
       await oracle.settleProcess();
     });
 
+    it("bettorBalances", async () => {
+      await betting.connect(account1).redeem(contractHash1);
+      await betting.connect(account2).redeem(contractHash2);
+    });
 
+    it("Check State Variables in After Settle, Redemption", async () => {
+      const bookiePool = await betting.margin(0);
+      const bettorLocked = await betting.margin(2);
+      const bookieLocked = await betting.margin(1);
+      const oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
+      const ethbal = ethers.utils.formatUnits(await ethers.provider.getBalance(betting.address), "finney");
+      const userBalanceAcct1 = await betting.userBalance(account1.address);
+      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      console.log(`acct1 ${userBalanceAcct1}`);
+      console.log(`acct2 ${userBalanceAcct2}`);
+      console.log(`bookiePool ${bookiePool}`);
+      console.log(`margin2 ${bettorLocked}`);
+      console.log(`margin1 ${bookieLocked}`);
+      console.log(`oracleBal ${oracleBal}`);
+      console.log(`ethbal ${ethbal}`);
+
+      assert.equal(userBalanceAcct1, "10949", "Must be equal");
+      assert.equal(userBalanceAcct2, "10760", "Must be equal");
+      assert.equal(bookiePool, "28201", "Must be equal");
+      assert.equal(bettorLocked, "0", "Must be equal");
+      assert.equal(bookieLocked, "0", "Must be equal");
+      assert.equal(oracleBal, "8.995", "Must be equal");
+      assert.equal(ethbal, "4991.005", "Must be equal");
+    });
   });
-
-  describe("setupBets2", async () => {
-    it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-
-      var nextStart = _timestamp + 7 * 86400;
-      result = await oracle.initPost(
-        [
-          "NFL:ARC:LAC",
-          "NFL:AAA:LAR",
-          "NFL:BAL:MIA",
-          "NFL:BUF:MIN",
-          "NFL:CAR:NE",
-          "NFL:CHI:NO",
-          "NFL:CIN:NYG",
-          "NFL:CLE:NYJ",
-          "NFL:DAL:OAK",
-          "NFL:DEN:PHI",
-          "NFL:DET:PIT",
-          "NFL:GB:SEA",
-          "NFL:HOU:SF",
-          "NFL:IND:TB",
-          "NFL:JAX:TEN",
-          "NFL:KC:WSH",
-          "UFC:Holloway:Kattar",
-          "UFC:Ponzinibbio:Li",
-          "UFC:Kelleher:Simon",
-          "UFC:Hernandez:Vieria",
-          "UFC:Akhemedov:Breese",
-          "UFC:Memphis:Brooklyn",
-          "UFC:Boston:Charlotte",
-          "UFC:Milwaukee:Dallas",
-          "UFC:miami:LALakers",
-          "UFC:Atlanta:SanAntonia",
-          "NHL:Colorado:Washington",
-          "NHL:Vegas:StLouis",
-          "NHL:TampaBay:Dallas",
-          "NHL:Boston:Carolina",
-          "NHL:Philadelphia:Edmonton",
-          "NHL:Pittsburgh:NYIslanders",
-        ],
-        [
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          0,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-        ],
-        [
-          1100,
-          2100,
-          500,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
-        ]
-      );
-      receipt = await result.wait()
-      gasUsed = receipt.gasUsed;
-      console.log(`gas on initPost2 = ${gasUsed}`);
-    });
-
-    it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
-    });
-
-    it("Send Initial Data", async () => {
-      result = await oracle.initProcess();
-      receipt = await result.wait()
-      gasUsed = receipt.gasUsed;
-      console.log(`gas on initSend2 = ${gasUsed}`);
-    });
-
-    it("send updated odds data", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      var nextStart = _timestamp + 86400;
-      result = await oracle.updatePost(
-          [
-          1112,
-          2001,
-          500,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          0,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
-        ]
-      );
-      receipt = await result.wait()
-      gasUsed = receipt.gasUsed;
-      console.log(`gas on updatePost2 = ${gasUsed}`);
-    });
-
-    it("fast forward 4 hours", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
-    });
-
-    it("approve and send to betting contract", async () => {
-      result = await oracle.updateProcess();
-      receipt = await result.wait()
-      gasUsed = receipt.gasUsed;
-      console.log(`gas on updateSend2 = ${gasUsed}`);
-    });
-
-
-  });
-
 });

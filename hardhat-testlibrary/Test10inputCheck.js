@@ -3,7 +3,9 @@ const web3 = require("web3-utils");
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+var hourOffset;
+var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
@@ -47,13 +49,20 @@ describe("Betting", function () {
 
   describe("setupBets", async () => {
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      nextStart = 1683975836;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
+
+
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -124,44 +133,13 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          800,
-          801,
-          802,
-          803,
-          804,
-          805,
-          806,
-          807,
-          808,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
+          999,448,500,919,909,800,510,807,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("Send Initial Data", async () => {
@@ -199,24 +177,32 @@ describe("Betting", function () {
       assert.equal(ints[1], "500", "Must be equal");
       assert.equal(ints[2], "807", "Must be equal");
       assert.equal(ints[3], "569", "Must be equal");
-      assert.equal(ints[5], 1683975836, "Must be equal");
+      assert.equal(ints[5], nextStart, "Must be equal");
       assert.equal(ints[6], "807", "Must be equal");
       assert.equal(ints[7], "1138", "Must be equal");
+      console.log("0", ints[0]);
+      console.log("0", ints[1]);
+      console.log("0", ints[2]);
+      console.log("0", ints[3]);
+      console.log("0", ints[4]);
+      console.log("0", ints[5]);
+      console.log("0", ints[6]);
+      console.log("0", ints[7]);
     });
 
-    it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-    });
 
     it("send updated odds data", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      nextStart = _timestamp + 86400;
-      console.log(`start is is ${nextStart}`);
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+
       await oracle.updatePost(
         [
           900,
@@ -225,39 +211,13 @@ describe("Betting", function () {
           903,
           904,
           905,
-          906,
-          907,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
-        ]
+          906,907,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
+          ]
       );
     });
 
     it("fast forward 6 hours", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       await oracle.updateProcess();
       const betData7b = await betting.betData(7);
       //const str = bn.toString(16);
@@ -275,11 +235,21 @@ describe("Betting", function () {
         );
       const intsb = piecesb.map((s) => parseInt("0x" + s)).reverse();
       console.log("data7b", intsb);
+      console.log("0", intsb[0]);
+      console.log("0", intsb[1]);
+      console.log("0", intsb[2]);
+      console.log("0", intsb[3]);
+      console.log("0", intsb[4]);
+      console.log("0", intsb[5]);
+      console.log("0", intsb[6]);
+      console.log("0", intsb[7]);
+      
+      console.log("data7b", intsb);
       assert.equal(intsb[0], "1000", "Must be equal");
       assert.equal(intsb[1], "500", "Must be equal");
       assert.equal(intsb[2], "807", "Must be equal");
       assert.equal(intsb[3], "569", "Must be equal");
-      assert.equal(intsb[5], 1683975836, "Must be equal");
+      assert.equal(intsb[5], nextStart, "Must be equal");
       assert.equal(intsb[6], "907", "Must be equal");
       assert.equal(intsb[7], "1013", "Must be equal");
     });

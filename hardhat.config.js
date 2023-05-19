@@ -83,7 +83,7 @@ module.exports = {
         count: 10,
         passphrase: "",
       },
-      gasPrice: 22e9,
+      gasPrice: 20e9,
       gas: 25e6,
     },
   },

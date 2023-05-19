@@ -2,7 +2,9 @@
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+var hourOffset;
+var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
@@ -46,14 +48,19 @@ describe("Betting", function () {
 
   describe("set up contract for taking bets", async () => {
     it("send init", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      console.log(`time is ${_timestamp}`);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      nextStart = _timestamp + 7 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
+
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -124,44 +131,13 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
 
     it("approve and send to betting contract", async () => {
-      //await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       await oracle.initProcess();
 
       const bookpool = await betting.margin(0);
@@ -187,6 +163,18 @@ describe("Betting", function () {
     });
 
     it("Send Initial Event Results", async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
       await oracle.settlePost([
         1,
         1,
@@ -224,22 +212,24 @@ describe("Betting", function () {
     });
 
     it("settle", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       const result2 = await oracle.settleProcess();
     });
 
     it("send new data", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      console.log(`time is ${_timestamp}`);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      nextStart = _timestamp + 7 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
+
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -310,50 +300,32 @@ describe("Betting", function () {
           nextStart
         ],
         [
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
 
     it("approve and send to betting contract", async () => {
-      //await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       await oracle.initProcess();
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);
     });
 
     it("Send Initial Event Results", async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
+
       await oracle.settlePost([
         1,
         1,
@@ -391,10 +363,7 @@ describe("Betting", function () {
     });
 
     it("settle", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       const result2 = await oracle.settleProcess();
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
@@ -404,14 +373,19 @@ describe("Betting", function () {
 
   describe("send new data", async () => {
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(_timestamp + offset);
-      console.log(`time is ${_timestamp}`);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
-      nextStart = _timestamp + 7 * 86400;
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+    nextStart = _timestamp + 7 * 86400;
+
       nextStart0 = _timestamp + 86400;
       console.log(`Most startTimes are ${nextStart}`);
       console.log(`Match 5 startTime is ${nextStart0}`);
@@ -485,43 +459,13 @@ describe("Betting", function () {
           nextStart
         ],
         [
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1000,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
     });
 
     it("approve and send to betting contract", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       await oracle.initProcess();
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);
@@ -534,28 +478,32 @@ describe("Betting", function () {
       var result = await betting.connect(account1).bet(4, 0, "1000");
     });
 
-    it("Fail: Excess Amount Should Fail because max size is 2000 (10000/5), and the bet size is ", async () => {
-      const result = await expect(betting.connect(account1).bet(5, 0, "2001")).to.be.reverted;
+    it("Fail: Excess Amount Should Fail because max size is 2000 (10000/5), and the bet payout is > 2000 ", async () => {
+      const result = await expect(betting.connect(account1).bet(5, 0, "2501")).to.be.reverted;
     });
 
     it("Test 1", async () => {
       const bookiePool = await betting.margin(0);
       const bettorLocked = await betting.margin(2);
       const bookieLocked = await betting.margin(1);
+      const oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
+      const betBal = ethers.utils.formatUnits(await ethers.provider.getBalance(betting.address), "finney");
 
       console.log(`bookiePool ${bookiePool}`);
       console.log(`bettorLocked ${bettorLocked}`);
       console.log(`bookieLocked ${bookieLocked}`);
-      /*
-            assert.equal(bookiePool, "30000", "mustBe equal");
-            assert.equal(bettorLocked, "15000", "Must be equal");
-            assert.equal(bookieLocked, "4614", "Must be equal");
-            assert.equal(oracleBal, "0", "Must be equal");
-            assert.equal(ethbal, "5000", "Must be equal");*/
+      console.log(`oracle ${oracleBal}`);
+      console.log(`bet ${betBal}`);
+      
+            assert.equal(bookiePool, "10000", "mustBe equal");
+            assert.equal(bettorLocked, "4000", "Must be equal");
+            assert.equal(bookieLocked, "2776", "Must be equal");
+            assert.equal(oracleBal, "0.0", "Must be equal");
+            assert.equal(betBal, "2000.0", "Must be equal");
     });
 
-    it("fail: attempt to withdraw 6001 too much", async () => {
-      const ethout0 = await expect(betting.withdrawBook("6001")).to.be.reverted;
+    it("fail: attempt to withdraw 10001 too much", async () => {
+      const ethout0 = await expect(betting.withdrawBook("8000")).to.be.reverted;
       const bookiePool = await betting.margin(0);
       const bookieLocked = await betting.margin(1);
       console.log(`bookiePool ${bookiePool}`);
@@ -568,7 +516,7 @@ describe("Betting", function () {
 
     it("putting that 5000 back, should succeed", async () => {
       await betting.connect(account3).fundBook({
-        value: "500000000000000000",
+        value: 500n*finneys,
       });
     });
 

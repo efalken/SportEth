@@ -1,5 +1,5 @@
 
-const helper = require("../hardhat-helpers");
+const helper = require("../../hardhat-helpers");
 var receipt;
 var result;
 const {assert} = require('chai');

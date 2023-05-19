@@ -1,4 +1,4 @@
-const helper = require("../hardhat-helpers");
+const helper = require("../../hardhat-helpers");
 const gas1 = 1e9;
 const gas2 = 3e9;
 const gas3 = 3e9;

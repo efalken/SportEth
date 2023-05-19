@@ -9,9 +9,9 @@ import "./Token.sol";
 
 contract Betting {
   /** totalShares is used to monitor an LP's share of LP eth in the contract.
-     * 0 bookie, 1 bookieLocked, 2 bettorLocked,
-        3 betEpoch, 4 totalShares, 5 concentrationLimit, 6 nonce, 7 firstStart
-        */
+  * 0 bookie, 1 bookieLocked, 2 bettorLocked,
+  3 betEpoch, 4 totalShares, 5 concentrationLimit, 6 nonce, 7 firstStart
+  */
   uint32[8] public margin;
   // for emergency shutdown
   uint8[2] public paused;
@@ -49,6 +49,7 @@ contract Betting {
   struct LPStruct {
     uint32 shares;
     uint32 outEpoch;
+    uint32 claimEpoch;
   }
 
   event BetRecord(
@@ -178,9 +179,9 @@ contract Betting {
     uint32 _betAmount,
     uint32 _decOddsBB
   ) external {
-    require(_betAmount >= margin[0] / margin[5], "too small");
+    //require(_betAmount >= margin[0] / margin[5], "too small");
     require(_betAmount <= userBalance[msg.sender], "NSF");
-    require(_decOddsBB > 1000 && _decOddsBB < 9999, "invalid odds");
+    require(_decOddsBB > 1000 && _decOddsBB < 9000, "invalid odds");
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));
     Subcontract memory order;
     order.pick = _team0or1;
@@ -283,32 +284,36 @@ contract Betting {
       winningTeam = _winner[i];
       uint32[7] memory betDatav = decodeNumber(betData[i]);
       epochMatch = i * 10 + margin[3] * 1000;
-      if (betDatav[5] != 999) {
+      if ((betDatav[0] + betDatav[1]) > 0) {
+        //if not a tie
         if (winningTeam != 2) {
           redemptionPot += betDatav[winningTeam];
           payoffPot += betDatav[winningTeam + 2];
+          // winning bet assigned number 2
           outcomeMap[uint32(epochMatch + winningTeam)] = 2;
         } else {
+          // tie or no contest assigned number 1
           redemptionPot += (betDatav[0] + betDatav[1]);
           outcomeMap[uint32(epochMatch)] = 1;
           outcomeMap[uint32(1 + epochMatch)] = 1;
         }
       }
     }
+    margin[3]++;
+    uint256 oracleDiv = ORACLE_5PERC * uint256(payoffPot);
     margin[0] = addSafe(
       margin[0] + margin[2],
       -int32(redemptionPot + payoffPot)
     );
-    margin[3]++;
-    uint256 oracleDiv = ORACLE_5PERC * uint256(payoffPot);
     margin[1] = 0;
     margin[2] = 0;
     delete betData;
     margin[7] = FUTURE_START;
-    //oracleAdmin.transfer(oracleDiv);
+    //bool success = oracleAdmin.transfer(oracleDiv);
     (bool success, ) = oracleAdmin.call{ value: oracleDiv }("");
     require(success, "Call failed");
     return (margin[3], uint32(5 * payoffPot));
+    //return (margin[3], 100000);
   }
 
   /// @dev bettor funds account for bets
@@ -347,6 +352,7 @@ contract Betting {
       betContracts[_subkId].pick;
     require(outcomeMap[epochMatch] != 0, "need win or tie");
     uint32 payoff = betContracts[_subkId].betAmount;
+
     if (outcomeMap[epochMatch] == 2) {
       payoff += (betContracts[_subkId].payoff * 95) / 100;
     }
@@ -394,12 +400,17 @@ contract Betting {
    * @param _oddsAndStart is the epoch's set of odds and start times for matches. Data are packed into uint96.
    * the first event is stored into margin[7] as when LPs can no longe add or remove liquidity
    */
-  function transmitInit(uint96[32] memory _oddsAndStart) external onlyAdmin {
+  function transmitInit(uint96[32] memory _oddsAndStart)
+    external
+    onlyAdmin
+    returns (bool)
+  {
     require(margin[2] == 0);
     betData = _oddsAndStart;
     margin[7] = uint32(_oddsAndStart[0] >> 64);
     paused[0] = 99;
     paused[1] = 99;
+    return true;
   }
 
   /** @dev processes updates to epoch's odds

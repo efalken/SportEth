@@ -2,13 +2,16 @@
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = _dateo.getTimezoneOffset() * 60 * 1000 - 7200000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+var hourOffset;
+var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
 var account2eo;
 var redeemCheck;
 const finneys = BigInt('1000000000000000');
+const gwei = BigInt('1000000000');
 const eths = BigInt('1000000000000000000');
 const million = BigInt('1000000');
 
@@ -46,13 +49,18 @@ describe("Betting", function () {
 
   describe("set up contract for taking bets", async () => {
     it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
 
+      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       var nextStart = _timestamp + 7 * 86400;
 
       await oracle.initPost(
@@ -125,45 +133,14 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          827,
-          955,
-          1000,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
+          999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
 
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("approve and send to betting contract", async () => {
@@ -178,13 +155,13 @@ describe("Betting", function () {
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account2).fundBettor({
-        value: "200000000000000000",
+        value: 200n*finneys,
       });
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account3).fundBettor({
-        value: "300000000000000000",
+        value: 300n*finneys,
       });
     });
   });
@@ -229,19 +206,20 @@ describe("Betting", function () {
       assert.equal(bettingKethbal, "3500.0", "Must be equal");
     });
 
-    it("bumpTime", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(86400);
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-    });
-
     it("checkHour", async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+      var nextStart = _timestamp + 7 * 86400;
     });
 
     it("Send Event Results to oracle", async () => {
@@ -285,7 +263,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
     });
 
     it("send result data to betting contract", async () => {
@@ -302,8 +280,9 @@ describe("Betting", function () {
       console.log(`acct2 ${userBalanceAcct2}`);
       console.log(`oracleBal ${oracleBal}`);
       console.log(`bettingKethbal ${bettingKethbal}`);
-      assert.equal(oracleBal, "10.15", "Must be equal");
-      assert.equal(bettingKethbal, "3489.85", "Must be equal");
+      assert.equal(userBalanceAcct2, "0", "Must be equal");
+      assert.equal(oracleBal, "13.635", "Must be equal");
+      assert.equal(bettingKethbal, "3486.365", "Must be equal");
       assert.equal(userBalanceAcct2, "0", "Must be equal");
     });
 
@@ -320,12 +299,10 @@ describe("Betting", function () {
     });
 
     it("fail: redeem attempt for losing bet on 0:0", async () => {
-     // const result = await betting.connect(account3).redeem(contractHash0);
       await expect(betting.connect(account3).redeem(contractHash0)).to.be.reverted;
     });
 
     it("fail: redeem bet on 0:1 second time", async () => {
-     // const result = await betting.connect(account2).redeem(contractHash1);
       await expect(betting.connect(account2).redeem(contractHash1)).to.be.reverted;
     });
 
@@ -340,19 +317,21 @@ describe("Betting", function () {
       console.log(`user2 contract balance ${userBalanceAcct2}`);
       console.log(`bettingKethbal ${bettingKethbal}`);
       console.log(`User2EOaccount ${account2eo}`);
-      assert.equal(bettingKethbal, "3489.85", "Must be equal");
-      assert.equal(userBalanceAcct2, "3928", "Must be equal");
+      assert.equal(bettingKethbal, "3486.365", "Must be equal");
+      assert.equal(userBalanceAcct2, "4590", "Must be equal");
     });
 
     it("State Variables in Betting Contract after Acct2 withdrawal", async () => {
       const playerbalance = await betting.userBalance(account2.address);
-      const result = await betting.connect(account2).withdrawBettor(playerbalance);
+      const result = await betting.connect(account2).withdrawBettor(playerbalance, {gasPrice: 200n*gwei });
       const tx = await ethers.provider.getTransaction(result.hash);
-      const gasPrice = ethers.utils.formatUnits(tx.gasPrice, "finney");
+      const gasPrice = ethers.utils.formatUnits(tx.gasPrice, "gwei");
       const receipt = await result.wait()
       const gasUsed = receipt.gasUsed;
       console.log(`gas Price (should be 200) = ${gasPrice}`);
       console.log(`gas on Withdraw = ${gasUsed}`);
+      const bettingKethbal2 = ethers.utils.formatUnits(await ethers.provider.getBalance(betting.address), "finney");
+      console.log(`bettingKethbal ${bettingKethbal2}`);
       const oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
       const bettingKethbal = ethers.utils.formatUnits(await ethers.provider.getBalance(betting.address), "finney");
       const userBalanceAcct2 = await betting.userBalance(account2.address);
@@ -363,9 +342,9 @@ describe("Betting", function () {
       console.log(`bettingKethbal ${bettingKethbal}`);
       console.log(`ethbalAcct2 ${Acct2EOaccount}`);
       console.log(`Account2 increase in account value ${Acct2Increase}`);
-      assert.equal(oracleBal, "10.15", "Must be equal");
-      assert.equal(bettingKethbal, "3097.05", "Must be equal");
-      assert.equal(Math.floor(Acct2Increase), "392", "Must be equal");
+      assert.equal(oracleBal, "13.635", "Must be equal");
+      assert.equal(bettingKethbal, "3027.365", "Must be equal");
+      assert.equal(Math.floor(Acct2Increase), "452", "Must be equal");
     });
   });
 });
