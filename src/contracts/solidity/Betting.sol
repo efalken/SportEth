@@ -309,11 +309,9 @@ contract Betting {
     margin[2] = 0;
     delete betData;
     margin[7] = FUTURE_START;
-    //bool success = oracleAdmin.transfer(oracleDiv);
     (bool success, ) = oracleAdmin.call{ value: oracleDiv }("");
     require(success, "Call failed");
     return (margin[3], uint32(5 * payoffPot));
-    //return (margin[3], 100000);
   }
 
   /// @dev bettor funds account for bets
@@ -337,6 +335,7 @@ contract Betting {
     lpStruct[msg.sender].outEpoch = margin[3] + 1;
     margin[4] += _shares;
     lpStruct[msg.sender].shares += _shares;
+    lpStruct[msg.sender].claimEpoch = margin[3];
     emit Funding(msg.sender, msg.value, margin[3], 1);
   }
 
@@ -394,6 +393,18 @@ contract Betting {
     (bool success, ) = payable(msg.sender).call{ value: ethWithdraw256 }("");
     require(success, "Call failed");
     emit Funding(msg.sender, ethWithdraw256, margin[3], 4);
+  }
+
+  function getTokenRewards() external {
+    require(token.balanceOf(address(this)) > 0, "only when tokens here");
+    require(lpStruct[msg.sender].claimEpoch < margin[3], "too soon");
+    lpStruct[msg.sender].claimEpoch = margin[3];
+    uint64 tokenRewards = uint64(
+      (uint256(lpStruct[msg.sender].shares) * 25e7) / uint256(margin[4])
+    );
+    bool success = token.transfer(msg.sender, tokenRewards);
+    require(success, "token failed");
+    emit Funding(msg.sender, tokenRewards, margin[3], 5);
   }
 
   /** @dev processes initial odds and start times

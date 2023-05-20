@@ -2,6 +2,7 @@
 const helper = require("../hardhat-helpers");
 const web3 = require('web3');
 const { ethers } = require("hardhat");
+var utils = require('ethers').utils;
 const secondsInHour = 3600;
 _dateo = new Date();
 const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
@@ -216,17 +217,7 @@ describe("Betting", function () {
       await oracle.settleProcess();
     });
 
-    it("check 1", async () => {
-      oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      const feePool = await oracle.params2(3);
-      const totTokens = await oracle.params2(0);
-      console.log(`eth in Oracle Contract ${oracleBal}`);
-      console.log(`feePool Tracker ${feePool}`);
-      console.log(`tot tokens ${totTokens}`);
-     // await betting.connect(account5).redeem(contractHash1);
-      const tokens5 = await token.balanceOf(account5.address);
-      console.log(`tot tokens acct5 ${tokens5}`);
-    });
+
   });
 
   describe("Second epoch with two oracles", async () => {
@@ -576,7 +567,7 @@ describe("Betting", function () {
       console.log(`ether Out ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      assert.equal(ethout, "21.25", "Must be equal");
+     assert.equal(ethout, "21.25", "Must be equal");
 
         const moosey = ethers.utils.formatUnits(await oracle.moose(), "mwei");
         console.log(`moose, ${moosey}`);
@@ -907,10 +898,27 @@ describe("Betting", function () {
       ethout = ethers.utils.formatUnits(receipt.events[1].args.etherChange, "finney");
       console.log(`ether Out0 ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
-      console.log(`tokens Out0 ${tokensout}`);
+      console.log(`tokens Out0 ${tokensout}`);  
+
       assert.equal(ethout, "11.1", "Must be equal");
+      const ethbal1 = ethers.utils.formatUnits(await ethers.provider.getBalance(account2.address), "finney");
       const result1 = await oracle.connect(account2).withdrawTokens(100n*million);
-      const receipt1 = await result1.wait()
+      const receipt1 = await result1.wait();
+      const tx = await ethers.provider.getTransaction(result1.hash);
+      const gasPrice = tx.gasPrice;
+      const gasUsed = receipt1.gasUsed;
+      console.log(`gas Price (should be 0) = ${gasPrice}`);
+      console.log(`gas on Withdraw = ${gasUsed}`); 
+      const xx = gasPrice * gasUsed; 
+      const ethbal2 = ethers.utils.formatUnits(await ethers.provider.getBalance(account2.address), "finney");
+      const xx2 = ethers.utils.formatUnits(ethers.BigNumber.from(xx), "finney");
+
+      console.log(`ethbal1 ${ethbal1}`);
+      console.log(ethbal1);
+      console.log(`ethbal2 ${ethbal2}`);
+      var sum1 = Number(ethbal2) - Number(ethbal1) + Number(xx2);
+      sum1 = Math.round(sum1*100)/100;
+      console.log(`eth sent to EOA ${sum1}`);
       ethout = ethers.utils.formatUnits(receipt1.events[1].args.etherChange, "finney");
       console.log(`ether Out2 ${ethout}`);
       const tokensout1 = receipt1.events[1].args.tokensChange;
@@ -918,6 +926,7 @@ describe("Betting", function () {
       assert.equal(ethout, "7.55", "Must be equal");
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
       console.log(`eth in Oracle Contract at end ${oracleBal}`);
+
     });
   });
   

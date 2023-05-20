@@ -9,6 +9,7 @@ var _timestamp;
 var nextStart;
 var _date;
 var _hour;
+var result;
 const firstStart = 1635695609;
 const { assert } = require('chai');
 const finneys = BigInt('1000000000000000');
@@ -16,6 +17,7 @@ const eths = BigInt('1000000000000000000');
 const million = BigInt('1000000');
 
 require("chai").use(require("chai-as-promised")).should();
+const { expect } = require("chai");
 
 describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
@@ -46,15 +48,15 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, 550n*million);
+      await token.approve(oracle.address, 500n*million);
     });
 
     it("Deposit Tokens in Oracle Contract1", async () => {
-      await oracle.depositTokens(550n*million);
+      await oracle.depositTokens(500n*million);
     });
 
     it("transfer tokens to betting account", async () => {
-      await token.transfer(betting.address, 100n*million);
+      await token.transfer(betting.address, 500n*million);
     });
   });
 
@@ -161,13 +163,13 @@ describe("Betting", function () {
 
     it("Acct 0 Fund Betting Contract", async () => {
       await betting.fundBook({
-        value: "6000000000000000000",
+        value: 6n*eths,
       });
     });
 
     it("Acct 1 Fund Betting Contract", async () => {
       await betting.connect(account1).fundBook({
-        value: "4000000000000000000",
+        value: 4n*eths,
       });
     });
 
@@ -247,6 +249,7 @@ describe("Betting", function () {
      await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
      await helper.advanceTimeAndBlock(3*secondsInHour);
+    
     });
 
     it("Approve and send result data", async () => {
@@ -254,6 +257,17 @@ describe("Betting", function () {
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
       console.log(`gas on first settlement ${gasUsed}`);
+    });
+
+    it("tokensEarned1", async () => {
+      const tokens0 = await token.balanceOf(owner.address);
+      const tokens1 = await token.balanceOf(account1.address);
+      result = await betting.getTokenRewards();
+      result = await betting.connect(account1).getTokenRewards();
+      const tokens00 = await token.balanceOf(owner.address);
+      const tokens11 = await token.balanceOf(account1.address);
+      console.log(`tokens0 earned ${tokens00 - tokens0}`);
+      console.log(`tokens1 earned ${tokens11 - tokens1}`);
     });
 
     it("state 0", async () => {
@@ -446,8 +460,33 @@ describe("Betting", function () {
       console.log(`gas on second settlement ${gasUsed}`);
     });
 
+    it("tokensEarned2", async () => {
+      const tokens0 = await token.balanceOf(owner.address);
+      const tokens1 = await token.balanceOf(account1.address);
+      result = await betting.getTokenRewards();
+      result = await betting.connect(account1).getTokenRewards();
+      const tokens00 = await token.balanceOf(owner.address);
+      const tokens11 = await token.balanceOf(account1.address);
+      console.log(`tokens0 earned ${tokens00 - tokens0}`);
+      console.log(`tokens1 earned ${tokens11 - tokens1}`);
+    });
+
     it("withdraw 100 finney 'shares' for account 0", async () => {
-      const ethout0 = await betting.withdrawBook("10000");
+      const ethbal1 = ethers.utils.formatUnits(await ethers.provider.getBalance(owner.address), "finney");
+      result = await betting.withdrawBook(10000);
+      const receipt1 = await result.wait();
+      const tx = await ethers.provider.getTransaction(result.hash);
+      const gasPrice = tx.gasPrice;
+      const gasUsed = receipt1.gasUsed;
+      const totCost = gasPrice * gasUsed; 
+
+      const ethout = ethers.utils.formatUnits(receipt1.events[0].args.moveAmount, "finney");
+      const ethbal2 = ethers.utils.formatUnits(await ethers.provider.getBalance(owner.address), "finney");
+      const totCost2 = ethers.utils.formatUnits(ethers.BigNumber.from(totCost), "finney");
+      var sum1 = Number(ethbal2) - Number(ethbal1) + Number(totCost2);
+      sum1 = Math.round(sum1*100)/100;
+      console.log(`eth sent to EOA ${sum1}`);
+      console.log(`eth sent to EOA2 ${ethout}`);
     });
 
     it("withdraw 50 finney shares for acct 1", async () => {
@@ -606,15 +645,20 @@ describe("Betting", function () {
       ]);
     });
 
-    it("fast forward 4 hours", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      _hour = _date.getHours();
+    it("fast forward 3 hours and send settle", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await oracle.settleProcess();
     });
 
-    it("Approve and send result data 3", async () => {
-      await oracle.settleProcess();
+    it("tokens earned3", async () => {
+      const tokens0 = await token.balanceOf(owner.address);
+      const tokens1 = await token.balanceOf(account1.address);
+      result = await expect(betting.getTokenRewards()).to.be.reverted;
+      result = await expect(betting.connect(account1).getTokenRewards()).to.be.reverted;;
+      const tokens00 = await token.balanceOf(owner.address);
+      const tokens11 = await token.balanceOf(account1.address);
+      console.log(`tokens0 earned ${tokens00 - tokens0}`);
+      console.log(`tokens1 earned ${tokens11 - tokens1}`);
     });
 
     it("state 2", async () => {

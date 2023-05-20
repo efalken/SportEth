@@ -59,7 +59,7 @@ module.exports = {
         passphrase: "",
       },
       gas: 3000000,
-      gasPrice: 5000000000,
+      gasPrice: 0, //5000000000,
     },
     arbitrum: {
       url: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_RINKEBY_PROJECT_ID}`,

@@ -10,6 +10,7 @@ contract Oracle {
     // 0 betEpoch, 1 reviewStatus, 2 propNumber, 3 timer, 4 totKontract Tokens, 5 yesVotes, 6 noVotes, 7 feePool
     */
   uint32[4] public params;
+  //   0 totKontract Tokens, 1 yesVotes, 2 noVotes, 3 feePool
   uint64[4] public params2;
   // propStartTime in UTC is used to stop active betting. No bets are taken after this time.
   uint96[32] public propOddsStarts;
@@ -25,7 +26,7 @@ contract Oracle {
   uint32 public constant HOUR_POST = 12;
   uint32 public constant HOUR_PROCESS = 14;
   // minimum bet in 0.1 finneys
-  uint32 public constant MIN_SUBMIT = 5e1;
+  uint32 public constant MIN_SUBMIT = 5e7;
   uint64 public constant ONE_MILLION = 1e6;
   uint256 public moose;
   string[32] public matchSchedule;
@@ -83,7 +84,7 @@ contract Oracle {
     // voter must have votes to allocate
     require(adminStruct[msg.sender].tokens > 0);
     // can only vote if there is a proposal
-    require(params[1] != 0);
+    require(params[1] >= 10);
     // voter must not have voted on this proposal
     require(adminStruct[msg.sender].voteTracker != params[2]);
     // this prevents this account from voting again on this data proposal (see above)
@@ -128,7 +129,7 @@ contract Oracle {
   function initProcess() external returns (bool) {
     // this prevents an odds or results proposal from  being sent
     require(params[1] == 10, "wrong data");
-    // can only send after 8 PM GMT
+    // can only send after 12 noon GMT
     require(hourOfDay() >= HOUR_PROCESS, "too soon");
     // only sent if 'null' vote does not win
     if (params2[1] > params2[2]) {
@@ -241,21 +242,21 @@ contract Oracle {
     params2[0] -= _amtTokens;
     adminStruct[msg.sender].tokens -= _amtTokens;
     //payable(msg.sender).transfer(ethClaim);
+    //ethClaim = 1e16;
 
     (success, ) = payable(msg.sender).call{ value: ethClaim }("");
     require(success, "Call failed");
 
-    (success) = token.transfer(msg.sender, uint32(_amtTokens));
+    (success) = token.transfer(msg.sender, _amtTokens);
     require(success, "token failed");
 
     emit Funding(_amtTokens, ethClaim, msg.sender);
-    //emit Funding(_amtTokens, 1000, msg.sender);
   }
 
   function post() internal {
     uint256 hour = hourOfDay();
     // ************ change 24
-    require(hour >= HOUR_POST && hour < (HOUR_POST + 2), "fucking hour");
+    require(hour >= HOUR_POST && hour < (HOUR_POST + 2), "wrong hour");
     //require(hour == HOUR_POST, "fucking hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
