@@ -139,7 +139,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("Send Initial Data", async () => {
@@ -217,7 +217,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.updateProcess();
       const betData7b = await betting.betData(7);
       //const str = bn.toString(16);

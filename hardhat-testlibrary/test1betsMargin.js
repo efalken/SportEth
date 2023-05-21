@@ -23,7 +23,7 @@ var hash11;
 var hash12;
 const finneys = BigInt('1000000000000000');
 const eths = BigInt('1000000000000000000');
-const million = BigInt('1');
+const million = BigInt('1000000');
 
 const {assert} = require('chai')
 require("chai").use(require("chai-as-promised")).should();
@@ -151,7 +151,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
 
       const bookpool = await betting.margin(0);
@@ -315,7 +315,7 @@ describe("Betting", function () {
     
 
     it("send result data to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 

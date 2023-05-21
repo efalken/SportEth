@@ -202,7 +202,7 @@ describe("Betting", function () {
     it("pull reviewData1 ", async () => {
       const result = await oracle.params(1);
       console.log(`review1 ${result}`);
-      const result2 = await oracle.params(5);
+      const result2 = await oracle.params2(1);
       console.log(`voteYes ${result2}`);
       const _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       console.log(`blocktime ${_timestamp}`);
@@ -218,7 +218,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("pull reviewData3 ", async () => {
@@ -278,8 +278,8 @@ describe("Betting", function () {
     });
 
     it("show votes", async () => {
-      const yesvote = await oracle.params(5);
-      const novote = await oracle.params(6);
+      const yesvote = await oracle.params2(1);
+      const novote = await oracle.params2(2);
       console.log(`Yes Vote 1 ${yesvote}: No Vote 1 ${novote}`);
        assert.equal(yesvote, "550000000", "Must be equal");
        assert.equal(novote, "250000000", "Must be equal");
@@ -296,7 +296,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("process vote, should send odds", async () => {
@@ -362,12 +362,12 @@ describe("Betting", function () {
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("show votes", async () => {
-      const yesvote = await oracle.params(5);
-      const novote = await oracle.params(6);
+      const yesvote = await oracle.params2(1);
+      const novote = await oracle.params2(2);
       console.log(`Yes Votes ${yesvote}: No Votes ${novote}`);
 
        assert.equal(yesvote, "400000000", "Must be equal");

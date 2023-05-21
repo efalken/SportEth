@@ -24,6 +24,7 @@ contract Betting {
   uint32 public constant FUTURE_START = 2e9;
   uint256 public constant ORACLE_5PERC = 5e12;
   uint32 public constant MIN_BET = 10; // 1 finney aka 0.001 ETH
+  uint32 public constant MIN_LP_DURATION = 0; // SET TO 2 IN PROD
   mapping(bytes32 => Subcontract) public betContracts;
   mapping(bytes32 => Subcontract) public offerContracts;
   /// this maps the set {epoch, match, team} to its event outcome,
@@ -49,7 +50,6 @@ contract Betting {
   struct LPStruct {
     uint32 shares;
     uint32 outEpoch;
-    uint32 claimEpoch;
   }
 
   event BetRecord(
@@ -274,7 +274,7 @@ contract Betting {
   function settle(uint8[32] memory _winner)
     external
     onlyAdmin
-    returns (uint32, uint32)
+    returns (uint32, uint256)
   {
     uint32 redemptionPot;
     uint32 payoffPot;
@@ -311,7 +311,7 @@ contract Betting {
     margin[7] = FUTURE_START;
     (bool success, ) = oracleAdmin.call{ value: oracleDiv }("");
     require(success, "Call failed");
-    return (margin[3], uint32(5 * payoffPot));
+    return (margin[3], oracleDiv);
   }
 
   /// @dev bettor funds account for bets
@@ -332,10 +332,10 @@ contract Betting {
       _shares = netinvestment;
     }
     margin[0] = addSafe(margin[0], int32(netinvestment));
-    lpStruct[msg.sender].outEpoch = margin[3] + 1;
+    // PRODUCTION CHANGE
+    lpStruct[msg.sender].outEpoch = margin[3] + MIN_LP_DURATION;
     margin[4] += _shares;
     lpStruct[msg.sender].shares += _shares;
-    lpStruct[msg.sender].claimEpoch = margin[3];
     emit Funding(msg.sender, msg.value, margin[3], 1);
   }
 
@@ -393,18 +393,6 @@ contract Betting {
     (bool success, ) = payable(msg.sender).call{ value: ethWithdraw256 }("");
     require(success, "Call failed");
     emit Funding(msg.sender, ethWithdraw256, margin[3], 4);
-  }
-
-  function getTokenRewards() external {
-    require(token.balanceOf(address(this)) > 0, "only when tokens here");
-    require(lpStruct[msg.sender].claimEpoch < margin[3], "too soon");
-    lpStruct[msg.sender].claimEpoch = margin[3];
-    uint64 tokenRewards = uint64(
-      (uint256(lpStruct[msg.sender].shares) * 25e7) / uint256(margin[4])
-    );
-    bool success = token.transfer(msg.sender, tokenRewards);
-    require(success, "token failed");
-    emit Funding(msg.sender, tokenRewards, margin[3], 5);
   }
 
   /** @dev processes initial odds and start times

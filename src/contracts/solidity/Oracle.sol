@@ -24,11 +24,10 @@ contract Oracle {
     */
   //uint256 public top;
   uint32 public constant HOUR_POST = 12;
-  uint32 public constant HOUR_PROCESS = 14;
+  uint32 public constant HOUR_PROCESS = 18;
   // minimum bet in 0.1 finneys
   uint32 public constant MIN_SUBMIT = 5e7;
   uint64 public constant ONE_MILLION = 1e6;
-  uint256 public moose;
   string[32] public matchSchedule;
   // keeps track of those who supplied data proposals.
   address public proposer;
@@ -135,10 +134,10 @@ contract Oracle {
     if (params2[1] > params2[2]) {
       // sends to the betting contract
       bettingContract.transmitInit(propOddsStarts);
+      emit VoteOutcome(true, params[0], params[2], params2[1], params2[2]);
     } else {
       burnAndReset();
     }
-    emit VoteOutcome(true, params[0], params[2], params2[1], params2[2]);
     reset();
     params[1] = 2;
     return true;
@@ -174,14 +173,12 @@ contract Oracle {
   function settleProcess() external returns (bool) {
     require(params[1] == 30, "wrong data");
     require(hourOfDay() >= HOUR_PROCESS, "too soon");
-    uint32 ethDividend;
-    uint32 _epoch;
     if (params2[1] > params2[2]) {
-      //if (params2[1] >= 0) {
-      (_epoch, ethDividend) = bettingContract.settle(propResults);
+      (uint32 _epoch, uint256 ethDividend) = bettingContract.settle(
+        propResults
+      );
       params[0] = _epoch;
-      params2[3] += (uint64(ethDividend) * 10000000) / params2[0];
-      moose = ethDividend;
+      params2[3] += uint64(ethDividend / uint256(params2[0]) / 1e5);
       emit VoteOutcome(true, params[0], params[2], params2[1], params2[2]);
     } else {
       burnAndReset();
@@ -236,8 +233,6 @@ contract Oracle {
       adminStruct[msg.sender].tokens *
         (params2[3] - adminStruct[msg.sender].initFeePool)
     ) * 1e5;
-    moose = ethClaim;
-
     adminStruct[msg.sender].initFeePool = params2[3];
     params2[0] -= _amtTokens;
     adminStruct[msg.sender].tokens -= _amtTokens;
@@ -255,9 +250,7 @@ contract Oracle {
 
   function post() internal {
     uint256 hour = hourOfDay();
-    // ************ change 24
-    require(hour >= HOUR_POST && hour < (HOUR_POST + 2), "wrong hour");
-    //require(hour == HOUR_POST, "fucking hour");
+    require(hour == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
     params2[1] = adminStruct[msg.sender].tokens;
@@ -269,9 +262,9 @@ contract Oracle {
   function reset() internal {
     // adds to nonce tracking proposals
     params[2]++;
-    // resets yes votes
+    // resets yes vote count to zero
     params2[1] = 0;
-    // resets no votes
+    // resets no votes count to zero
     params2[2] = 0;
   }
 

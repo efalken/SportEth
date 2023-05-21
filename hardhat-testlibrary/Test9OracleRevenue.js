@@ -6,6 +6,7 @@ const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
 var hourOffset;
 var _hourSolidity;
 var _timestamp;
+var nextStart;
 var _date;
 var _hour;
 var tokens0;
@@ -20,7 +21,6 @@ var betEpoc;
 var ethout8;
 var ethout;
 var tokensout;
-nextStart
 const {assert} = require('chai');
 const finneys = BigInt('1000000000000000');
 const eths = BigInt('1000000000000000000');
@@ -149,7 +149,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       console.log(`currTimet ${_timestamp}`);
       _date = new Date(_timestamp + offset);
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
     });
 
@@ -217,7 +217,7 @@ describe("Betting", function () {
         0,
       ]);
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
@@ -330,7 +330,7 @@ describe("Betting", function () {
           800,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
     });
 
@@ -391,7 +391,7 @@ describe("Betting", function () {
         0,
       ]);
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
@@ -507,7 +507,7 @@ describe("Betting", function () {
         ]
       );
 
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
       _hourSolidity = await reader.hourOfDay();
@@ -560,7 +560,7 @@ describe("Betting", function () {
         0,
         0,
       ]);
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
@@ -678,7 +678,7 @@ describe("Betting", function () {
           800,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.connect(account1).initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
       _hourSolidity = await reader.hourOfDay();
@@ -734,7 +734,7 @@ describe("Betting", function () {
         ]
       );
 
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.connect(account1).settleProcess();
     });
 
@@ -852,7 +852,7 @@ describe("Betting", function () {
         ]
       );
 
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
 
@@ -908,7 +908,7 @@ describe("Betting", function () {
           0,
         ]
       );
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 

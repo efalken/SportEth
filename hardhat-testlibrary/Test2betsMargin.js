@@ -153,7 +153,7 @@ describe("Test2", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
 
       const bookpool = await betting.margin(0);
@@ -290,7 +290,7 @@ describe("Test2", function () {
     });
 
     it("send result data to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 

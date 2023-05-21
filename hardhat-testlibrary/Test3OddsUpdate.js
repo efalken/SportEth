@@ -142,7 +142,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("Send Initial Data", async () => {
@@ -216,7 +216,7 @@ describe("Betting", function () {
 
     it("fast forward 4 hours", async () => {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("approve and send to betting contract", async () => {
@@ -324,7 +324,7 @@ describe("Betting", function () {
     });
 
     it("Approve results and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       const betdata0 = await betting.betData(0);
       console.log(`betdata preSettle ${betdata0}`);
       const betdata1 = await betting.betData(1);

@@ -66,7 +66,7 @@ describe('Test2b', function () {
     })
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const startNow = await betting.betData(5);
       console.log(`startTime is ${startNow}`);
@@ -169,7 +169,7 @@ describe('Test2b', function () {
     });
 
     it("send result data to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 

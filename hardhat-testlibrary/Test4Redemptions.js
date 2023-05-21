@@ -140,7 +140,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("approve and send to betting contract", async () => {
@@ -263,7 +263,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("send result data to betting contract", async () => {

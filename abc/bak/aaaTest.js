@@ -1,5 +1,5 @@
 
-const helper = require("../hardhat-helpers");
+const helper = require("../../hardhat-helpers");
 const web3 = require('web3');
 const { ethers } = require("hardhat");
 const secondsInHour = 3600;
@@ -151,7 +151,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
     });
 
@@ -214,7 +214,7 @@ describe("Betting", function () {
     });
 
       it("bump1", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
@@ -322,7 +322,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
     });
 
@@ -381,7 +381,7 @@ describe("Betting", function () {
 
     it("bump and process", async () => {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
@@ -493,7 +493,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       result = await betting.connect(account5).bet(0, 0, "2500");
       _hourSolidity = await reader.hourOfDay();
@@ -545,7 +545,7 @@ describe("Betting", function () {
     });
 
     it("bump settle", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
       it("checkfees", async () => {

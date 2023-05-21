@@ -27,9 +27,9 @@ contract Token {
     symbol = "SET";
   }
 
-  receive() external payable {}
+  //receive() external payable {}
 
-  fallback() external {}
+  //fallback() external {}
 
   function approve(address _spender, uint64 _value)
     external

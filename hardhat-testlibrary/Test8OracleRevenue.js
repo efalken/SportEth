@@ -150,7 +150,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
     });
 
@@ -213,7 +213,7 @@ describe("Betting", function () {
     });
 
       it("bump1", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
@@ -311,7 +311,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
     });
 
@@ -366,7 +366,7 @@ describe("Betting", function () {
         0,
       ]);
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
@@ -478,7 +478,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
       _hourSolidity = await reader.hourOfDay();
@@ -530,7 +530,7 @@ describe("Betting", function () {
     });
 
     it("bump settle", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
       it("checkfees", async () => {
@@ -569,10 +569,6 @@ describe("Betting", function () {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
      assert.equal(ethout, "21.25", "Must be equal");
 
-        const moosey = ethers.utils.formatUnits(await oracle.moose(), "mwei");
-        console.log(`moose, ${moosey}`);
-        const moosey2 = await oracle.moose();
-        console.log(`moose, ${moosey2}`);
       });
   });
 
@@ -664,7 +660,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.connect(account1).initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
       _hourSolidity = await reader.hourOfDay();
@@ -716,7 +712,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.connect(account1).settleProcess();
     });
 
@@ -826,7 +822,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
       _hourSolidity = await reader.hourOfDay();
@@ -878,7 +874,7 @@ describe("Betting", function () {
         ]
       );
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 

@@ -1,5 +1,5 @@
 
-const helper = require("../hardhat-helpers");
+const helper = require("../../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
 const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
@@ -139,7 +139,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("approve and send to betting contract", async () => {
@@ -319,7 +319,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("send result data to betting contract", async () => {

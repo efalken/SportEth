@@ -137,7 +137,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
 
       const bookpool = await betting.margin(0);
@@ -212,7 +212,7 @@ describe("Betting", function () {
     });
 
     it("settle", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       const result2 = await oracle.settleProcess();
     });
 
@@ -306,7 +306,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);
@@ -363,7 +363,7 @@ describe("Betting", function () {
     });
 
     it("settle", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       const result2 = await oracle.settleProcess();
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
@@ -465,7 +465,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);

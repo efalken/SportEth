@@ -27,11 +27,13 @@ describe("Betting", function () {
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
     const Reader = await ethers.getContractFactory('ReadSportEth')
+    const TokenRewards = await ethers.getContractFactory('TokenRewards')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
     reader = await Reader.deploy(betting.address, token.address);
+    tokenrewards = await TokenRewards.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   })
 
@@ -56,7 +58,10 @@ describe("Betting", function () {
     });
 
     it("transfer tokens to betting account", async () => {
-      await token.transfer(betting.address, 500n*million);
+      await token.approve(tokenrewards.address, 500n*million);
+      await tokenrewards.depositTokens(500n*million);
+      var tt = await tokenrewards.tokensInContract();
+      console.log("tokens in k", tt); 
     });
   });
 
@@ -154,7 +159,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("approve and send to betting contract", async () => {
@@ -165,12 +170,14 @@ describe("Betting", function () {
       await betting.fundBook({
         value: 6n*eths,
       });
+      await tokenrewards.getTokenRewards();
     });
 
     it("Acct 1 Fund Betting Contract", async () => {
       await betting.connect(account1).fundBook({
         value: 4n*eths,
       });
+      await tokenrewards.connect(account1).getTokenRewards();
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
@@ -236,19 +243,8 @@ describe("Betting", function () {
       ]);
     });
 
-    it("fast forward 4 hours", async () => {
-      _hourSolidity = await reader.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
-      hourOffset = 0;
-     if (_hourSolidity > 12) {
-      hourOffset = 36 - _hourSolidity;
-     } else if (_hourSolidity < 12) {
-      hourOffset = 12 - _hourSolidity;
-     }
-     console.log(`hourAdj ${hourOffset}`);
-     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
-     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-     await helper.advanceTimeAndBlock(3*secondsInHour);
+    it("fast forward 6 hours", async () => {
+     await helper.advanceTimeAndBlock(secondsInHour * 6);
     
     });
 
@@ -257,13 +253,17 @@ describe("Betting", function () {
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
       console.log(`gas on first settlement ${gasUsed}`);
+      const totShares = await betting.margin(4);
+      console.log(`totShares ${totShares}`);
+      const x = await tokenrewards.x();
+      console.log(`totShares2 ${x}`);
     });
 
     it("tokensEarned1", async () => {
       const tokens0 = await token.balanceOf(owner.address);
       const tokens1 = await token.balanceOf(account1.address);
-      result = await betting.getTokenRewards();
-      result = await betting.connect(account1).getTokenRewards();
+      result = await tokenrewards.getTokenRewards();
+      result = await tokenrewards.connect(account1).getTokenRewards();
       const tokens00 = await token.balanceOf(owner.address);
       const tokens11 = await token.balanceOf(account1.address);
       console.log(`tokens0 earned ${tokens00 - tokens0}`);
@@ -383,7 +383,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("approve and send to betting contract #2", async () => {
@@ -392,7 +392,6 @@ describe("Betting", function () {
       const gasUsed = receipt.gasUsed;
       console.log(`gas on initial send ${gasUsed}`);
     });
-
 
     it("checkHour", async () => {
       _hourSolidity = await reader.hourOfDay();
@@ -450,7 +449,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("Approve and send result data 2", async () => {
@@ -463,8 +462,8 @@ describe("Betting", function () {
     it("tokensEarned2", async () => {
       const tokens0 = await token.balanceOf(owner.address);
       const tokens1 = await token.balanceOf(account1.address);
-      result = await betting.getTokenRewards();
-      result = await betting.connect(account1).getTokenRewards();
+      await tokenrewards.getTokenRewards();
+      await tokenrewards.connect(account1).getTokenRewards();
       const tokens00 = await token.balanceOf(owner.address);
       const tokens11 = await token.balanceOf(account1.address);
       console.log(`tokens0 earned ${tokens00 - tokens0}`);
@@ -608,7 +607,7 @@ describe("Betting", function () {
       _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
 
     it("approve and send to betting contract #3", async () => {
@@ -646,15 +645,15 @@ describe("Betting", function () {
     });
 
     it("fast forward 3 hours and send settle", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 3);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
 
     it("tokens earned3", async () => {
       const tokens0 = await token.balanceOf(owner.address);
       const tokens1 = await token.balanceOf(account1.address);
-      result = await expect(betting.getTokenRewards()).to.be.reverted;
-      result = await expect(betting.connect(account1).getTokenRewards()).to.be.reverted;;
+      result = await expect(tokenrewards.getTokenRewards()).to.be.reverted;
+      result = await expect(tokenrewards.connect(account1).getTokenRewards()).to.be.reverted;;
       const tokens00 = await token.balanceOf(owner.address);
       const tokens11 = await token.balanceOf(account1.address);
       console.log(`tokens0 earned ${tokens00 - tokens0}`);
@@ -701,16 +700,13 @@ describe("Betting", function () {
       const sharesAcct0 = (await betting.lpStruct(owner.address)).shares;
       const sharesAcct1 = (await betting.lpStruct(account1.address)).shares;
       const sharesAcct3 = (await betting.lpStruct(account3.address)).shares;
-
       console.log(`bookie capital ${excessCapital}`);
       console.log(`eth in betting contract ${ethbal}`);
       console.log(`total LP shares ${shares2}`);
       console.log(`sharesAcct0 ${sharesAcct0}`);
       console.log(`sharesAcct1 ${sharesAcct1}`);
-
       assert.equal(Math.floor(sharesAcct0), "40000", "Must be equal");
       assert.equal(Math.floor(sharesAcct1), "30000", "Must be equal");
-
       assert.equal(Math.floor(excessCapital), "74118", "Must be equal");
       assert.equal(Math.floor(shares2), "70000", "Must be equal");
 
