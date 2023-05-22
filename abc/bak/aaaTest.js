@@ -220,7 +220,7 @@ describe("Betting", function () {
 
     it("check 1", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      const feePool = await oracle.params2(3);
+      const feePool = await oracle.feeData(1);
       const totTokens = await oracle.params2(0);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
@@ -387,7 +387,7 @@ describe("Betting", function () {
 
     it("check 2", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
     });
@@ -550,7 +550,7 @@ describe("Betting", function () {
     });
       it("checkfees", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
     });
@@ -566,7 +566,7 @@ describe("Betting", function () {
       //await token.approve(oracle.address, 50n*million);
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
       console.log(`oracle ETH, ${oracleBal}`);
-      const feepuul = await oracle.params2(3);
+      const feepuul = await oracle.feeData(1);
       console.log(`feepool, ${feepuul}`);
 
       result = await oracle.withdrawTokens(50n*million);

@@ -9,6 +9,10 @@ var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
+var result;
+var receipt;
+var gasUsed = 0;
+
 const { assert } = require('chai');
 const finneys = BigInt('1000000000000000');
 const eths = BigInt('1000000000000000000');
@@ -124,7 +128,7 @@ describe("Betting", function () {
      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
         var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
-      await oracle.initPost(
+      result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
           "NFL:ATL:LAR",
@@ -197,17 +201,16 @@ describe("Betting", function () {
           999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("pull reviewData1 ", async () => {
-      const result = await oracle.params(1);
+      const result = await oracle.reviewStatus();
       console.log(`review1 ${result}`);
-      const result2 = await oracle.params2(1);
+      const result2 = await oracle.votes(0);
       console.log(`voteYes ${result2}`);
-      const _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      console.log(`blocktime ${_timestamp}`);
-      const result3 = await oracle.params(3);
-      console.log(`timer ${result3}`);
+
     });
 
     it("fail: try to send too soon", async () => {
@@ -222,7 +225,7 @@ describe("Betting", function () {
     });
 
     it("pull reviewData3 ", async () => {
-      const result = await oracle.params(1);
+      const result = await oracle.reviewStatus();
       console.log(`review3 ${result}`);
     });
 
@@ -245,7 +248,9 @@ describe("Betting", function () {
     });
 
     it("approve and send correct data to betting contract", async () => {
-      await oracle.initProcess();
+      result = await oracle.initProcess();
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("send updated odds data: 2000 for match 1, team 0", async () => {
@@ -262,24 +267,30 @@ describe("Betting", function () {
      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
         var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
-      await oracle.updatePost(
+      result = await oracle.updatePost(
         [
           800,600,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("vote yes on odds", async () => {
-      await oracle.connect(account2).vote(true);
+      result = await oracle.connect(account2).vote(true);
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("vote no on odds", async () => {
-      await oracle.connect(account1).vote(false);
+      result = await oracle.connect(account1).vote(false);
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("show votes", async () => {
-      const yesvote = await oracle.params2(1);
-      const novote = await oracle.params2(2);
+      const yesvote = await oracle.votes(0);
+      const novote = await oracle.votes(1);
       console.log(`Yes Vote 1 ${yesvote}: No Vote 1 ${novote}`);
        assert.equal(yesvote, "550000000", "Must be equal");
        assert.equal(novote, "250000000", "Must be equal");
@@ -300,7 +311,9 @@ describe("Betting", function () {
     });
 
     it("process vote, should send odds", async () => {
-      await oracle.updateProcess();
+      result = await oracle.updateProcess();
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("See updated odds, should be new 2000", async () => {
@@ -346,19 +359,25 @@ describe("Betting", function () {
      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
         var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
-      await oracle.updatePost(
+      result = await oracle.updatePost(
         [
           700,700,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
         ]
       );
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("vote no on proposed odds", async () => {
-      await oracle.connect(account1).vote(false);
+      result = await oracle.connect(account1).vote(false);
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("vote no on proposed odds", async () => {
-      await oracle.connect(account2).vote(false);
+      result = await oracle.connect(account2).vote(false);
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("fast forward 6 hours", async () => {
@@ -366,8 +385,8 @@ describe("Betting", function () {
     });
 
     it("show votes", async () => {
-      const yesvote = await oracle.params2(1);
-      const novote = await oracle.params2(2);
+      const yesvote = await oracle.votes(0);
+      const novote = await oracle.votes(1);
       console.log(`Yes Votes ${yesvote}: No Votes ${novote}`);
 
        assert.equal(yesvote, "400000000", "Must be equal");
@@ -377,7 +396,9 @@ describe("Betting", function () {
     });
 
     it("process should not send", async () => {
-      await oracle.updateProcess();
+      result = await oracle.updateProcess();
+      receipt = await result.wait()
+      gasUsed = Number(receipt.gasUsed) + gasUsed;
       const tokBal98 = ethers.utils.formatUnits(
         (await oracle.adminStruct(owner.address)).tokens,
         "gwei"
@@ -414,6 +435,13 @@ describe("Betting", function () {
       const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
       assert.equal(ints[6], "600", "Must be equal");
     });
+
+    it("totalGas", async () => {
+      console.log(`totalGas ${gasUsed}`);
+    });
+
   });
+
+
 
 });

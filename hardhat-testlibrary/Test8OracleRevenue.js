@@ -372,7 +372,7 @@ describe("Betting", function () {
 
     it("check 2", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
     });
@@ -535,7 +535,7 @@ describe("Betting", function () {
     });
       it("checkfees", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
     });
@@ -551,7 +551,7 @@ describe("Betting", function () {
       //await token.approve(oracle.address, 50n*million);
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
       console.log(`oracle ETH, ${oracleBal}`);
-      const feepuul = await oracle.params2(3);
+      const feepuul = await oracle.feeData(1);
       console.log(`feepool, ${feepuul}`);
       const result = await oracle.withdrawTokens(50n*million);
       const receipt = await result.wait();
@@ -718,7 +718,7 @@ describe("Betting", function () {
 
     it("check 4", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
       });
@@ -880,7 +880,7 @@ describe("Betting", function () {
 
     it("check 5", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
         });

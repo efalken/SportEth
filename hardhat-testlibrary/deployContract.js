@@ -178,8 +178,7 @@ describe("Betting", function () {
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
       console.log(`gas on initProcess = ${gasUsed}`);
-      const tracker0 = await oracle.params(1);
-      console.log(`tracker0000 ${tracker0}`);
+
     });
 
     it("approve and send to betting contract", async () => {
@@ -191,7 +190,7 @@ describe("Betting", function () {
 
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);
-      const tracker1 = await oracle.params(1);
+      const tracker1 = await oracle.betEpochOracle();
       console.log(`tracker111 ${tracker1}`);
     });
 
@@ -315,7 +314,7 @@ describe("Betting", function () {
       if (_hour < 10) {
         await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
       }
-      const tracker = await oracle.params(1);
+      const tracker = await oracle.betEpochOracle();
       console.log(`tracker ${tracker}`);
     });
     

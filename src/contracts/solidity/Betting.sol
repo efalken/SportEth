@@ -111,19 +111,24 @@ contract Betting {
     uint8 _team0or1,
     uint32 _betAmt
   ) external {
-    require(_betAmt <= userBalance[msg.sender] && _betAmt > MIN_BET, "NSF ");
+    require(_betAmt <= userBalance[msg.sender] && _betAmt >= MIN_BET, "NSF ");
     require(_matchNumber != paused[0] && _matchNumber != paused[1]);
+    // pulls odds, start time, betamounts on match
     uint32[7] memory betDatav = decodeNumber(betData[_matchNumber]);
     require(betDatav[4] > block.timestamp, "game started or not playing");
+    // winnings to bettor if they win
     int32 betPayoff = (int32(_betAmt) * int32(betDatav[5 + _team0or1])) / 1000;
+    // current net position of LP collective to this match/pick
     int32 netPosTeamBet = int32(betDatav[2 + _team0or1]) -
       int32(betDatav[1 - _team0or1]);
+    // subsequent net position after bet must be less than LP totLiq/concentration factor
     require(
       int32(betPayoff + netPosTeamBet) < int32(margin[0] / margin[5]),
       "betsize over limit"
     );
     int32 netPosTeamOpp = int32(betDatav[3 - _team0or1]) -
       int32(betDatav[_team0or1]);
+    // LP net required margin change from bet
     int32 marginChange = maxZero(
       int32(betPayoff) + netPosTeamBet,
       -int32(_betAmt) + netPosTeamOpp
@@ -181,6 +186,7 @@ contract Betting {
   ) external {
     //require(_betAmount >= margin[0] / margin[5], "too small");
     require(_betAmount <= userBalance[msg.sender], "NSF");
+    // data in raw decimal form, times 1000. Standard 1.91 odds would be 1910
     require(_decOddsBB > 1000 && _decOddsBB < 9000, "invalid odds");
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));
     Subcontract memory order;

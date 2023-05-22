@@ -23,7 +23,7 @@ contract Token {
     balanceOf[msg.sender] = MINT_AMT;
     totalSupply = MINT_AMT;
     name = "SportEth Token";
-    decimals = 6;
+    decimals = 0;
     symbol = "SET";
   }
 

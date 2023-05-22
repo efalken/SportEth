@@ -223,8 +223,8 @@ describe("Betting", function () {
 
     it("check 1", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
-      const totTokens = await oracle.params2(0);
+      feePool = await oracle.feeData(1);
+      const totTokens = await oracle.feeData(0);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
       console.log(`tot tokens ${totTokens}`);
@@ -397,7 +397,7 @@ describe("Betting", function () {
 
     it("check 2", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
     });
@@ -566,7 +566,7 @@ describe("Betting", function () {
 
     it("check 3", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
     });
@@ -740,9 +740,9 @@ describe("Betting", function () {
 
     it("check 4", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       const oracleBal2 = await token.balanceOf(oracle.address);
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
       console.log(`feePool Tracker2 ${oracleBal2}`);
@@ -914,7 +914,7 @@ describe("Betting", function () {
 
     it("check 5", async () => {
       oracleBal = ethers.utils.formatUnits(await ethers.provider.getBalance(oracle.address), "finney");
-      feePool = await oracle.params2(3);
+      feePool = await oracle.feeData(1);
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
         });
