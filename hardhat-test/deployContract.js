@@ -58,19 +58,22 @@ describe("Betting", function () {
   });
 
   describe("set up contract for taking bets", async () => {
-    it("checkHour", async () => {
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-      _date = new Date(1000 * _timestamp + offset);
-      console.log(`time is ${_timestamp}`);
-      _hour = _date.getHours();
-      if (_hour < 10) {
-        await helper.advanceTimeAndBlock(secondsInHour * (10 - _hour));
-      }
+    it("checkHour0", async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+     if (_hourSolidity > 12) {
+      hourOffset = 36 - _hourSolidity;
+     } else if (_hourSolidity < 12) {
+      hourOffset = 12 - _hourSolidity;
+     }
+     console.log(`hourAdj ${hourOffset}`);
+     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+     _hourSolidity = await reader.hourOfDay();
+     console.log(`hour in EVM2 ${_hourSolidity}`);
+     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
         var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
-      //var nextStart = firstStart;
-      //console.log(`startTime is ${nextStart}`);
-      //console.log(`time is ${_timestamp}`);
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -140,40 +143,7 @@ describe("Betting", function () {
           nextStart,
           nextStart,
         ],
-        [
-          1000,
-          2000,
-          500,
-          1000,
-          909,
-          800,
-          510,
-          1240,
-          1470,
-          960,
-          650,
-          1330,
-          970,
-          730,
-          1310,
-          1040,
-          520,
-          1020,
-          1470,
-          1200,
-          1080,
-          820,
-          770,
-          790,
-          730,
-          690,
-          970,
-          760,
-          1000,
-          720,
-          1360,
-          800,
-        ]
+        [999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,]
       );
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
@@ -182,7 +152,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      //await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
       result = await oracle.initProcess();
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
@@ -228,7 +198,7 @@ describe("Betting", function () {
     });
 
     it("bets", async () => {
-      result = await betting.connect(account1).bet(0, 0, 100);
+      result = await betting.connect(account1).bet(0, 0, 20);
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
       console.log(`gas on betting = ${gasUsed}`);
