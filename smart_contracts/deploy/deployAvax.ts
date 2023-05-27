@@ -1,7 +1,11 @@
 import { ethers } from "hardhat";
 import fs from "fs";
 
-function saveABIFile(fileName: string, content: string, dirPath = "./abis") {
+function saveABIFile(
+  fileName: string,
+  content: string,
+  dirPath = "../frontend/src/abis"
+) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath);
   }
@@ -44,6 +48,7 @@ async function main() {
   const chainId = (await ethers.provider.getNetwork()).chainId;
 
   const readerABI = {
+    name: "ReaderMain",
     address: reader.address,
     abi: JSON.parse(
       reader.interface.format(ethers.utils.FormatTypes.json) as string
@@ -54,6 +59,7 @@ async function main() {
   saveABIFile("Reader.json", JSON.stringify(readerABI));
 
   const oracleABI = {
+    name: "OracleMain",
     address: oracle.address,
     abi: JSON.parse(
       oracle.interface.format(ethers.utils.FormatTypes.json) as string
@@ -64,6 +70,7 @@ async function main() {
   saveABIFile("Oracle.json", JSON.stringify(oracleABI));
 
   const bettingABI = {
+    name: "BettingMain",
     address: betting.address,
     abi: JSON.parse(
       betting.interface.format(ethers.utils.FormatTypes.json) as string
@@ -74,6 +81,7 @@ async function main() {
   saveABIFile("Betting.json", JSON.stringify(bettingABI));
 
   const tokenABI = {
+    name: "TokenMain",
     address: token.address,
     abi: JSON.parse(
       token.interface.format(ethers.utils.FormatTypes.json) as string

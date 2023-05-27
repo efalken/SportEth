@@ -3,8 +3,7 @@
     "test": "npx hardhat test",
     "build": "npx hardhat compile",
     "size": "npx hardhat size-contracts",
-    "lint": "npx prettier --write contracts/**/*.sol",
-    "prepare": "husky install"
+    "lint": "npx prettier --write contracts/**/*.sol"
   },
   "devDependencies": {
     "@matterlabs/hardhat-zksync-deploy": "^0.6.3",

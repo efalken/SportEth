@@ -9,7 +9,7 @@ module.exports = {
     settings: {},
   },
   paths: {
-    sources: "./src/contracts/solidity",
+    sources: "./contracts",
     tests: "./hardhat-test",
     artifacts: "./artifacts",
   },
@@ -39,7 +39,7 @@ module.exports = {
       },
     },
     localhost: {
-      url: "http://127.0.0.1",
+      url: "http://127.0.0.1:8545",
     //   ethNetwork: `https://goerli.infura.io/v3/${process.env.INFURA_GOERLI_PROJECT_ID}`,
     //   accounts: {
     //     mnemonic: `${process.env.GOERLI_WALLET_MNEMONIC}`,

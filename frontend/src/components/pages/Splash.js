@@ -49,6 +49,7 @@ class Splash extends Component {
 
   render() {
     //console.log("ChainCheck", ChainCheck);
+    console.log(this.state.contracts)
     return (
       <div>
         <VBackground />
@@ -173,6 +174,7 @@ class Splash extends Component {
             //     height: "calc(100vh - 90px)"
             // }}
             >
+              Hi
               <Box mt="50px">
                 <Flex
                   mt="20px"
