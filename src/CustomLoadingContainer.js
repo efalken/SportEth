@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import Betting from "./abis/Betting.json";
 import Oracle from './abis/Oracle.json';
 import Token from './abis/Token.json';
+import Reader from './abis/Reader.json';
 
 
 /*
@@ -42,10 +43,19 @@ class CustomLoader extends Component {
       )
     };
 
+    var FOOT3Config = {
+      contractName: "ReaderMain",
+      web3Contract: new drizz.web3.eth.Contract(
+        Reader.abi,
+        Reader.address
+      )
+    };
+
     this.context.drizzle.addContract(FOOT0Config);
     this.context.drizzle.addContract(FOOT1Config);
     this.context.drizzle.addContract(FOOT2Config);
-
+    this.context.drizzle.addContract(FOOT3Config);
+    console.log(this.context.drizzle)
   }
 
   componentDidMount() {
