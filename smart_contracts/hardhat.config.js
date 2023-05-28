@@ -39,7 +39,7 @@ module.exports = {
       },
     },
     localhost: {
-      url: "http://127.0.0.1:8545",
+     // url: "http://127.0.0.1:8545",
     //   ethNetwork: `https://goerli.infura.io/v3/${process.env.INFURA_GOERLI_PROJECT_ID}`,
     //   accounts: {
     //     mnemonic: `${process.env.GOERLI_WALLET_MNEMONIC}`,
@@ -69,8 +69,8 @@ module.exports = {
         count: 20,
         passphrase: "",
       },
-      gas: 3000000,
-      gasPrice: 0, //5000000000,
+      gas: 21000000,
+      gasPrice: 9000000000,
     },
     arbitrum: {
       url: `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_RINKEBY_PROJECT_ID}`,

@@ -22,8 +22,8 @@ contract Oracle {
   uint32 public betEpochOracle;
   uint32 public reviewStatus;
   uint32 public propNumber;
-  uint32 public constant HOUR_POST = 12;
-  uint32 public constant HOUR_PROCESS = 18;
+  uint32 public constant HOUR_POST = 0;// 12 in prod
+  uint32 public constant HOUR_PROCESS = 0; // 18 in prod
   // minimum bet in 0.1 finneys
   uint32 public constant MIN_SUBMIT = 5e7;
   uint64 public constant ONE_MILLION = 1e6;
@@ -250,7 +250,7 @@ contract Oracle {
 
   function post() internal {
     uint256 hour = hourOfDay();
-    require(hour == HOUR_POST, "wrong hour");
+    //require(hour == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
     votes[0] = adminStruct[msg.sender].tokens;

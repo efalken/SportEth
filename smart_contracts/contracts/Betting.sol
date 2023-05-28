@@ -27,7 +27,7 @@ contract Betting {
   uint32 public constant MIN_LP_DURATION = 0; // SET TO 2 IN PROD
   mapping(bytes32 => Subcontract) public betContracts;
   mapping(bytes32 => Subcontract) public offerContracts;
-  /// this maps the set {epoch, match, team} to its event outcome,
+  /// this maps the set {epoch, match, team} to its event outcome, 
   ///where 0 is a loss, 1 is a tie or postponement, 2 a win
   /// The outcome defaults to 0, so that these need not be updated for a loss
   mapping(uint32 => uint8) public outcomeMap;
@@ -84,6 +84,8 @@ contract Betting {
     margin[5] = 5;
     // initial bet epoch one
     margin[3] = 1;
+    // first contest
+    margin[7] = 2e9;
     token = Token(_tokenAddress);
   }
 
@@ -450,6 +452,11 @@ contract Betting {
     paused[0] = _bad1;
     paused[1] = _bad2;
   }
+
+  
+    function showBetData() external view returns (uint256[32] memory) {
+        return betData;
+    }
 
   // @dev unpacks uint256 to reveal match's odds and bet amounts
   function decodeNumber(uint256 _encoded)

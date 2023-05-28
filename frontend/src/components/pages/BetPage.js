@@ -175,17 +175,17 @@ class BetPagejs extends Component {
     this.setState({ matchPick: teampic, teamPick: 0 });
   }
 
-  radioUnderPick(teampic) {
+  radioUnderPick(teampic) {  
     this.setState({ matchPick: teampic, teamPick: 1 });
   }
 
   findValues() {
     this.betDataKey = this.contracts[
-      "ReaderMain"
+      "BettingMain"
     ].methods.showBetData.cacheCall();
 
     this.tokenKey = this.contracts["TokenMain"].methods.balanceOf.cacheCall(
-      "0x23cEd89B1F6baFa4F89063D7Af51a81a38d879d6"
+      "0x2572eE2A871fCC586722C3E57d43831d78E7219c"
     );
 
     this.userBalKey = this.contracts[

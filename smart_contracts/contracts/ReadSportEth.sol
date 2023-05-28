@@ -60,6 +60,8 @@ contract ReadSportEth {
     returns (uint32[7] memory matchData)
   {
     matchData = decodeNumber(bettingk.betData(_matchNumber));
+    //betdata = bettingk.betData(_i);
+    //return betdata;
   }
 
   function hourOfDay() external view returns (uint256 hour) {

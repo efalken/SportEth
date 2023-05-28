@@ -24,6 +24,7 @@ export async function switchToAvalanche() {
   if (!ethereum.request)
     throw new Error("This wallet provider does not support request method");
   const parsedChainId = 43113;
+  //const rpcUrl = "https://api.avax-test.network/ext/bc/C/rpc";
   const rpcUrl = "https://api.avax-test.network/ext/bc/C/rpc";
   const chainId = "0x" + parsedChainId.toString(16);
   try {

@@ -59,18 +59,18 @@ describe("Betting", function () {
 
   describe("set up contract for taking bets", async () => {
     it("checkHour0", async () => {
-      _hourSolidity = await reader.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
-      hourOffset = 0;
-     if (_hourSolidity > 12) {
-      hourOffset = 36 - _hourSolidity;
-     } else if (_hourSolidity < 12) {
-      hourOffset = 12 - _hourSolidity;
-     }
-     console.log(`hourAdj ${hourOffset}`);
-     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
-     _hourSolidity = await reader.hourOfDay();
-     console.log(`hour in EVM2 ${_hourSolidity}`);
+    //   _hourSolidity = await reader.hourOfDay();
+    //   console.log(`hour in EVM ${_hourSolidity}`);
+    //   hourOffset = 0;
+    //  if (_hourSolidity > 12) {
+    //   hourOffset = 36 - _hourSolidity;
+    //  } else if (_hourSolidity < 12) {
+    //   hourOffset = 12 - _hourSolidity;
+    //  }
+    //  console.log(`hourAdj ${hourOffset}`);
+    //  await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+    //  _hourSolidity = await reader.hourOfDay();
+    //  console.log(`hour in EVM2 ${_hourSolidity}`);
      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
         var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
@@ -152,7 +152,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+     // await helper.advanceTimeAndBlock(secondsInHour * 6);
       result = await oracle.initProcess();
       receipt = await result.wait()
       gasUsed = receipt.gasUsed;
