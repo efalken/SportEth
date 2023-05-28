@@ -213,7 +213,7 @@ class BetPagejs extends Component {
     this.marginKey7 = this.contracts["BettingMain"].methods.margin.cacheCall(7);
 
     this.scheduleStringKey = this.contracts[
-      "ReaderMain"
+      "OracleMain"
     ].methods.showSchedString.cacheCall();
   }
 
@@ -328,8 +328,8 @@ class BetPagejs extends Component {
     // }
 
     let betData = [];
-    if (this.betDataKey in this.props.contracts["ReaderMain"].showBetData) {
-      let st = this.props.contracts["ReaderMain"].showBetData[this.betDataKey]
+    if (this.betDataKey in this.props.contracts["BettingMain"].showBetData) {
+      let st = this.props.contracts["BettingMain"].showBetData[this.betDataKey]
         .value;
       if (st) {
         betData = st;
@@ -354,9 +354,9 @@ class BetPagejs extends Component {
 
     if (
       this.scheduleStringKey in
-      this.props.contracts["ReaderMain"].showSchedString
+      this.props.contracts["OracleMain"].showSchedString
     ) {
-      let sctring = this.props.contracts["ReaderMain"].showSchedString[
+      let sctring = this.props.contracts["OracleMain"].showSchedString[
         this.scheduleStringKey
       ].value;
       if (sctring && newBets) {

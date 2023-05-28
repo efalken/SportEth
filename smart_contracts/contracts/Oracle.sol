@@ -206,6 +206,10 @@ contract Oracle {
     emit PausePosted(_match1, _match2);
   }
 
+      function showSchedString() external view returns (string[32] memory) {
+        return matchSchedule;
+    }
+
   function depositTokens(uint64 _amt) external {
     uint256 ethClaim;
     bool success;
