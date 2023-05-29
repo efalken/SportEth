@@ -9,7 +9,6 @@ import { autoBind } from "react-extras";
 import wppdf from "../whitepaper/SportEth.pdf";
 import excelSheet from "../whitepaper/sportEthData.xlsx";
 
-
 class Splash extends Component {
   constructor(props, context) {
     super(props);
@@ -24,7 +23,6 @@ class Splash extends Component {
       chartSymbols: ["SP:FOOT1", "BTCUSD"],
     };
   }
-
 
   openWhitepaper() {
     console.log("Opened whitepaper");
@@ -46,10 +44,9 @@ class Splash extends Component {
     // TODO
   }
 
-
   render() {
     //console.log("ChainCheck", ChainCheck);
-    console.log(this.state.contracts)
+    console.log(this.state.contracts);
     return (
       <div>
         <VBackground />
@@ -74,7 +71,7 @@ class Splash extends Component {
                 // height="100%"
                 className="nav-header-wrap"
               >
-                { }
+                {}
                 <Flex
                   flexWrap="wrap"
                   width="100%"
@@ -83,7 +80,7 @@ class Splash extends Component {
                   style={{ cursor: "pointer" }}
                   variant="nav"
                 >
-                  { }
+                  {}
                   <Flex
                     alignItems="center"
                     height="100%"
@@ -155,7 +152,7 @@ class Splash extends Component {
                           cursor: "pointer",
                         }}
                         href="http://github.com/efalken/SportEth"
-                      //    href="FAQ.js"
+                        //    href="FAQ.js"
                       >
                         Github Project
                       </a>
@@ -170,9 +167,9 @@ class Splash extends Component {
               width={1}
               justifyContent="center"
               alignItems="center"
-            // style={{
-            //     height: "calc(100vh - 90px)"
-            // }}
+              // style={{
+              //     height: "calc(100vh - 90px)"
+              // }}
             >
               Hi
               <Box mt="50px">
@@ -202,11 +199,16 @@ class Splash extends Component {
             </Flex>
           </Flex>
         </Flex>
-        <Box>
-          <Flex width="100%" alignItems="center" justifyContent="center" color="859DA9">
+        {/* <Box>
+          <Flex
+            width="100%"
+            alignItems="center"
+            justifyContent="center"
+            color="859DA9"
+          >
             <Text size="20px">Event Logs</Text>
           </Flex>
-        </Box>
+        </Box> */}
 
         <div className="footer-links-wrapper" style={{ width: "115%" }}>
           <Flex width="100%" alignItems="center" justifyContent="center">
@@ -220,14 +222,15 @@ class Splash extends Component {
                   alignItems: "flex-start",
                   display: "flex",
                 }}
-                href="/bethistory"
+                href="/betpage"
                 target="_blank"
               >
-                Bets
+                CLICK HERE TO GET TO MAIN PAGE
               </a>
             </Text>
           </Flex>
-          <Flex width="100%" alignItems="center" justifyContent="center">
+
+          {/* <Flex width="100%" alignItems="center" justifyContent="center">
             <Text size="15px">
               <a
                 className="nav-header"
@@ -266,7 +269,6 @@ class Splash extends Component {
               </a>
             </Text>
           </Flex>
-
           <Flex>
             <Text> </Text>
           </Flex>
@@ -288,15 +290,13 @@ class Splash extends Component {
               </a>
             </Text>
           </Flex>
-
           <Flex>
             <Text> </Text>
           </Flex>
-
           <Flex>
             <Text> </Text>
-          </Flex>
-          <Flex width="100%" alignItems="center" justifyContent="center">
+          </Flex> */}
+          {/* <Flex width="100%" alignItems="center" justifyContent="center">
             <Text size="15px">
               <a
                 className="nav-header"
@@ -312,10 +312,8 @@ class Splash extends Component {
               >
                 Team Schedules
               </a>
-
             </Text>
-
-          </Flex>
+          </Flex> */}
         </div>
       </div>
     );
@@ -325,7 +323,5 @@ class Splash extends Component {
 Splash.contextTypes = {
   drizzle: PropTypes.object,
 };
-
-
 
 export default Splash;

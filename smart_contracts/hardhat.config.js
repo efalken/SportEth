@@ -3,6 +3,7 @@ require("hardhat-contract-sizer");
 require("dotenv").config();
 
 module.exports = {
+  defaultNetwork: "hardhat",
   zksolc: {
     version: "1.3.1",
     compilerSource: "binary",
@@ -38,16 +39,27 @@ module.exports = {
         passphrase: "",
       },
     },
+    hardhat: {
+      //url: "http://127.0.0.1:8545/",
+      chainId: 1337,
+      blockConfirmations: 1,
+      allowUnlimitedContractSize: true,
+      throwOnCallFailures: true,
+      accounts: {
+        mnemonic: `${process.env.DEFAULT_WALLET_MNEMONIC}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 9,
+        passphrase: "",
+      },
+      gasPrice: 20e9,
+      gas: "auto",
+      timeout: 80000,
+    },
     localhost: {
-     // url: "http://127.0.0.1:8545",
-    //   ethNetwork: `https://goerli.infura.io/v3/${process.env.INFURA_GOERLI_PROJECT_ID}`,
-    //   accounts: {
-    //     mnemonic: `${process.env.GOERLI_WALLET_MNEMONIC}`,
-    //     path: "m/44'/60'/0'/0",
-    //     initialIndex: 0,
-    //     count: 20,
-    //     passphrase: "",
-    //   },
+      url: "http://127.0.0.1:8545/",
+      chainId: 1337 || 1337,
+      blockConfirmations: 1,
     },
     avaxtest: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
@@ -83,19 +95,6 @@ module.exports = {
       },
       gas: 21000000,
       gasPrice: 9000000000,
-    },
-    hardhat: {
-      allowUnlimitedContractSize: true,
-      throwOnCallFailures: true,
-      accounts: {
-        mnemonic: `${process.env.DEFAULT_WALLET_MNEMONIC}`,
-        path: "m/44'/60'/0'/0",
-        initialIndex: 0,
-        count: 10,
-        passphrase: "",
-      },
-      gasPrice: 20e9,
-      gas: 25e6,
     },
   },
 };
