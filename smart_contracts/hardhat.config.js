@@ -58,8 +58,14 @@ module.exports = {
     },
     localhost: {
       url: "http://127.0.0.1:8545/",
-      chainId: 1337 || 1337,
       blockConfirmations: 1,
+      accounts: {
+        mnemonic: `${process.env.DEFAULT_WALLET_MNEMONIC}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 9,
+        passphrase: "",
+      },
     },
     avaxtest: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",

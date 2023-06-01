@@ -1,16 +1,17 @@
 import { ethers } from "hardhat";
 import fs from "fs";
+
 var result;
-var nextStart = 1688289727;
+var nextStart = ((new Date().getTime() / 1000) | 0) + 36 * 60 * 60;
 //var finney = "1000000000000000"
-const finneys = BigInt('1000000000000000');
-const eths = BigInt('1000000000000000000');
-const million = BigInt('1000000');
+const finneys = BigInt("1000000000000000");
+const eths = BigInt("1000000000000000000");
+const million = BigInt("1000000");
 
 function saveABIFile(
   fileName: string,
   content: string,
-  dirPath = "../frontend/src/abis"
+  dirPath = "../dapp-js/src/abis"
 ) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath);
@@ -51,12 +52,12 @@ async function main() {
   await reader.deployed();
   console.log(`Reader contract was deployed to ${reader.address}`);
 
-  result = await token.approve(oracle.address, 560n*million);
-  result = await oracle.depositTokens(560n*million);
-  result = await token.transfer(reader.address, 440n*million);
+  result = await token.approve(oracle.address, 560n * million);
+  result = await oracle.depositTokens(560n * million);
+  result = await token.transfer(reader.address, 440n * million);
   nextStart = 2e9;
   result = await betting.fundBook({
-    value: 300n*finneys,
+    value: 300n * finneys,
   });
   result = await oracle.initPost(
     [
@@ -127,32 +128,31 @@ async function main() {
       nextStart,
       nextStart,
     ],
-    [999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,]
+    [
+      999, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730, 699,
+      884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760, 919, 720,
+      672, 800,
+    ]
   );
   result = await oracle.initProcess();
 
-
   result = await betting.connect(signers[1]).fundBettor({
-    value: 300n*finneys,
+    value: 300n * finneys,
   });
 
   const betdata0 = await betting.betData(0);
-      console.log(`betdata ${betdata0}`);
+  console.log(`betdata ${betdata0}`);
 
-      const betfunds = await betting.userBalance(accounts[1]);
-      console.log(`funds ${betfunds}`);
+  const betfunds = await betting.userBalance(accounts[1]);
+  console.log(`funds ${betfunds}`);
 
-      const bookiefunds = (await betting.lpStruct(accounts[0])).shares;
-      console.log(`bookiefunds ${bookiefunds}`);
-
-
-
+  const bookiefunds = (await betting.lpStruct(accounts[0])).shares;
+  console.log(`bookiefunds ${bookiefunds}`);
 
   const chainId = (await ethers.provider.getNetwork()).chainId;
 
   const readerABI = {
-    name: "ReaderMain",
-    address: reader.address,
+    name: "Reader",
     abi: JSON.parse(
       reader.interface.format(ethers.utils.FormatTypes.json) as string
     ),
@@ -162,8 +162,7 @@ async function main() {
   saveABIFile("Reader.json", JSON.stringify(readerABI));
 
   const oracleABI = {
-    name: "OracleMain",
-    address: oracle.address,
+    name: "Oracle",
     abi: JSON.parse(
       oracle.interface.format(ethers.utils.FormatTypes.json) as string
     ),
@@ -173,8 +172,7 @@ async function main() {
   saveABIFile("Oracle.json", JSON.stringify(oracleABI));
 
   const bettingABI = {
-    name: "BettingMain",
-    address: betting.address,
+    name: "Betting",
     abi: JSON.parse(
       betting.interface.format(ethers.utils.FormatTypes.json) as string
     ),
@@ -184,8 +182,7 @@ async function main() {
   saveABIFile("Betting.json", JSON.stringify(bettingABI));
 
   const tokenABI = {
-    name: "TokenMain",
-    address: token.address,
+    name: "Token",
     abi: JSON.parse(
       token.interface.format(ethers.utils.FormatTypes.json) as string
     ),

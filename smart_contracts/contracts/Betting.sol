@@ -27,7 +27,7 @@ contract Betting {
   uint32 public constant MIN_LP_DURATION = 0; // SET TO 2 IN PROD
   mapping(bytes32 => Subcontract) public betContracts;
   mapping(bytes32 => Subcontract) public offerContracts;
-  /// this maps the set {epoch, match, team} to its event outcome, 
+  /// this maps the set {epoch, match, team} to its event outcome,
   ///where 0 is a loss, 1 is a tie or postponement, 2 a win
   /// The outcome defaults to 0, so that these need not be updated for a loss
   mapping(uint32 => uint8) public outcomeMap;
@@ -103,16 +103,23 @@ contract Betting {
 
   receive() external payable {}
 
+  function checkRedeem(bytes32 _subkID) external view returns (bool) {
+    Subcontract memory subcontract = betContracts[_subkID];
+    uint32 epochMatch = subcontract.epoch *
+      1000 +
+      subcontract.matchNum *
+      10 +
+      subcontract.pick;
+    bool redeemable = (outcomeMap[epochMatch] > 0);
+    return redeemable;
+  }
+
   /** @dev processes simple bet
    * @param _matchNumber is 0 to 31, representing the match
    * @param _team0or1 is the initial favorite (0) and underdog (1)
    * @param _betAmt is the amount bet in 10s of finney, 0.0001 ether
    */
-  function bet(
-    uint8 _matchNumber,
-    uint8 _team0or1,
-    uint32 _betAmt
-  ) external {
+  function bet(uint8 _matchNumber, uint8 _team0or1, uint32 _betAmt) external {
     require(_betAmt <= userBalance[msg.sender] && _betAmt >= MIN_BET, "NSF ");
     require(_matchNumber != paused[0] && _matchNumber != paused[1]);
     // pulls odds, start time, betamounts on match
@@ -279,11 +286,9 @@ contract Betting {
   /* @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
    * @param _winner is the epoch's entry of results: 1 for team 1 win, 0 for team 0 win, 2 for tie or no contest
    */
-  function settle(uint8[32] memory _winner)
-    external
-    onlyAdmin
-    returns (uint32, uint256)
-  {
+  function settle(
+    uint8[32] memory _winner
+  ) external onlyAdmin returns (uint32, uint256) {
     uint32 redemptionPot;
     uint32 payoffPot;
     uint256 epochMatch;
@@ -317,7 +322,7 @@ contract Betting {
     margin[2] = 0;
     delete betData;
     margin[7] = FUTURE_START;
-    (bool success, ) = oracleAdmin.call{ value: oracleDiv }("");
+    (bool success, ) = oracleAdmin.call{value: oracleDiv}("");
     require(success, "Call failed");
     return (margin[3], oracleDiv);
   }
@@ -376,7 +381,7 @@ contract Betting {
     userBalance[msg.sender] -= _amt;
     uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     // payable(msg.sender).transfer(amt256);
-    (bool success, ) = payable(msg.sender).call{ value: amt256 }("");
+    (bool success, ) = payable(msg.sender).call{value: amt256}("");
     require(success, "Call failed");
     emit Funding(msg.sender, amt256, margin[3], 3);
   }
@@ -398,7 +403,7 @@ contract Betting {
     margin[0] -= ethWithdraw;
     uint256 ethWithdraw256 = uint256(ethWithdraw) * UNITS_TRANS14;
     //payable(msg.sender).transfer(ethWithdraw256);
-    (bool success, ) = payable(msg.sender).call{ value: ethWithdraw256 }("");
+    (bool success, ) = payable(msg.sender).call{value: ethWithdraw256}("");
     require(success, "Call failed");
     emit Funding(msg.sender, ethWithdraw256, margin[3], 4);
   }
@@ -407,11 +412,9 @@ contract Betting {
    * @param _oddsAndStart is the epoch's set of odds and start times for matches. Data are packed into uint96.
    * the first event is stored into margin[7] as when LPs can no longe add or remove liquidity
    */
-  function transmitInit(uint96[32] memory _oddsAndStart)
-    external
-    onlyAdmin
-    returns (bool)
-  {
+  function transmitInit(
+    uint96[32] memory _oddsAndStart
+  ) external onlyAdmin returns (bool) {
     require(margin[2] == 0);
     betData = _oddsAndStart;
     margin[7] = uint32(_oddsAndStart[0] >> 64);
@@ -453,17 +456,14 @@ contract Betting {
     paused[1] = _bad2;
   }
 
-  
-    function showBetData() external view returns (uint256[32] memory) {
-        return betData;
-    }
+  function showBetData() external view returns (uint256[32] memory) {
+    return betData;
+  }
 
   // @dev unpacks uint256 to reveal match's odds and bet amounts
-  function decodeNumber(uint256 _encoded)
-    internal
-    pure
-    returns (uint32[7] memory vec1)
-  {
+  function decodeNumber(
+    uint256 _encoded
+  ) internal pure returns (uint32[7] memory vec1) {
     vec1[0] = uint32(_encoded >> 224);
     vec1[1] = uint32(_encoded >> 192);
     vec1[2] = uint32(_encoded >> 160);
