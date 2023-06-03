@@ -3,6 +3,7 @@ import Text from "../basics/Text";
 import IndicatorD from "../basics/IndicatorD";
 import AuthContext from "../../contexts/AuthContext";
 import moment from "moment";
+var pricedata = [];
 
 export default function EventOdds() {
   const { oracleContractReadOnly } = useContext(AuthContext);
@@ -19,9 +20,9 @@ export default function EventOdds() {
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
-          Epoch: args.epoch,
-          time: Number(blockNumber),
-          decOdds: args.decOdds,
+          Epoch: Number(args.epoch),
+          time: 888,
+          decOdds: Number(args.decOdds),
         });
       }
       setPriceHistory(pricedata);
@@ -29,6 +30,12 @@ export default function EventOdds() {
   }, [oracleContractReadOnly]);
 
   console.log("decodds", priceHistory);
+
+  // openEtherscan() {
+  //   const url =
+  //     "https://rinkeby.etherscan.io/address/0xF2a86D7F05d017e0A82F06Ee59b4098FE8B07826";
+  //   window.open(url, "_blank");
+  // };
 
   if (Object.keys(priceHistory).length === 0)
     return (
@@ -39,7 +46,7 @@ export default function EventOdds() {
   else {
     return (
       <div>
-        <IndicatorD
+        {/* <IndicatorD
           className="etherscanLink"
           size="15px"
           mr="10px"
@@ -50,7 +57,7 @@ export default function EventOdds() {
           label="See Contract on"
           onClick={() => openEtherscan()}
           value="Etherscan"
-        />
+        /> */}
         <Text size="12px" weight="200">
           {" "}
           Time, Week, m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12,

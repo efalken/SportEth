@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Text from "../basics/Text";
 import IndicatorD from "../basics/IndicatorD";
 import AuthContext from "../../contexts/AuthContext";
-
+  
 export default function EventBetRecord() {
   const [priceHistory, setPriceHistory] = useState([]);
   const { bettingContractReadOnly } = useContext(AuthContext);
@@ -21,10 +21,12 @@ export default function EventBetRecord() {
           Epoch: Number(args.epoch),
           //Offer: Boolean(args.Offer).toString(),
           //Offer: args.offer,
-          BetSize: Number(args.betAmount / 10000),
+          //BetSize: args.betAmount,
+          BetSize: Number(args.betAmount),
           LongPick: Number(args.pick),
           MatchNum: Number(args.matchNum),
-          Payoff: Number(args.payoff / 10000),
+          //Payoff: args.payoff,
+          Payoff: Number(args.payoff),
           Hashoutput: args.contractHash,
           BettorAddress: args.bettor,
         });

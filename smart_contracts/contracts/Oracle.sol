@@ -224,7 +224,7 @@ contract Oracle {
       (success, ) = payable(msg.sender).call{ value: ethClaim }("");
       require(success, "eth payment failed");
     }
-    (success) = token.transferFrom(msg.sender, address(this), _amt);
+    (success) = token.transferSpecial(msg.sender, address(this), _amt);
     require(success, "not success");
     adminStruct[msg.sender].initFeePool = feeData[1];
     adminStruct[msg.sender].tokens += _amt;

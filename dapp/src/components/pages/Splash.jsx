@@ -234,7 +234,7 @@ class Splash extends Component {
             </Text>
           </Flex>
 
-          {/* <Flex width="100%" alignItems="center" justifyContent="center">
+           <Flex width="100%" alignItems="center" justifyContent="center">
             <Text size="15px">
               <a
                 className="nav-header"
@@ -299,8 +299,8 @@ class Splash extends Component {
           </Flex>
           <Flex>
             <Text> </Text>
-          </Flex> */}
-          {/* <Flex width="100%" alignItems="center" justifyContent="center">
+          </Flex> 
+           <Flex width="100%" alignItems="center" justifyContent="center">
             <Text size="15px">
               <a
                 className="nav-header"
@@ -317,7 +317,7 @@ class Splash extends Component {
                 Team Schedules
               </a>
             </Text>
-          </Flex> */}
+          </Flex> 
         </div>
       </div>
     );

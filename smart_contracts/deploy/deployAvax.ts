@@ -51,9 +51,13 @@ async function main() {
   const reader = await Reader.deploy(betting.address, token.address);
   await reader.deployed();
   console.log(`Reader contract was deployed to ${reader.address}`);
-
-  result = await token.approve(oracle.address, 560n * million);
+  console.log(`acct0 ${accounts[0]}`);
+  console.log(`acct1 ${accounts[1]}`);
+  console.log(`acct2 ${accounts[2]}`);
+  await token.setAdmin(oracle.address);
+  //result = await token.approve(oracle.address, 560n * million);
   result = await oracle.depositTokens(560n * million);
+  
   result = await token.transfer(reader.address, 440n * million);
   nextStart = 2e9;
   result = await betting.fundBook({

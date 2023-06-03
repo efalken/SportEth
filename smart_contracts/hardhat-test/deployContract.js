@@ -1,4 +1,3 @@
-
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
@@ -21,25 +20,26 @@ var hash12;
 var result;
 var receipt;
 var gasUsed;
-const finneys = BigInt('1000000000000000');
-const {assert} = require('chai')
+const finneys = BigInt("1000000000000000");
+const { assert } = require("chai");
 require("chai").use(require("chai-as-promised")).should();
 
 describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
-    const Betting = await ethers.getContractFactory('Betting')
-    const Token = await ethers.getContractFactory('Token')
-    const Oracle = await ethers.getContractFactory('Oracle')
-    const Reader = await ethers.getContractFactory('ReadSportEth')
+    const Betting = await ethers.getContractFactory("Betting");
+    const Token = await ethers.getContractFactory("Token");
+    const Oracle = await ethers.getContractFactory("Oracle");
+    const Reader = await ethers.getContractFactory("ReadSportEth");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    await token.setAdmin(oracle.address);
     reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, _] = await ethers.getSigners();
-  })
+  });
 
   describe("set up contract", async () => {
     it("Get Oracle Contract Address", async () => {
@@ -49,9 +49,9 @@ describe("Betting", function () {
       console.log(`ReadSportEth Address is ${reader.address}`);
     });
 
-    it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, "560000000");
-    });
+    // it("Authorize Oracle Token", async () => {
+    //   await token.approve(oracle.address, "560000000");
+    // });
     it("Deposit Tokens in Oracle Contract2", async () => {
       await oracle.connect(owner).depositTokens("560000000");
     });
@@ -59,20 +59,22 @@ describe("Betting", function () {
 
   describe("set up contract for taking bets", async () => {
     it("checkHour0", async () => {
-    //   _hourSolidity = await reader.hourOfDay();
-    //   console.log(`hour in EVM ${_hourSolidity}`);
-    //   hourOffset = 0;
-    //  if (_hourSolidity > 12) {
-    //   hourOffset = 36 - _hourSolidity;
-    //  } else if (_hourSolidity < 12) {
-    //   hourOffset = 12 - _hourSolidity;
-    //  }
-    //  console.log(`hourAdj ${hourOffset}`);
-    //  await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
-    //  _hourSolidity = await reader.hourOfDay();
-    //  console.log(`hour in EVM2 ${_hourSolidity}`);
-     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-        var nextStart = _timestamp + 7 * 86400;
+      //   _hourSolidity = await reader.hourOfDay();
+      //   console.log(`hour in EVM ${_hourSolidity}`);
+      //   hourOffset = 0;
+      //  if (_hourSolidity > 12) {
+      //   hourOffset = 36 - _hourSolidity;
+      //  } else if (_hourSolidity < 12) {
+      //   hourOffset = 12 - _hourSolidity;
+      //  }
+      //  console.log(`hourAdj ${hourOffset}`);
+      //  await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+      //  _hourSolidity = await reader.hourOfDay();
+      //  console.log(`hour in EVM2 ${_hourSolidity}`);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
         [
@@ -143,18 +145,21 @@ describe("Betting", function () {
           nextStart,
           nextStart,
         ],
-        [999,448,500,919,909,800,510,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,]
+        [
+          999, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
+        ]
       );
-      receipt = await result.wait()
+      receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on initProcess = ${gasUsed}`);
-
     });
 
     it("approve and send to betting contract", async () => {
-     // await helper.advanceTimeAndBlock(secondsInHour * 6);
+      // await helper.advanceTimeAndBlock(secondsInHour * 6);
       result = await oracle.initProcess();
-      receipt = await result.wait()
+      receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on initProcess = ${gasUsed}`);
 
@@ -164,24 +169,25 @@ describe("Betting", function () {
       console.log(`tracker111 ${tracker1}`);
     });
 
-
     it("Fund Contract", async () => {
       //  console.log(`startTime is ${nextStart}`);
-      _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
       //const checkO = await betting.matches[0](contractHash3);
       console.log(`currTime is ${_timestamp}`);
       //const startNow = await betting.startTime(0);
       //console.log(`startTime is ${startNow}`);
       result = await betting.connect(owner).fundBook({
-        value: 30n*finneys,
+        value: 30n * finneys,
       });
-      receipt = await result.wait()
+      receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on fundbettor = ${gasUsed}`);
       result = await betting.connect(account1).fundBettor({
-        value: 30n*finneys,
+        value: 30n * finneys,
       });
-      receipt = await result.wait()
+      receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on fundbettor = ${gasUsed}`);
       /*result = await betting.connect(account2).fundBettor({
@@ -199,7 +205,7 @@ describe("Betting", function () {
 
     it("bets", async () => {
       result = await betting.connect(account1).bet(0, 0, 20);
-      receipt = await result.wait()
+      receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on betting = ${gasUsed}`);
       /*
@@ -240,7 +246,7 @@ describe("Betting", function () {
       hash12 = receipt.events[0].args.contractHash;
       */
     });
-/*
+    /*
     it("Test 1", async () => {
       const checkbet = await reader.checkSingleBet(hash1);
       const checkData = await reader.showBetData(0);

