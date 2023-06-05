@@ -21,8 +21,8 @@ export default function EventGameoutcomes() {
         const { args, blockNumber } = event;
         pricedata.push({
           timestamp: (blockNumber),
-          outcome: args.winner,
-          Epoch: (args.epoch),
+          outcome: Number(args.winner),
+          Epoch: Number(args.epoch),
         });
       }
       setPriceHistory(pricedata);

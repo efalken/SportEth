@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import fs from "fs";
 var result;
-var nextStart = 1688289727;
+var nextStart = 1686254079;
 var receipt;
 var hash;
 
@@ -48,17 +48,22 @@ async function main() {
   await oracle.deployed();
   console.log(`Oracle contract was deployed to ${oracle.address}`);
   await betting.setOracleAddress(oracle.address);
-  await token.setAdmin(oracle.address);
 
-  const Reader = await ethers.getContractFactory("ReadSportEth");
+  await token.setAdmin(oracle.address);
+ 
+
+  const Reader = await ethers.getContractFactory("Reader");
   const reader = await Reader.deploy(betting.address, token.address);
   const tx = await reader.deployed();
+  console.log(`Reader contract was deployed to ${reader.address}`);
+
 
   result = await oracle.depositTokens(560n*million);
   await result.wait();
+  console.log(`got here2`);
   result = await token.transfer(reader.address, 440n*million);
   await result.wait();
-  nextStart = 2e9;
+  nextStart = 1686254079;
   result = await betting.fundBook({
     value: 100n*finneys,
   });
@@ -275,7 +280,7 @@ async function main() {
       receipt = result.wait();
       result = await oracle.settleProcess();
       receipt = result.wait();
-
+      var nextStart = 1686254079;
       result = await oracle.initPost(
         [
           "NHL:Colorado:Washington",
@@ -361,7 +366,6 @@ async function main() {
       console.log(`add1 ${userBalanceAcct1}`);
       console.log(`add2 ${userBalanceAcct2}`);
       console.log(`owner ${ownershares}`);
-
 
 
   

@@ -11,6 +11,7 @@ export default function EventSchedule() {
     if (!oracleContractReadOnly) return;
 
     (async () => {
+      const pricedata = [];
       const SchedulePostedEvent =
         oracleContractReadOnly.filters.SchedulePosted();
       const events = await oracleContractReadOnly.queryFilter(
@@ -20,7 +21,7 @@ export default function EventSchedule() {
         const { args, blockNumber } = event;
         pricedata.push({
           games: args.sched,
-          Epoch: args.epoch,
+          Epoch: Number(args.epoch),
           time: Number(blockNumber),
         });
       }

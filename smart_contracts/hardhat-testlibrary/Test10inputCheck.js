@@ -1,19 +1,18 @@
-
 const web3 = require("web3-utils");
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
-const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000)/1000;
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
 var hourOffset;
 var _hourSolidity;
 var _timestamp;
 var _date;
 var _hour;
 var nextStart;
-const {assert} = require('chai');
-const finneys = BigInt('1000000000000000');
-const eths = BigInt('1000000000000000000');
-const million = BigInt('1000000');
+const { assert } = require("chai");
+const finneys = BigInt("1000000000000000");
+const eths = BigInt("1000000000000000000");
+const million = BigInt("1000000");
 
 require("chai").use(require("chai-as-promised")).should();
 
@@ -21,17 +20,17 @@ describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
-    const Betting = await ethers.getContractFactory('Betting')
-    const Token = await ethers.getContractFactory('Token')
-    const Oracle = await ethers.getContractFactory('Oracle')
-    const Reader = await ethers.getContractFactory('ReadSportEth')
+    const Betting = await ethers.getContractFactory("Betting");
+    const Token = await ethers.getContractFactory("Token");
+    const Oracle = await ethers.getContractFactory("Oracle");
+    const Reader = await ethers.getContractFactory("Reader");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
     reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
-  })
+  });
 
   describe("Preliminaries", async () => {
     it("Get Oracle Contract Address", async () => {
@@ -39,11 +38,11 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, 560n*million);
+      await token.approve(oracle.address, 560n * million);
     });
 
     it("Deposit Tokens in Oracle Contract", async () => {
-      await oracle.connect(owner).depositTokens(560n*million);
+      await oracle.connect(owner).depositTokens(560n * million);
     });
   });
 
@@ -52,16 +51,17 @@ describe("Betting", function () {
       _hourSolidity = await reader.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
-     if (_hourSolidity > 12) {
-      hourOffset = 36 - _hourSolidity;
-     } else if (_hourSolidity < 12) {
-      hourOffset = 12 - _hourSolidity;
-     }
-     console.log(`hourAdj ${hourOffset}`);
-     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
-     _timestamp = (await ethers.provider.getBlock(await ethers.provider.getBlockNumber())).timestamp;
-    nextStart = _timestamp + 7 * 86400;
-
+      if (_hourSolidity > 12) {
+        hourOffset = 36 - _hourSolidity;
+      } else if (_hourSolidity < 12) {
+        hourOffset = 12 - _hourSolidity;
+      }
+      console.log(`hourAdj ${hourOffset}`);
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart = _timestamp + 7 * 86400;
 
       await oracle.initPost(
         [
@@ -133,7 +133,9 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          999,448,500,919,909,800,510,807,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
+          999, 448, 500, 919, 909, 800, 510, 807, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
         ]
       );
     });
@@ -149,8 +151,8 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-       await betting.connect(owner).fundBook({
-        value: 3n*eths,
+      await betting.connect(owner).fundBook({
+        value: 3n * eths,
       });
       await betting.connect(account1).fundBettor({
         value: "2000000000000000000",
@@ -190,30 +192,23 @@ describe("Betting", function () {
       console.log("0", ints[7]);
     });
 
-
     it("send updated odds data", async () => {
       _hourSolidity = await reader.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
-     if (_hourSolidity > 12) {
-      hourOffset = 36 - _hourSolidity;
-     } else if (_hourSolidity < 12) {
-      hourOffset = 12 - _hourSolidity;
-     }
-     console.log(`hourAdj ${hourOffset}`);
-     await helper.advanceTimeAndBlock(hourOffset*secondsInHour);
+      if (_hourSolidity > 12) {
+        hourOffset = 36 - _hourSolidity;
+      } else if (_hourSolidity < 12) {
+        hourOffset = 12 - _hourSolidity;
+      }
+      console.log(`hourAdj ${hourOffset}`);
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
 
-      await oracle.updatePost(
-        [
-          900,
-          901,
-          902,
-          903,
-          904,
-          905,
-          906,907,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800,
-          ]
-      );
+      await oracle.updatePost([
+        900, 901, 902, 903, 904, 905, 906, 907, 620, 960, 650, 688, 970, 730,
+        699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+        919, 720, 672, 800,
+      ]);
     });
 
     it("fast forward 6 hours", async () => {
@@ -243,7 +238,7 @@ describe("Betting", function () {
       console.log("0", intsb[5]);
       console.log("0", intsb[6]);
       console.log("0", intsb[7]);
-      
+
       console.log("data7b", intsb);
       assert.equal(intsb[0], "1000", "Must be equal");
       assert.equal(intsb[1], "500", "Must be equal");

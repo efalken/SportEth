@@ -47,7 +47,7 @@ async function main() {
   console.log(`Oracle contract was deployed to ${oracle.address}`);
   await betting.setOracleAddress(oracle.address);
 
-  const Reader = await ethers.getContractFactory("ReadSportEth");
+  const Reader = await ethers.getContractFactory("Reader");
   const reader = await Reader.deploy(betting.address, token.address);
   await reader.deployed();
   console.log(`Reader contract was deployed to ${reader.address}`);

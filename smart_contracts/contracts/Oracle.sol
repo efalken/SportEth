@@ -3,13 +3,14 @@ pragma solidity ^0.8.0;
 
 import "./Token.sol";
 import "./Betting.sol";
+import "./ConstantsOracle.sol";
 
 contract Oracle {
+    // slots are 0 for the initial favorite, 1 for initial underdog
   uint96[32] public propOddsStarts;
   // smaller data from propOddsStarts because one cannot change the start times
   uint64[32] public propOddsUpdate;
-  // results are 0 for team 0 winning, 1 for team 1 winning
-  // slots are 0 for the initial favorite, 1 for initial underdog
+  // results are 0 for team 0 winning, 1 for team 1 winning, 2 for a tie or no contest
   uint8[32] public propResults;
   /** the schedule is a record of "sport:home:away", such as "NFL:NYG:SF" for us football
    */
@@ -22,23 +23,9 @@ contract Oracle {
   uint32 public betEpochOracle;
   uint32 public reviewStatus;
   uint32 public propNumber;
-  uint32 public constant HOUR_POST = 0;// 12 in prod
-  uint32 public constant HOUR_PROCESS = 0; // 18 in prod
-  // minimum bet in 0.1 finneys
-  uint32 public constant MIN_SUBMIT = 5e7;
-  uint64 public constant ONE_MILLION = 1e6;
-  uint32 public constant MAX_DEC_ODDS_INIT = 1000;
-  uint32 public constant MIN_DEC_ODDS_INIT = 125;
-  uint32 public constant MAX_DEC_ODDS_UPDATE = 1500;
-  uint32 public constant MIN_DEC_ODDS_UPDATE = 110;
-  uint32 public constant ODDS_FACTOR = 41;
-  uint32 public constant INIT_PROC_NEXT = 10;
-  uint32 public constant UPDATE_PROC_NEXT = 20;
-  uint32 public constant SETTLE_PROC_NEXT = 30;
-  uint32 public constant ACTIVE_STATE = 2;
-  // keeps track of those who supplied data proposals.
+  // keeps track of  who supplied data proposal, will be fined if data submission voted down
   address public proposer;
-  // track token holders: amount, whether they voted, their basis for the token fees
+  // track token holders: ownership metric, whether they voted, their basis for the token fees
   mapping(address => AdminStruct) public adminStruct;
   // this allows the contract to send the tokens
   Token public token;
@@ -91,7 +78,7 @@ contract Oracle {
     require(reviewStatus >= 10);
     // voter must not have voted on this proposal
     require(adminStruct[msg.sender].voteTracker != propNumber);
-    // this prevents this account from voting again on this data proposal (see above)
+    // this prevents this account from voting again on this data proposal 
     adminStruct[msg.sender].voteTracker = propNumber;
     // votes are simply one's entire token balance in this oracle contract
     if (_sendData) {
@@ -224,7 +211,7 @@ contract Oracle {
       (success, ) = payable(msg.sender).call{ value: ethClaim }("");
       require(success, "eth payment failed");
     }
-    (success) = token.transferSpecial(msg.sender, address(this), _amt);
+    (success) = token.transferSpecial(msg.sender, _amt);
     require(success, "not success");
     adminStruct[msg.sender].initFeePool = feeData[1];
     adminStruct[msg.sender].tokens += _amt;
@@ -274,6 +261,7 @@ contract Oracle {
 
   function burnAndReset() internal returns (bool success) {
     uint32 burnAmt = MIN_SUBMIT / 5;
+    // punishes proposer for sending data that was rejected
     feeData[0] -= burnAmt;
     adminStruct[proposer].tokens -= burnAmt;
     success = token.burn(burnAmt);

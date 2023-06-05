@@ -21,7 +21,7 @@ export default function EventOdds() {
         const { args, blockNumber } = event;
         pricedata.push({
           Epoch: Number(args.epoch),
-          time: 888,
+          time: blockNumber.timestamp,
           decOdds: Number(args.decOdds),
         });
       }

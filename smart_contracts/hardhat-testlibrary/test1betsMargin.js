@@ -38,7 +38,7 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory('Betting')
     const Token = await ethers.getContractFactory('Token')
     const Oracle = await ethers.getContractFactory('Oracle')
-    const Reader = await ethers.getContractFactory('ReadSportEth')
+    const Reader = await ethers.getContractFactory('Reader')
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);

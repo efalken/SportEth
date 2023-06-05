@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 import "./Oracle.sol";
 import "./Betting.sol";
 
-contract ReadSportEth {
+contract Reader {
   Oracle public oraclek;
   Betting public bettingk;
 
@@ -40,12 +40,6 @@ contract ReadSportEth {
   {
     (_epoch, _matchNum, _pick, _betAmount, _payoff, _bettor) = bettingk
       .betContracts(_subkID);
-    // _epoch = bettingk.betContracts[_subkID].epoch;
-    // _matchNum = bettingk.betContracts[_subkID].matchNum;
-    // _pick = bettingk.betContracts[_subkID].pick;
-    // _betAmount = bettingk.betContracts[_subkID].betAmount;
-    // _payoff = bettingk.betContracts[_subkID].payoff;
-    // _bettor = bettingk.betContracts[_subkID].bettor;
   }
 
   function checkOffer(bytes32 _subkID) external view returns (bool) {
@@ -54,15 +48,21 @@ contract ReadSportEth {
     return takeable;
   }
 
-  function showBetData(uint256 _matchNumber)
-    external
-    view
-    returns (uint32[7] memory matchData)
-  {
-    matchData = decodeNumber(bettingk.betData(_matchNumber));
-    //betdata = bettingk.betData(_i);
+  // function showBigBetData(bytes32 _subkid)
+  //   external
+  //   view
+  //   returns (uint32[7] memory matchData)
+  // {
+  //     (uint8 epoch, uint8 matchNum, uint8 pick, uint32 betAmount, uint32 payoff, address bettor) = bettingk.offerContracts(_subkid);
+    // (uint32 favelong, uint32 undlong, uint32 favepayout, uint32 undpayout, uint32 startTime, uint32 faveodds, uint32 undodds) = bettingk.offerContracts(_matchNumber);
+    //uint256 x = bettingk.offerContracts(matchData);
+     //matchData = decodeNumber(x);
+    //matchData = bettingk.betData(x);
+    // matchData = [favelong, undlong, favepayout, undpayout, startTime, faveodds, undodds];
+    // return decodedMatch; 
+    //betdata = bettingk.betData(x);
     //return betdata;
-  }
+  //}
 
   function hourOfDay() external view returns (uint256 hour) {
     hour = (block.timestamp % 86400) / 3600;
@@ -89,4 +89,24 @@ contract ReadSportEth {
   {
     matchDescription = oraclek.matchSchedule(i);
   }
+
+   function create96(uint32[32] memory _time, uint32[32] memory _odds)
+    internal
+    pure
+    returns (uint96[32] memory outv)
+  {
+    uint32 opponentOdds;
+    uint96 out;
+    for (uint256 i = 0; i < 32; i++) {
+      if (_time[i] != 0) {
+        opponentOdds = 1e6 / (42 + _odds[i]) - 42;
+        out |= uint96(_time[i]) << 64;
+        out |= uint96(_odds[i]) << 32;
+        out |= uint96(opponentOdds);
+        outv[i] = out;
+      }
+      delete out;
+    }
+  }
+
 }

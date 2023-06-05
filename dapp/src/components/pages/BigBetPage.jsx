@@ -159,6 +159,11 @@ export default function BigBetPage() {
     await bettingContract.offerContracts(x);
   }
 
+  
+  function switchOdds() {
+    setShowDecimalOdds(!showDecimalOdds);
+  }
+
   async function makeBigBet() {
     await bettingContract.postBigBet(
       matchPick,
@@ -805,7 +810,7 @@ export default function BigBetPage() {
               justifyContent="flex-start"
               alignItems="center"
             >
-              <Input
+              {/* <Input
                 onChange={({ target: { value } }) => handleBetSize(value)}
                 width="100px"
                 placeholder={"Enter Eths"}
@@ -821,7 +826,7 @@ export default function BigBetPage() {
                 marginLeft="10px"
                 marginRignt="5px"
                 value={decOddsOffered}
-              />
+              /> */}
               <Box mt="10px" mb="10px">
                 <Button
                   style={{

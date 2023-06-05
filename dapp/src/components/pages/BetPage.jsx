@@ -12,6 +12,7 @@ import VBackgroundCom from "../basics/VBackgroundCom";
 import BettingContract from "../../abis/Betting.json";
 import TokenContract from "../../abis/Token.json";
 import OracleContract from "../../abis/Oracle.json";
+import ReaderContract from "../../abis/Reader.json";
 import { ethers } from "ethers";
 import AuthContext from "../../contexts/AuthContext";
 import { networkConfig } from "../../config";
@@ -22,6 +23,7 @@ function BetPage() {
   const [bettingContract, setBettingContract] = useState(null);
   const [oracleContract, setOracleContract] = useState(null);
   const [tokenContract, setTokenContract] = useState(null);
+  const [readerContract, setReaderContract] = useState(null);
 
   const [betAmount, setBetAmount] = useState("");
   const [fundAmount, setFundAmount] = useState("");
@@ -106,10 +108,15 @@ function BetPage() {
         TokenContract.abi,
         signer
       );
-
+      const _readerContract = new ethers.Contract(
+        ReaderContract.networks[chainId].address,
+        ReaderContract.abi,
+        signer
+      );
       setBettingContract(_bettingContract);
       setOracleContract(_oracleContract);
       setTokenContract(_tokenContract);
+      setReaderContract(_readerContract);
     })();
   }, [provider, signer]);
 
@@ -121,11 +128,11 @@ function BetPage() {
       findValues();
       //  this.getbetHistoryArray();
       //  this.checkRedeem();
-    }, 1000);
+    }, 1000);//1000
 
     const interval2 = setInterval(() => {
       getbetHistoryArray();
-    }, 5000);
+    }, 5000);//5000
 
     return () => {
       clearInterval(interval1);
