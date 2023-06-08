@@ -21,8 +21,8 @@ export default function () {
         muted
         loop
         style={{
-          opacity: 0.3,
-          filter: "grayscale(100%)",
+          opacity: 0.15,
+ filter: "grayscale(15%)",
           minHeight: "100%",
           minWidth: "100%",
         }}

@@ -17,14 +17,7 @@ contract Reader {
     bettingk = Betting(_betting);
   }
 
-  function checkRedeem(bytes32 _subkID) external view returns (bool) {
-    (uint8 epoch, uint8 matchNum, uint8 pick, , , ) = bettingk.betContracts(
-      _subkID
-    );
-    uint32 epochMatch = epoch * 1000 + matchNum * 10 + pick;
-    bool redeemable = (bettingk.outcomeMap(epochMatch) > 0);
-    return redeemable;
-  }
+
 
   function checkSingleBet(bytes32 _subkID)
     external
@@ -47,6 +40,19 @@ contract Reader {
     bool takeable = (betamt > 0);
     return takeable;
   }
+
+    function checkRedeem(bytes32 _subkID) external view returns (bool) {
+    (uint8 epoch, uint8 matchNum, uint8 pick, , , ) = bettingk.betContracts(
+      _subkID
+    );
+    uint32 epochMatch = epoch * 1000 + matchNum * 10 + pick;
+    bool redeemable = (bettingk.outcomeMap(epochMatch) > 0);
+    return redeemable;
+  }
+
+      function showBetData(uint256 _match) external view returns (uint256 betData) {
+        betData = bettingk.betData(_match);
+    }
 
   // function showBigBetData(bytes32 _subkid)
   //   external

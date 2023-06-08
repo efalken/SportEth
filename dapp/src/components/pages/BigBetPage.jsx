@@ -155,7 +155,7 @@ export default function BigBetPage() {
     await bettingContract.withdrawBettor(wdAmount * 10000);
   }
 
-  async function checkOffer(x) {
+  async function offerContracts(x) {
     await bettingContract.offerContracts(x);
   }
 
@@ -187,27 +187,28 @@ export default function BigBetPage() {
 
     // TODO: Fix below
     for (const event of events) {
-      const {
-        args: {
-          bettor,
-          epoch,
-          matchNum,
-          pick,
-          betAmount,
-          payoff,
-          contractHash,
-        },
+   //   const {args, blockNumber} = event;
+        const {
+          args: {
+            bettor,
+            epoch,
+            matchNum,
+            pick,
+            betAmount,
+            payoff,
+            contractHash,
+          },
         blockNumber,
       } = event;
 
-      const block = await provider.getBlock(blockNumber);
+     // const block = await provider.getBlock(blockNumber);
 
       eventdata.push({
         Hashoutput: contractHash,
         BettorAddress: bettor,
         Epoch: Number(epoch),
-        timestamp: Number(block.timestamp),
-        BetSize: Number(betAmount / 10000),
+        timestamp: Number(blockNumber),
+        BetSize: Number(betAmount ),
         MyTeamPick: Number(pick),
         MatchNum: Number(matchNum),
         Payoff: Number(payoff),
@@ -230,6 +231,7 @@ export default function BigBetPage() {
     const events = await bettingContract.queryFilter(BetRecordEvent);
 
     for (const event of events) {
+     // const {args, blockNumber} = event;
       const {
         args: {
           bettor,
@@ -243,15 +245,15 @@ export default function BigBetPage() {
         blockNumber,
       } = event;
 
-      const block = await provider.getBlock(blockNumber);
+   //   const block = await provider.getBlock(blockNumber);
 
       eventdata2.push({
         Hashoutput2: contractHash,
         BettorAddress2: bettor,
         Epoch2: Number(epoch),
         MatchNum2: Number(matchNum),
-        OfferedTeam2: Number(1 - pick),
-        timestamp2: Number(block.timestamp),
+        OfferedTeam2: 1 - Number(pick),
+        timestamp2: Number(blockNumber),
         BetSize2: Number(betAmount),
         Payoff2: Number(payoff),
       });
@@ -322,13 +324,13 @@ export default function BigBetPage() {
     // offkey = contracts["BettingMain"].methods.betContracts.cacheCall(
     //   "0xd742678f8344bbb7accc6296c8abc740f2c0508ada4c2249fa898c2877a8943c"
     // ).epoch;
-    let _offstring =
-      (
-        await bettingContract.betContracts(
-          "0xd742678f8344bbb7accc6296c8abc740f2c0508ada4c2249fa898c2877a8943c"
-        )
-      ).epoch || "";
-    setOffstring(_offstring);
+    // let _offstring =
+    //   (
+    //     await bettingContract.betContracts(
+    //       "0xd742678f8344bbb7accc6296c8abc740f2c0508ada4c2249fa898c2877a8943c"
+    //     )
+    //   ).epoch || "";
+    // setOffstring(_offstring);
 
     // marginKey7 = contracts["BettingMain"].methods.margin.cacheCall(7);
     let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
@@ -450,10 +452,10 @@ export default function BigBetPage() {
         teamAbbrevName: teamSplit[bet.MatchNum2][bet.OfferedTeam2 + 1],
         BigBetSize: Number(bet.Payoff2 / 10000).toFixed(3),
         BigOdds: ((0.95 * bet.Payoff2) / bet.BetSize2 + 1).toFixed(3),
-        OfferHash: bet.Hashoutput2,
-        OfferedEpoch: bet.Epoch2,
-        OfferTeamNum: bet.OfferedTeam2,
-        BigMatch: bet.MatchNum2,
+        OfferHash: Number(bet.Hashoutput2),
+        OfferedEpoch: Number(bet.Epoch2),
+        OfferTeamNum: Number(bet.OfferedTeam2),
+        BigMatch: Number(bet.MatchNum2),
       };
       _bigBets.push(bigBet);
     });
@@ -919,8 +921,8 @@ export default function BigBetPage() {
                     bigBets.map(
                       (bet, index) =>
                         //    bet.OfferTeamNum === teamPick &&
-                        bet.BigMatch == matchPick &&
-                        bet.OfferTeamNum === teamPick &&
+                        bet.BigMatch === matchPick &&
+                        bet.OfferTeamNum !== teamPick &&
                         subcontracts2[bet.OfferHash] && (
                           <tr style={{ width: "100%" }}>
                             <td>

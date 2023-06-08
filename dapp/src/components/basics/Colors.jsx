@@ -16,7 +16,7 @@ export const G = "#707070";
 
 export const Gg = "#CC0000";
 
-export const Ggg = "#910000";
+export const Ggg = "#961C1C";
 
 export const H = "#711313";
 

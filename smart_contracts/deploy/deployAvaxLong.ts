@@ -13,7 +13,7 @@ const million = BigInt('1000000');
 function saveABIFile(
   fileName: string,
   content: string,
-  dirPath = "../frontend/src/abis"
+  dirPath = "../dapp/src/abis"
 ) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath);
@@ -366,6 +366,16 @@ async function main() {
       console.log(`add1 ${userBalanceAcct1}`);
       console.log(`add2 ${userBalanceAcct2}`);
       console.log(`owner ${ownershares}`);
+      result = await betting.connect(signers[2]).postBigBet(0, 0, 201, 1995);
+      receipt = await result.wait();
+      result = await betting.connect(signers[1]).postBigBet(0, 0, 201, 1998);
+      receipt = await result.wait();
+      result = await betting.connect(signers[2]).postBigBet(0, 0, 201, 1999);
+      receipt = await result.wait();
+      result = await betting.connect(signers[1]).bet(4, 0, 20);
+      receipt = await result.wait();
+      result = await betting.connect(signers[1]).bet(6, 0, 20);
+      receipt = await result.wait();
 
 
   

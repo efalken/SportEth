@@ -101,6 +101,11 @@ contract Betting {
     oracleAdmin = _oracleAddress;
   }
 
+  function checkOffer(bytes32 _subkID) external view returns (bool) {
+    bool takeable = (offerContracts[_subkID].betAmount > 0);
+    return takeable;
+  }
+  
   receive() external payable {}
 
   fallback() external payable {}
@@ -489,6 +494,10 @@ contract Betting {
     return true;
   }
 
+  function showBetData() external view returns (uint256[32] memory _betData) {
+        _betData = betData;
+  }
+
   /** @dev processes updates to epoch's odds
    * @param _updateBetData updates the epoch's odds. Data are packed into uint64.
    */
@@ -530,10 +539,7 @@ contract Betting {
         bool redeemable = (outcomeMap[epochMatchWinner] > 0);
         return redeemable;
     }
-  
-    function showBetData() external view returns (uint256[32] memory) {
-        return betData;
-    }
+
 
   // @dev unpacks uint256 to reveal match's odds and bet amounts
   function decodeNumber(uint256 _encoded)

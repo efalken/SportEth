@@ -11,6 +11,7 @@ export default function EventStartTime() {
     if (!oracleContractReadOnly) return;
 
     (async () => {
+      const pricedata = [];
       const StartTimesPostedEvent =
         oracleContractReadOnly.filters.StartTimesPosted();
       const events = await oracleContractReadOnly.queryFilter(
