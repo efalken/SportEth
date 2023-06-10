@@ -190,10 +190,10 @@ function BookiePage() {
     //   this.props.accounts[0]
     // );
     let bs = await bettingContract.lpStruct(account);
-    let _bookieShares = bs ? bs.shares : "0";
+    let _bookieShares = bs ? bs.shares.toString() : "0";
     setBookieShares(_bookieShares);
 
-    let _bookieEpoch = bs ? bs.outEpoch : "0";
+    let _bookieEpoch = bs ? bs.outEpoch.toString() : "0";
     setBookieEpoch(_bookieEpoch);
 
     // this.tokenKey = this.contracts["TokenMain"].methods.balanceOf.cacheCall(
