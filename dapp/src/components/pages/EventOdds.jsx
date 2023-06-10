@@ -71,7 +71,7 @@ export default function EventOdds() {
               {" "}
               {moment.unix(event.time).format("DD-MM-YYTHH:mm")}, {event.Epoch}
               {": "} {(1 + event.decOdds[0] / 1000).toFixed(3)},{" "}
-              {(1 + event.decOdds[1] / 1000).toFixed(3)},{" "}
+              {Number(1 + event.decOdds[1] / 1000).toFixed(3)},{" "}
               {(1 + event.decOdds[2] / 1000).toFixed(3)},{" "}
               {(1 + event.decOdds[3] / 1000).toFixed(3)},{" "}
               {(1 + event.decOdds[4] / 1000).toFixed(3)},{" "}
