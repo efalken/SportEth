@@ -122,22 +122,18 @@ function BookiePage() {
     };
   }, [bettingContract, oracleContract, tokenContract]);
 
-  function fundRadio() {
-    setWantTokens(!wantTokens);
-  }
-
-  function handlefundBook(value) {
-    setFundAmount(value * 1e18);
-  }
-
   async function wdBook() {
     await bettingContract.withdrawBook(sharesToSell);
   }
 
   async function fundBook() {
-    await bettingContract.fundBook({
-      value: fundAmount * 1e18,
-    });
+    try {
+      await bettingContract.fundBook({
+        value: ethers.parseEther(fundAmount),
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async function inactivateBook() {
