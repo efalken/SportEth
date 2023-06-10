@@ -135,7 +135,7 @@ export default function BigBetPage() {
     return () => {
       clearInterval(interval1);
     };
-  }, [bettingContract, oracleContract]);
+  }, [bettingContract, oracleContract, currW]);
 
   async function takeBet() {
     await bettingContract.bet(6, 0, 200);
@@ -451,14 +451,13 @@ export default function BigBetPage() {
         teamAbbrevName: teamSplit[bet.MatchNum2][bet.OfferedTeam2 + 1],
         BigBetSize: Number(bet.Payoff2 / 10000).toFixed(3),
         BigOdds: ((0.95 * bet.Payoff2) / bet.BetSize2 + 1).toFixed(3),
-        OfferHash: Number(bet.Hashoutput2),
+        OfferHash: bet.Hashoutput2,
         OfferedEpoch: Number(bet.Epoch2),
         OfferTeamNum: Number(bet.OfferedTeam2),
         BigMatch: Number(bet.MatchNum2),
       };
       _bigBets.push(bigBet);
     });
-
     if (!bigBetsSet && _bigBets.length > 0) {
       setBigBets(_bigBets);
       setBigBetsSet(true);
@@ -914,45 +913,44 @@ export default function BigBetPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {bigBets.length > 0 &&
-                    /*  bet.OfferTeamNum === teamPick &&
-                       bet.BigMatch === matchPick &&*/
-                    bigBets.map(
-                      (bet, index) =>
-                        //    bet.OfferTeamNum === teamPick &&
-                        bet.BigMatch === matchPick &&
-                        bet.OfferTeamNum !== teamPick &&
-                        subcontracts2[bet.OfferHash] && (
-                          <tr style={{ width: "100%" }}>
-                            <td>
-                              <input
-                                type="radio"
-                                value={bet.OfferTeamNum}
-                                name={bet.teamAbbrevName}
-                                onChange={({ target: { value } }) =>
-                                  radioTeamPickTake(
-                                    bet.BigBetSize,
-                                    bet.OfferHash,
-                                    bet.BigOdds
-                                  )
-                                }
-                              />
-                            </td>
-                            <td>{Number(bet.BigBetSize).toFixed(3)}</td>
-                            <td>{Number(bet.BigOdds).toFixed(3)}</td>
+                  {bigBets
+                    .filter(
+                      (bet) =>
+                        bet.BigMatch === Number(matchPick) &&
+                        bet.OfferTeamNum === Number(teamPick) &&
+                        subcontracts2[bet.OfferHash]
+                    )
+                    .map((bet, index) => (
+                      //    bet.OfferTeamNum === teamPick &&
+                      <tr key={index} style={{ width: "100%" }}>
+                        <td>
+                          <input
+                            type="radio"
+                            value={bet.OfferTeamNum}
+                            name={bet.teamAbbrevName}
+                            onChange={({ target: { value } }) =>
+                              radioTeamPickTake(
+                                bet.BigBetSize,
+                                bet.OfferHash,
+                                bet.BigOdds
+                              )
+                            }
+                          />
+                        </td>
+                        <td>{Number(bet.BigBetSize).toFixed(3)}</td>
+                        <td>{Number(bet.BigOdds).toFixed(3)}</td>
 
-                            <td>
-                              <TruncatedAddress
-                                addr={bet.OfferHash}
-                                start="8"
-                                end="0"
-                                transform="uppercase"
-                                spacing="1px"
-                              />{" "}
-                            </td>
-                          </tr>
-                        )
-                    )}
+                        <td>
+                          <TruncatedAddress
+                            addr={bet.OfferHash}
+                            start="8"
+                            end="0"
+                            transform="uppercase"
+                            spacing="1px"
+                          />{" "}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
