@@ -79,7 +79,7 @@ export default function BigBetPage() {
   ]);
   const [teamSplit, setTeamSplit] = useState([]);
   const [betData, setBetData] = useState([]);
- // const [offstring, setOffstring] = useState("");
+  // const [offstring, setOffstring] = useState("");
   const [userBalance, setUserBalance] = useState("0");
 
   const { provider, signer, setSigner } = useContext(AuthContext);
@@ -159,7 +159,6 @@ export default function BigBetPage() {
     await bettingContract.offerContracts(x);
   }
 
-  
   function switchOdds() {
     setShowDecimalOdds(!showDecimalOdds);
   }
@@ -168,7 +167,7 @@ export default function BigBetPage() {
     await bettingContract.postBigBet(
       matchPick,
       teamPick,
-      betAmount * 10000,
+      Math.round(betAmount * 10000),
       Math.round(decOddsOffered * 1000)
     );
   }
@@ -187,28 +186,28 @@ export default function BigBetPage() {
 
     // TODO: Fix below
     for (const event of events) {
-   //   const {args, blockNumber} = event;
-        const {
-          args: {
-            bettor,
-            epoch,
-            matchNum,
-            pick,
-            betAmount,
-            payoff,
-            contractHash,
-          },
+      //   const {args, blockNumber} = event;
+      const {
+        args: {
+          bettor,
+          epoch,
+          matchNum,
+          pick,
+          betAmount,
+          payoff,
+          contractHash,
+        },
         blockNumber,
       } = event;
 
-     // const block = await provider.getBlock(blockNumber);
+      // const block = await provider.getBlock(blockNumber);
 
       eventdata.push({
         Hashoutput: contractHash,
         BettorAddress: bettor,
         Epoch: Number(epoch),
         timestamp: Number(blockNumber),
-        BetSize: Number(betAmount ),
+        BetSize: Number(betAmount),
         MyTeamPick: Number(pick),
         MatchNum: Number(matchNum),
         Payoff: Number(payoff),
@@ -231,7 +230,7 @@ export default function BigBetPage() {
     const events = await bettingContract.queryFilter(BetRecordEvent);
 
     for (const event of events) {
-     // const {args, blockNumber} = event;
+      // const {args, blockNumber} = event;
       const {
         args: {
           bettor,
@@ -245,7 +244,7 @@ export default function BigBetPage() {
         blockNumber,
       } = event;
 
-   //   const block = await provider.getBlock(blockNumber);
+      //   const block = await provider.getBlock(blockNumber);
 
       eventdata2.push({
         Hashoutput2: contractHash,
@@ -812,8 +811,8 @@ export default function BigBetPage() {
               justifyContent="flex-start"
               alignItems="center"
             >
-               <Input
-                onChange={({ target: { value } }) => setBetSize(value)}
+              <Input
+                onChange={({ target: { value } }) => setBetAmount(value)}
                 width="100px"
                 placeholder={"Enter Eths"}
                 marginLeft="10px"
@@ -828,7 +827,7 @@ export default function BigBetPage() {
                 marginLeft="10px"
                 marginRignt="5px"
                 value={decOddsOffered}
-              /> 
+              />
               <Box mt="10px" mb="10px">
                 <Button
                   style={{
@@ -837,9 +836,9 @@ export default function BigBetPage() {
                     float: "right",
                     marginLeft: "5px",
                   }}
-                  onClick={() => makeBigBet()}
+                  onClick={makeBigBet}
                 >
-                  Click to Submit{" "}
+                  Click to Submit
                 </Button>
               </Box>
 
