@@ -127,7 +127,7 @@ function BookiePage() {
   }
 
   function handlefundBook(value) {
-    setFundAmount(value * 10000);
+    setFundAmount(value * 1e18);
   }
 
   async function wdBook() {
@@ -136,7 +136,7 @@ function BookiePage() {
 
   async function fundBook() {
     await bettingContract.fundBook({
-      value: fundAmount * 1e14,
+      value: fundAmount * 1e18,
     });
   }
 

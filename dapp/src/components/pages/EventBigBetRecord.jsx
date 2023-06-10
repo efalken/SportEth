@@ -25,6 +25,7 @@ export default function EventBigBetRecord() {
           BettorAddress: args.bettor,
           Epoch: Number(args.epoch),
           BetSize: Number(args.betAmount),
+          Payoff: Number(args.payoff),
           LongPick: Number(args.pick),
           MatchNum: Number(args.matchNum),
         });
@@ -70,7 +71,7 @@ export default function EventBigBetRecord() {
           <Text size="12px" weight="200">
             {" "}
             {event.Epoch}, {event.MatchNum}, {event.LongPick},{" "}
-            {event.BetSize.toFixed(3)}, {event.BettorAddress},{" "}
+            {event.BetSize.toFixed(0)},{event.Payoff.toFixed(1)}, {event.BettorAddress},{" "}
             {event.Hashoutput},{" "}
           </Text>
           <br />

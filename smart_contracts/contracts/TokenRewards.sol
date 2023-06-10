@@ -14,7 +14,7 @@ contract TokenRewards {
   mapping(address => uint32) public claimEpoch;
   uint64 public tokensInContract;
   uint32 public x;
-  uint256 public constant EPOCH_AMOUNT = 25e7;
+  uint256 public constant EPOCH_AMOUNT = 1e7;
 
   event TokenReward(address liqprovider, uint256 tokens, uint32 epoch);
 
@@ -42,6 +42,7 @@ contract TokenRewards {
     } else if (lpepoch < epoch) {
       claimEpoch[msg.sender] = epoch;
       tokenRewards = uint64((uint256(lpShares) * EPOCH_AMOUNT) / totShares);
+      //tokenRewards = uint64(totShares);
       tokensInContract -= tokenRewards;
       bool success = token.transfer(msg.sender, tokenRewards);
       require(success, "token failed");

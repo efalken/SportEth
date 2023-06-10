@@ -79,7 +79,7 @@ export default function BigBetPage() {
   ]);
   const [teamSplit, setTeamSplit] = useState([]);
   const [betData, setBetData] = useState([]);
-  const [offstring, setOffstring] = useState("");
+ // const [offstring, setOffstring] = useState("");
   const [userBalance, setUserBalance] = useState("0");
 
   const { provider, signer, setSigner } = useContext(AuthContext);
@@ -169,7 +169,7 @@ export default function BigBetPage() {
       matchPick,
       teamPick,
       betAmount * 10000,
-      decOddsOffered * 1000
+      Math.round(decOddsOffered * 1000)
     );
   }
 
@@ -812,8 +812,8 @@ export default function BigBetPage() {
               justifyContent="flex-start"
               alignItems="center"
             >
-              {/* <Input
-                onChange={({ target: { value } }) => handleBetSize(value)}
+               <Input
+                onChange={({ target: { value } }) => setBetSize(value)}
                 width="100px"
                 placeholder={"Enter Eths"}
                 marginLeft="10px"
@@ -822,13 +822,13 @@ export default function BigBetPage() {
               />
 
               <Input
-                onChange={({ target: { value } }) => handleOddsOffered(value)}
+                onChange={({ target: { value } }) => setDecOddsOffered(value)}
                 width="151px"
                 placeholder={"DecOdds e.g. 1.909"}
                 marginLeft="10px"
                 marginRignt="5px"
                 value={decOddsOffered}
-              /> */}
+              /> 
               <Box mt="10px" mb="10px">
                 <Button
                   style={{

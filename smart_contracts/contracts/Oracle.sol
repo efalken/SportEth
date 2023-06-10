@@ -112,12 +112,13 @@ contract Oracle {
     // requires new init data posted
     require(reviewStatus == INIT_PROC_NEXT, "wrong data");
     // can only send after 12 noon GMT
-    require(hourOfDay() >= HOUR_PROCESS, "too soon");
+    require(hourOfDay() < HOUR_PROCESS, "too soon");
     // only sent if 'null' vote does not win
     if (votes[0] > votes[1]) {
       // sends to the betting contract
       bettingContract.transmitInit(propOddsStarts);
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
+      mintReward();
     } else {
       burnAndReset();
     }
@@ -139,10 +140,11 @@ contract Oracle {
     // makes sure updated odds data was posted
     require(reviewStatus == UPDATE_PROC_NEXT, "wrong data");
     // needs at least 6 hours
-    require(hourOfDay() >= HOUR_PROCESS, "too soon");
+    require(hourOfDay() < HOUR_PROCESS, "too soon");
     if (votes[0] > votes[1]) {
       bettingContract.transmitUpdate(propOddsUpdate);
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
+      mintReward();
     } else {
       burnAndReset();
     }
@@ -163,7 +165,7 @@ contract Oracle {
 
   function settleProcess() external returns (bool) {
     require(reviewStatus == SETTLE_PROC_NEXT, "wrong data");
-    require(hourOfDay() >= HOUR_PROCESS, "too soon");
+    require(hourOfDay() < HOUR_PROCESS, "too soon");
     if (votes[0] > votes[1]) {
       (uint32 _epoch, uint256 ethDividend) = bettingContract.settle(
         propResults
@@ -171,6 +173,7 @@ contract Oracle {
       betEpochOracle = _epoch;
       feeData[1] += uint64(ethDividend / uint256(feeData[0]) / 1e5);
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
+      mintReward();
     } else {
       burnAndReset();
     }
@@ -179,7 +182,7 @@ contract Oracle {
     return true;
   }
 
-  function paramUpdate(uint32 _concentrationLim) external returns (bool) {
+  function concentrationFactor(uint32 _concentrationLim) external returns (bool) {
     require(adminStruct[msg.sender].tokens >= (MIN_SUBMIT * 2));
     bettingContract.adjustParams(_concentrationLim);
     emit ParamsPosted(_concentrationLim);
@@ -206,7 +209,7 @@ contract Oracle {
           adminStruct[msg.sender].tokens *
             (feeData[1] - adminStruct[msg.sender].initFeePool)
         ) *
-        1e5;
+        TOKEN_ADJ;
       //payable(msg.sender).transfer(ethClaim);
       (success, ) = payable(msg.sender).call{ value: ethClaim }("");
       require(success, "eth payment failed");
@@ -227,7 +230,7 @@ contract Oracle {
     uint256 ethClaim = uint256(
       adminStruct[msg.sender].tokens *
         (feeData[1] - adminStruct[msg.sender].initFeePool)
-    ) * 1e5;
+    ) * TOKEN_ADJ;
     adminStruct[msg.sender].initFeePool = feeData[1];
     feeData[0] -= _amtTokens;
     adminStruct[msg.sender].tokens -= _amtTokens;
@@ -260,13 +263,16 @@ contract Oracle {
   }
 
   function burnAndReset() internal returns (bool success) {
-    uint32 burnAmt = MIN_SUBMIT / 5;
     // punishes proposer for sending data that was rejected
-    feeData[0] -= burnAmt;
-    adminStruct[proposer].tokens -= burnAmt;
-    success = token.burn(burnAmt);
+    feeData[0] -= BURN_AMT;
+    adminStruct[proposer].tokens -= BURN_AMT;
+    success = token.burn(BURN_AMT);
     emit VoteOutcome(false, betEpochOracle, propNumber, votes[0], votes[1]);
     require(success, "token burn failed");
+  }
+
+    function mintReward() internal {
+    token.mint(proposer, ORACLE_REWARD);
   }
 
   function create96(uint32[32] memory _time, uint32[32] memory _odds)
@@ -280,7 +286,7 @@ contract Oracle {
       if (_time[i] != 0) {
         require(_odds[i] > MIN_DEC_ODDS_INIT && _odds[i] < MAX_DEC_ODDS_INIT);
         require(_time[i] >= _time[0]);
-        opponentOdds = 1e6 / (ODDS_FACTOR + _odds[i]) - ODDS_FACTOR;
+        opponentOdds = 1e6 / (ODDS_FACTOR0 + _odds[i]) - ODDS_FACTOR1;
         out |= uint96(_time[i]) << 64;
         out |= uint96(_odds[i]) << 32;
         out |= uint96(opponentOdds);
@@ -299,7 +305,7 @@ contract Oracle {
     uint64 out;
     for (uint256 i = 0; i < 32; i++) {
       require(_odds[i] > MIN_DEC_ODDS_UPDATE && _odds[i] < MAX_DEC_ODDS_UPDATE);
-      opponentOdds = 1e6 / (ODDS_FACTOR + _odds[i]) - ODDS_FACTOR;
+      opponentOdds = 1e6 / (ODDS_FACTOR1 + _odds[i]) - ODDS_FACTOR1;
       out |= uint64(_odds[i]) << 32;
       out |= uint64(opponentOdds);
       outv[i] = out;

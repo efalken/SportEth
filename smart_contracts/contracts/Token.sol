@@ -17,7 +17,7 @@ contract Token {
 
   event Transfer(address _from, address _to, uint64 _value);
   event Burn(address _from, uint64 _value);
-
+  event Mint(address _from, uint64 _value);
   event Approval(address _owner, address _spender, uint64 _value);
 
   constructor() {
@@ -28,16 +28,23 @@ contract Token {
     symbol = "SET";
   }
 
-  //receive() external payable {}
-
-  //fallback() external {}
-
   function approve(address _spender, uint64 _value)
     external
     returns (bool success)
   {
     allowance[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
+    return true;
+  }
+
+    function mint(address _spender, uint64 _value)
+    external
+    onlyAdmin
+    returns (bool success)
+  {
+    totalSupply += _value;
+    balanceOf[_spender] += _value;
+    emit Mint(_spender, _value);
     return true;
   }
 

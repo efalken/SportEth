@@ -33,6 +33,7 @@ describe("Betting", function () {
     oracle = await Oracle.deploy(betting.address, token.address);
     reader = await Reader.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
+    await token.setAdmin(oracle.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   });
 

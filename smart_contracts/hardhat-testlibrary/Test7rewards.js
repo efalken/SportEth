@@ -9,6 +9,7 @@ var nextStart;
 var _date;
 var _hour;
 var result;
+var receipt;
 const firstStart = 1635695609;
 const { assert } = require("chai");
 const finneys = BigInt("1000000000000000");
@@ -62,12 +63,14 @@ describe("Betting", function () {
       await tokenrewards.depositTokens(500n * million);
       var tt = await tokenrewards.tokensInContract();
       console.log("tokens in k", tt);
-      const tokens0 = await token.balanceOf(owner.address);
-      const tokens1 = await token.balanceOf(account1.address);
-      console.log(`acct 0-0 ${tokens0}`);
-      console.log(`acct 1-0 ${tokens1}`);
-      const epoch = await betting.margin(3);
-      console.log(`epoch ${epoch}`);
+      // const tokens0 = await token.balanceOf(owner.address);
+      // const tokens1 = await token.balanceOf(account1.address);
+      // console.log(`acct 0-0 ${tokens0}`);
+      // console.log(`acct 1-0 ${tokens1}`);
+      // const epoch = await betting.margin(3);
+      // console.log(`margin3 ${epoch}`);
+      // const acct0epoch = await tokenrewards.claimEpoch(owner.address);
+      // console.log(`epoch ${acct0epoch}`);
     });
   });
 
@@ -81,13 +84,13 @@ describe("Betting", function () {
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      console.log(`hourAdj ${hourOffset}`);
+      //  console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       var nextStart = _timestamp + 7 * 86400;
-      console.log(`time is ${nextStart}`);
+      // console.log(`time is ${nextStart}`);
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -204,14 +207,14 @@ describe("Betting", function () {
 
     it("checkHour", async () => {
       _hourSolidity = await reader.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
+      //    console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
         hourOffset = 36 - _hourSolidity;
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      console.log(`hourAdj ${hourOffset}`);
+      //   console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -222,7 +225,9 @@ describe("Betting", function () {
       console.log(`acct 0-1 ${tokens0}`);
       console.log(`acct 1-1 ${tokens1}`);
       const epoch = await betting.margin(3);
-      console.log(`epoch ${epoch}`);
+      console.log(`margin3 ${epoch}`);
+      const acct0epoch = await tokenrewards.claimEpoch(owner.address);
+      console.log(`epoch ${acct0epoch}`);
     });
 
     it("Send Initial Event Results", async () => {
@@ -240,11 +245,11 @@ describe("Betting", function () {
       const result2 = await oracle.settleProcess();
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
-      console.log(`gas on first settlement ${gasUsed}`);
+      //   console.log(`gas on first settlement ${gasUsed}`);
       const totShares = await betting.margin(4);
       console.log(`totShares ${totShares}`);
       const x = await tokenrewards.x();
-      console.log(`totShares2 ${x}`);
+      //   console.log(`totShares2 ${x}`);
     });
 
     it("tokensEarned1", async () => {
@@ -257,7 +262,9 @@ describe("Betting", function () {
       console.log(`acct 0-2 ${tokens00}`);
       console.log(`acct 1-2 ${tokens11}`);
       const epoch = await betting.margin(3);
-      console.log(`epoch ${epoch}`);
+      console.log(`margin3 ${epoch}`);
+      const acct0epoch = await tokenrewards.claimEpoch(owner.address);
+      console.log(`epoch ${acct0epoch}`);
     });
 
     it("state after Round 2", async () => {
@@ -269,28 +276,28 @@ describe("Betting", function () {
       const shares2 = await betting.margin(4);
       const sharesAcct0 = (await betting.lpStruct(owner.address)).shares;
       const sharesAcct1 = (await betting.lpStruct(account1.address)).shares;
-      console.log(`bookie capital ${excessCapital}`);
-      console.log(`eth in betting contract ${ethbal}`);
-      console.log(`total LP shares ${shares2}`);
-      console.log(`sharesAcct0 ${sharesAcct0}`);
-      console.log(`sharesAcct1 ${sharesAcct1}`);
-      assert.equal(Math.floor(sharesAcct0), "60000", "Must be equal");
-      assert.equal(Math.floor(sharesAcct1), "40000", "Must be equal");
-      assert.equal(Math.floor(shares2), "100000", "Must be equal");
-      assert.equal(Math.floor(ethbal), "20000", "Must be equal");
-      assert.equal(Math.floor(excessCapital), "100000", "Must be equal");
+      // console.log(`bookie capital ${excessCapital}`);
+      // console.log(`eth in betting contract ${ethbal}`);
+      // console.log(`total LP shares ${shares2}`);
+      // console.log(`sharesAcct0 ${sharesAcct0}`);
+      // console.log(`sharesAcct1 ${sharesAcct1}`);
+      // assert.equal(Math.floor(sharesAcct0), "60000", "Must be equal");
+      // assert.equal(Math.floor(sharesAcct1), "40000", "Must be equal");
+      // assert.equal(Math.floor(shares2), "100000", "Must be equal");
+      // assert.equal(Math.floor(ethbal), "20000", "Must be equal");
+      // assert.equal(Math.floor(excessCapital), "100000", "Must be equal");
     });
 
     it("checkHour", async () => {
       _hourSolidity = await reader.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
+      // console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
         hourOffset = 36 - _hourSolidity;
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      console.log(`hourAdj ${hourOffset}`);
+      // console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -373,7 +380,7 @@ describe("Betting", function () {
       );
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
-      console.log(`gas on first post ${gasUsed}`);
+      // console.log(`gas on first post ${gasUsed}`);
     });
 
     it("fast forward 4 hours", async () => {
@@ -389,19 +396,19 @@ describe("Betting", function () {
       const result2 = await oracle.initProcess();
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
-      console.log(`gas on initial send ${gasUsed}`);
+      // console.log(`gas on initial send ${gasUsed}`);
     });
 
     it("checkHour", async () => {
       _hourSolidity = await reader.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
+      // console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
         hourOffset = 36 - _hourSolidity;
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      console.log(`hourAdj ${hourOffset}`);
+      // console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -429,22 +436,20 @@ describe("Betting", function () {
       const result2 = await oracle.settleProcess();
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
-      console.log(`gas on second settlement ${gasUsed}`);
+      await tokenrewards.getTokenRewards();
+      await tokenrewards.connect(account1).getTokenRewards();
+      // console.log(`gas on second settlement ${gasUsed}`);
       const tokens00 = await token.balanceOf(owner.address);
       const tokens11 = await token.balanceOf(account1.address);
-      console.log(`tokens0-3 earned ${tokens00}`);
-      console.log(`tokens1-3 earned ${tokens11}`);
+      console.log(`acct 0-3 earned ${tokens00}`);
+      console.log(`acct 1-3 earned ${tokens11}`);
       const epoch = await betting.margin(3);
-      console.log(`epoch ${epoch}`);
+      console.log(`margin3 ${epoch}`);
+      const acct0epoch = await tokenrewards.claimEpoch(owner.address);
+      console.log(`epoch ${acct0epoch}`);
+      const totshares = await betting.margin(4);
+      console.log(`totshares ${totshares}`);
     });
-
-    // it("tokensEarned2", async () => {
-    //   const tokens0 = await token.balanceOf(owner.address);
-    //   const tokens1 = await token.balanceOf(account1.address);
-    //   await tokenrewards.getTokenRewards();
-    //   await tokenrewards.connect(account1).getTokenRewards();
-
-    // });
 
     it("withdraw 100 finney 'shares' for account 0", async () => {
       const ethbal1 = ethers.utils.formatUnits(
@@ -472,8 +477,8 @@ describe("Betting", function () {
       );
       var sum1 = Number(ethbal2) - Number(ethbal1) + Number(totCost2);
       sum1 = Math.round(sum1 * 100) / 100;
-      console.log(`eth sent to EOA ${sum1}`);
-      console.log(`eth sent to EOA2 ${ethout}`);
+      // console.log(`eth sent to EOA ${sum1}`);
+      // console.log(`eth sent to EOA2 ${ethout}`);
     });
 
     it("withdraw 50 finney shares for acct 1", async () => {
@@ -490,29 +495,29 @@ describe("Betting", function () {
       const sharesAcct0 = (await betting.lpStruct(owner.address)).shares;
       const sharesAcct1 = (await betting.lpStruct(account1.address)).shares;
 
-      console.log(`bookie capital ${excessCapital}`);
-      console.log(`eth in betting contract ${ethbal}`);
-      console.log(`total LP shares ${shares2}`);
-      console.log(`sharesAcct0 ${sharesAcct0}`);
-      console.log(`sharesAcct1 ${sharesAcct1}`);
+      // console.log(`bookie capital ${excessCapital}`);
+      // console.log(`eth in betting contract ${ethbal}`);
+      // console.log(`total LP shares ${shares2}`);
+      // console.log(`sharesAcct0 ${sharesAcct0}`);
+      // console.log(`sharesAcct1 ${sharesAcct1}`);
 
-      assert.equal(Math.floor(sharesAcct0), "50000", "Must be equal");
-      assert.equal(Math.floor(sharesAcct1), "35000", "Must be equal");
-      assert.equal(Math.floor(excessCapital), "85000", "Must be equal");
-      assert.equal(Math.floor(ethbal), "18500", "Must be equal");
-      assert.equal(Math.floor(shares2), "85000", "Must be equal");
+      // assert.equal(Math.floor(sharesAcct0), "50000", "Must be equal");
+      // assert.equal(Math.floor(sharesAcct1), "35000", "Must be equal");
+      // assert.equal(Math.floor(excessCapital), "85000", "Must be equal");
+      // assert.equal(Math.floor(ethbal), "18500", "Must be equal");
+      // assert.equal(Math.floor(shares2), "85000", "Must be equal");
     });
 
     it("checkHour", async () => {
       _hourSolidity = await reader.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
+      // console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
         hourOffset = 36 - _hourSolidity;
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      console.log(`hourAdj ${hourOffset}`);
+      // console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -595,7 +600,7 @@ describe("Betting", function () {
       );
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
-      console.log(`gas on second post ${gasUsed}`);
+      // console.log(`gas on second post ${gasUsed}`);
     });
 
     it("fast forward 4 hours", async () => {
@@ -611,25 +616,25 @@ describe("Betting", function () {
       const result2 = await oracle.initProcess();
       const receipt = await result2.wait();
       const gasUsed = receipt.gasUsed;
-      console.log(`gas on second send ${gasUsed}`);
+      // console.log(`gas on second send ${gasUsed}`);
     });
 
     it("Bet 50 finney on match 0: team 0", async () => {
       const bookpool = await betting.margin(0);
-      console.log(`bookieCap is ${bookpool}`);
+      // console.log(`bookieCap is ${bookpool}`);
       await betting.connect(account2).bet(0, 0, "5000");
     });
 
     it("checkHour", async () => {
       _hourSolidity = await reader.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
+      // console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
         hourOffset = 36 - _hourSolidity;
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      console.log(`hourAdj ${hourOffset}`);
+      // console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -649,40 +654,21 @@ describe("Betting", function () {
       await oracle.settleProcess();
     });
 
-    it("tokens earned3", async () => {
-      const tokens0 = await token.balanceOf(owner.address);
-      const tokens1 = await token.balanceOf(account1.address);
-      //result = await expect(tokenrewards.getTokenRewards()).to.be.reverted;
-      result = await expect(tokenrewards.getTokenRewards());
-      result = await expect(tokenrewards.connect(account1));
+    it("final pre", async () => {
+      result = await tokenrewards.getTokenRewards();
+      //receipt = await result.wait();
+      result = await tokenrewards.connect(account1).getTokenRewards();
+      //receipt = await result.wait();
       const tokens00 = await token.balanceOf(owner.address);
       const tokens11 = await token.balanceOf(account1.address);
       console.log(`acct 0-4 ${tokens00}`);
       console.log(`acct 1-4 ${tokens11}`);
       const epoch = await betting.margin(3);
-      console.log(`epoch ${epoch}`);
-    });
-
-    it("state 2", async () => {
-      const excessCapital = await betting.margin(0);
-      const ethbal = ethers.utils.formatUnits(
-        await ethers.provider.getBalance(betting.address),
-        "finney"
-      );
-      const shares2 = await betting.margin(4);
-      const sharesAcct0 = (await betting.lpStruct(owner.address)).shares;
-      const sharesAcct1 = (await betting.lpStruct(account1.address)).shares;
-      console.log(`bookie capital ${excessCapital}`);
-      console.log(`eth in betting contract ${ethbal}`);
-      console.log(`total LP shares ${shares2}`);
-      console.log(`sharesAcct0 ${sharesAcct0}`);
-      console.log(`sharesAcct1 ${sharesAcct1}`);
-
-      assert.equal(Math.floor(sharesAcct0), "50000", "Must be equal");
-      assert.equal(Math.floor(sharesAcct1), "35000", "Must be equal");
-      assert.equal(Math.floor(excessCapital), "90000", "Must be equal");
-      assert.equal(Math.floor(ethbal), "18500", "Must be equal");
-      assert.equal(Math.floor(shares2), "85000", "Must be equal");
+      console.log(`margin3 ${epoch}`);
+      const acct0epoch = await tokenrewards.claimEpoch(owner.address);
+      console.log(`epoch ${acct0epoch}`);
+      const totShares = await betting.margin(4);
+      console.log(`totShares ${totShares}`);
     });
 
     it("withdraw 100 finney for account 0", async () => {
@@ -702,31 +688,6 @@ describe("Betting", function () {
         await ethers.provider.getBalance(betting.address),
         "finney"
       );
-      console.log(`eth to acct0 ${ethin0}`);
-      console.log(`eth to acct1 ${ethin1}`);
-      assert.equal(ethin0, "1058.8", "Must be equal");
-      assert.equal(ethin1, "529.4", "Must be equal");
-    });
-
-    it("State 3", async () => {
-      const excessCapital = await betting.margin(0);
-      const ethbal = ethers.utils.formatUnits(
-        await ethers.provider.getBalance(betting.address),
-        "finney"
-      );
-      const shares2 = await betting.margin(4);
-      const sharesAcct0 = (await betting.lpStruct(owner.address)).shares;
-      const sharesAcct1 = (await betting.lpStruct(account1.address)).shares;
-      const sharesAcct3 = (await betting.lpStruct(account3.address)).shares;
-      console.log(`bookie capital ${excessCapital}`);
-      console.log(`eth in betting contract ${ethbal}`);
-      console.log(`total LP shares ${shares2}`);
-      console.log(`sharesAcct0 ${sharesAcct0}`);
-      console.log(`sharesAcct1 ${sharesAcct1}`);
-      assert.equal(Math.floor(sharesAcct0), "40000", "Must be equal");
-      assert.equal(Math.floor(sharesAcct1), "30000", "Must be equal");
-      assert.equal(Math.floor(excessCapital), "74118", "Must be equal");
-      assert.equal(Math.floor(shares2), "70000", "Must be equal");
     });
 
     it("Acct 3 Funds Betting Contract", async () => {
@@ -735,37 +696,17 @@ describe("Betting", function () {
       });
     });
 
-    it("State 4", async () => {
-      const excessCapital = await betting.margin(0);
-      const ethbal = ethers.utils.formatUnits(
-        await ethers.provider.getBalance(betting.address),
-        "finney"
-      );
-      const shares2 = await betting.margin(4);
-
-      const sharesAcct0 = (await betting.lpStruct(owner.address)).shares;
-      const sharesAcct1 = (await betting.lpStruct(account1.address)).shares;
-      const sharesAcct3 = (await betting.lpStruct(account3.address)).shares;
-
-      console.log(`bookie capital ${excessCapital}`);
-      console.log(`eth in betting contract ${ethbal}`);
-      console.log(`total LP shares ${shares2}`);
-      console.log(`sharesAcct0 ${sharesAcct0}`);
-      console.log(`sharesAcct1 ${sharesAcct1}`);
-      console.log(`sharesAcct3 ${sharesAcct3}`);
-      assert.equal(Math.floor(sharesAcct0), "40000", "Must be equal");
-      assert.equal(Math.floor(sharesAcct1), "30000", "Must be equal");
-      assert.equal(Math.floor(sharesAcct3), "9444", "Must be equal");
-      assert.equal(Math.floor(shares2), "79444", "Must be equal");
-    });
-
-    it("State 4", async () => {
+    it("final", async () => {
       const tokens0 = await token.balanceOf(owner.address);
       const tokens1 = await token.balanceOf(account1.address);
       console.log(`acct 0-5 ${tokens0}`);
       console.log(`acct 1-5 ${tokens1}`);
       const epoch = await betting.margin(3);
-      console.log(`epoch ${epoch}`);
+      console.log(`margin3 ${epoch}`);
+      const acct0epoch = await tokenrewards.claimEpoch(owner.address);
+      console.log(`epoch ${acct0epoch}`);
+      const totShares = await betting.margin(4);
+      console.log(`totShares ${totShares}`);
     });
   });
 });

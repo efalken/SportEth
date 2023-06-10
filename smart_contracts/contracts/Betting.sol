@@ -79,7 +79,7 @@ contract Betting {
 
   constructor(address payable _tokenAddress) {
     // concentration limit
-    margin[5] = 8;
+    margin[5] = 5;
     // initial bet epoch one
     margin[3] = 1;
     // first contest
@@ -107,8 +107,6 @@ contract Betting {
   }
   
   receive() external payable {}
-
-  fallback() external payable {}
 
   /** @dev processes a basic bet
    * @param _matchNumber is 0 to 31, representing the match number as presented in the sequence of weekly matches
@@ -167,7 +165,7 @@ contract Betting {
     betContracts[subkID] = order;
     // adds to LP collateral locked for this weekend
     margin[2] += _betAmt;
-    margin[1] = uint32(addSafe(margin[1], marginChange));
+    margin[1] = uint32(int32(margin[1]) + marginChange);
     betDatav[_team0or1] += _betAmt;
     betDatav[2 + _team0or1] += uint32(betPayoff);
     // pack data on match into one 256-bit number via bit shifting
@@ -235,7 +233,7 @@ contract Betting {
   }
 
   /* @dev takes outstanding offered bet
-   * @param _subkid is the picked contract's HashID
+   * @param _subkid is the bet offer's unique HashID
    */
   function takeBigBet(bytes32 _subkid) external {
     Subcontract memory k = offerContracts[_subkid];
@@ -277,6 +275,15 @@ contract Betting {
     k.pick = 1 - k.pick;
     userBalance[msg.sender] -= k.betAmount;
     margin[2] += (k.payoff + k.betAmount);
+    emit OfferRecord(
+      msg.sender,
+      uint8(margin[3]),
+      k.matchNum,
+      k.pick,
+      k.betAmount,
+      k.payoff,
+      _subkid
+    );
     emit BetRecord(
       msg.sender,
       uint8(margin[3]),
@@ -300,6 +307,7 @@ contract Betting {
     betContracts[subkID2] = k;
     margin[6]++;
     delete offerContracts[_subkid];
+    
   }
 
   /* @dev cancels outstanding offered bet
@@ -308,7 +316,7 @@ contract Betting {
    */
   function cancelBigBet(bytes32 _subkid) external {
     require(offerContracts[_subkid].bettor == msg.sender, "wrong account");
-    delete betContracts[_subkid];
+    delete offerContracts[_subkid];
   }
 
   /* @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
@@ -350,22 +358,19 @@ contract Betting {
         }
       }
     }
-    // advances epoch
-    margin[3]++;
     // sending avax to oracle adjusts from 5 to 18 decimals, and applies the 5% multiplication factor
     // 5e-2 is the factor to generate 5% of a number
     uint256 oracleDiv = ORACLE_5PERC * uint256(payoffPot);
     // first throws bookie and bettor money into a pot, then subtracts the money due to 
     // bettors via payoff (payoffPot) and principal (redemptionPot)
     // this is the new net bookie balance
-    margin[0] = addSafe(
-      margin[0] + margin[2],
-      -int32(redemptionPot + payoffPot)
-    );
+    margin[0] = margin[0] + margin[2] - redemptionPot - payoffPot;
     // bookie locked amount for the next week starts at zero
     margin[1] = 0;
     // bet amount for the next week starts at zero
     margin[2] = 0;
+    // advances epoch
+    margin[3]++;
     delete betData;
     // this sets the future start time in the future
     // bookies can only add or remove from their accounts when games have not started
@@ -389,14 +394,14 @@ contract Betting {
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
     require(block.timestamp < uint32(margin[7]), "only prior to first event");
-    uint32 netinvestment = uint32(msg.value / UNITS_TRANS14);
+    uint256 netinvestment = (msg.value / 1e14);
     uint32 _shares = 0;
     if (margin[0] > 0) {
-      _shares = multiply(netinvestment, margin[4]) / margin[0];
+      _shares = uint32(netinvestment * uint256(margin[4]) / uint256(margin[0]));
     } else {
-      _shares = netinvestment;
+      _shares = uint32(netinvestment);
     }
-    margin[0] = addSafe(margin[0], int32(netinvestment));
+    margin[0] = margin[0] + uint32(netinvestment);
     // PRODUCTION CHANGE
     // LP can only withdraw after this epoch
     // prevents LPs from providing liquidity on books that 
@@ -456,7 +461,7 @@ contract Betting {
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
     // process check
     require(margin[3] > lpStruct[msg.sender].outEpoch, "too soon");
-    uint32 ethWithdraw = multiply(_sharesToSell, margin[0]) / margin[4];
+    uint32 ethWithdraw = (_sharesToSell * margin[0]) / margin[4];
     // LP cannot withdraw if bettors have locked up their capital
     require(
       ethWithdraw <= (margin[0] - margin[1]),
@@ -562,22 +567,5 @@ contract Betting {
     if (c <= 0) c = 0;
     return c;
   }
-  // @dev multiply without overflow
-  function multiply(uint32 _a, uint32 _b) internal pure returns (uint32) {
-    uint32 c = _a * _b;
-    require(c / _a == _b, "mult overflow");
-    return c;
-  }
 
-  function addSafe(uint32 _a, int32 _b) internal pure returns (uint32) {
-    uint32 c;
-    if (_b < 0) {
-      c = _a - uint32(-_b);
-      require(c < _a, "overflow");
-    } else {
-      c = _a + uint32(_b);
-      require(c >= _a, "overflow");
-    }
-    return c;
-  }
 }

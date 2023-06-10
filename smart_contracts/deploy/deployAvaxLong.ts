@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import fs from "fs";
 var result;
-var nextStart = 1686254079;
+var nextStart = 1687254079;
 var receipt;
 var hash;
 
@@ -63,7 +63,7 @@ async function main() {
   console.log(`got here2`);
   result = await token.transfer(reader.address, 440n*million);
   await result.wait();
-  nextStart = 1686254079;
+  nextStart = 1687254079;
   result = await betting.fundBook({
     value: 100n*finneys,
   });
@@ -280,7 +280,7 @@ async function main() {
       receipt = result.wait();
       result = await oracle.settleProcess();
       receipt = result.wait();
-      var nextStart = 1686254079;
+      var nextStart = 1687254079;
       result = await oracle.initPost(
         [
           "NHL:Colorado:Washington",
@@ -366,9 +366,9 @@ async function main() {
       console.log(`add1 ${userBalanceAcct1}`);
       console.log(`add2 ${userBalanceAcct2}`);
       console.log(`owner ${ownershares}`);
-      result = await betting.connect(signers[2]).postBigBet(0, 0, 201, 1995);
+      result = await betting.connect(signers[2]).postBigBet(0, 0, 200, 2000);
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).postBigBet(0, 0, 201, 1998);
+      result = await betting.connect(signers[1]).postBigBet(0, 0, 200, 4000);
       receipt = await result.wait();
       result = await betting.connect(signers[2]).postBigBet(0, 0, 201, 1999);
       receipt = await result.wait();
@@ -376,6 +376,10 @@ async function main() {
       receipt = await result.wait();
       result = await betting.connect(signers[1]).bet(6, 0, 20);
       receipt = await result.wait();
+      result = await betting.connect(signers[1]).fundBook({
+        value: 100n*finneys,
+      });
+      await result.wait();
 
 
   
