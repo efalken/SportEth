@@ -1,16 +1,15 @@
 import React, { useState, useContext, useEffect } from "react";
 import Text from "../basics/Text";
-import IndicatorD from "../basics/IndicatorD";
 import AuthContext from "../../contexts/AuthContext";
 import moment from "moment";
 
 export default function EventGameoutcomes() {
   const { oracleContractReadOnly } = useContext(AuthContext);
-  const [priceHistory, setPriceHistory] = useState([]);
+  const [priceHistory, setPriceHistory] = useState([][]);
 
   useEffect(() => {
     if (!oracleContractReadOnly) return;
-
+    console.log(oracleContractReadOnly);
     (async () => {
       const pricedata = [];
       const ResultsPostedEvent = oracleContractReadOnly.filters.ResultsPosted();
@@ -20,7 +19,8 @@ export default function EventGameoutcomes() {
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
-          timestamp: Number(blockNumber),
+          timestamp: (blockNumber),
+          outcome: Number(args.winner),
           Epoch: Number(args.epoch),
           outcome: args.winner,
         });
@@ -29,9 +29,7 @@ export default function EventGameoutcomes() {
     })();
   }, [oracleContractReadOnly]);
 
-  console.log("phist", priceHistory);
-
-  if (Object.keys(priceHistory).length === 0)
+  if (priceHistory.length === 0)
     return (
       <Text size="20px" weight="200">
         Waiting...

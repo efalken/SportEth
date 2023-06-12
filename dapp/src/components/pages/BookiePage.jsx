@@ -122,22 +122,18 @@ function BookiePage() {
     };
   }, [bettingContract, oracleContract, tokenContract]);
 
-  function fundRadio() {
-    setWantTokens(!wantTokens);
-  }
-
-  function handlefundBook(value) {
-    setFundAmount(value * 1e18);
-  }
-
   async function wdBook() {
     await bettingContract.withdrawBook(sharesToSell);
   }
 
   async function fundBook() {
-    await bettingContract.fundBook({
-      value: fundAmount * 1e18,
-    });
+    try {
+      await bettingContract.fundBook({
+        value: ethers.parseEther(fundAmount),
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async function inactivateBook() {
@@ -190,10 +186,10 @@ function BookiePage() {
     //   this.props.accounts[0]
     // );
     let bs = await bettingContract.lpStruct(account);
-    let _bookieShares = bs ? bs.shares : "0";
+    let _bookieShares = bs ? bs.shares.toString() : "0";
     setBookieShares(_bookieShares);
 
-    let _bookieEpoch = bs ? bs.outEpoch : "0";
+    let _bookieEpoch = bs ? bs.outEpoch.toString() : "0";
     setBookieEpoch(_bookieEpoch);
 
     // this.tokenKey = this.contracts["TokenMain"].methods.balanceOf.cacheCall(
