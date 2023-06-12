@@ -5,7 +5,7 @@ import moment from "moment";
 
 export default function EventGameoutcomes() {
   const { oracleContractReadOnly } = useContext(AuthContext);
-  const [priceHistory, setPriceHistory] = useState([][]);
+  const [priceHistory, setPriceHistory] = useState([]);
 
   useEffect(() => {
     if (!oracleContractReadOnly) return;
