@@ -2,17 +2,17 @@ import React, { useState, useContext, useEffect } from "react";
 import Text from "../basics/Text";
 import IndicatorD from "../basics/IndicatorD";
 import AuthContext from "../../contexts/AuthContext";
+import moment from "moment";
 
 export default function EventGameoutcomes() {
   const { oracleContractReadOnly } = useContext(AuthContext);
-  const [priceHistory, setPriceHistory] = useState();
+  const [priceHistory, setPriceHistory] = useState([]);
 
   useEffect(() => {
     if (!oracleContractReadOnly) return;
 
     (async () => {
       const pricedata = [];
-
       const ResultsPostedEvent = oracleContractReadOnly.filters.ResultsPosted();
       const events = await oracleContractReadOnly.queryFilter(
         ResultsPostedEvent
@@ -20,9 +20,9 @@ export default function EventGameoutcomes() {
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
-          timestamp: (blockNumber),
-          outcome: Number(args.winner),
+          timestamp: Number(blockNumber),
           Epoch: Number(args.epoch),
+          outcome: args.winner,
         });
       }
       setPriceHistory(pricedata);
@@ -37,20 +37,9 @@ export default function EventGameoutcomes() {
         Waiting...
       </Text>
     );
+    else {
   return (
     <div>
-      {/* <IndicatorD
-        className="etherscanLink"
-        size="15px"
-        mr="10px"
-        mb="10px"
-        ml="5px"
-        mt="10px"
-        width="360px"
-        label="See Contract on"
-        onClick={() => openEtherscan()}
-        value="Etherscan"
-      /> */}
       <Text size="12px" weight="200">
         {" "}
         Time, epoch, m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13,
@@ -60,23 +49,22 @@ export default function EventGameoutcomes() {
       <br />
       {priceHistory.map(
         (event) => (
-          //      event.post1 && (
           <div>
             <Text size="12px" weight="200">
               {" "}
               {event.timestamp}, {event.Epoch}
               {": "}
-              {event.outcome[0]}, {event.outcome[1]}, {event.outcome[2]},{" "}
-              {event.outcome[3]}, {event.outcome[4]}, {event.outcome[5]},{" "}
-              {event.outcome[6]}, {event.outcome[7]}, {event.outcome[8]},{" "}
-              {event.outcome[9]}, {event.outcome[10]}, {event.outcome[11]},{" "}
-              {event.outcome[12]}, {event.outcome[13]}, {event.outcome[14]},{" "}
-              {event.outcome[15]}, {event.outcome[16]}, {event.outcome[17]},{" "}
-              {event.outcome[18]}, {event.outcome[19]}, {event.outcome[20]},{" "}
-              {event.outcome[21]}, {event.outcome[22]}, {event.outcome[23]},{" "}
-              {event.outcome[24]}, {event.outcome[25]}, {event.outcome[26]},{" "}
-              {event.outcome[27]}, {event.outcome[28]}, {event.outcome[29]},{" "}
-              {event.outcome[30]}, {event.outcome[31]}
+              {Number(event.outcome[0])}{" "}, {Number(event.outcome[1])}{" "}, {Number(event.outcome[2])}{" "},
+              {Number(event.outcome[3])}{" "}, {Number(event.outcome[4])}{" "}, {Number(event.outcome[5])}{" "},
+              {Number(event.outcome[6])}{" "}, {Number(event.outcome[7])}{" "}, {Number(event.outcome[8])}{" "},
+              {Number(event.outcome[9])}{" "}, {Number(event.outcome[10])}{" "}, {Number(event.outcome[11])}{" "},
+              {Number(event.outcome[12])}{" "}, {Number(event.outcome[13])}{" "}, {Number(event.outcome[14])}{" "},
+              {Number(event.outcome[15])}{" "}, {Number(event.outcome[16])}{" "}, {Number(event.outcome[17])}{" "},
+              {Number(event.outcome[18])}{" "}, {Number(event.outcome[19])}{" "}, {Number(event.outcome[20])}{" "},
+              {Number(event.outcome[21])}{" "}, {Number(event.outcome[22])}{" "}, {Number(event.outcome[23])}{" "},
+              {Number(event.outcome[24])}{" "}, {Number(event.outcome[25])}{" "}, {Number(event.outcome[26])}{" "},
+              {Number(event.outcome[27])}{" "}, {Number(event.outcome[28])}{" "}, {Number(event.outcome[29])}{" "},
+              {Number(event.outcome[30])}{" "}, {Number(event.outcome[31])}
             </Text>
             <br />
           </div>
@@ -85,4 +73,5 @@ export default function EventGameoutcomes() {
       )}
     </div>
   );
+}
 }

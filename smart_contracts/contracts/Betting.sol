@@ -36,7 +36,7 @@ contract Betting {
   mapping(address => uint32) public userBalance;
 
 
-  struct Subcontract {
+  struct Subcontract {  
     uint8 epoch;
     uint8 matchNum;
     uint8 pick;

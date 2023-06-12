@@ -234,6 +234,29 @@ class Splash extends Component {
             </Text>
           </Flex>
 
+          <Flex width="100%" alignItems="center" justifyContent="center">
+            <Text size="15px">
+              <a
+                className="nav-header"
+                style={{
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  width: "20em",
+                  alignItems: "flex-start",
+                  display: "flex",
+                }}
+                href="/bethistory"
+                target="_blank"
+              >
+                Bet history 
+              </a>
+            </Text>
+          </Flex>
+
+          <Flex>
+            <Text> </Text>
+          </Flex>
+
            <Flex width="100%" alignItems="center" justifyContent="center">
             <Text size="15px">
               <a
@@ -248,7 +271,7 @@ class Splash extends Component {
                 href="/bigbethistory"
                 target="_blank"
               >
-                Big Bets
+                Big Bet Offers
               </a>
             </Text>
           </Flex>
@@ -314,7 +337,25 @@ class Splash extends Component {
                 href="/schedhistory"
                 target="_blank"
               >
-                Team Schedules
+                Weekly Bet Slate Schedules
+              </a>
+            </Text>
+          </Flex> 
+          <Flex width="100%" alignItems="center" justifyContent="center">
+            <Text size="15px">
+              <a
+                className="nav-header"
+                style={{
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  width: "20em",
+                  alignItems: "flex-start",
+                  display: "flex",
+                }}
+                href="/starthistory"
+                target="_blank"
+              >
+                Weekly Start Times
               </a>
             </Text>
           </Flex> 

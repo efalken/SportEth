@@ -31,7 +31,7 @@ contract Oracle {
   Token public token;
   // link to communicate with the betting contract
   Betting public bettingContract;
-
+  
   struct AdminStruct {
     uint64 tokens;
     uint64 voteTracker;

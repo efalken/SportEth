@@ -20,9 +20,9 @@ export default function EventStartTime() {
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
-          games: args.starttimes,
           time: Number(blockNumber),
           Epoch: Number(args.epoch),
+          games: args.starttimes,
         });
       }
       setMatchHistory(pricedata);
@@ -78,17 +78,17 @@ export default function EventStartTime() {
             <div>
               <Text size="12px" weight="200">
                 {" "}
-                {event.time}, {event.Epoch},{event.games[0]},{event.games[1]},
-                {event.games[2]},{event.games[3]},{event.games[4]},
-                {event.games[5]},{event.games[6]},{event.games[7]},
-                {event.games[8]},{event.games[9]},{event.games[10]},
-                {event.games[11]},{event.games[12]},{event.games[13]},
-                {event.games[14]},{event.games[15]},{event.games[16]},
-                {event.games[17]},{event.games[18]},{event.games[19]},
-                {event.games[20]},{event.games[21]},{event.games[22]},
-                {event.games[23]},{event.games[24]},{event.games[25]},
-                {event.games[26]},{event.games[27]},{event.games[28]},
-                {event.games[29]},{event.games[30]},{event.games[31]}
+                {event.time}, {event.Epoch},{Number(event.games[0])}{" "}, {Number(event.games[1])}{" "}, {Number(event.games[2])}{" "},
+              {Number(event.games[3])}{" "}, {Number(event.games[4])}{" "}, {Number(event.games[5])}{" "},
+              {Number(event.games[6])}{" "}, {Number(event.games[7])}{" "}, {Number(event.games[8])}{" "},
+              {Number(event.games[9])}{" "}, {Number(event.games[10])}{" "}, {Number(event.games[11])}{" "},
+              {Number(event.games[12])}{" "}, {Number(event.games[13])}{" "}, {Number(event.games[14])}{" "},
+              {Number(event.games[15])}{" "}, {Number(event.games[16])}{" "}, {Number(event.games[17])}{" "},
+              {Number(event.games[18])}{" "}, {Number(event.games[19])}{" "}, {Number(event.games[20])}{" "},
+              {Number(event.games[21])}{" "}, {Number(event.games[22])}{" "}, {Number(event.games[23])}{" "},
+              {Number(event.games[24])}{" "}, {Number(event.games[25])}{" "}, {Number(event.games[26])}{" "},
+              {Number(event.games[27])}{" "}, {Number(event.games[28])}{" "}, {Number(event.games[29])}{" "},
+              {Number(event.games[30])}{" "}, {Number(event.games[31])}
               </Text>
               <br />
             </div>
