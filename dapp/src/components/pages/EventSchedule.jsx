@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { Box, Flex } from "@rebass/grid";
-import AuthContext from "../../contexts/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 export default function EventSchedule() {
-  const { oracleContractReadOnly } = useContext(AuthContext);
+  const { oracleContractReadOnly } = useAuthContext();
   const [matchHistory, setMatchHistory] = useState([]);
 
   useEffect(() => {

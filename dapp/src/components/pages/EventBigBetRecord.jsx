@@ -1,10 +1,10 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Text from "../basics/Text";
 import IndicatorD from "../basics/IndicatorD";
-import AuthContext from "../../contexts/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 export default function EventBigBetRecord() {
-  const { bettingContractReadOnly } = useContext(AuthContext);
+  const { bettingContractReadOnly } = useAuthContext();
   const [bigBetHistory, setBigBetHistory] = useState([]);
 
   useEffect(() => {
@@ -71,8 +71,8 @@ export default function EventBigBetRecord() {
           <Text size="12px" weight="200">
             {" "}
             {event.Epoch}, {event.MatchNum}, {event.LongPick},{" "}
-            {event.BetSize.toFixed(0)},{event.Payoff.toFixed(1)}, {event.BettorAddress},{" "}
-            {event.Hashoutput},{" "}
+            {event.BetSize.toFixed(0)},{event.Payoff.toFixed(1)},{" "}
+            {event.BettorAddress}, {event.Hashoutput},{" "}
           </Text>
           <br />
         </div>

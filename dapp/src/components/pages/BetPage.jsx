@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Split from "../layout/Split";
 import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
@@ -9,21 +9,21 @@ import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
-import BettingContract from "../../abis/Betting.json";
-import TokenContract from "../../abis/Token.json";
-import OracleContract from "../../abis/Oracle.json";
-import ReaderContract from "../../abis/Reader.json";
 import { ethers } from "ethers";
-import AuthContext from "../../contexts/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
 
 function BetPage() {
-  const [bettingContract, setBettingContract] = useState(null);
-  const [oracleContract, setOracleContract] = useState(null);
-  const [tokenContract, setTokenContract] = useState(null);
-  const [readerContract, setReaderContract] = useState(null);
+  const {
+    oracleContract,
+    bettingContract,
+    provider,
+    signer,
+    setSigner,
+    account,
+  } = useAuthContext();
 
   const [betAmount, setBetAmount] = useState("");
   const [fundAmount, setFundAmount] = useState("");
@@ -33,43 +33,11 @@ function BetPage() {
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
   const [betHistory, setBetHistory] = useState([]);
-  const [account, setAccount] = useState("");
 
   const [subcontracts, setSubcontracts] = useState({});
-  const [scheduleString, setScheduleString] = useState([
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-  ]);
+  const [scheduleString, setScheduleString] = useState(
+    Array(32).fill("check later...: n/a: n/a")
+  );
   const [betData, setBetData] = useState([]);
   const [userBalance, setUserBalance] = useState("0");
   const [unusedCapital, setUnusedCapital] = useState("0");
@@ -79,47 +47,6 @@ function BetPage() {
   const [newBets, setNewBets] = useState(false);
   const [teamSplit, setTeamSplit] = useState([]);
 
-  const { provider, signer, setSigner } = useContext(AuthContext);
-
-  useEffect(() => {
-    if (!signer) {
-      if (provider) connect();
-      return;
-    }
-
-    (async () => {
-      setAccount(await signer.getAddress());
-
-      console.log(await provider.getNetwork());
-      const chainId = (await provider.getNetwork()).chainId.toString();
-
-      const _bettingContract = new ethers.Contract(
-        BettingContract.networks[chainId].address,
-        BettingContract.abi,
-        signer
-      );
-      const _oracleContract = new ethers.Contract(
-        OracleContract.networks[chainId].address,
-        OracleContract.abi,
-        signer
-      );
-      const _tokenContract = new ethers.Contract(
-        TokenContract.networks[chainId].address,
-        TokenContract.abi,
-        signer
-      );
-      const _readerContract = new ethers.Contract(
-        ReaderContract.networks[chainId].address,
-        ReaderContract.abi,
-        signer
-      );
-      setBettingContract(_bettingContract);
-      setOracleContract(_oracleContract);
-      setTokenContract(_tokenContract);
-      setReaderContract(_readerContract);
-    })();
-  }, [provider, signer]);
-
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
 
@@ -128,11 +55,11 @@ function BetPage() {
       findValues();
       //  this.getbetHistoryArray();
       //  this.checkRedeem();
-    }, 1000);//1000
+    }, 1000);
 
     const interval2 = setInterval(() => {
       getbetHistoryArray();
-    }, 5000);//5000
+    }, 5000);
 
     return () => {
       clearInterval(interval1);

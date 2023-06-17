@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { Box, Flex } from "@rebass/grid";
-import AuthContext from "../../contexts/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 export default function EventStartTime() {
-  const { oracleContractReadOnly } = useContext(AuthContext);
+  const { oracleContractReadOnly } = useAuthContext();
   const [matchHistory, setMatchHistory] = useState([]);
 
   useEffect(() => {
@@ -78,17 +78,23 @@ export default function EventStartTime() {
             <div>
               <Text size="12px" weight="200">
                 {" "}
-                {event.time}, {event.Epoch},{Number(event.games[0])}{" "}, {Number(event.games[1])}{" "}, {Number(event.games[2])}{" "},
-              {Number(event.games[3])}{" "}, {Number(event.games[4])}{" "}, {Number(event.games[5])}{" "},
-              {Number(event.games[6])}{" "}, {Number(event.games[7])}{" "}, {Number(event.games[8])}{" "},
-              {Number(event.games[9])}{" "}, {Number(event.games[10])}{" "}, {Number(event.games[11])}{" "},
-              {Number(event.games[12])}{" "}, {Number(event.games[13])}{" "}, {Number(event.games[14])}{" "},
-              {Number(event.games[15])}{" "}, {Number(event.games[16])}{" "}, {Number(event.games[17])}{" "},
-              {Number(event.games[18])}{" "}, {Number(event.games[19])}{" "}, {Number(event.games[20])}{" "},
-              {Number(event.games[21])}{" "}, {Number(event.games[22])}{" "}, {Number(event.games[23])}{" "},
-              {Number(event.games[24])}{" "}, {Number(event.games[25])}{" "}, {Number(event.games[26])}{" "},
-              {Number(event.games[27])}{" "}, {Number(event.games[28])}{" "}, {Number(event.games[29])}{" "},
-              {Number(event.games[30])}{" "}, {Number(event.games[31])}
+                {event.time}, {event.Epoch},{Number(event.games[0])} ,{" "}
+                {Number(event.games[1])} , {Number(event.games[2])} ,
+                {Number(event.games[3])} , {Number(event.games[4])} ,{" "}
+                {Number(event.games[5])} ,{Number(event.games[6])} ,{" "}
+                {Number(event.games[7])} , {Number(event.games[8])} ,
+                {Number(event.games[9])} , {Number(event.games[10])} ,{" "}
+                {Number(event.games[11])} ,{Number(event.games[12])} ,{" "}
+                {Number(event.games[13])} , {Number(event.games[14])} ,
+                {Number(event.games[15])} , {Number(event.games[16])} ,{" "}
+                {Number(event.games[17])} ,{Number(event.games[18])} ,{" "}
+                {Number(event.games[19])} , {Number(event.games[20])} ,
+                {Number(event.games[21])} , {Number(event.games[22])} ,{" "}
+                {Number(event.games[23])} ,{Number(event.games[24])} ,{" "}
+                {Number(event.games[25])} , {Number(event.games[26])} ,
+                {Number(event.games[27])} , {Number(event.games[28])} ,{" "}
+                {Number(event.games[29])} ,{Number(event.games[30])} ,{" "}
+                {Number(event.games[31])}
               </Text>
               <br />
             </div>

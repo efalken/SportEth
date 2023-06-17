@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Split from "../layout/Split";
 import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
@@ -10,19 +10,20 @@ import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
-import AuthContext from "../../contexts/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { ethers } from "ethers";
 import TeamTable from "../blocks/TeamTable";
-import BettingContract from "../../abis/Betting.json";
-import TokenContract from "../../abis/Token.json";
-import OracleContract from "../../abis/Oracle.json";
 import { Link } from "react-router-dom";
 
 export default function BigBetPage() {
-  const [bettingContract, setBettingContract] = useState(null);
-  const [oracleContract, setOracleContract] = useState(null);
-  const [tokenContract, setTokenContract] = useState(null);
-  const [account, setAccount] = useState("");
+  const {
+    oracleContract,
+    bettingContract,
+    provider,
+    signer,
+    setSigner,
+    account,
+  } = useAuthContext();
 
   const [userOffers, setUserOffers] = useState([]);
   const [currentOffers, setCurrentOffers] = useState([]);
@@ -43,78 +44,13 @@ export default function BigBetPage() {
   const [subcontracts, setSubcontracts] = useState({});
   const [subcontracts2, setSubcontracts2] = useState({});
   const [newBets, setNewBets] = useState(false);
-  const [scheduleString, setScheduleString] = useState([
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-  ]);
+  const [scheduleString, setScheduleString] = useState(
+    Array(32).fill("check later...: n/a: n/a")
+  );
   const [teamSplit, setTeamSplit] = useState([]);
   const [betData, setBetData] = useState([]);
   // const [offstring, setOffstring] = useState("");
   const [userBalance, setUserBalance] = useState("0");
-
-  const { provider, signer, setSigner } = useContext(AuthContext);
-
-  useEffect(() => {
-    if (!signer) {
-      if (provider) connect();
-      return;
-    }
-
-    (async () => {
-      setAccount(await signer.getAddress());
-      const chainId = (await provider.getNetwork()).chainId.toString();
-
-      const _bettingContract = new ethers.Contract(
-        BettingContract.networks[chainId].address,
-        BettingContract.abi,
-        signer
-      );
-      const _oracleContract = new ethers.Contract(
-        OracleContract.networks[chainId].address,
-        OracleContract.abi,
-        signer
-      );
-      const _tokenContract = new ethers.Contract(
-        TokenContract.networks[chainId].address,
-        TokenContract.abi,
-        signer
-      );
-
-      setBettingContract(_bettingContract);
-      setOracleContract(_oracleContract);
-      setTokenContract(_tokenContract);
-    })();
-  }, [provider, signer]);
 
   useEffect(() => {
     let _teamSplit = scheduleString.map((s) => (s ? s.split(":") : undefined));
@@ -180,8 +116,7 @@ export default function BigBetPage() {
     const eventdata = [];
     const _subcontracts = {};
 
-    const bettor = await signer.getAddress();
-    const BetRecordEvent = bettingContract.filters.OfferRecord(bettor);
+    const BetRecordEvent = bettingContract.filters.OfferRecord(account);
     const events = await bettingContract.queryFilter(BetRecordEvent);
 
     // TODO: Fix below
@@ -225,7 +160,6 @@ export default function BigBetPage() {
     const eventdata2 = [];
     const _subcontracts2 = {};
     if (!currW) return;
-    const bettor = await signer.getAddress();
     const BetRecordEvent = bettingContract.filters.OfferRecord(null, currW);
     const events = await bettingContract.queryFilter(BetRecordEvent);
 

@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import IndicatorD from "../basics/IndicatorD";
-import AuthContext from "../../contexts/AuthContext";
-  
+import { useAuthContext } from "../../contexts/AuthContext";
+
 export default function EventBetRecord() {
   const [priceHistory, setPriceHistory] = useState([]);
-  const { bettingContractReadOnly } = useContext(AuthContext);
+  const { bettingContractReadOnly } = useAuthContext();
 
   useEffect(() => {
     if (!bettingContractReadOnly) return;

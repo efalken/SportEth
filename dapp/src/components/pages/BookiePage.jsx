@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Split from "../layout/Split";
 import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
@@ -8,29 +8,24 @@ import LabeledText from "../basics/LabeledText";
 import Form from "../basics/Form";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
-import AuthContext from "../../contexts/AuthContext";
-import BettingContract from "../../abis/Betting.json";
-import TokenContract from "../../abis/Token.json";
-import OracleContract from "../../abis/Oracle.json";
 import { ethers } from "ethers";
 import { Link } from "react-router-dom";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 function BookiePage() {
-  const [bettingContract, setBettingContract] = useState(null);
-  const [oracleContract, setOracleContract] = useState(null);
-  const [tokenContract, setTokenContract] = useState(null);
-  const [account, setAccount] = useState("");
-
-  const { signer, provider, setSigner } = useContext(AuthContext);
+  const {
+    oracleContract,
+    bettingContract,
+    tokenContract,
+    provider,
+    signer,
+    setSigner,
+    account,
+  } = useAuthContext();
 
   const [fundAmount, setFundAmount] = useState("");
-  const [shareAmount, setShareAmount] = useState("");
   const [sharesToSell, setSharesToSell] = useState("");
-  const [contractTokens, setContractTokens] = useState(0);
   const [currentWeek, setCurrentWeek] = useState("");
-  const [showDecimalOdds, setShowDecimalOdds] = useState(false);
-  const [teamPick, setTeamPick] = useState("");
-  const [wantTokens, setWantTokens] = useState(false);
 
   const [unusedCapital, setUnusedCapital] = useState(0);
   const [usedCapital, setUsedCapital] = useState(0);
@@ -38,77 +33,12 @@ function BookiePage() {
   const [totalShares, setTotalShares] = useState(0);
   const [newBets, setNewBets] = useState(false);
   const [betData, setBetData] = useState([]);
-  const [scheduleString, setScheduleString] = useState([
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-    "check later...: n/a: n/a",
-  ]);
+  const [scheduleString, setScheduleString] = useState(
+    Array(32).fill("check later...: n/a: n/a")
+  );
   const [bookieShares, setBookieShares] = useState("0");
   const [bookieEpoch, setBookieEpoch] = useState("0");
   const [tokenAmount, setTokenAmount] = useState("0");
-
-  useEffect(() => {
-    if (!signer) {
-      if (provider) connect();
-      return;
-    }
-
-    (async () => {
-      setAccount(await signer.getAddress());
-
-      console.log(await provider.getNetwork());
-      const chainId = (await provider.getNetwork()).chainId.toString();
-
-      const _bettingContract = new ethers.Contract(
-        BettingContract.networks[chainId].address,
-        BettingContract.abi,
-        signer
-      );
-      const _oracleContract = new ethers.Contract(
-        OracleContract.networks[chainId].address,
-        OracleContract.abi,
-        signer
-      );
-      const _tokenContract = new ethers.Contract(
-        TokenContract.networks[chainId].address,
-        TokenContract.abi,
-        signer
-      );
-
-      setBettingContract(_bettingContract);
-      setOracleContract(_oracleContract);
-      setTokenContract(_tokenContract);
-    })();
-  }, [provider, signer]);
 
   useEffect(() => {
     if (!bettingContract || !oracleContract || !tokenContract) return;
@@ -141,50 +71,33 @@ function BookiePage() {
   }
 
   async function findValues() {
-    // this.unusedKey = this.contracts["BettingMain"].methods.margin.cacheCall(0);
     let _unusedCapital =
       Number((await bettingContract.margin(0)) || "0") / 10000;
     setUnusedCapital(_unusedCapital);
 
-    // this.usedKey = this.contracts["BettingMain"].methods.margin.cacheCall(1);
     let _usedCapital = Number((await bettingContract.margin(1)) || "0") / 10000;
     setUsedCapital(_usedCapital);
 
-    // this.betCapitalKey =
-    //   this.contracts["BettingMain"].methods.margin.cacheCall(2);
     let _betCapital = Number((await bettingContract.margin(2)) || "0") / 10000;
     setBetCapital(_betCapital);
 
-    // this.weekKey = this.contracts["BettingMain"].methods.margin.cacheCall(3);
     let _currentWeek = Number(await bettingContract.margin(3));
     setCurrentWeek(_currentWeek);
 
-    // this.totalSharesKey =
-    //   this.contracts["BettingMain"].methods.margin.cacheCall(4);
     let _totalShares = (await bettingContract.margin(4)) || "0";
     setTotalShares(_totalShares);
 
-    // this.marginKey5 = this.contracts["BettingMain"].methods.margin.cacheCall(5);
-
-    // this.marginKey7 = this.contracts["BettingMain"].methods.margin.cacheCall(7);
     let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
     setNewBets(_newBets);
 
-    // this.betDataKey =
-    //   this.contracts["BettingMain"].methods.showBetData.cacheCall();
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
 
-    // this.scheduleStringKey =
-    //   this.contracts["OracleMain"].methods.showSchedString.cacheCall();
     let sctring = await oracleContract.showSchedString();
     if (sctring && _newBets) {
       setScheduleString(sctring);
     }
 
-    // this.sharesKey = this.contracts["BettingMain"].methods.lpStruct.cacheCall(
-    //   this.props.accounts[0]
-    // );
     let bs = await bettingContract.lpStruct(account);
     let _bookieShares = bs ? bs.shares.toString() : "0";
     setBookieShares(_bookieShares);
@@ -192,9 +105,6 @@ function BookiePage() {
     let _bookieEpoch = bs ? bs.outEpoch.toString() : "0";
     setBookieEpoch(_bookieEpoch);
 
-    // this.tokenKey = this.contracts["TokenMain"].methods.balanceOf.cacheCall(
-    //   "0x23cEd89B1F6baFa4F89063D7Af51a81a38d879d6"
-    // );
     let _tokenAmount =
       (await tokenContract.balanceOf(
         "0x23cEd89B1F6baFa4F89063D7Af51a81a38d879d6"
@@ -203,8 +113,6 @@ function BookiePage() {
   }
 
   function unpack256(src) {
-    // const bn = new web3.BN(src);
-    //const str = bn.toString(16);
     const str = src.toString(16).padStart(64, "0");
     const pieces = str
       .match(/.{1,2}/g)
@@ -310,7 +218,6 @@ function BookiePage() {
   async function connect() {
     await provider.send("eth_requestAccounts", []);
     const signer = await provider.getSigner();
-    console.log(signer);
     setSigner(signer);
   }
 

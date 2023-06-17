@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
-import IndicatorD from "../basics/IndicatorD";
-import AuthContext from "../../contexts/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 import moment from "moment";
 
-
 export default function EventOdds() {
-  const { oracleContractReadOnly } = useContext(AuthContext);
+  const { oracleContractReadOnly } = useAuthContext();
   const [priceHistory, setPriceHistory] = useState([]);
-  
+
   useEffect(() => {
     if (!oracleContractReadOnly) return;
 
@@ -29,9 +27,6 @@ export default function EventOdds() {
       setPriceHistory(pricedata);
     })();
   }, [oracleContractReadOnly]);
-
-  console.log("decodds", priceHistory);
-
 
   if (Object.keys(priceHistory).length === 0)
     return (
@@ -67,7 +62,7 @@ export default function EventOdds() {
               {" "}
               {moment.unix(event.time).format("DD-MM-YYTHH:mm")}, {event.Epoch}
               {": "} {(1 + Number(event.decOdds[0]) / 1000).toFixed(3)},{" "}
-             {(1 + Number(event.decOdds[1]) / 1000).toFixed(3)},{" "}
+              {(1 + Number(event.decOdds[1]) / 1000).toFixed(3)},{" "}
               {(1 + Number(event.decOdds[2]) / 1000).toFixed(3)},{" "}
               {(1 + Number(event.decOdds[3]) / 1000).toFixed(3)},{" "}
               {(1 + Number(event.decOdds[4]) / 1000).toFixed(3)},{" "}
@@ -97,7 +92,7 @@ export default function EventOdds() {
               {(1 + Number(event.decOdds[28]) / 1000).toFixed(3)},{" "}
               {(1 + Number(event.decOdds[29]) / 1000).toFixed(3)},{" "}
               {(1 + Number(event.decOdds[30]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[31]) / 1000).toFixed(3)}  
+              {(1 + Number(event.decOdds[31]) / 1000).toFixed(3)}
             </Text>
             <br />
           </div>
