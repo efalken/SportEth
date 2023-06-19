@@ -6,7 +6,7 @@ import "./Betting.sol";
 import "./ConstantsOracle.sol";
 
 contract Oracle {
-    // slots are 0 for the initial favorite, 1 for initial underdog
+  // slots are 0 for the initial favorite, 1 for initial underdog
   uint96[32] public propOddsStarts;
   // smaller data from propOddsStarts because one cannot change the start times
   uint64[32] public propOddsUpdate;
@@ -31,7 +31,7 @@ contract Oracle {
   Token public token;
   // link to communicate with the betting contract
   Betting public bettingContract;
-  
+
   struct AdminStruct {
     uint64 tokens;
     uint64 voteTracker;
@@ -78,7 +78,7 @@ contract Oracle {
     require(reviewStatus >= 10);
     // voter must not have voted on this proposal
     require(adminStruct[msg.sender].voteTracker != propNumber);
-    // this prevents this account from voting again on this data proposal 
+    // this prevents this account from voting again on this data proposal
     adminStruct[msg.sender].voteTracker = propNumber;
     // votes are simply one's entire token balance in this oracle contract
     if (_sendData) {
@@ -182,7 +182,9 @@ contract Oracle {
     return true;
   }
 
-  function concentrationFactor(uint32 _concentrationLim) external returns (bool) {
+  function concentrationFactor(
+    uint32 _concentrationLim
+  ) external returns (bool) {
     require(adminStruct[msg.sender].tokens >= (MIN_SUBMIT * 2));
     bettingContract.adjustParams(_concentrationLim);
     emit ParamsPosted(_concentrationLim);
@@ -196,9 +198,9 @@ contract Oracle {
     emit PausePosted(_match1, _match2);
   }
 
-      function showSchedString() external view returns (string[32] memory) {
-        return matchSchedule;
-    }
+  function showSchedString() external view returns (string[32] memory) {
+    return matchSchedule;
+  }
 
   function depositTokens(uint64 _amt) external {
     uint256 ethClaim;
@@ -211,7 +213,7 @@ contract Oracle {
         ) *
         TOKEN_ADJ;
       //payable(msg.sender).transfer(ethClaim);
-      (success, ) = payable(msg.sender).call{ value: ethClaim }("");
+      (success, ) = payable(msg.sender).call{value: ethClaim}("");
       require(success, "eth payment failed");
     }
     (success) = token.transferSpecial(msg.sender, _amt);
@@ -235,7 +237,7 @@ contract Oracle {
     feeData[0] -= _amtTokens;
     adminStruct[msg.sender].tokens -= _amtTokens;
     //payable(msg.sender).transfer(ethClaim);
-    (success, ) = payable(msg.sender).call{ value: ethClaim }("");
+    (success, ) = payable(msg.sender).call{value: ethClaim}("");
     require(success, "eth payment failed");
     (success) = token.transfer(msg.sender, _amtTokens);
     require(success, "token failed");
@@ -271,15 +273,14 @@ contract Oracle {
     require(success, "token burn failed");
   }
 
-    function mintReward() internal {
-    token.mint(proposer, ORACLE_REWARD);
+  function mintReward() internal {
+    // token.mint(proposer, ORACLE_REWARD);
   }
 
-  function create96(uint32[32] memory _time, uint32[32] memory _odds)
-    internal
-    pure
-    returns (uint96[32] memory outv)
-  {
+  function create96(
+    uint32[32] memory _time,
+    uint32[32] memory _odds
+  ) internal pure returns (uint96[32] memory outv) {
     uint32 opponentOdds;
     uint96 out;
     for (uint256 i = 0; i < 32; i++) {
@@ -296,11 +297,9 @@ contract Oracle {
     }
   }
 
-  function create64(uint32[32] memory _odds)
-    internal
-    pure
-    returns (uint64[32] memory outv)
-  {
+  function create64(
+    uint32[32] memory _odds
+  ) internal pure returns (uint64[32] memory outv) {
     uint32 opponentOdds;
     uint64 out;
     for (uint256 i = 0; i < 32; i++) {

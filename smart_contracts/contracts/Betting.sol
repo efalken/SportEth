@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 */
 
 import "./Token.sol";
+
 import "./ConstantsBetting.sol";
 
 contract Betting {
@@ -25,7 +26,7 @@ contract Betting {
   mapping(bytes32 => Subcontract) public betContracts;
   // individual offered big bets
   mapping(bytes32 => Subcontract) public offerContracts;
-  /// this maps the set {epoch, match, team} to its event outcome, 
+  /// this maps the set {epoch, match, team} to its event outcome,
   ///where 0 is a loss, 1 is a tie or postponement, 2 a win
   /// The outcome defaults to 0, so that these need not be updated for a loss
   mapping(uint32 => uint8) public outcomeMap;
@@ -35,8 +36,7 @@ contract Betting {
   /// this struct holds a user's ETH balance
   mapping(address => uint32) public userBalance;
 
-
-  struct Subcontract {  
+  struct Subcontract {
     uint8 epoch;
     uint8 matchNum;
     uint8 pick;
@@ -105,7 +105,7 @@ contract Betting {
     bool takeable = (offerContracts[_subkID].betAmount > 0);
     return takeable;
   }
-  
+
   receive() external payable {}
 
   /** @dev processes a basic bet
@@ -113,11 +113,7 @@ contract Betting {
    * @param _team0or1 denotes the initial favorite (0) and underdog (1) for a given epoch and matchNumber
    * @param _betAmt is the amount bet in 10s of finney, 0.0001 ether
    */
-  function bet(
-    uint8 _matchNumber,
-    uint8 _team0or1,
-    uint32 _betAmt
-  ) external {
+  function bet(uint8 _matchNumber, uint8 _team0or1, uint32 _betAmt) external {
     // user needs sufficient capital to make bet
     require(_betAmt <= userBalance[msg.sender] && _betAmt >= MIN_BET, "NSF ");
     // pause[0] and [1] can be used to prevent betting when an odds number posted is very wrong
@@ -307,7 +303,6 @@ contract Betting {
     betContracts[subkID2] = k;
     margin[6]++;
     delete offerContracts[_subkid];
-    
   }
 
   /* @dev cancels outstanding offered bet
@@ -321,16 +316,14 @@ contract Betting {
 
   /* @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
    * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win, 2 for tie or no contest
-   * @return epoch is the first argument. The data epoch, match, pick create a tuple that uniquely identifies bets 
+   * @return epoch is the first argument. The data epoch, match, pick create a tuple that uniquely identifies bets
    * @return ethDividend, the second argument, is sent to the oracle contract
    * the oracle contract needs this number to adjust its global oracle fee variable
    * used to allocate oracle revenue among token holders
    */
-  function settle(uint8[32] memory _winner)
-    external
-    onlyAdmin
-    returns (uint32, uint256)
-  {
+  function settle(
+    uint8[32] memory _winner
+  ) external onlyAdmin returns (uint32, uint256) {
     uint32 redemptionPot;
     uint32 payoffPot;
     uint256 epochMatch;
@@ -340,15 +333,15 @@ contract Betting {
       // pulls data for each match that week
       uint32[7] memory betDatav = decodeNumber(betData[i]);
       epochMatch = i * 10 + margin[3] * 1000;
-    // if no one bet on the match these numbers will both be zero, and it need not 
-    // be processed because it will not change the state
+      // if no one bet on the match these numbers will both be zero, and it need not
+      // be processed because it will not change the state
       if ((betDatav[0] + betDatav[1]) > 0) {
         //if not a tie
         if (winningTeam != 2) {
           redemptionPot += betDatav[winningTeam];
           payoffPot += betDatav[winningTeam + 2];
           // winning bet assigned number 2
-          // useful because bettors redeem both wins and ties 
+          // useful because bettors redeem both wins and ties
           outcomeMap[uint32(epochMatch + winningTeam)] = 2;
         } else {
           // tie or no contest assigned number 1
@@ -361,7 +354,7 @@ contract Betting {
     // sending avax to oracle adjusts from 5 to 18 decimals, and applies the 5% multiplication factor
     // 5e-2 is the factor to generate 5% of a number
     uint256 oracleDiv = ORACLE_5PERC * uint256(payoffPot);
-    // first throws bookie and bettor money into a pot, then subtracts the money due to 
+    // first throws bookie and bettor money into a pot, then subtracts the money due to
     // bettors via payoff (payoffPot) and principal (redemptionPot)
     // this is the new net bookie balance
     margin[0] = margin[0] + margin[2] - redemptionPot - payoffPot;
@@ -374,11 +367,11 @@ contract Betting {
     delete betData;
     // this sets the future start time in the future
     // bookies can only add or remove from their accounts when games have not started
-    // this way bookies can add/withdraw when games are not active, 
+    // this way bookies can add/withdraw when games are not active,
     // but the new schedule has not been posted
     margin[7] = FUTURE_START;
     // sends the oracle contract its weekly fee
-    (bool success, ) = oracleAdmin.call{ value: oracleDiv }("");
+    (bool success, ) = oracleAdmin.call{value: oracleDiv}("");
     require(success, "Call failed");
     return (margin[3], oracleDiv);
   }
@@ -397,15 +390,14 @@ contract Betting {
     uint256 netinvestment = (msg.value / 1e14);
     uint32 _shares = 0;
     if (margin[0] > 0) {
-      _shares = uint32(netinvestment * uint256(margin[4]) / uint256(margin[0]));
+      _shares = uint32(
+        (netinvestment * uint256(margin[4])) / uint256(margin[0])
+      );
     } else {
       _shares = uint32(netinvestment);
     }
     margin[0] = margin[0] + uint32(netinvestment);
-    // PRODUCTION CHANGE
     // LP can only withdraw after this epoch
-    // prevents LPs from providing liquidity on books that 
-    // one knows has little risk
     lpStruct[msg.sender].outEpoch = margin[3] + MIN_LP_DURATION;
     // monitors total LP shares
     margin[4] += _shares;
@@ -448,7 +440,7 @@ contract Betting {
     userBalance[msg.sender] -= _amt;
     uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     // payable(msg.sender).transfer(amt256);
-    (bool success, ) = payable(msg.sender).call{ value: amt256 }("");
+    (bool success, ) = payable(msg.sender).call{value: amt256}("");
     require(success, "Call failed");
     emit Funding(msg.sender, amt256, margin[3], 3);
   }
@@ -475,7 +467,7 @@ contract Betting {
     margin[0] -= ethWithdraw;
     uint256 ethWithdraw256 = uint256(ethWithdraw) * UNITS_TRANS14;
     //payable(msg.sender).transfer(ethWithdraw256);
-    (bool success, ) = payable(msg.sender).call{ value: ethWithdraw256 }("");
+    (bool success, ) = payable(msg.sender).call{value: ethWithdraw256}("");
     require(success, "Call failed");
     emit Funding(msg.sender, ethWithdraw256, margin[3], 4);
   }
@@ -485,11 +477,9 @@ contract Betting {
    * the first event's start time is stored in margin[7]
    * it sets the time after which LPs can no longer add or remove liquidity
    */
-  function transmitInit(uint96[32] memory _oddsAndStart)
-    external
-    onlyAdmin
-    returns (bool)
-  {
+  function transmitInit(
+    uint96[32] memory _oddsAndStart
+  ) external onlyAdmin returns (bool) {
     require(margin[2] == 0);
     betData = _oddsAndStart;
     margin[7] = uint32(_oddsAndStart[0] >> 64);
@@ -500,7 +490,7 @@ contract Betting {
   }
 
   function showBetData() external view returns (uint256[32] memory _betData) {
-        _betData = betData;
+    _betData = betData;
   }
 
   /** @dev processes updates to epoch's odds
@@ -523,7 +513,7 @@ contract Betting {
   /** @dev It limits the amount of LP capital that can be applied to a single match.
    * @param _maxPos sets the parameter that defines how much diversification is enforced.
    */
-  function adjustParams(uint32 _maxPos) external  {
+  function adjustParams(uint32 _maxPos) external {
     margin[5] = _maxPos;
   }
 
@@ -538,20 +528,20 @@ contract Betting {
     paused[1] = _bad2;
   }
 
-    function checkRedeem(bytes32 _subkID) external view returns (bool) {
-        uint32 epochMatchWinner = betContracts[_subkID].epoch * 1000 +
-            betContracts[_subkID].matchNum * 10 + betContracts[_subkID].pick;
-        bool redeemable = (outcomeMap[epochMatchWinner] > 0);
-        return redeemable;
-    }
-
+  function checkRedeem(bytes32 _subkID) external view returns (bool) {
+    uint32 epochMatchWinner = betContracts[_subkID].epoch *
+      1000 +
+      betContracts[_subkID].matchNum *
+      10 +
+      betContracts[_subkID].pick;
+    bool redeemable = (outcomeMap[epochMatchWinner] > 0);
+    return redeemable;
+  }
 
   // @dev unpacks uint256 to reveal match's odds and bet amounts
-  function decodeNumber(uint256 _encoded)
-    internal
-    pure
-    returns (uint32[7] memory vec1)
-  {
+  function decodeNumber(
+    uint256 _encoded
+  ) internal pure returns (uint32[7] memory vec1) {
     vec1[0] = uint32(_encoded >> 224);
     vec1[1] = uint32(_encoded >> 192);
     vec1[2] = uint32(_encoded >> 160);
@@ -567,5 +557,4 @@ contract Betting {
     if (c <= 0) c = 0;
     return c;
   }
-
 }

@@ -615,12 +615,10 @@ describe("Betting", function () {
     it("approve and send to betting contract #3", async () => {
       const result2 = await oracle.initProcess();
       const receipt = await result2.wait();
-      const gasUsed = receipt.gasUsed;
-      // console.log(`gas on second send ${gasUsed}`);
     });
 
     it("Bet 50 finney on match 0: team 0", async () => {
-      const bookpool = await betting.margin(0);
+      //const bookpool = await betting.margin(0);
       // console.log(`bookieCap is ${bookpool}`);
       await betting.connect(account2).bet(0, 0, "5000");
     });

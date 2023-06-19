@@ -22,7 +22,7 @@ export default function () {
         loop
         style={{
           // opacity: 0.3,
-        //filter: "grayscale(100%)",
+        filter: "grayscale(100%)",
           minHeight: "100%",
           minWidth: "100%",
         }}

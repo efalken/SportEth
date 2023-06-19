@@ -28,20 +28,19 @@ contract Token {
     symbol = "SET";
   }
 
-  function approve(address _spender, uint64 _value)
-    external
-    returns (bool success)
-  {
+  function approve(
+    address _spender,
+    uint64 _value
+  ) external returns (bool success) {
     allowance[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
     return true;
   }
 
-    function mint(address _spender, uint64 _value)
-    external
-    onlyAdmin
-    returns (bool success)
-  {
+  function mint(
+    address _spender,
+    uint64 _value
+  ) external onlyAdmin returns (bool success) {
     totalSupply += _value;
     balanceOf[_spender] += _value;
     emit Mint(_spender, _value);
@@ -65,9 +64,7 @@ contract Token {
     uint64 _value
   ) external returns (bool) {
     uint64 senderBalance = balanceOf[_from];
-    require(
-      senderBalance >= _value && allowance[_from][msg.sender] >= _value
-    );
+    require(senderBalance >= _value && allowance[_from][msg.sender] >= _value);
     unchecked {
       balanceOf[_from] = senderBalance - _value;
       balanceOf[_recipient] += _value;
@@ -77,12 +74,12 @@ contract Token {
     return true;
   }
 
-    function transferSpecial(address _from,
+  function transferSpecial(
+    address _from,
     uint64 _value
   ) external onlyAdmin returns (bool) {
     uint64 senderBalance = balanceOf[_from];
-    require(
-      senderBalance >= _value);
+    require(senderBalance >= _value);
     unchecked {
       balanceOf[_from] = senderBalance - _value;
       balanceOf[oracleAdmin] += _value;
@@ -96,9 +93,9 @@ contract Token {
     _;
   }
 
-    function setAdmin(address _oracle) external {
-      //require(oracleAdmin == address(0x0));
-      oracleAdmin = _oracle;
+  function setAdmin(address _oracle) external {
+    //require(oracleAdmin == address(0x0));
+    oracleAdmin = _oracle;
   }
 
   function burn(uint64 _value) external returns (bool) {

@@ -86,7 +86,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
+      nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
       await oracle.initPost(
         [
@@ -173,10 +173,9 @@ describe("Betting", function () {
       _hour = _date.getHours();
       await helper.advanceTimeAndBlock(secondsInHour * 6);
     });
-
-    it("approve and send to betting contract", async () => {
-      await oracle.initProcess();
-    });
+    // it("approve and send to betting contract", async () => {
+    //   await oracle.initProcess();
+    // });
 
     it("Acct 0 Fund Betting Contract", async () => {
       await betting.fundBook({
@@ -213,16 +212,6 @@ describe("Betting", function () {
       }
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
-      const tokens0 = await token.balanceOf(owner.address);
-      const tokens1 = await token.balanceOf(account1.address);
-      console.log(`acct 0-1 ${tokens0}`);
-      console.log(`acct 1-1 ${tokens1}`);
-      const epoch = await betting.margin(3);
-      console.log(`epoch ${epoch}`);
     });
 
     it("Send Initial Event Results", async () => {

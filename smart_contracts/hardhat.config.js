@@ -80,6 +80,7 @@ module.exports = {
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_GOERLI_PROJECT_ID}`,
+      chainId: 5,
       accounts: {
         mnemonic: `${process.env.GOERLI_WALLET_MNEMONIC}`,
         path: "m/44'/60'/0'/0",

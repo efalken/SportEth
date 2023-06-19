@@ -45,8 +45,8 @@ async function main() {
   const oracle = await Oracle.deploy(betting.address, token.address);
   await oracle.deployed();
   console.log(`Oracle contract was deployed to ${oracle.address}`);
-  await betting.setOracleAddress(oracle.address);
-
+  result = await betting.setOracleAddress(oracle.address);
+  await result.wait();
   const Reader = await ethers.getContractFactory("Reader");
   const reader = await Reader.deploy(betting.address, token.address);
   await reader.deployed();
@@ -54,15 +54,21 @@ async function main() {
   console.log(`acct0 ${accounts[0]}`);
   console.log(`acct1 ${accounts[1]}`);
   console.log(`acct2 ${accounts[2]}`);
-  await token.setAdmin(oracle.address);
+  result = await token.setAdmin(oracle.address);
+  await result.wait();
   //result = await token.approve(oracle.address, 560n * million);
+  console.log(`got here0`);
   result = await oracle.depositTokens(560n * million);
-  
+  await result.wait();
   result = await token.transfer(reader.address, 440n * million);
+  await result.wait();
+  console.log(`got here1`);
   nextStart = 2e9;
   result = await betting.fundBook({
     value: 300n * finneys,
   });
+  await result.wait();
+  console.log(`got here2`);
   result = await oracle.initPost(
     [
       "NFL:ARI:LAC",
@@ -138,12 +144,13 @@ async function main() {
       672, 800,
     ]
   );
+  await result.wait();
   result = await oracle.initProcess();
-
+  await result.wait();
   result = await betting.connect(signers[1]).fundBettor({
     value: 300n * finneys,
   });
-
+  await result.wait();
   const betdata0 = await betting.betData(0);
   console.log(`betdata ${betdata0}`);
 

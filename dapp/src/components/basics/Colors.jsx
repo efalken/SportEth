@@ -2,9 +2,9 @@
 export const A = "#FAFAFA";
 
 /* Used as primary text color */
-export const B = "#FAFAFA";
+export const B = "#010101"; // FAFAFA";
 
-export const C = "#9C9C9C";
+export const C = "#9C9C9C";  
 
 export const D = "#272727";
 

@@ -32,7 +32,8 @@ border-radius: 50%;
 
 /* appearance for checked radiobutton */
 input[type="radio"]:checked {
-background-color: #C81432;
+/* background-color: #C81432; */
+background-color: black; 
 }
 
 /* input.prechecked */
@@ -108,7 +109,8 @@ margin-bottom:  8.0pt !important;
 margin-left:  0in !important;
 line-height:  105% !important;  */
 font-size:  12px !important;
-font-family:  "Times New Roman",serif !important;
+font-family: "Calibri",sans-serif !important;
+/*font-family:  "Times New Roman",serif !important;*/
 }
 /*
 a.docu-header:hover, p.docu-header:hover > span:hover {

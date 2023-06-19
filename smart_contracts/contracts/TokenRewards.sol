@@ -33,20 +33,23 @@ contract TokenRewards {
     require(tokensInContract > 0, "no token rewards left");
     (uint256 lpShares, ) = betting.lpStruct(msg.sender);
     require(lpShares > 0, "only for liq providers");
-    uint32 epoch = betting.margin(3);
-    uint256 totShares = uint256(betting.margin(4));
     uint32 lpepoch = claimEpoch[msg.sender];
-    uint64 tokenRewards;
-    if (lpepoch == 0) {
-      claimEpoch[msg.sender] = epoch;
-    } else if (lpepoch < epoch) {
-      claimEpoch[msg.sender] = epoch;
-      tokenRewards = uint64((uint256(lpShares) * EPOCH_AMOUNT) / totShares);
-      //tokenRewards = uint64(totShares);
+    uint32 epoch = betting.margin(3);
+    if (lpepoch < epoch && lpepoch != 0) {
+      uint256 totShares = uint256(betting.margin(4));
+      uint64 tokenRewards = uint64(
+        (uint256(lpShares) * EPOCH_AMOUNT) / totShares
+      );
       tokensInContract -= tokenRewards;
       bool success = token.transfer(msg.sender, tokenRewards);
       require(success, "token failed");
       emit TokenReward(msg.sender, tokenRewards, epoch);
     }
+    claimEpoch[msg.sender] = epoch;
+  }
+
+  function hourOfDay() external view returns (uint256 hour) {
+    // 86400 is seconds in a day, 3600 seconds in an hour
+    hour = (block.timestamp % 86400) / 3600;
   }
 }

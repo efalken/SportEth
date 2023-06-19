@@ -376,22 +376,30 @@ async function main() {
       receipt = await result.wait();
       result = await betting.connect(signers[1]).bet(6, 0, 20);
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).fundBook({
-        value: 100n*finneys,
-      });
-      await result.wait();
-
+      // result = await betting.connect(signers[1]).fundBook({
+      //   value: 100n*finneys,
+      // });
+      // receipt = await result.wait();
+      // result = await betting.connect(signers[2]).fundBook({
+      //   value: 50n*finneys,
+      // });
+      // await result.wait();
+      const shares0 = (await betting.lpStruct(accounts[0])).shares;
+      const shares1 = (await betting.lpStruct(accounts[1])).shares;
+      const shares2 = (await betting.lpStruct(accounts[2])).shares;
+      console.log(`shares0 ${shares0}`);
+      console.log(`shares1 ${shares1}`);
+      console.log(`shares2 ${shares2}`);
 
   
 
-  const betdata0 = await betting.betData(0);
-      console.log(`betdata ${betdata0}`);
+  const m0 = await betting.margin(0);
+      console.log(`bookieCapital ${m0}`);
 
-      const betfunds = await betting.userBalance(accounts[1]);
-      console.log(`funds ${betfunds}`);
+      const shares = await betting.margin(0);
+      console.log(`bookieShares ${shares}`);
 
-      const bookiefunds = (await betting.lpStruct(accounts[0])).shares;
-      console.log(`bookiefunds ${bookiefunds}`);
+
 
 
 

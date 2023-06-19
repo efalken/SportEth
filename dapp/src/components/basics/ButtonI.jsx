@@ -1,5 +1,5 @@
 import Styled from 'styled-components'
-import { I } from './Colors'
+import { J } from './Colors'
 import { Radius } from './Style'
 
 export default Styled.button`
@@ -13,5 +13,5 @@ export default Styled.button`
             width: ${({ width }) => width ? width : "auto"};
             cursor: pointer;
             color: #fff;
-            background-color: ${({ bgColor }) => bgColor ? bgColor : I};
+            background-color: ${({ bgColor }) => bgColor ? bgColor : J};
         `
