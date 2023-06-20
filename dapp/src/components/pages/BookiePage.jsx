@@ -3,7 +3,7 @@ import Split from "../layout/Split";
 import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
-import { G } from "../basics/Colors";
+import { G, cyellow, cwhite } from "../basics/Colors";
 import LabeledText from "../basics/LabeledText";
 import Form from "../basics/Form";
 import TruncatedAddress from "../basics/TruncatedAddress";
@@ -40,6 +40,7 @@ function BookiePage() {
   const [bookieEpoch, setBookieEpoch] = useState("0");
   const [tokenAmount, setTokenAmount] = useState("0");
 
+  document.title = "LP Page";
   useEffect(() => {
     if (!bettingContract || !oracleContract || !tokenContract) return;
 
@@ -237,7 +238,7 @@ function BookiePage() {
         side={
           <Box mt="30px" ml="25px" mr="35px">
             <Logo />
-            <Flex mt="15px"></Flex>
+            <Flex mt="14px"></Flex>
             <Box
               mt="20px"
               pt="10px"
@@ -250,12 +251,13 @@ function BookiePage() {
                 alignItems="center"
                 justifyContent="marginLeft"
               >
-                <Text size="20px">
+                <Text size="14px">
                   <Link
                     className="nav-header"
                     style={{
                       // textDecoration: "none",
                       cursor: "pointer",
+                      color: "#fff000"
                     }}
                     to="/betpage"
                   >
@@ -271,11 +273,12 @@ function BookiePage() {
                 alignItems="center"
                 justifyContent="marginLeft"
               >
-                <Text size="20px">
+                <Text size="14px">
                   <Link
                     className="nav-header"
                     style={{
                       cursor: "pointer",
+                      color: "#fff000"
                     }}
                     to="/"
                   >
@@ -289,11 +292,11 @@ function BookiePage() {
               <Flex mt="10px" pt="10px"></Flex>
             </Box>
             <Box mb="10px" mt="10px">
+            <Text className="style">Your address</Text>
               <TruncatedAddress
-                label="Your Address"
                 addr={account}
                 start="8"
-                end="6"
+                end="0"
                 transform="uppercase"
                 spacing="1px"
               />
@@ -317,14 +320,14 @@ function BookiePage() {
                 justifyContent="flex-start"
                 buttonWidth="95px"
                 inputWidth="100px"
-                placeholder="ether"
-                buttonLabel="fund"
+                placeholder="# avax"
+                buttonLabel="Fund"
               />
             </Box>
 
             <Box>
               {" "}
-              <Text size="14px">
+              <Text size="14px" color={cwhite}>
                 {"Tokens available for match funding: " +
                   Number(tokenAmount)
                     .toString()
@@ -344,16 +347,17 @@ function BookiePage() {
                       borderTop: `thin solid ${G}`,
                     }}
                   >
-                    <Text size="16px" weight="400" style={{ marginLeft: "1%" }}>
-                      Bookie Capital
+                    <Text size="14px" weight="400" style={{ marginLeft: "1%" }} color={cwhite}>
+                      Total LP Capital
                     </Text>
                   </Flex>
                   <Flex pt="10px" justifyContent="space-around">
                     <Box>
                       <LabeledText
-                        big
+                        //big
+                        color = "#fff000"
                         label="Available Capital"
-                        size="14px"
+                        size="24px"
                         text={Number(unusedCapital).toFixed(3)}
                         spacing="4px"
                       />
@@ -390,7 +394,7 @@ function BookiePage() {
 
             <Box>
               {" "}
-              <Text size="14px">
+              <Text size="14px" color={cwhite}>
                 {"You own: " +
                   Number(bookieShares).toFixed(0) +
                   "  out of " +
@@ -400,14 +404,14 @@ function BookiePage() {
             </Box>
             <Box>
               {" "}
-              <Text size="14px">
-                {"Your share value: " + Number(ethBookie).toFixed(3) + " Eth "}
+              <Text size="14px" color={cwhite}>
+                {"Your share value: " + Number(ethBookie).toFixed(3) + " AVAX "}
               </Text>
               <Box>
                 {" "}
-                <Text size="15px">Current Epoch: {currentWeek} </Text>
+                <Text size="14px" color={cwhite}>Current Epoch: {currentWeek} </Text>
                 <br></br>
-                <Text size="15px">
+                <Text size="14px" color={cwhite}>
                   you can withdraw after epoch {bookieEpoch}
                 </Text>
               </Box>
@@ -422,8 +426,8 @@ function BookiePage() {
                   justifyContent="flex-start"
                   buttonWidth="95px"
                   inputWidth="100px"
-                  placeholder="Shares"
-                  buttonLabel="withdraw"
+                  placeholder="# shares"
+                  buttonLabel="Withdraw"
                 />
               ) : null}
             </Box>
@@ -440,17 +444,17 @@ function BookiePage() {
       >
         <div className="bookie-page-wrapper" style={{ width: "100%" }}>
           <Flex justifyContent="center">
-            <Text size="25px">Bookie Page</Text>
+            <Text size="25px" color="#ffffff">Bookie Page</Text>
           </Flex>
 
-          <Box mt="15px" mx="30px">
+          <Box mt="14px" mx="30px">
             <Flex width="100%" justifyContent="marginLeft">
-              <Text size="14px" weight="300">
+              <Text size="14px" weight="300" color="#ffffff">
                 {" "}
                 This page helps LPs understand their netLiab exposure to this
                 week's events. The NetLiability is the amount paid out by the
                 contract if the Home or Away Team wins. If negative this means
-                the LPs are credited eth. LPs can fund and withdraw using the
+                the LPs are credited AVAX. LPs can fund and withdraw using the
                 left-hand fields.
               </Text>
             </Flex>
@@ -481,10 +485,11 @@ function BookiePage() {
                     width: "100%",
                     borderRight: "1px solid",
                     float: "left",
+                    color: "#ffffff"
                   }}
                 >
                   <tbody>
-                    <tr style={{ width: "50%", textAlign: "center" }}>
+                    <tr style={{ width: "50%", textAlign: "center"}}>
                       <th>sport</th>
                       <th>Home Team</th>
                       <th>Away Team</th>

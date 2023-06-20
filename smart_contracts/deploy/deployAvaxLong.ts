@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import fs from "fs";
 var result;
-var nextStart = 1687254079;
+var nextStart = 1687965292;
 var receipt;
 var hash;
 
@@ -63,7 +63,6 @@ async function main() {
   console.log(`got here2`);
   result = await token.transfer(reader.address, 440n*million);
   await result.wait();
-  nextStart = 1687254079;
   result = await betting.fundBook({
     value: 100n*finneys,
   });
@@ -280,7 +279,6 @@ async function main() {
       receipt = result.wait();
       result = await oracle.settleProcess();
       receipt = result.wait();
-      var nextStart = 1687254079;
       result = await oracle.initPost(
         [
           "NHL:Colorado:Washington",

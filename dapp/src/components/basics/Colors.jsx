@@ -9,6 +9,11 @@ export const C = "#9C9C9C";  // grey
 export const cwhite = "#fff";  // white
 export const cblack = "#000";  // black
 export const cyellow = "#ffff00";  // yellow
+export const cdarkblue = "#121823";  // darkblue
+export const cmedblue = "#273548";  // medblue
+export const clightblue = "#3f587a";  // lightblue
+export const cbeige = "#ffd380";  // lightblue
+export const cpink = "#ff6361";  // lightblue
 
 
 

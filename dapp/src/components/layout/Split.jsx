@@ -17,7 +17,8 @@ export default ({ side, children, page }) => page === "bookie" ? (
     <Box
       width="380px"
       style={{
-        backgroundColor: "rgba(39, 39, 39, 0.67)",
+        //backgroundColor: "rgba(5, 5, 5, 0.67)",
+        backgroundColor: "rgba(0, 0, 0, 0.67)",
         height: "auto",
       }}
     >
@@ -30,8 +31,9 @@ export default ({ side, children, page }) => page === "bookie" ? (
     <Box
       width="470px"
       style={{
+        backgroundColor: "rgba(0, 0, 0, 0.67)",
         //backgroundColor: "rgba(39, 39, 39, 0.67)",
-        backgroundColor: "rgba(5, 5, 5, 0.67)",
+        //backgroundColor: "rgba(5, 5, 5, 0.67)",
         height: "auto",
       }}
     >

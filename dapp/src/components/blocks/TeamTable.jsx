@@ -41,7 +41,7 @@ export default function TeamTable({
       <tbody className="style">
         <tr style={{ width: "50%", textAlign: "left" }}>
           <th>Match</th>
-          <th>sport</th>
+          <th>Sport</th>
           <th style={{ textAlign: "left" }}>Favorite</th>
           <th style={{ textAlign: "left" }}>
             {showDecimalOdds ? "DecOdds" : "MoneyLine"}

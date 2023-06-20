@@ -1,4 +1,4 @@
-import { B, cyellow, cblack } from "./Colors";
+import { B, cyellow, cblack, cwhite } from "./Colors";
 import { Radius } from "./Style";
 import { Box, Flex } from "@rebass/grid";
 import React from "react";
@@ -53,10 +53,10 @@ export default function ({
               paddingRight: 7,
               outline: "none",
              // backgroundColor: "#fff",
-              font: cblack,
+              font: cwhite,
               width: width ? width : 50,
               height: "100%",
-              fontSize: size ? size : 18,
+              fontSize: size ? size : 16,
               fontWeight: weight ? weight : "normal",
 
             }}
