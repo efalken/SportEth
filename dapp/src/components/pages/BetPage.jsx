@@ -4,7 +4,7 @@ import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
 import Form from "../basics/Form";
-import { G } from "../basics/Colors";
+import { G, cblack } from "../basics/Colors";
 import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
@@ -334,7 +334,7 @@ function BetPage() {
             </Box>
             <Box>
               <Flex>
-                <Text size="20px" color="#707070">
+                <Text size="20px" color= "#000">
                   <Link
                     className="nav-header"
                     style={{
@@ -364,7 +364,7 @@ function BetPage() {
             </Box>
             <Box>
               <Flex
-                width="100%"
+                width="100%"  
                 alignItems="center"
                 justifyContent="marginLeft"
               >
@@ -382,15 +382,15 @@ function BetPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text>Your address</Text>
+              <Text className="style">Your address</Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
                 end="6"
                 transform="uppercase"
-                spacing="1px"
+                spacing="1px"   
               />
-              <Text>
+              <Text  className="style">
                 Your available margin: {Number(userBalance).toFixed(3)} ETH
               </Text>
             </Box>
@@ -402,16 +402,17 @@ function BetPage() {
               ></Flex>
             </Box>
             <Flex>
-              <Box mt="1px" mb="1px">
+              <Box mt="1px" mb="1px" font="white">
                 <button
                   style={{
-                    backgroundColor: "#707070",
-                    borderRadius: "2px",
+                    backgroundColor: "black",
+                    borderRadius: "5px",
                     cursor: "pointer",
+                    color: "yellow"
                   }}
                   onClick={() => switchOdds()}
                 >
-                  {showDecimalOdds ? "show MoneyLine" : "show DecimalOdds"}
+                  {showDecimalOdds ? "Switch to MoneyLine Odds" : "Switch to Decimal Odds"}
                 </button>{" "}
               </Box>
             </Flex>{" "}
@@ -431,11 +432,11 @@ function BetPage() {
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text> Your active bets</Text>
+                    <Text  className="style"> Your active bets</Text>
                     <br />
-                    <table style={{ width: "100%", fontSize: "12px" }}>
+                    <table style={{ width: "100%", fontSize: "14px",  color: "black"}}>
                       <tbody>
-                        <tr style={{ width: "33%" }}>
+                        <tr style={{ width: "33%", color:"black"}}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
@@ -486,19 +487,21 @@ function BetPage() {
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text size="15px">Active Epoch: {currW4}</Text>
+                    <Text size="15px" className="style">Active Epoch: {currW4}</Text>
                     <br />
-                    <Text> Your unclaimed winning bets</Text>
+                    <Text  className="style"> Your unclaimed winning bets</Text>
                     <br />
                     <table
                       style={{
                         width: "100%",
-                        fontSize: "12px",
+                        fontSize: "18px",
                         float: "left",
+                        font: "sans-serif",
                       }}
+                    
                     >
                       <tbody>
-                        <tr style={{ width: "33%" }}>
+                        <tr style={{ width: "33%"}}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
@@ -525,9 +528,10 @@ function BetPage() {
                                 <td>
                                   <button
                                     style={{
-                                      backgroundColor: "#707070",
+                                      backgroundColor: "black",
                                       borderRadius: "2px",
                                       cursor: "pointer",
+                                      color: "yellow"
                                     }}
                                     value={event.Hashoutput}
                                     onClick={(e) => {
@@ -567,6 +571,7 @@ function BetPage() {
             >
               <Box>
                 <Form
+                // className="btn"
                   onChange={setWdAmount}
                   value={wdAmount}
                   onSubmit={withdrawBettor}
@@ -599,7 +604,8 @@ function BetPage() {
                   inputWidth="100px"
                   borderRadius="2px"
                   placeholder="eth"
-                  buttonLabel="Fund"
+                  //backgroundColor = "#fff"
+                  buttonLabel="Fund!!!"
                 />
               </Box>
             </Flex>
@@ -607,11 +613,11 @@ function BetPage() {
         }
       >
         <Flex justifyContent="center">
-          <Text size="25px">Place Bets Here</Text>
+          <Text size="25px" className="style">Place Bets Here</Text>
         </Flex>
         <Box mt="15px" mx="30px">
           <Flex width="100%" justifyContent="marginLeft">
-            <Text size="14px" weight="300">
+            <Text size="14px" weight="300" className="style">
               {" "}
               Toggle radio button on the team/player you want to bet on to win.
               Enter eths bet in the box (eg, 1.123). Prior wins, tie, or
@@ -639,16 +645,18 @@ function BetPage() {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Text size="16px" weight="400" style={{ paddingLeft: "10px" }}>
+            <Text size="16px" weight="400" color= "white" style={{ paddingLeft: "10px" }}>
               Bet Amount
             </Text>
 
             <Input
               onChange={({ target: { value } }) => setBetAmount(value)}
               width="100px"
+              color = "black"
               placeholder={"Enter Eths"}
               marginLeft="10px"
               marginRignt="5px"
+             // color="yellow"
               value={betAmount}
             />
             <Box mt="10px" mb="10px">
@@ -658,6 +666,7 @@ function BetPage() {
                   width: "100px",
                   float: "right",
                   marginLeft: "5px",
+                 // color: "black"
                 }}
                 onClick={() => takeBet()}
               >
@@ -680,12 +689,12 @@ function BetPage() {
 
         <Flex
           style={{
-            color: "#B0B0B0",
+          //  color: "#000",
             fontSize: "12px",
           }}
         >
           {teamPick != null ? (
-            <Text size="16px" weight="400">
+            <Text size="16px" weight="400" color="white">
               pick: {teamSplit[matchPick][teamPick + 1]}
               {"  "}
               Odds:{" "}

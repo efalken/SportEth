@@ -25,8 +25,8 @@ height: 15px;
 padding: 3px;
 /* background-color only for content */
 background-clip: content-box;
-border: 1px solid #bbbbbb;
-background-color: #e7e6e7;
+border: 1px solid #ffff00;
+background-color: #ffff00;
 border-radius: 50%;
 }
 
@@ -49,7 +49,7 @@ cursor: pointer;
 .circle:before {
 content: ' \25CF';
 font-size: 20px;
-color: black;
+color: yellow;
 padding-right: 5px;
 padding-left: 6px;
 }
@@ -80,6 +80,15 @@ transform: scale(0.95);
 cursor: pointer;
 }
 
+.style{
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.btn{
+  background: yellow;
+}
+
 a.faqs-link:hover {
   background: #7393B3;
   border-radius: 5px;
@@ -108,7 +117,7 @@ margin-right: 0in !important;
 margin-bottom:  8.0pt !important;
 margin-left:  0in !important;
 line-height:  105% !important;  */
-font-size:  12px !important;
+font-size:  18px !important;
 font-family: "Calibri",sans-serif !important;
 /*font-family:  "Times New Roman",serif !important;*/
 }

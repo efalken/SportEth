@@ -12,6 +12,6 @@ export default Styled.button`
             font-weight: ${({ weight }) => weight ? weight : "normal"};
             width: ${({ width }) => width ? width : "auto"};
             cursor: pointer;
-            color: #fff;
+            color: #ccc;
             background-color: ${({ bgColor }) => bgColor ? bgColor : G};
         `

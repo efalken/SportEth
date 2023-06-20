@@ -1,5 +1,5 @@
 import Styled from 'styled-components'
-import { Ggg } from './Colors'
+import { Ggg, cblack } from './Colors'
 import { Radius } from './Style'
 
 export default Styled.button`
@@ -12,8 +12,9 @@ export default Styled.button`
         font-weight: ${({ weight }) => weight ? weight : "normal"};
         width: ${({ width }) => width ? width : "auto"};
         cursor: pointer;
-        background-color: ${({ bgColor }) => bgColor ? bgColor : Ggg};
         border-style:outset;
-        border-color: gray;
+        border-color: yellow; 
         border-width: 2px;
+        color: yellow;
+        background-color: black;
     `

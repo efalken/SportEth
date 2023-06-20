@@ -15,14 +15,14 @@ export default function () {
         zIndex: -10,
         overflow: "hidden",
       }}
-    >
+    >  
       <video
         autoPlay
         muted
         loop
         style={{
-          // opacity: 0.3,
-        filter: "grayscale(100%)",
+       opacity: 0.97,
+        //filter: "grayscale(100%)",
           minHeight: "100%",
           minWidth: "100%",
         }}

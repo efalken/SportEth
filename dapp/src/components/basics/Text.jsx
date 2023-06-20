@@ -1,6 +1,7 @@
 import Styled from 'styled-components'
 
 export default Styled.span`
+           font-family: sans-serif;
             font-size: ${({ size }) => size};
             font-weight: ${({ weight }) => weight ? weight : "normal"};
             color: ${({ color }) => color};
@@ -12,3 +13,4 @@ export default Styled.span`
         `
 
         //          word-break: break-all;
+        //  font-family: sans-serif;

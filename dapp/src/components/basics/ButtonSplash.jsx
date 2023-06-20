@@ -12,5 +12,5 @@ export default Styled.button`
             width: ${({ width }) => width ? width : "auto"};
             cursor: pointer;
             color: #fff;
-            background-color: ${({ bgColor }) => bgColor ? bgColor : "#0C101B"};
+            background-color: black;
         `

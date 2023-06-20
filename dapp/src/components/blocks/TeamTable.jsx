@@ -36,8 +36,9 @@ export default function TeamTable({
         float: "left",
         borderCollapse: "collapse",
       }}
+      
     >
-      <tbody>
+      <tbody className="style">
         <tr style={{ width: "50%", textAlign: "left" }}>
           <th>Match</th>
           <th>sport</th>

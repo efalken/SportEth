@@ -1,5 +1,5 @@
 import React from 'react';
-import { C, B } from './Colors'
+import { C, cwhite } from './Colors'
 import { Box } from '@rebass/grid'
 import Text from './Text'
 
@@ -15,7 +15,7 @@ export default ({ label, addr, start, end, transform, spacing, big }) => <Box>
   <Box mt="2px">
     <Text
       size={big ? "15px" : "13px"}
-      color={B}
+      color = {cwhite}
       style={{
         textTransform: transform ? transform : "none",
         letterSpacing: spacing ? spacing : 0

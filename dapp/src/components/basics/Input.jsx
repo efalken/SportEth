@@ -1,4 +1,4 @@
-import { B, Gg } from "./Colors";
+import { B, cyellow, cblack } from "./Colors";
 import { Radius } from "./Style";
 import { Box, Flex } from "@rebass/grid";
 import React from "react";
@@ -17,7 +17,8 @@ export default function ({
       <Flex
         {...props}
         style={{
-          border: `thin solid ${Gg}`,
+          //border: `thin solid ${Gg}`,
+          border: `yellow`,
           borderRadius: Radius,
           height: 30,
         }}
@@ -35,8 +36,14 @@ export default function ({
 
         {/* This is the value */}
         <Box
+          // style={{
+          //   borderLeft: `thin solid ${Gg}`,
+          // }}
           style={{
-            borderLeft: `thin solid ${Gg}`,
+            backgroundColor: "black",
+            borderRadius: "2px",
+            cursor: "pointer",
+            color: "yellow"
           }}
         >
           <input
@@ -45,12 +52,13 @@ export default function ({
               paddingLeft: 7,
               paddingRight: 7,
               outline: "none",
-              backgroundColor: "#404040",
-              color: B,
+             // backgroundColor: "#fff",
+              font: cblack,
               width: width ? width : 50,
               height: "100%",
-              fontSize: size ? size : 14,
+              fontSize: size ? size : 18,
               fontWeight: weight ? weight : "normal",
+
             }}
           />
         </Box>
@@ -62,11 +70,11 @@ export default function ({
         <input
           placeholder={placeholder}
           style={{
-            border: `thin solid ${Gg}`,
+            border: `thin solid ${cyellow}`,
             width: width ? width : 120,
-            color: B,
+            color: "cyellow",
             outline: "none",
-            backgroundColor: "#404040",
+            backgroundColor: cblack,
             padding: "5px 7px 5px 7px",
             fontSize: size ? size : 14,
             fontWeight: weight ? weight : "normal",

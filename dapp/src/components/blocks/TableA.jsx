@@ -1,4 +1,4 @@
-import C from '../basics/Colors'
+import cblack from '../basics/Colors'
 import {Box} from '@rebass/grid'
 import React from 'react'
 import Styled from 'styled-components'
@@ -6,7 +6,7 @@ import Styled from 'styled-components'
 const Table = Styled.table`
     margin-left: -30px;
     & tr td:first-child {
-        color: ${C}
+        color: ${cblack}
     }
     & tr {
         padding: 12px 30px;
@@ -37,7 +37,7 @@ export default
             </tbody>
         </Table> */}
 
-            <Table>
+            <Table cla>
                 <tbody>
                     <tr>
                         <th></th>
