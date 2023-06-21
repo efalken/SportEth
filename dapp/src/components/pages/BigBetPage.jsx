@@ -482,7 +482,7 @@ export default function BigBetPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text color="#ffffff">Connected Accout Address</Text>
+              <Text color="#ffffff">Connected Account Address</Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
@@ -530,14 +530,14 @@ export default function BigBetPage() {
             <Flex>
               {Object.keys(userOffers).map((id) => (
                 <div key={id} style={{ width: "100%", float: "left" }}>
-                  <Text color= "#ffffff"> Your Unclaimed Offers</Text>
+                  <Text color= "#ffffff"> Your Unclaimed Active Offers</Text>
                   <br />
                   <table style={{ width: "100%", fontSize: "14px",  color: "#ffffff"}}>
                     <tbody>
                       <tr style={{ width: "50%", color: "#ffffff"}}>
                         <td>Week</td>
                         <td>Bet Size</td>
-                        <td>contractID</td>
+                        <td>Contract Hash ID</td>
                         <td>Click to Retract</td>
                       </tr>
                       {userOffers[id].map(
@@ -616,8 +616,7 @@ export default function BigBetPage() {
                   placeholder="# avax"
                   buttonLabel="WithDraw"
                   border-color= "yellow"
-        color= "yellow"
-        background-color= "black"
+                 background-color= "black"
                 />
               </Box>
             </Flex>
@@ -757,7 +756,7 @@ export default function BigBetPage() {
               <Input
                 onChange={({ target: { value } }) => setBetAmount(value)}
                 width="100px"
-                placeholder={"# AVAX"}
+                placeholder={"# avax"}
                 marginLeft="10px"
                 marginRignt="5px"
                 value={betAmount}
@@ -853,7 +852,7 @@ export default function BigBetPage() {
                       />
                     </td>
                     <td>Offered Odds</td>
-                    <td>ContractID</td>
+                    <td>Contract hash ID</td>
                   </tr>
                 </thead>
                 <tbody>

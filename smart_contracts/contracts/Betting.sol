@@ -54,7 +54,7 @@ contract Betting {
     address indexed bettor,
     uint8 indexed epoch,
     uint8 matchNum,
-    uint8 pick,
+    uint8 pick,  
     uint32 betAmount,
     uint32 payoff,
     bytes32 contractHash
@@ -113,7 +113,7 @@ contract Betting {
    * @param _team0or1 denotes the initial favorite (0) and underdog (1) for a given epoch and matchNumber
    * @param _betAmt is the amount bet in 10s of finney, 0.0001 ether
    */
-  function bet(uint8 _matchNumber, uint8 _team0or1, uint32 _betAmt) external {
+  function bet(uint8 _matchNumber, uint8 _team0or1, uint32 _betAmt) external returns (bytes32) {
     // user needs sufficient capital to make bet
     require(_betAmt <= userBalance[msg.sender] && _betAmt >= MIN_BET, "NSF ");
     // pause[0] and [1] can be used to prevent betting when an odds number posted is very wrong
@@ -185,6 +185,7 @@ contract Betting {
       uint32(betPayoff),
       subkID
     );
+    return subkID;
   }
 
   /** @dev processes large bet where the size and odds are of the poster's choosing
@@ -198,7 +199,7 @@ contract Betting {
     uint8 _team0or1,
     uint32 _betAmount,
     uint32 _decOddsBB
-  ) external {
+  ) external returns (bytes32) {
     // we only want large bets, not just custom bets
     require(_betAmount >= margin[0] / margin[5], "too small");
     // cannot bet more than one has
@@ -226,12 +227,13 @@ contract Betting {
       order.payoff,
       subkID
     );
+    return subkID;
   }
 
   /* @dev takes outstanding offered bet
    * @param _subkid is the bet offer's unique HashID
    */
-  function takeBigBet(bytes32 _subkid) external {
+  function takeBigBet(bytes32 _subkid) external returns (bytes32) {
     Subcontract memory k = offerContracts[_subkid];
     uint32[7] memory betDatav = decodeNumber(betData[k.matchNum]);
     require(betDatav[4] > block.timestamp, "game started");
@@ -303,6 +305,7 @@ contract Betting {
     betContracts[subkID2] = k;
     margin[6]++;
     delete offerContracts[_subkid];
+    return subkID2;
   }
 
   /* @dev cancels outstanding offered bet

@@ -292,7 +292,7 @@ function BookiePage() {
               <Flex mt="10px" pt="10px"></Flex>
             </Box>
             <Box mb="10px" mt="10px">
-            <Text className="style">Your address</Text>
+            <Text className="style">Connected Account Address</Text>
               <TruncatedAddress
                 addr={account}
                 start="8"

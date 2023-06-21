@@ -385,7 +385,7 @@ function BetPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text className="style">Your address</Text>
+              <Text className="style">Connected Account Address</Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
@@ -435,11 +435,11 @@ function BetPage() {
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text  className="style" color= "#ffffff"> Your active bets</Text>
+                    <Text  className="style" color= "#ffffff" font="sans-selif"> Your active bets</Text>
                     <br />
-                    <table style={{ width: "100%", fontSize: "14px",  color: "#ffffff"}}>
-                      <tbody>
-                        <tr style={{ width: "33%", color: "#ffffff"}}>
+                    <table style={{ width: "100%", fontSize: "14px", font:"sans-selif", color: "#ffffff"}}>
+                      <tbody font="sans-selif">
+                        <tr style={{ width: "33%", color: "#ffffff", font:"sans-selif"}}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
@@ -573,7 +573,7 @@ function BetPage() {
               alignItems="center"
             >
               <Box>
-                <Form
+                <Form 
                 // className="btn"
                   onChange={setWdAmount}
                   value={wdAmount}
@@ -581,9 +581,10 @@ function BetPage() {
                   mb="20px"
                   justifyContent="flex-start"
                   buttonWidth="95px"
+                  color="yellow"
                   inputWidth="100px"
                   borderRadius="2px"
-                  placeholder="# avax"
+                  placeholder="# units"
                   buttonLabel="WithDraw"
                 />
               </Box>
@@ -608,7 +609,7 @@ function BetPage() {
                   borderRadius="2px"
                   placeholder="# avax"
                   //backgroundColor = "#fff"
-                  buttonLabel="Fund!!!"
+                  buttonLabel="Fund"
                 />
               </Box>
             </Flex>
@@ -623,9 +624,9 @@ function BetPage() {
             <Text size="14px" weight="300" className="style">
               {" "}
               Toggle radio button on the team/player you want to bet on to win.
-              Enter AVAX bet in the box (eg, 1.123). Prior wins, tie, or
-              cancelled bets are redeemable on the left panel. This sends eth
-              directly to your eth address. Scroll down to see all of the week's
+              Enter desired avax bet in the box (eg, 1.123). Prior wins, tie, or
+              cancelled bets are redeemable on the left panel. This sends avax
+              directly to your avax address. Scroll down to see all of the week's
               contests.
             </Text>
           </Flex>
@@ -656,6 +657,7 @@ function BetPage() {
               onChange={({ target: { value } }) => setBetAmount(value)}
               width="100px"
               color = "black"
+              font = "sans-serif"
               placeholder={"# avax"}
               marginLeft="10px"
               marginRignt="5px"

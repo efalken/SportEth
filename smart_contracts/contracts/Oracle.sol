@@ -36,6 +36,8 @@ contract Oracle {
     uint64 tokens;
     uint64 voteTracker;
     uint64 initFeePool;
+    uint32 initEpoch;
+    uint32 totalVotes;
   }
 
   event ResultsPosted(uint32 epoch, uint32 propnum, uint8[32] winner);
@@ -81,11 +83,13 @@ contract Oracle {
     // this prevents this account from voting again on this data proposal
     adminStruct[msg.sender].voteTracker = propNumber;
     // votes are simply one's entire token balance in this oracle contract
+    uint64 _tokens = adminStruct[msg.sender].tokens;
     if (_sendData) {
-      votes[0] += adminStruct[msg.sender].tokens;
+      votes[0] += _tokens;
     } else {
-      votes[1] += adminStruct[msg.sender].tokens;
+      votes[1] += _tokens;
     }
+    adminStruct[msg.sender].totalVotes += (_tokens / 2);
   }
 
   receive() external payable {}
@@ -122,6 +126,7 @@ contract Oracle {
     } else {
       burnAndReset();
     }
+    totVote = votes[0] + votes[1];
     reset();
     // only update or settle allowed next
     reviewStatus = ACTIVE_STATE;
@@ -166,6 +171,7 @@ contract Oracle {
   function settleProcess() external returns (bool) {
     require(reviewStatus == SETTLE_PROC_NEXT, "wrong data");
     require(hourOfDay() < HOUR_PROCESS, "too soon");
+    totVote = votes[0] + votes[1];
     if (votes[0] > votes[1]) {
       (uint32 _epoch, uint256 ethDividend) = bettingContract.settle(
         propResults
@@ -179,6 +185,7 @@ contract Oracle {
     }
     reset();
     reviewStatus = 0;
+
     return true;
   }
 
@@ -227,15 +234,22 @@ contract Oracle {
   function withdrawTokens(uint64 _amtTokens) external {
     require(_amtTokens <= adminStruct[msg.sender].tokens, "nsf tokens");
     // this prevents voting more than once or oracle proposals with token balance.
-    require(reviewStatus < 10, "no wd during vote");
+    require(reviewStatus == 2, "no wd during vote");
+    uint64 numVotes = betEpochOracle - adminStruct[msg.sender].initEpoch;
+    uint64 userVotes = (adminStruct[msg.sender].totalVotes + adminStruct[msg.sender].tokens) / numVotes;
+    if (userVotes > adminStruct[msg.sender].tokens) userVotes = adminStruct[msg.sender].tokens;
+    require(numVotes > 0, "no wd for at least 1 week");
+    require(adminStruct[msg.sender].totalVotes < betEpochOracle, "no wd for at least 1 week");
     bool success;
     uint256 ethClaim = uint256(
-      adminStruct[msg.sender].tokens *
+      userVotes * adminStruct[msg.sender].tokens *
         (feeData[1] - adminStruct[msg.sender].initFeePool)
     ) * TOKEN_ADJ;
     adminStruct[msg.sender].initFeePool = feeData[1];
     feeData[0] -= _amtTokens;
     adminStruct[msg.sender].tokens -= _amtTokens;
+    adminStruct[msg.sender].initEpoch = betEpochOracle;
+    adminStruct[msg.sender].totalVotes = 0;
     //payable(msg.sender).transfer(ethClaim);
     (success, ) = payable(msg.sender).call{value: ethClaim}("");
     require(success, "eth payment failed");
@@ -249,10 +263,12 @@ contract Oracle {
     //require(hour == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
-    votes[0] = adminStruct[msg.sender].tokens;
+    uint64 _tokens = adminStruct[msg.sender].tokens;
+    votes[0] = _tokens;
     proposer = msg.sender;
     // this prevents proposer from voting again with his tokens on this submission
     adminStruct[msg.sender].voteTracker = propNumber;
+    adminStruct[msg.sender].totalVotes += (_tokens / 2);
   }
 
   function reset() internal {
@@ -262,6 +278,7 @@ contract Oracle {
     votes[0] = 0;
     // resets no votes count to zero
     votes[1] = 0;
+    
   }
 
   function burnAndReset() internal returns (bool success) {

@@ -25,7 +25,7 @@ height: 15px;
 padding: 3px;
 /* background-color only for content */
 background-clip: content-box;
-border: 1px solid #fff000;
+border: 2px solid #fff000;
 background-color: #fff000;
 border-radius: 50%;
 }
