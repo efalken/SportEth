@@ -10,6 +10,7 @@ contract Oracle {
   uint96[32] public propOddsStarts;
   // smaller data from propOddsStarts because one cannot change the start times
   uint64[32] public propOddsUpdate;
+  uint64 public totVote;
   // results are 0 for team 0 winning, 1 for team 1 winning, 2 for a tie or no contest
   uint8[32] public propResults;
   /** the schedule is a record of "sport:home:away", such as "NFL:NYG:SF" for us football
@@ -34,10 +35,10 @@ contract Oracle {
 
   struct AdminStruct {
     uint64 tokens;
-    uint64 voteTracker;
     uint64 initFeePool;
+    uint64 totalVotes;
+    uint32 voteTracker;
     uint32 initEpoch;
-    uint32 totalVotes;
   }
 
   event ResultsPosted(uint32 epoch, uint32 propnum, uint8[32] winner);
@@ -235,7 +236,7 @@ contract Oracle {
     require(_amtTokens <= adminStruct[msg.sender].tokens, "nsf tokens");
     // this prevents voting more than once or oracle proposals with token balance.
     require(reviewStatus == 2, "no wd during vote");
-    uint64 numVotes = betEpochOracle - adminStruct[msg.sender].initEpoch;
+    uint64 numVotes = uint64(betEpochOracle - adminStruct[msg.sender].initEpoch);
     uint64 userVotes = (adminStruct[msg.sender].totalVotes + adminStruct[msg.sender].tokens) / numVotes;
     if (userVotes > adminStruct[msg.sender].tokens) userVotes = adminStruct[msg.sender].tokens;
     require(numVotes > 0, "no wd for at least 1 week");
