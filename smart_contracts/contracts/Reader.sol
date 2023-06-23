@@ -7,14 +7,22 @@ SPDX-License-Identifier: MIT
 
 import "./Oracle.sol";
 import "./Betting.sol";
+import "./Token.sol";
 
 contract Reader {
   Oracle public oraclek;
-  Betting public bettingk;
+  Betting public betting;
+  Token public token;
+  mapping(address => uint32) public claimEpoch;
+  uint64 public tokensInContract;
+  uint32 public x;
+  uint256 public constant EPOCH_AMOUNT = 1e7;
+
+  event TokenReward(address liqprovider, uint256 tokens, uint32 epoch);
 
   constructor(address payable _betting, address payable _oracle) {
     oraclek = Oracle(_oracle);
-    bettingk = Betting(_betting);
+    betting = Betting(_betting);
   }
 
   function checkSingleBet(
@@ -31,27 +39,52 @@ contract Reader {
       address _bettor
     )
   {
-    (_epoch, _matchNum, _pick, _betAmount, _payoff, _bettor) = bettingk
+    (_epoch, _matchNum, _pick, _betAmount, _payoff, _bettor) = betting
       .betContracts(_subkID);
   }
 
   function checkOffer(bytes32 _subkID) external view returns (bool) {
-    (, , , uint32 betamt, , ) = bettingk.offerContracts(_subkID);
+    (, , , uint32 betamt, , ) = betting.offerContracts(_subkID);
     bool takeable = (betamt > 0);
     return takeable;
   }
 
   function checkRedeem(bytes32 _subkID) external view returns (bool) {
-    (uint8 epoch, uint8 matchNum, uint8 pick, , , ) = bettingk.betContracts(
+    (uint8 epoch, uint8 matchNum, uint8 pick, , , ) = betting.betContracts(
       _subkID
     );
     uint32 epochMatch = epoch * 1000 + matchNum * 10 + pick;
-    bool redeemable = (bettingk.outcomeMap(epochMatch) > 0);
+    bool redeemable = (betting.outcomeMap(epochMatch) > 0);
     return redeemable;
   }
 
   function showBetData(uint256 _match) external view returns (uint256 betData) {
-    betData = bettingk.betData(_match);
+    betData = betting.betData(_match);
+  }
+
+    function depositTokens(uint64 _amt) external {
+    bool success = token.transferFrom(msg.sender, address(this), _amt);
+    require(success, "not success");
+    tokensInContract += _amt;
+  }
+
+  function getTokenRewards() external {
+    require(tokensInContract > 0, "no token rewards left");
+    (uint256 lpShares, ) = betting.lpStruct(msg.sender);
+    require(lpShares > 0, "only for liq providers");
+    uint32 lpepoch = claimEpoch[msg.sender];
+    uint32 epoch = betting.margin(3);
+    if (lpepoch < epoch && lpepoch != 0) {
+      uint256 totShares = uint256(betting.margin(4));
+      uint64 tokenRewards = uint64(
+        (uint256(lpShares) * EPOCH_AMOUNT) / totShares
+      );
+      tokensInContract -= tokenRewards;
+      bool success = token.transfer(msg.sender, tokenRewards);
+      require(success, "token failed");
+      emit TokenReward(msg.sender, tokenRewards, epoch);
+    }
+    claimEpoch[msg.sender] = epoch;
   }
 
   // function showBigBetData(bytes32 _subkid)
@@ -59,14 +92,14 @@ contract Reader {
   //   view
   //   returns (uint32[7] memory matchData)
   // {
-  //     (uint8 epoch, uint8 matchNum, uint8 pick, uint32 betAmount, uint32 payoff, address bettor) = bettingk.offerContracts(_subkid);
-  // (uint32 favelong, uint32 undlong, uint32 favepayout, uint32 undpayout, uint32 startTime, uint32 faveodds, uint32 undodds) = bettingk.offerContracts(_matchNumber);
-  //uint256 x = bettingk.offerContracts(matchData);
+  //     (uint8 epoch, uint8 matchNum, uint8 pick, uint32 betAmount, uint32 payoff, address bettor) = betting.offerContracts(_subkid);
+  // (uint32 favelong, uint32 undlong, uint32 favepayout, uint32 undpayout, uint32 startTime, uint32 faveodds, uint32 undodds) = betting.offerContracts(_matchNumber);
+  //uint256 x = betting.offerContracts(matchData);
   //matchData = decodeNumber(x);
-  //matchData = bettingk.betData(x);
+  //matchData = betting.betData(x);
   // matchData = [favelong, undlong, favepayout, undpayout, startTime, faveodds, undodds];
   // return decodedMatch;
-  //betdata = bettingk.betData(x);
+  //betdata = betting.betData(x);
   //return betdata;
   //}
 

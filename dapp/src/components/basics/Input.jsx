@@ -48,12 +48,12 @@ export default function ({
         >
           <input
             style={{
-              border: "none",
-              paddingLeft: 7,
-              paddingRight: 7,
-              outline: "none",
+              // border: "none",
+              // paddingLeft: 7,
+              // paddingRight: 7,
+              // outline: "none",
              // backgroundColor: "#fff",
-              font: cwhite,
+              font: cwhite, 
               width: width ? width : 50,
               height: "100%",
               fontSize: size ? size : 16,
@@ -73,6 +73,7 @@ export default function ({
             border: `thin solid ${cyellow}`,
             width: width ? width : 120,
             color: "cyellow",
+            borderRadius: "2px",
             outline: "none",
             backgroundColor: cblack,
             padding: "5px 7px 5px 7px",

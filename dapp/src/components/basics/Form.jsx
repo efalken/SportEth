@@ -16,8 +16,9 @@ export default function Form({ label, inputWidth, placeholder, buttonWidth, butt
             <Box>
                 <Button style={{
                     backgroundColor: "black",
-                    borderRadius: "5px",
+                    borderRadius: "2px",
                     cursor: "pointer",
+                    color: "yellow"
                 }} width={buttonWidth} onClick={onSubmit}>{buttonLabel}</Button>
             </Box>
         </Flex>

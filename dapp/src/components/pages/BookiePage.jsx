@@ -231,7 +231,7 @@ function BookiePage() {
   }
 
   return (
-    <div>
+    <div>   
       <VBackgroundCom />
       <Split
         page={"bookie"}
@@ -442,9 +442,10 @@ function BookiePage() {
           </Box>
         }
       >
-        <div className="bookie-page-wrapper" style={{ width: "100%" }}>
+        {/* <div className="bookie-page-wrapper" style={{ width: "100%" }}> */}
+        <div style={{ width: "100%" }}>
           <Flex justifyContent="center">
-            <Text size="25px" color="#ffffff">Bookie Page</Text>
+            <Text size="25px" color="#ffffff">Liquidity Provider Page</Text>
           </Flex>
 
           <Box mt="14px" mx="30px">
