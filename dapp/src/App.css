@@ -46,6 +46,12 @@ background-color: black;
 cursor: pointer;
 }
 
+/* input::placeholder {
+  font-weight: bold;
+  opacity: 0.5;
+  color: red;
+} */
+
 .circle:before {
 content: ' \25CF';
 font-size: 20px;
@@ -96,8 +102,8 @@ a.faqs-link:hover {
 }
 
 ::placeholder {
-color:  #D3D3D3;
-font-weight: 800;
+color: #00ff00;
+font-weight: 600;
 }
 
  a.docu-header:hover {

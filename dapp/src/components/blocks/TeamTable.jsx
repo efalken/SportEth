@@ -35,6 +35,7 @@ export default function TeamTable({
         borderRight: "1px solid",
         float: "left",
         borderCollapse: "collapse",
+        fontSize: "14px",
       }}
       
     >

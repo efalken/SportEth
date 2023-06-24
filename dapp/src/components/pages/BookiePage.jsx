@@ -257,7 +257,8 @@ function BookiePage() {
                     style={{
                       // textDecoration: "none",
                       cursor: "pointer",
-                      color: "#fff000"
+                      color: "#fff000",
+                      fontStyle: "italic"
                     }}
                     to="/betpage"
                   >
@@ -278,7 +279,8 @@ function BookiePage() {
                     className="nav-header"
                     style={{
                       cursor: "pointer",
-                      color: "#fff000"
+                      color: "#fff000",
+                      fontStyle: "italic",
                     }}
                     to="/"
                   >
@@ -292,7 +294,7 @@ function BookiePage() {
               <Flex mt="10px" pt="10px"></Flex>
             </Box>
             <Box mb="10px" mt="10px">
-            <Text className="style">Connected Account Address</Text>
+            <Text className="style" size="14px">Connected Account Address</Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
@@ -318,8 +320,8 @@ function BookiePage() {
                 onSubmit={fundBook}
                 mb="20px"
                 justifyContent="flex-start"
-                buttonWidth="95px"
-                inputWidth="100px"
+               
+                padding="4px"
                 placeholder="# avax"
                 buttonLabel="Fund"
               />
@@ -347,30 +349,31 @@ function BookiePage() {
                       borderTop: `thin solid ${G}`,
                     }}
                   >
-                    <Text size="14px" weight="400" style={{ marginLeft: "1%" }} color={cwhite}>
-                      Total LP Capital
-                    </Text>
+
                   </Flex>
-                  <Flex pt="10px" justifyContent="space-around">
+                  <Flex pt="10px" justifyContent="left">
                     <Box>
                       <LabeledText
                         //big
-                        color = "#fff000"
-                        label="Available Capital"
-                        size="24px"
+                        color = "#00ff00"
+                        label="Available LP Capital"
+                        size="14px"
                         text={Number(unusedCapital).toFixed(3)}
                         spacing="4px"
                       />
                     </Box>
-
+                    </Flex>
+                  <Flex pt="10px" justifyContent="left">
                     <Box>
                       <LabeledText
-                        big
+                        color="red"
                         label="Locked Capital"
                         text={Number(usedCapital).toFixed(3)}
                         spacing="1px"
                       />
                     </Box>
+                    </Flex>
+                  <Flex pt="10px" justifyContent="left">
                     <Box>
                       <LabeledText
                         big
@@ -486,11 +489,13 @@ function BookiePage() {
                     width: "100%",
                     borderRight: "1px solid",
                     float: "left",
-                    color: "#ffffff"
+                    color: "#ffffff",
+                    fontFamily: "sans-serif"
+
                   }}
                 >
                   <tbody>
-                    <tr style={{ width: "50%", textAlign: "center"}}>
+                    <tr font="sans-serif" style={{ width: "50%", textAlign: "center"}}>
                       <th>sport</th>
                       <th>Home Team</th>
                       <th>Away Team</th>

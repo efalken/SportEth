@@ -339,7 +339,8 @@ function BetPage() {
                     className="nav-header"
                     style={{
                       cursor: "pointer",
-                      color: "#fff000"
+                      color: "#fff000",
+                      fontStyle: "italic",
                     }}
                     to="/bookiepage"
                   >
@@ -355,7 +356,9 @@ function BetPage() {
                     className="nav-header"
                     style={{
                       cursor: "pointer",
-                      color: "#fff000"
+                      color: "#fff000",
+                      fontStyle: "italic",
+                     // font: "sans-serif"
                     }}
                     to="/bigbetpage"
                   >
@@ -375,7 +378,8 @@ function BetPage() {
                     className="nav-header"
                     style={{
                       cursor: "pointer",
-                      color: "#fff000"
+                      color: "#fff000",
+                      fontStyle: "italic",
                     }}
                     to="/"
                   >
@@ -385,7 +389,7 @@ function BetPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text className="style">Connected Account Address</Text>
+              <Text size="14px" className="style">Connected Account Address</Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
@@ -393,7 +397,7 @@ function BetPage() {
                 transform="uppercase"
                 spacing="1px"   
               />
-              <Text  className="style">
+              <Text size="14px" className="style">
                 Your available capital: {Number(userBalance).toFixed(3)} AVAX
               </Text>
             </Box>
@@ -411,7 +415,12 @@ function BetPage() {
                     backgroundColor: "black",
                     borderRadius: "5px",
                     cursor: "pointer",
-                    color: "yellow"
+                    color: "yellow",
+                    border: "1px solid #ffff00", 
+                    padding: "4px"
+            // width: width ? width : 120,
+            // color: "#00ff00",
+
                   }}
                   onClick={() => switchOdds()}
                 >
@@ -435,11 +444,11 @@ function BetPage() {
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text  className="style" color= "#ffffff" font="sans-selif"> Your active bets</Text>
+                    <Text  className="style" color= "#ffffff" size="14px"> Your active bets</Text>  
                     <br />
-                    <table style={{ width: "100%", fontSize: "14px", font:"sans-selif", color: "#ffffff"}}>
-                      <tbody font="sans-selif">
-                        <tr style={{ width: "33%", color: "#ffffff", font:"sans-selif"}}>
+                    <table style={{ width: "100%", fontSize: "14px", fontFamily: "sans-serif", color: "#ffffff"}}>
+                      <tbody >
+                        <tr style={{ width: "33%", color: "#ffffff"}}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
@@ -492,14 +501,14 @@ function BetPage() {
                   <div key={id} style={{ width: "100%", float: "left" }}>
                     <Text size="14px" className="style">Active Epoch: {currW4}</Text>
                     <br />
-                    <Text  className="style"> Your unclaimed winning bets</Text>
+                    <Text  className="style" size="14px"> Your unclaimed winning bets</Text>
                     <br />
                     <table
                       style={{
                         width: "100%",
                         fontSize: "14px",
                         float: "left",
-                        font: "sans-serif",
+                        fontFamily: "sans-serif",
                       }}
                     
                     >
@@ -532,9 +541,14 @@ function BetPage() {
                                   <button
                                     style={{
                                       backgroundColor: "black",
-                                      borderRadius: "2px",
+                                      borderRadius: "5px",
+                                      padding: "4px",
+                                      //borderRadius: "1px",
                                       cursor: "pointer",
-                                      color: "yellow"
+                                      color: "yellow",
+                                      border: "1px solid #ffff00", 
+            // width: width ? width : 120,
+            // color: "#00ff00",
                                     }}
                                     value={event.Hashoutput}
                                     onClick={(e) => {
@@ -565,7 +579,7 @@ function BetPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
-            </Box>
+            </Box> 
             <Flex
               mt="5px"
               flexDirection="row"
@@ -574,7 +588,6 @@ function BetPage() {
             >
               <Box>
                 <Form 
-                // className="btn"
                   onChange={setWdAmount}
                   value={wdAmount}
                   onSubmit={withdrawBettor}
@@ -583,9 +596,10 @@ function BetPage() {
                   buttonWidth="95px"
                   color="yellow"
                   inputWidth="100px"
-                  borderRadius="2px"
-                  placeholder="# units"
+                  borderRadius="1px"
+                  placeholder="# avax"
                   buttonLabel="WithDraw"
+                  padding="4px"
                 />
               </Box>
 
@@ -606,7 +620,7 @@ function BetPage() {
                   justifyContent="flex-start"
                   buttonWidth="95px"
                   inputWidth="100px"
-                  borderRadius="2px"
+                  borderRadius="1px"
                   placeholder="# avax"
                   //backgroundColor = "#fff"
                   buttonLabel="Fund"
@@ -657,6 +671,7 @@ function BetPage() {
               onChange={({ target: { value } }) => setBetAmount(value)}
               width="100px"
               color = "black"
+
               font = "sans-serif"
               placeholder={"# avax"}
               marginLeft="10px"
@@ -667,10 +682,12 @@ function BetPage() {
             <Box mt="10px" mb="10px">
               <Button
                 style={{
-                  height: "30px",
-                  width: "100px",
+                  //height: "30px",
+                 // width: "100px",
                   float: "right",
                   marginLeft: "5px",
+                  border: "1px solid yellow",
+                  padding: "4px"
                  // color: "black"
                 }}
                 onClick={() => takeBet()}

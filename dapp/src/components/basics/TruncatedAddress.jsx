@@ -6,16 +6,18 @@ import Text from './Text'
 // eslint-disable-next-line
 export default ({ label, addr, start, end, transform, spacing, big }) => <Box>
   <Box>
-    <Text
-      size={big ? "13px" : "11px"}
+    {/* <Text
+    //  size={big ? "14px" : "13px"}
+      size="18px"
       color = {cwhite}>
       {label}
-    </Text>
+    </Text> */}
   </Box>
   <Box mt="2px">
     <Text
-      size={big ? "15px" : "13px"}
+      //size={big ? "14px" : "13px"}
       color = {cwhite}
+      size="14px"
       style={{
         textTransform: transform ? transform : "none",
         letterSpacing: spacing ? spacing : 0

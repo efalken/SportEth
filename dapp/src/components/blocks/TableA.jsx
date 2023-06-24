@@ -5,6 +5,7 @@ import Styled from 'styled-components'
 
 const Table = Styled.table`
     margin-left: -30px;
+    fontSize: 14px;
     & tr td:first-child {
         color: ${cwhite}
     }
@@ -37,7 +38,7 @@ export default
             </tbody>
         </Table> */}
 
-            <Table cla>
+            <Table cla fontSize="14px">
                 <tbody>
                     <tr>
                         <th></th>

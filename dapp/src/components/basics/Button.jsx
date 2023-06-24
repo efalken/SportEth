@@ -14,7 +14,9 @@ export default Styled.button`
         cursor: pointer;
         border-style:outset;
         border-color: yellow; 
-        border-width: 2px;
         color: yellow;
         background-color: black;
+        
+
     `
+    

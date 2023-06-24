@@ -7,14 +7,14 @@ import Text from './Text'
 export default ({ label, text, transform, spacing, big }) => <Box>
     <Box>
         <Text
-            size={big ? "16px" : "16px"}
+            size={big ? "14px" : "14px"}
             color={cwhite}>
             {label}
         </Text>
     </Box>
     <Box mt="2px">
         <Text
-            size={big ? "16px" : "16px"}
+            size={big ? "14px" : "14px"}
             color={cwhite}
             style={{
                 textTransform: transform ? transform : "none",
