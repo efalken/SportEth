@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Logo from "../basics/Logo";
 import { Flex, Box } from "rebass";
 import Text from "../basics/Text";
-import VBackground from "../basics/VBackground";
+import VBackground from "../basics/VBackgroundCom";
 import SplashDrizzleContract from "../blocks/SplashDrizzleContract";
 // import wppdf from "../whitepaper/SportEth.pdf";
 // import excelSheet from "../whitepaper/sportEthData.xlsx";

@@ -35,6 +35,7 @@ contract Betting {
   mapping(address => LPStruct) public lpStruct;
   /// this struct holds a user's ETH balance
   mapping(address => uint32) public userBalance;
+  mapping(address => bytes32) public lastTransaction;
 
   struct Subcontract {
     uint8 epoch;
@@ -176,6 +177,7 @@ contract Betting {
     betData[_matchNumber] = encoded;
     // increment nonce used for unique bet hash IDs
     margin[6]++;
+    lastTransaction[msg.sender] = subkID;
     emit BetRecord(
       msg.sender,
       uint8(margin[3]),

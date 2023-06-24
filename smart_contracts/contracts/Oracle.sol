@@ -74,7 +74,7 @@ contract Oracle {
     propNumber = 1;
   }
 
-  function vote(bool _sendData) external {
+  function vote(bool _vote) external {
     // voter must have votes to allocate
     require(adminStruct[msg.sender].tokens > 0);
     // can only vote if there is a proposal
@@ -85,7 +85,7 @@ contract Oracle {
     adminStruct[msg.sender].voteTracker = propNumber;
     // votes are simply one's entire token balance in this oracle contract
     uint64 _tokens = adminStruct[msg.sender].tokens;
-    if (_sendData) {
+    if (_vote) {
       votes[0] += _tokens;
     } else {
       votes[1] += _tokens;
@@ -228,6 +228,7 @@ contract Oracle {
     require(success, "not success");
     adminStruct[msg.sender].initFeePool = feeData[1];
     adminStruct[msg.sender].tokens += _amt;
+    adminStruct[msg.sender].initEpoch = betEpochOracle;
     feeData[0] += _amt;
     emit Funding(_amt, ethClaim, msg.sender);
   }
@@ -237,15 +238,14 @@ contract Oracle {
     // this prevents voting more than once or oracle proposals with token balance.
     require(reviewStatus == 2, "no wd during vote");
     uint64 numVotes = uint64(betEpochOracle - adminStruct[msg.sender].initEpoch);
-    uint64 userVotes = (adminStruct[msg.sender].totalVotes + adminStruct[msg.sender].tokens) / numVotes;
-    if (userVotes > adminStruct[msg.sender].tokens) userVotes = adminStruct[msg.sender].tokens;
     require(numVotes > 0, "no wd for at least 1 week");
-    require(adminStruct[msg.sender].totalVotes < betEpochOracle, "no wd for at least 1 week");
+    uint64 userVotes = (adminStruct[msg.sender].totalVotes + adminStruct[msg.sender].tokens) / numVotes;
+    if (userVotes > adminStruct[msg.sender].tokens) {userVotes = adminStruct[msg.sender].tokens;}
     bool success;
     uint256 ethClaim = uint256(
-      userVotes * adminStruct[msg.sender].tokens *
+      userVotes * 
         (feeData[1] - adminStruct[msg.sender].initFeePool)
-    ) * TOKEN_ADJ;
+    ) * TOKEN_ADJ; 
     adminStruct[msg.sender].initFeePool = feeData[1];
     feeData[0] -= _amtTokens;
     adminStruct[msg.sender].tokens -= _amtTokens;
@@ -261,7 +261,7 @@ contract Oracle {
 
   function post() internal {
     uint256 hour = hourOfDay();
-    //require(hour == HOUR_POST, "wrong hour");
+    require(hour == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
     uint64 _tokens = adminStruct[msg.sender].tokens;
