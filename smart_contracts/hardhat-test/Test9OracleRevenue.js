@@ -327,6 +327,7 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
+      await oracle.connect(account1).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
     });
@@ -365,6 +366,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
+      await oracle.connect(account1).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
@@ -491,7 +493,8 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-
+      await oracle.connect(account1).vote(true);
+      await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
@@ -517,6 +520,8 @@ describe("Betting", function () {
         0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
+      await oracle.connect(account1).vote(true);
+      await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.settleProcess();
     });
@@ -647,6 +652,8 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
+      await oracle.connect(account1).vote(true);
+      await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.connect(account1).initProcess();
       const result = await betting.connect(account5).bet(0, 0, "2500");
@@ -676,6 +683,8 @@ describe("Betting", function () {
         ]);
 
       await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await oracle.connect(owner).vote(true);
+      await oracle.connect(account2).vote(true);
       await oracle.connect(account1).settleProcess();
     });
 
@@ -690,23 +699,6 @@ describe("Betting", function () {
       console.log(`eth in Oracle Contract ${oracleBal}`);
       console.log(`feePool Tracker ${feePool}`);
       console.log(`feePool Tracker2 ${oracleBal2}`);
-    });
-
-    it("withdraw", async () => {
-      const result = await oracle
-        .connect(account1)
-        .withdrawTokens(150n * million);
-      const receipt = await result.wait();
-      const oracleBal3 = await token.balanceOf(oracle.address);
-      console.log(`feePool Tracker3 ${oracleBal3}`);
-      ethout = ethers.utils.formatUnits(
-        receipt.events[1].args.etherChange,
-        "finney"
-      );
-      console.log(`finney Out1 ${ethout}`);
-      assert.equal(ethout, "9.465", "Must be equal");
-      tokensout = receipt.events[1].args.tokensChange;
-      console.log(`tokens Out1 ${tokensout}`);
     });
   });
 
@@ -804,9 +796,47 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-
+      await oracle.connect(account1).vote(true);
+      await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
+      it("withdraw", async () => {
+        const result = await oracle
+          .connect(account1)
+          .withdrawTokens(150n * million);
+        const receipt = await result.wait();
+
+        const oracleBal3 = await token.balanceOf(oracle.address);
+        console.log(`feePool Tracker3 ${oracleBal3}`);
+        ethout = ethers.utils.formatUnits(
+          receipt.events[1].args.etherChange,
+          "finney"
+        );
+        console.log(`finney Out1 ${ethout}`);
+        assert.equal(ethout, "9.465", "Must be equal");
+        tokensout = receipt.events[1].args.tokensChange;
+        console.log(`tokens Out1 ${tokensout}`);
+      });
+    });
+
+    it("withdraw", async () => {
+      const result = await oracle
+        .connect(account1)
+        .withdrawTokens(150n * million);
+      const receipt = await result.wait();
+
+      const oracleBal3 = await token.balanceOf(oracle.address);
+      console.log(`feePool Tracker3 ${oracleBal3}`);
+      ethout = ethers.utils.formatUnits(
+        receipt.events[1].args.etherChange,
+        "finney"
+      );
+      console.log(`finney Out1 ${ethout}`);
+      assert.equal(ethout, "9.465", "Must be equal");
+      tokensout = receipt.events[1].args.tokensChange;
+      console.log(`tokens Out1 ${tokensout}`);
+    });
+    it("finfin", async () => {
       const result = await betting.connect(account5).bet(0, 0, "2500");
 
       _hourSolidity = await reader.hourOfDay();
@@ -832,7 +862,105 @@ describe("Betting", function () {
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
+      //  await oracle.connect(account1).vote(true);
+      await oracle.connect(account2).vote(true);
       await oracle.settleProcess();
+    });
+
+    it("post init", async () => {
+      _hourSolidity = await reader.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+      if (_hourSolidity > 12) {
+        hourOffset = 36 - _hourSolidity;
+      } else if (_hourSolidity < 12) {
+        hourOffset = 12 - _hourSolidity;
+      }
+      console.log(`hourAdj ${hourOffset}`);
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart = _timestamp + 7 * 86400;
+      await oracle.initPost(
+        [
+          "NFL:ARI:LAC",
+          "NFL:ATL:LAR",
+          "NFL:BAL:MIA",
+          "NFL:BUF:MIN",
+          "NFL:CAR:NE",
+          "NFL:CHI:NO",
+          "NFL:CIN:NYG",
+          "NFL:CLE:NYJ",
+          "NFL:DAL:OAK",
+          "NFL:DEN:PHI",
+          "NFL:DET:PIT",
+          "NFL:GB:SEA",
+          "NFL:HOU:SF",
+          "NFL:IND:TB",
+          "NFL:JAX:TEN",
+          "NFL:KC:WSH",
+          "UFC:Holloway:Kattar",
+          "UFC:Ponzinibbio:Li",
+          "UFC:Kelleher:Simon",
+          "UFC:Hernandez:Vieria",
+          "UFC:Akhemedov:Breese",
+          "UFC:Memphis:Brooklyn",
+          "UFC:Boston:Charlotte",
+          "UFC:Milwaukee:Dallas",
+          "UFC:miami:LALakers",
+          "UFC:Atlanta:SanAntonia",
+          "NHL:Colorado:Washington",
+          "NHL:Vegas:StLouis",
+          "NHL:TampaBay:Dallas",
+          "NHL:Boston:Carolina",
+          "NHL:Philadelphia:Edmonton",
+          "NHL:Pittsburgh:NYIslanders",
+        ],
+        [
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+        ],
+        [
+          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
+        ]
+      );
+      await oracle.connect(account2).vote(true);
+      // await oracle.connect(account2).vote(true);
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await oracle.initProcess();
     });
 
     it("check 5", async () => {

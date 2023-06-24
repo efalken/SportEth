@@ -631,16 +631,16 @@ describe("Betting", function () {
     });
 
     it("w1888", async () => {
-      const activeState = await oracle.reviewStatus();
-      console.log(`activestate, ${activeState}`);
-      const betepoch = await oracle.betEpochOracle();
-      console.log(`betepoch, ${betepoch}`);
-      const initepoch = (await oracle.adminStruct(owner.address)).initEpoch;
-      console.log(`initEpoch, ${initepoch}`);
-      const totvotes = (await oracle.adminStruct(owner.address)).totalVotes;
-      console.log(`votes, ${totvotes}`);
-      const ortokens = (await oracle.adminStruct(owner.address)).tokens;
-      console.log(`tokens, ${ortokens}`);
+      // const activeState = await oracle.reviewStatus();
+      // console.log(`activestate, ${activeState}`);
+      // const betepoch = await oracle.betEpochOracle();
+      // console.log(`betepoch, ${betepoch}`);
+      // const initepoch = (await oracle.adminStruct(owner.address)).initEpoch;
+      // console.log(`initEpoch, ${initepoch}`);
+      // const totvotes = (await oracle.adminStruct(owner.address)).totalVotes;
+      // console.log(`votes, ${totvotes}`);
+      // const ortokens = (await oracle.adminStruct(owner.address)).tokens;
+      // console.log(`tokens, ${ortokens}`);
       result = await oracle.withdrawTokens(50n * million);
       receipt = await result.wait();
 
@@ -688,6 +688,8 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
+      await oracle.connect(owner).vote(true);
+      await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.connect(account1).settleProcess();
     });
@@ -794,6 +796,8 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
+      await oracle.connect(account1).vote(true);
+      await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
       const activeState = await oracle.reviewStatus();
@@ -814,9 +818,7 @@ describe("Betting", function () {
         "finney"
       );
       console.log(`ether Out1 ${ethout}`);
-
       assert.equal(ethout, "10.08", "Must be equal");
-
       tokensout = receipt.events[1].args.tokensChange;
       console.log(`tokens Out1 ${tokensout}`);
       result = await betting.connect(account5).bet(0, 0, "2500");
@@ -842,6 +844,8 @@ describe("Betting", function () {
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       await helper.advanceTimeAndBlock(secondsInHour * 6);
+      // await oracle.connect(account1).vote(true);
+      await oracle.connect(account2).vote(true);
       await oracle.settleProcess();
     });
 
