@@ -14,7 +14,7 @@ import { Box, Flex } from "@rebass/grid"
 // eslint-disable-next-line
 export default ({ side, children, page }) => page === "bookie" ? (
   <Flex style={{
-    backgroundColor: "rgba(0, 0, 0, 0.85)"
+ //   backgroundColor: "rgba(0, 0, 0, 0.85)"
   }}>
     <Box
       width="380px"
@@ -33,7 +33,7 @@ export default ({ side, children, page }) => page === "bookie" ? (
   </Flex>
 ) : (
   <Flex style={{
-    backgroundColor: "rgba(0, 0, 0, 0.85)"
+   // backgroundColor: "rgba(0, 0, 0, 0.85)"
   }}>
     <Box
       width="470px"

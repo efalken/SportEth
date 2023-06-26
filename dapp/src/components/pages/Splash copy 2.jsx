@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Logo from "../basics/Logo";
 import { Flex, Box } from "rebass";
 import Text from "../basics/Text";
-import VBackground from "../basics/VBackgroundFull";
+import VBackground from "../basics/VBackgroundCom";
 import SplashDrizzleContract from "../blocks/SplashDrizzleContract";
 // import wppdf from "../whitepaper/SportEth.pdf";
 // import excelSheet from "../whitepaper/sportEthData.xlsx";
@@ -40,21 +40,127 @@ export default function Splash() {
         <Flex width={1} flexWrap="wrap">
           <Flex
             width={1}
+         //   backgroundColor="rgba(27, 29, 30, 0.6)"
             padding="10px"
             justifyContent="space-between"
           >
             <Box>
               <Logo />
             </Box>
+            <Flex
+              width="100%"
+              justifyContent="space-around"
+              alignItems="center"
+              // height="100%"
+              className="nav-header-wrap"
+            >
+              {}
+              <Flex
+                flexWrap="wrap"
+                width="100%"
+                justifyContent="space-around"
+                //   onClick={this.openWhitepaper}
+                style={{ cursor: "pointer" }}
+                variant="nav"
+              >
+                {}
+                <Flex
+                  alignItems="center"
+                  height="100%"
+                  className="nav-header-wrap"
+             //     backgroundColor="rgba(27, 29, 30, 0.6)"
+                  width="100%"
+                  justifyContent="space-around"
+                >
+                  {/* <Text size="15px">
+                    <a
+                      className="nav-header"
+                      style={{
+                        textDecoration: "none",
+                        cursor: "pointer",
+                      }}
+                      href={
+                        new URL(`../../../../docs/SportEth.pdf`, import.meta.url)
+                          .href
+                      }
+                      download=""
+                    >
+                      Whitepaper
+                    </a>
+                  </Text> */}
+{/* 
+                  <Text size="15px">
+                    <a
+                      className="nav-header"
+                      style={{
+                        textDecoration: "none",
+                        cursor: "pointer",
+                      }}
+                      href="https://testnet.snowtrace.io/address/0x5e51b7f5ca7e3b7c969710be37f192e3d030f2b2"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      EtherScan
+                    </a>
+                  </Text> */}
 
+                  {/* <Text size="15px">
+                    <a
+                      className="nav-header"
+                      style={{
+                        textDecoration: "none",
+                        cursor: "pointer",
+                      }}
+                      href="/faqs"
+                    >
+                      FAQ
+                    </a>
+                  </Text> */}
 
+                  {/* <Text size="15px">
+                    <a
+                      className="nav-header"
+                      style={{
+                        textDecoration: "none",
+                        cursor: "pointer",
+                      }}
+                      href={
+                        new URL(
+                          `../whitepaper/sportEthData.xlsx`,
+                          import.meta.url
+                        ).href
+                      }
+                    >
+                      Excel Sheet
+                    </a>
+                  </Text> */}
 
+                  {/* <Text size="15px">
+                    <a
+                      className="nav-header"
+                      style={{
+                        textDecoration: "none",
+                        cursor: "pointer",
+                      }}
+                      href="http://github.com/efalken/SportEth"
+                      //    href="FAQ.js"
+                    >
+                      Github Codebase and Docs
+                    </a>
+                  </Text> */}
+                </Flex>
+              </Flex>
+            </Flex>
+
+            {/* </Box> */}
           </Flex>
           <Flex
             width={1}
             justifyContent="center"
             alignItems="center"
-
+            // style={{
+            //     height: "calc(100vh - 90px)"
+            // }}
           >
             <Box mt="50px">
               <Flex
@@ -83,7 +189,16 @@ export default function Splash() {
           </Flex>
         </Flex>
       </Flex>
-
+      {/* <Box>
+          <Flex
+            width="100%"
+            alignItems="center"
+            justifyContent="center"
+            color="859DA9"
+          >
+            <Text size="20px">Event Logs</Text>
+          </Flex>
+        </Box> */}
 
       <div className="footer-links-wrapper" style={{ width: "115%" }}>
         <Flex width="100%" alignItems="center" justifyContent="center">

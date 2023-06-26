@@ -75,8 +75,8 @@ const ChainSwitch = () => {
         <Box>
           <button
             style={{
-              backgroundColor: "#707070",
-              color: "white",
+              //backgroundColor: "#707070",
+             //color: "white",
               borderRadius: "2px",
               cursor: "pointer",
               padding: "10px",
@@ -85,7 +85,7 @@ const ChainSwitch = () => {
             //    href={"/betpage"}
           >
             {" "}
-            Click Here to Enter Main Betting Page{" "}
+            Connect Wallet and Enter{" "}
           </button>
         </Box>
       </a>
@@ -95,7 +95,7 @@ const ChainSwitch = () => {
       <Box>
         <button
           style={{
-            backgroundColor: "#424242",
+           // backgroundColor: "#424242",
             borderRadius: "2px",
             cursor: "pointer",
             color: "white",

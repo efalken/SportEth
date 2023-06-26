@@ -43,15 +43,15 @@ export default function TeamTable({
         <tr style={{ width: "50%", textAlign: "left" }}>
           <th>Match</th>
           <th>Sport</th>
-          <th style={{ textAlign: "left" }}>Favorite</th>
+          <th style={{ textAlign: "center" }}>Favorite</th>
           <th style={{ textAlign: "left" }}>
             {showDecimalOdds ? "DecOdds" : "MoneyLine"}
           </th>
-          <th style={{ textAlign: "left" }}>Underdog</th>
+          <th style={{ textAlign: "center" }}>Underdog</th>
           <th style={{ textAlign: "left" }}>
             {showDecimalOdds ? "DecOdds" : "MoneyLine"}
           </th>
-          <th style={{ textAlign: "left" }}>Start</th>
+          <th style={{ textAlign: "center" }}>Start</th>
         </tr>
         {[...Array(32)].map((_value, i) => (
           <tr

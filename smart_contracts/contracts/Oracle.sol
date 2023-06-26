@@ -236,32 +236,34 @@ contract Oracle {
   function withdrawTokens(uint64 _amtTokens) external {
     require(_amtTokens <= adminStruct[msg.sender].tokens, "nsf tokens");
     // this prevents voting more than once or oracle proposals with token balance.
-    require(reviewStatus == 2, "no wd during vote");
+    require(reviewStatus < 10, "no wd during vote");
     uint64 numVotes = uint64(betEpochOracle - adminStruct[msg.sender].initEpoch);
     require(numVotes > 0, "no wd for at least 1 week");
-    uint64 userVotes = (adminStruct[msg.sender].totalVotes + adminStruct[msg.sender].tokens) / numVotes;
-    if (userVotes > adminStruct[msg.sender].tokens) {userVotes = adminStruct[msg.sender].tokens;}
+    if (adminStruct[msg.sender].totalVotes > adminStruct[msg.sender].tokens) {adminStruct[msg.sender].totalVotes = adminStruct[msg.sender].tokens;}
     bool success;
-    uint256 ethClaim = uint256(
-      userVotes * 
+    uint256 ethTot = uint256(
+      adminStruct[msg.sender].tokens * 
         (feeData[1] - adminStruct[msg.sender].initFeePool)
     ) * TOKEN_ADJ; 
-    adminStruct[msg.sender].initFeePool = feeData[1];
+    uint256 lpPayout = adminStruct[msg.sender].totalVotes * ethTot / numVotes;
+    uint256 ploughBack = ethTot - lpPayout;
     feeData[0] -= _amtTokens;
+    feeData[1] += uint64(ploughBack / uint256(feeData[0]) / 1e5);
+        adminStruct[msg.sender].initFeePool = feeData[1];
     adminStruct[msg.sender].tokens -= _amtTokens;
     adminStruct[msg.sender].initEpoch = betEpochOracle;
     adminStruct[msg.sender].totalVotes = 0;
     //payable(msg.sender).transfer(ethClaim);
-    (success, ) = payable(msg.sender).call{value: ethClaim}("");
+    (success, ) = payable(msg.sender).call{value: lpPayout}("");
     require(success, "eth payment failed");
     (success) = token.transfer(msg.sender, _amtTokens);
     require(success, "token failed");
-    emit Funding(_amtTokens, ethClaim, msg.sender);
+    emit Funding(_amtTokens, lpPayout, msg.sender);
   }
 
   function post() internal {
     uint256 hour = hourOfDay();
-    require(hour == HOUR_POST, "wrong hour");
+    //require(hour == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
     uint64 _tokens = adminStruct[msg.sender].tokens;
