@@ -20,7 +20,7 @@ contract Reader {
 
   event TokenReward(address liqprovider, uint256 tokens, uint32 epoch);
 
-  constructor(address payable _betting, address payable _oracle) {
+  constructor(address _betting, address _oracle) {
     oraclek = Oracle(_oracle);
     betting = Betting(_betting);
   }
