@@ -1,4 +1,5 @@
-import { oracleContract } from "../../../config";
+import { EventHandler } from "../../../EventHandler.js";
+import { oracleContract } from "../../../config.js";
 
 // event ResultsPosted(uint32 epoch, uint32 propnum, uint8[32] winner);
 
@@ -25,16 +26,104 @@ import { oracleContract } from "../../../config";
 // event Funding(uint64 tokensChange, uint256 etherChange, address transactor);
 
 export async function oracleContractEventListener() {
-  const ResultsPostedFilter = oracleContract.filters.ResultsPosted();
-  const DecOddsPostedFilter = oracleContract.filters.DecOddsPosted();
-  const VoteOutcomeFilter = oracleContract.filters.VoteOutcome();
-  const BetDataPostedFilter = oracleContract.filters.BetDataPosted();
-  const ParamsPostedFilter = oracleContract.filters.ParamsPosted();
-  const PausePostedFilter = oracleContract.filters.PausePosted();
-  const StartTimesPostedFilter = oracleContract.filters.StartTimesPosted();
-  const SchedulePostedFilter = oracleContract.filters.SchedulePosted();
-  const FundingFilter = oracleContract.filters.Funding();
+  const oracleResultsPostedEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["epoch", "epoch", "int"],
+      ["propnum", "propnum", "int"],
+      ["winner", "winner", "int[]"],
+    ],
+    "oracleResultsPostedEvent",
+    "ResultsPosted"
+  );
+  const oracleDecOddsPostedEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["epoch", "epoch", "int"],
+      ["propnum", "propnum", "int"],
+      ["decOdds", "decOdds", "int[]"],
+    ],
+    "oracleDecOddsPostedEvent",
+    "DecOddsPosted"
+  );
+  const oracleVoteOutcomeEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["epoch", "epoch", "int"],
+      ["propnum", "propnum", "int"],
+      ["voteResult", "voteResult", "bool"],
+      ["yesvotes", "yesvotes", "bigint"],
+      ["novotes", "novotes", "bigint"],
+    ],
+    "oracleVoteOutcomeEvent",
+    "VoteOutcome"
+  );
+  const oracleBetDataPostedEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["epoch", "epoch", "int"],
+      ["propnum", "propnum", "int"],
+      ["oddsStart", "oddsStart", "int[]"],
+    ],
+    "oracleBetDataPostedEvent",
+    "BetDataPosted"
+  );
+  const oracleParamsPostedEventHandler = new EventHandler(
+    oracleContract,
+    [["concLimit", "concLimit", "int"]],
+    "oracleParamsPostedEvent",
+    "ParamsPosted"
+  );
+  const oraclePausePostedEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["pausedMatch1", "pausedMatch1", "int"],
+      ["pausedMatch2", "pausedMatch2", "int"],
+    ],
+    "oraclePausePostedEvent",
+    "PausePosted"
+  );
+  const oracleStartTimesPostedEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["epoch", "epoch", "int"],
+      ["propnum", "propnum", "int"],
+      ["starttimes", "starttimes", "int[]"],
+    ],
+    "oracleStartTimesPostedEvent",
+    "StartTimesPosted"
+  );
+  const oracleSchedulePostedEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["epoch", "epoch", "int"],
+      ["propnum", "propnum", "int"],
+      ["sched", "sched", "int[]"],
+    ],
+    "oracleSchedulePostedEvent",
+    "SchedulePosted"
+  );
+  const oracleFundingEventHandler = new EventHandler(
+    oracleContract,
+    [
+      ["tokensChange", "tokensChange", "bigint"],
+      ["etherChange", "etherChange", "bigint"],
+      ["transactor", "transactor", "string"],
+    ],
+    "oracleFundingEvent",
+    "Funding"
+  );
 
   // sync old events
+  await oracleResultsPostedEventHandler.syncEventTillNow();
+  await oracleDecOddsPostedEventHandler.syncEventTillNow();
+  await oracleVoteOutcomeEventHandler.syncEventTillNow();
+  await oracleBetDataPostedEventHandler.syncEventTillNow();
+  await oracleParamsPostedEventHandler.syncEventTillNow();
+  await oraclePausePostedEventHandler.syncEventTillNow();
+  await oracleStartTimesPostedEventHandler.syncEventTillNow();
+  await oracleSchedulePostedEventHandler.syncEventTillNow();
+  await oracleFundingEventHandler.syncEventTillNow();
+
   // start the event listener for the new events
 }

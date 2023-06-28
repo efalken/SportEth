@@ -1,6 +1,11 @@
-import BettingContractConfig from "./abis/Betting.json";
-import OracleContractConfig from "./abis/Oracle.json";
-import TokenContractConfig from "./abis/Token.json";
+import { ethers } from "ethers";
+import dotenv from "dotenv";
+
+import BettingContractConfig from "./abis/Betting.json" assert { type: "json" };
+import OracleContractConfig from "./abis/Oracle.json" assert { type: "json" };
+import TokenContractConfig from "./abis/Token.json" assert { type: "json" };
+
+dotenv.config();
 
 export const PORT = Number(process.env.PORT || "8000");
 

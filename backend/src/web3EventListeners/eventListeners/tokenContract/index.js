@@ -1,4 +1,5 @@
-import { tokenContract } from "../../../config";
+import { EventHandler } from "../../../EventHandler.js";
+import { tokenContract } from "../../../config.js";
 
 // event Transfer(address _from, address _to, uint64 _value);
 // event Burn(address _from, uint64 _value);
@@ -6,11 +7,50 @@ import { tokenContract } from "../../../config";
 // event Approval(address _owner, address _spender, uint64 _value);
 
 export async function tokenContractEventListener() {
-  const TransferFilter = tokenContract.filters.Transfer();
-  const BurnFilter = tokenContract.filters.Burn();
-  const MintFilter = tokenContract.filters.Mint();
-  const ApprovalFilter = tokenContract.filters.Approval();
+  const tokenTransferEventHandler = new EventHandler(
+    tokenContract,
+    [
+      ["_from", "from", "string"],
+      ["_to", "to", "string"],
+      ["_value", "value", "bigint"],
+    ],
+    "tokenTransferEvent",
+    "Transfer"
+  );
+  const tokenBurnEventHandler = new EventHandler(
+    tokenContract,
+    [
+      ["_from", "from", "string"],
+      ["_value", "value", "bigint"],
+    ],
+    "tokenBurnEvent",
+    "Burn"
+  );
+  const tokenMintEventHandler = new EventHandler(
+    tokenContract,
+    [
+      ["_from", "from", "string"],
+      ["_value", "value", "bigint"],
+    ],
+    "tokenMintEvent",
+    "Mint"
+  );
+  const tokenApprovalEventHandler = new EventHandler(
+    tokenContract,
+    [
+      ["_owner", "owner", "string"],
+      ["_spender", "spender", "string"],
+      ["_value", "value", "bigint"],
+    ],
+    "tokenApprovalEvent",
+    "Approval"
+  );
 
   // sync old events
+  await tokenTransferEventHandler.syncEventTillNow();
+  await tokenBurnEventHandler.syncEventTillNow();
+  await tokenMintEventHandler.syncEventTillNow();
+  await tokenApprovalEventHandler.syncEventTillNow();
+
   // start the event listener for the new events
 }

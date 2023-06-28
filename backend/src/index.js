@@ -1,6 +1,7 @@
 import express from "express";
-import { PORT } from "./config";
-import web3EventListeners from "./web3EventListeners";
+
+import { PORT } from "./config.js";
+import web3EventListeners from "./web3EventListeners/index.js";
 
 const app = express();
 
