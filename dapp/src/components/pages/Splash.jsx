@@ -64,6 +64,7 @@ export default function Splash() {
                 justifyContent="center"
                 flexDirection="column"
                 alignItems="center"
+                //color="#0ff000"
               >
                 {contracts.map((contract) =>
                   contract.asset === "NFL" ? (
@@ -85,8 +86,9 @@ export default function Splash() {
       </Flex>
 
 
+
       <div className="footer-links-wrapper" style={{ width: "115%" }}>
-        <Flex width="100%" alignItems="center" justifyContent="center">
+        {/* <Flex width="100%" alignItems="center" justifyContent="center">
           <Text size="15px">
             <a
               className="nav-header"
@@ -103,10 +105,10 @@ export default function Splash() {
               CLICK HERE TO GET TO MAIN PAGE
             </a>
           </Text>
-        </Flex>
+        </Flex> */}
 
         <Flex width="100%" alignItems="center" justifyContent="center">
-          <Text size="15px">
+          <Text size="16px">
             <a
               className="nav-header"
               style={{
@@ -115,6 +117,7 @@ export default function Splash() {
                 width: "20em",
                 alignItems: "flex-start",
                 display: "flex",
+              //  color: "#white",
               }}
               href={
                 new URL(`../../../../docs/SportEth.pdf`, import.meta.url)
@@ -126,35 +129,40 @@ export default function Splash() {
             </a>
           </Text>
         </Flex>
+        <Flex><Box>" "</Box></Flex>
 
-        <Flex>
-          <Text> </Text>
-        </Flex>
 
         <Flex width="100%" alignItems="center" justifyContent="center">
-          <Text size="15px">
+          <Text size="16px">
           <a
                       className="nav-header"
                       style={{
                         textDecoration: "none",
                         cursor: "pointer",
+                        width: "20em",
+                        alignItems: "flex-start",
+                        display: "flex",
                       }}
                       href="/faqs"
                     >
-                      FAQ
+                      FAQs
                     </a>
           </Text>
         </Flex>
         <Flex>
           <Text> </Text>
         </Flex>
+        <Flex><Box>" "</Box></Flex>
         <Flex width="100%" alignItems="center" justifyContent="center">
-          <Text size="15px">
+          <Text size="16px">
  <a
                       className="nav-header"
                       style={{
                         textDecoration: "none",
                         cursor: "pointer",
+                        width: "20em",
+                        alignItems: "flex-start",
+                        display: "flex",
                       }}
                       href="http://github.com/efalken/SportEth"
                       //    href="FAQ.js"

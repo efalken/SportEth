@@ -5,6 +5,8 @@
 //     name: "AVAX",
 //     symbol: "AVAX",
 //     decimals: 18,
+//     gasPrice: 225000000000,
+//     chainId: 43112,
 //   },
 //   rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
 //   blockExplorerUrls: ["https://snowtrace.io/"],

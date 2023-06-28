@@ -1,5 +1,5 @@
 import React from 'react'
-import Logo from '../../images/logo.png'
+import Logo from '../../images/sbw3.png'
 
 // eslint-disable-next-line
 export default function () {

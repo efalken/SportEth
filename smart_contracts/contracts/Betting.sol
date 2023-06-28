@@ -487,7 +487,9 @@ contract Betting {
   ) external onlyAdmin returns (bool) {
     require(margin[2] == 0);
     betData = _oddsAndStart;
-    margin[7] = uint32(_oddsAndStart[0] >> 64);
+    uint32 x = uint32(_oddsAndStart[0] >> 64);
+    margin[7] = x - ((x - 1687543200) % 604800);
+    //margin[7] = uint32(_oddsAndStart[0] >> 64);
     // resets the paused matches (99 will never be possible)
     paused[0] = 99;
     paused[1] = 99;
