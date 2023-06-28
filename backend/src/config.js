@@ -37,3 +37,5 @@ export const tokenContract = new ethers.Contract(
   TokenContractConfig.abi,
   provider
 );
+
+export const minBlock = process.env.MIN_BLOCK;
