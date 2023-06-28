@@ -133,8 +133,8 @@ model OracleVoteOutcomeEvent {
   epoch            Int
   propnum          Int
   voteResult       Boolean
-  yesvotes         Int
-  novotes          Int
+  yesvotes         BigInt
+  novotes          BigInt
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -204,35 +204,6 @@ model OracleFundingEvent {
   tokensChange     BigInt
   etherChange      BigInt
   transactor       String
-
-  @@id([blockNumber, transactionHash, transactionIndex, logIndex])
-}
-
-enum BlockchainSyncTypes {
-  TokenTransferFilter
-  TokenBurnFilter
-  TokenMintFilter
-  TokenApprovalFilter
-  BettingBetRecordFilter
-  BettingOfferRecordFilter
-  BettingFundingFilter
-  OracleResultsPostedFilter
-  OracleDecOddsPostedFilter
-  OracleVoteOutcomeFilter
-  OracleBetDataPostedFilter
-  OracleParamsPostedFilter
-  OraclePausePostedFilter
-  OracleStartTimesPostedFilter
-  OracleSchedulePostedFilter
-  OracleFundingFilter
-}
-
-model BlockchainSync {
-  blockNumber      Int
-  transactionHash  String
-  transactionIndex Int
-  logIndex         Int
-  type             BlockchainSyncTypes
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
