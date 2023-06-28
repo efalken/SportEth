@@ -8,6 +8,18 @@ export class EventHandler {
     this.filter = contract.filters[eventName];
   }
 
+  async syncEvent() {
+    this.startListener();
+    await this.syncEventTillNow();
+  }
+
+  startListener() {
+    this.contract.on(this.filter, async (...args) => {
+      const eventEmitted = args[args.length - 1];
+      await this.addEvent(eventEmitted);
+    });
+  }
+
   async syncEventTillNow() {
     const lastEvent = await this.table.findFirst({
       orderBy: { blockNumber: "desc" },

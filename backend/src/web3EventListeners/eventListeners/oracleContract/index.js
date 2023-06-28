@@ -114,16 +114,14 @@ export async function oracleContractEventListener() {
     "Funding"
   );
 
-  // sync old events
-  await oracleResultsPostedEventHandler.syncEventTillNow();
-  await oracleDecOddsPostedEventHandler.syncEventTillNow();
-  await oracleVoteOutcomeEventHandler.syncEventTillNow();
-  await oracleBetDataPostedEventHandler.syncEventTillNow();
-  await oracleParamsPostedEventHandler.syncEventTillNow();
-  await oraclePausePostedEventHandler.syncEventTillNow();
-  await oracleStartTimesPostedEventHandler.syncEventTillNow();
-  await oracleSchedulePostedEventHandler.syncEventTillNow();
-  await oracleFundingEventHandler.syncEventTillNow();
-
-  // start the event listener for the new events
+  // sync old events and start the event listener for the new events
+  await oracleResultsPostedEventHandler.syncEvent();
+  await oracleDecOddsPostedEventHandler.syncEvent();
+  await oracleVoteOutcomeEventHandler.syncEvent();
+  await oracleBetDataPostedEventHandler.syncEvent();
+  await oracleParamsPostedEventHandler.syncEvent();
+  await oraclePausePostedEventHandler.syncEvent();
+  await oracleStartTimesPostedEventHandler.syncEvent();
+  await oracleSchedulePostedEventHandler.syncEvent();
+  await oracleFundingEventHandler.syncEvent();
 }

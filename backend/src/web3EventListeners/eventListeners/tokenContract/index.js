@@ -46,11 +46,9 @@ export async function tokenContractEventListener() {
     "Approval"
   );
 
-  // sync old events
-  await tokenTransferEventHandler.syncEventTillNow();
-  await tokenBurnEventHandler.syncEventTillNow();
-  await tokenMintEventHandler.syncEventTillNow();
-  await tokenApprovalEventHandler.syncEventTillNow();
-
-  // start the event listener for the new events
+  // sync old events and start the event listener for the new events
+  await tokenTransferEventHandler.syncEvent();
+  await tokenBurnEventHandler.syncEvent();
+  await tokenMintEventHandler.syncEvent();
+  await tokenApprovalEventHandler.syncEvent();
 }

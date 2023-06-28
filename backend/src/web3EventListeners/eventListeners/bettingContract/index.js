@@ -69,10 +69,8 @@ export async function bettingContractEventListener() {
     "Funding"
   );
 
-  // sync old events
-  await bettingBetRecordEventHandler.syncEventTillNow();
-  await bettingOfferRecordEventHandler.syncEventTillNow();
-  await bettingFundingEventHandler.syncEventTillNow();
-
-  // start the event listener for the new events
+  // sync old events and start the event listener for the new events
+  await bettingBetRecordEventHandler.syncEvent();
+  await bettingOfferRecordEventHandler.syncEvent();
+  await bettingFundingEventHandler.syncEvent();
 }
