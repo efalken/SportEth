@@ -4,7 +4,7 @@ import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
 import Form from "../basics/Form";
-import { G, cwhite } from "../basics/Colors";
+import { G } from "../basics/Colors";
 import Triangle from "../basics/Triangle";
 import Input from "../basics/Input";
 import Button from "../basics/Button";
@@ -43,7 +43,7 @@ export default function BigBetPage() {
   const [currW, setCurrW] = useState("");
   const [subcontracts, setSubcontracts] = useState({});
   const [subcontracts2, setSubcontracts2] = useState({});
-  const [newBets, setNewBets] = useState(false);
+ // const [newBets, setNewBets] = useState(false);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
@@ -74,9 +74,9 @@ export default function BigBetPage() {
     };
   }, [bettingContract, oracleContract, currW]);
 
-  async function takeBet() {
-    await bettingContract.bet(6, 0, 200);
-  }
+  // async function takeBet() {
+  //   await bettingContract.bet(6, 0, 200);
+  // }
 
   async function killBet(x) {
     await bettingContract.cancelBigBet(x);
@@ -92,9 +92,9 @@ export default function BigBetPage() {
     await bettingContract.withdrawBettor(wdAmount * 10000);
   }
 
-  async function offerContracts(x) {
-    await bettingContract.offerContracts(x);
-  }
+  // async function offerContracts(x) {
+  //   await bettingContract.offerContracts(x);
+  // }
 
   function switchOdds() {
     setShowDecimalOdds(!showDecimalOdds);
@@ -267,11 +267,12 @@ export default function BigBetPage() {
     // setOffstring(_offstring);
 
     // marginKey7 = contracts["BettingMain"].methods.margin.cacheCall(7);
-    let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
-    setNewBets(_newBets);
+    // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
+    // setNewBets(_newBets);
 
     let sctring = await oracleContract.showSchedString();
-    if (sctring && _newBets) {
+   // if (sctring && _newBets) {
+    if (sctring) {
       setScheduleString(sctring);
     }
   }
@@ -297,7 +298,7 @@ export default function BigBetPage() {
     } else {
       decTransform1 = moneyline0 / 100 + 1;
     }
-    decTransform1 = decTransform1.toFixed(3);
+    decTransform1 = decTransform1.toFixed(2);
     setDecTransform1(decTransform1);
   }
 
@@ -535,9 +536,9 @@ export default function BigBetPage() {
             <Flex>
               {Object.keys(userOffers).map((id) => (
                 <div key={id} style={{ width: "100%", float: "left" }}>
-                  <Text color= "#ffffff" size="14px" fontFamily="sans-serif"> Your Unclaimed Active Offers</Text>
+                  <Text color= "#ffffff" size="14px" fontFamily="Arial"> Your Unclaimed Active Offers</Text>
                   <br />
-                  <table style={{ width: "100%", fontSize: "14px",  color: "#ffffff", fontFamily:"sans-serif"}}>
+                  <table style={{ width: "100%", fontSize: "14px",  color: "#ffffff", fontFamily:"Arial"}}>
                     <tbody>
                       <tr style={{ width: "50%", color: "#ffffff"}}>
                         <td>Week</td>
@@ -547,7 +548,7 @@ export default function BigBetPage() {
                       </tr>
                       {userOffers[id].map(
                         (event, index) =>
-                          event.Epoch == currW &&
+                          event.Epoch === currW &&
                           subcontracts[event.Hashoutput] && (
                             <tr key={index} style={{ width: "50%", color: "#ffffff" }}>
                               <td  color= "#ffffff">{event.Epoch}</td>
@@ -700,21 +701,19 @@ export default function BigBetPage() {
         }
       >
         <Flex justifyContent="center">
-          <Text size="25px" color="white">Place, Take and Cancel Big Bets</Text>
+          <Text size="25px" color="white">Big Bets: Offer or Take Bets too large for LPs</Text>
         </Flex>
 
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifyContent="marginLeft">
             <Text size="14px" weight="300" color="white">
               {" "}
-              This page is for those who want to offer or take bets larger than
-              what is offered on the main betting page. Toggle the match and
+              Bet size must be greater than what is maximally feasible on the straight-up betting page. Toggle the match and
               team you want to bet on, and the offers, if any, will appear
               below. You can place your showLongs large bet above. Your
               unclaimed bets are on the left tab (this sends your AVAX back).
-              Enter odds in decimal form. For example, a MoneyLine -110 bet is
-              equivalent to 1.909 decimal odds, and you would enter it as 1.909.
-              These are the odds you are asking for on your bet.
+              Enter odds in decimal form, but only to two decimals (eg, 1.9123456 will be recorded as 1.91).
+              These are the odds you are asking for on your winning payoff. 
             </Text>
           </Flex>
         </Box>
@@ -774,7 +773,7 @@ export default function BigBetPage() {
               <Input
                 onChange={({ target: { value } }) => setDecOddsOffered(value)}
                 width="125px"
-                placeholder={"DecOdds e.g. 1.909"}
+                placeholder={"DecOdds e.g. 2.97"}
                 marginLeft="10px"
                 marginRignt="5px"
                 value={decOddsOffered}
@@ -782,13 +781,10 @@ export default function BigBetPage() {
               <Box mt="10px" mb="10px">
                 <Button
                   style={{
-                   
-                    padding: "4px",
                     float: "right",
-                   
                     marginLeft: "20px",
-                  border: "1px solid yellow",
-                  padding: "4px"
+                    border: "1px solid yellow",
+                    padding: "4px"
                   }}
                   onClick={makeBigBet}
                 >
@@ -844,11 +840,11 @@ export default function BigBetPage() {
                   width: "100%",
                   fontSize: "14px",
                   tableLayout: "fixed",
-                  fontFamily: "sans-serif",
+                  fontFamily: "Arial",
                 }}
               >
                 <thead>
-                  <tr style={{ width: "100%", color: "white", font: "sans-serif"}}>
+                  <tr style={{ width: "100%", color: "white", font: "Arial"}}>
                     <td>Take </td>
                     <td
                       onClick={() => sortByBetSize()}

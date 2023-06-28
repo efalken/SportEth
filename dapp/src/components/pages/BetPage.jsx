@@ -33,7 +33,6 @@ function BetPage() {
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
   const [betHistory, setBetHistory] = useState([]);
-
   const [subcontracts, setSubcontracts] = useState({});
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -44,7 +43,7 @@ function BetPage() {
   const [usedCapital, setUsedCapital] = useState("0");
   const [currW4, setCurrW4] = useState("0");
   const [concentrationLimit, setConcentrationLimit] = useState("0");
-  const [newBets, setNewBets] = useState(false);
+  //const [newBets, setNewBets] = useState(false);
   const [teamSplit, setTeamSplit] = useState([]);
 
   useEffect(() => {
@@ -171,14 +170,14 @@ function BetPage() {
     let _usedCapital = (await bettingContract.margin(1)) || "0";
     setUsedCapital(_usedCapital);
 
-    let _currW4 = await bettingContract.margin(3);
+    let _currW4 = Number((await bettingContract.margin(3)) || "0");
     setCurrW4(_currW4);
 
     let _concentrationLimit = await bettingContract.margin(5);
     setConcentrationLimit(_concentrationLimit);
 
-    let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
-    setNewBets(_newBets);
+    // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
+    // setNewBets(_newBets);
 
     let sctring = await oracleContract.showSchedString();
     setScheduleString(sctring);
@@ -439,6 +438,9 @@ function BetPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
+            <Flex justifyContent="left">
+              <Text size="14px"  color="#ffffff">Active Week: {currW4}</Text>
+            </Flex>
             </Box>
             <Box>
               <Flex>
@@ -457,7 +459,7 @@ function BetPage() {
                         </tr>
                         {betHistory[id].map(
                           (event, index) =>
-                            event.Epoch == currW4 && (
+                            event.Epoch === currW4 && (
                               <tr key={index} style={{ width: "33%" }}>
                                 <td>{event.Epoch}</td>
                                 <td>{teamSplit[event.MatchNum][0]}</td>

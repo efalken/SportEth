@@ -29,7 +29,7 @@ export default function ({
           px="9px"
           style={{
             size:"14px",
-            font:"sans-serif",
+            font:"Arial",
             color: "#00ff00"
             //fontSize: size ? size : 14,
           }}

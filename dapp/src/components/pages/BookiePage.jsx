@@ -3,7 +3,7 @@ import Split from "../layout/Split";
 import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
-import { G, cyellow, cwhite } from "../basics/Colors";
+import { G,  cwhite } from "../basics/Colors";
 import LabeledText from "../basics/LabeledText";
 import Form from "../basics/Form";
 import TruncatedAddress from "../basics/TruncatedAddress";
@@ -31,7 +31,7 @@ function BookiePage() {
   const [usedCapital, setUsedCapital] = useState(0);
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
-  const [newBets, setNewBets] = useState(false);
+  //const [newBets, setNewBets] = useState(false);
   const [betData, setBetData] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -67,9 +67,9 @@ function BookiePage() {
     }
   }
 
-  async function inactivateBook() {
-    await bettingContract.inactiveBook();
-  }
+  // async function inactivateBook() {
+  //   await bettingContract.inactiveBook();
+  // }
 
   async function findValues() {
     let _unusedCapital =
@@ -88,14 +88,15 @@ function BookiePage() {
     let _totalShares = (await bettingContract.margin(4)) || "0";
     setTotalShares(_totalShares);
 
-    let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
-    setNewBets(_newBets);
+    // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
+    // setNewBets(_newBets);
 
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
 
     let sctring = await oracleContract.showSchedString();
-    if (sctring && _newBets) {
+    //if (sctring && _newBets) {
+    if (sctring) {
       setScheduleString(sctring);
     }
 
@@ -130,13 +131,13 @@ function BookiePage() {
     return ints;
   }
 
-  function getSpreadText(spreadnumber) {
-    let outspread = spreadnumber / 10;
-    if (outspread > 0) {
-      outspread = "+" + outspread;
-    }
-    return outspread;
-  }
+  // function getSpreadText(spreadnumber) {
+  //   let outspread = spreadnumber / 10;
+  //   if (outspread > 0) {
+  //     outspread = "+" + outspread;
+  //   }
+  //   return outspread;
+  // }
 
   let ethBookie =
     (Number(bookieShares) * (Number(unusedCapital) + Number(usedCapital))) /

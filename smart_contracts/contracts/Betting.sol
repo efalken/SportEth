@@ -206,9 +206,9 @@ contract Betting {
     require(_betAmount >= margin[0] / margin[5], "too small");
     // cannot bet more than one has
     require(_betAmount <= userBalance[msg.sender], "NSF");
-    // data in raw decimal form, times 1000. Standard 1.91 odds would be 1910
+    // data in raw decimal form, times 100. Standard 1.91 odds would be 191
     // this targets trolls who post extreme odds hoping a confused or lazy person accidentally takes their offered bet. It's annoyingly common
-    require(_decOddsBB > 1000 && _decOddsBB < 9000, "invalid odds");
+    require(_decOddsBB > 110 && _decOddsBB < 900, "invalid odds");
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));
     Subcontract memory order;
     order.pick = _team0or1;
@@ -217,7 +217,7 @@ contract Betting {
     order.bettor = msg.sender;
     order.betAmount = _betAmount;
     // payoff determines the money needed to take the other side of this bet
-    order.payoff = ((_decOddsBB - 1000) * _betAmount) / 1000;
+    order.payoff = ((_decOddsBB - 100) * _betAmount) / 100;
     offerContracts[subkID] = order;
     margin[6]++;
     emit OfferRecord(

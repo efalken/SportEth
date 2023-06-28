@@ -1,7 +1,7 @@
 import Styled from 'styled-components'
 
 export default Styled.span`
-           font-family: sans-serif;
+           font-family: Arial;
             font-size: ${({ size }) => size};
             font-weight: ${({ weight }) => weight ? weight : "normal"};
             color: ${({ color }) => color};

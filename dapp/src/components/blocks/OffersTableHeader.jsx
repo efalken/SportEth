@@ -37,7 +37,7 @@ export default ({ order: [by, asc], setOrder }) => (
 
       <Flex
         alignItems="flex-end"
-        mt="13px"
+        Fmt="13px"
         className="offers-table-header"
         style={{
           textOverflow: "ellipsis",
