@@ -108,7 +108,7 @@ model OracleResultsPostedEvent {
   logIndex         Int
   epoch            Int
   propnum          Int
-  winner           String // encode int[] to string
+  winner           String @db.VarChar(3000) // encode int[] to string
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -120,7 +120,7 @@ model OracleDecOddsPostedEvent {
   logIndex         Int
   epoch            Int
   propnum          Int
-  decOdds          String // encode int[] to string
+  decOdds          String @db.VarChar(3000) // encode int[] to string
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -146,7 +146,7 @@ model OracleBetDataPostedEvent {
   logIndex         Int
   epoch            Int
   propnum          Int
-  oddsStart        String // encode int[] to string
+  oddsStart        String @db.VarChar(3000) // encode int[] to string
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -179,7 +179,7 @@ model OracleStartTimesPostedEvent {
   logIndex         Int
   propnum          Int
   epoch            Int
-  starttimes       String // encode int[] to string
+  starttimes       String @db.VarChar(3000) // encode int[] to string
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -191,7 +191,7 @@ model OracleSchedulePostedEvent {
   logIndex         Int
   propnum          Int
   epoch            Int
-  sched            String // encode int[] to string
+  sched            String @db.VarChar(3000) // encode int[] to string
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }

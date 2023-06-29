@@ -3,7 +3,7 @@ import { oracleContractEventListener } from "./eventListeners/oracleContract/ind
 import { tokenContractEventListener } from "./eventListeners/tokenContract/index.js";
 
 export default async function web3EventListeners() {
-  bettingContractEventListener();
-  oracleContractEventListener();
-  tokenContractEventListener();
+  await bettingContractEventListener();
+  await oracleContractEventListener();
+  await tokenContractEventListener();
 }
