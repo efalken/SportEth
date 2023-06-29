@@ -80,7 +80,7 @@ export default function TeamTable({
                 ? (1 + (95 * oddsTot[0][i]) / 100000).toFixed(3)
                 : getMoneyLine((95 * oddsTot[0][i]) / 100)}
             </td>
-            <td style={{ textAlign: "left", paddingLeft: "15px" }}>
+            <td style={{ textAlign: "left", paddingLeft: "2px" }}>
               {startTimeColumn[i] > moment().unix() ? (
                 <input
                   type="radio"
