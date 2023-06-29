@@ -150,7 +150,7 @@ contract Betting {
     );
     // if passed to here, subtract desired bet amount from user balance
     userBalance[msg.sender] -= _betAmt;
-    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));
+    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;
     order.bettor = msg.sender;
     order.betAmount = _betAmt;
@@ -209,7 +209,7 @@ contract Betting {
     // data in raw decimal form, times 100. Standard 1.91 odds would be 191
     // this targets trolls who post extreme odds hoping a confused or lazy person accidentally takes their offered bet. It's annoyingly common
     require(_decOddsBB > 110 && _decOddsBB < 900, "invalid odds");
-    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));
+    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;
     order.pick = _team0or1;
     order.matchNum = _matchNum;
@@ -267,7 +267,7 @@ contract Betting {
       _subkid
     );
     // creates hash of bet for taker
-    bytes32 subkID2 = keccak256(abi.encodePacked(margin[6], block.timestamp));
+    bytes32 subkID2 = keccak256(abi.encodePacked(margin[6], block.number));
     k.bettor = msg.sender;
     // reverses payout and betamount for taker
     (k.payoff, k.betAmount) = (k.betAmount, k.payoff);
