@@ -43,15 +43,15 @@ export default function TeamTable({
         <tr style={{ width: "50%", textAlign: "left" }}>
           <th>Match</th>
           <th>Sport</th>
-          <th style={{ textAlign: "center" }}>Favorite</th>
+          <th style={{ textAlign: "left" }}>Favorite</th>
           <th style={{ textAlign: "left" }}>
             {showDecimalOdds ? "DecOdds" : "MoneyLine"}
           </th>
-          <th style={{ textAlign: "center" }}>Underdog</th>
+          <th style={{ textAlign: "left" }}>Underdog</th>
           <th style={{ textAlign: "left" }}>
             {showDecimalOdds ? "DecOdds" : "MoneyLine"}
           </th>
-          <th style={{ textAlign: "center" }}>Start</th>
+          <th style={{ textAlign: "left" }}>Start</th>
         </tr>
         {[...Array(32)].map((_value, i) => (
           <tr
@@ -61,7 +61,7 @@ export default function TeamTable({
           >
             <td>{i}</td>
             <td>{sport[i]}</td>
-            <td style={{ textAlign: "left", paddingLeft: "15px" }}>
+            <td style={{ textAlign: "left", paddingLeft: "2px" }}>
               {startTimeColumn[i] > moment().unix() ? (
                 <input
                   type="radio"

@@ -205,8 +205,8 @@ function BookiePage() {
 
   for (let i = 0; i < 32; i++) {
     allMatches.push(
-      <tr key={i} style={{ width: "25%", textAlign: "center" }}>
-        <td>{teamSplit[i][0]}</td>
+      <tr key={i} style={{ width: "25%", textAlign: "left" }}>
+        <td>{i}</td>
         <td>{teamSplit[i][1]}</td>
         <td>{teamSplit[i][2]}</td>
         <td>{(bets0[i] / 10).toFixed(3)}</td>
@@ -496,8 +496,8 @@ function BookiePage() {
                   }}
                 >
                   <tbody>
-                    <tr font="sans-serif" style={{ width: "50%", textAlign: "center"}}>
-                      <th>sport</th>
+                    <tr font="sans-serif" style={{ width: "50%", textAlign: "left"}}>
+                      <th>Match</th>
                       <th>Favorite</th>
                       <th>Underdog</th>
                       <th>Fave Bets</th>
