@@ -458,7 +458,7 @@ function BookiePage() {
                 {" "}
                 This page helps LPs understand their netLiab exposure to this
                 week's events. The NetLiability is the amount paid out by the
-                contract if the Home or Away Team wins. If negative this means
+                contract if the Favorite or Underdog Team wins. If negative this means
                 the LPs are credited AVAX. LPs can fund and withdraw using the
                 left-hand fields.
               </Text>
@@ -498,12 +498,12 @@ function BookiePage() {
                   <tbody>
                     <tr font="sans-serif" style={{ width: "50%", textAlign: "center"}}>
                       <th>sport</th>
-                      <th>Home Team</th>
-                      <th>Away Team</th>
-                      <th>HomeBets</th>
-                      <th>AwayBets</th>
-                      <th>NetLiabHome</th>
-                      <th>NetLiabAway</th>
+                      <th>Favorite</th>
+                      <th>Underdog</th>
+                      <th>Fave Bets</th>
+                      <th>Dog Bets</th>
+                      <th>NetLiabFave</th>
+                      <th>NetLiabDog</th>
                     </tr>
                     {allMatches}
                   </tbody>
