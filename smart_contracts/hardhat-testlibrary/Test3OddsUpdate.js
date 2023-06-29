@@ -63,7 +63,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
+      var nextStart = 1688218363 + 7 * 86400;
       console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
         [
@@ -264,8 +264,10 @@ describe("Betting", function () {
         await ethers.provider.getBalance(betting.address),
         "finney"
       );
-      const userBalanceAcct1 = await betting.userBalance(account1.address);
-      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      const userBalanceAcct1 = (await betting.userStruct(account1.address))
+        .userBalance;
+      const userBalanceAcct2 = (await betting.userStruct(account2.address))
+        .userBalance;
       console.log(`acct1 ${userBalanceAcct1}`);
       console.log(`acct3 ${userBalanceAcct2}`);
       console.log(`bookiePool ${bookiePool}`);
@@ -335,8 +337,10 @@ describe("Betting", function () {
         await ethers.provider.getBalance(betting.address),
         "finney"
       );
-      const userBalanceAcct1 = await betting.userBalance(account1.address);
-      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      const userBalanceAcct1 = (await betting.userStruct(account1.address))
+        .userBalance;
+      const userBalanceAcct2 = (await betting.userStruct(account2.address))
+        .userBalance;
       console.log(`acct1 ${userBalanceAcct1}`);
       console.log(`acct2 ${userBalanceAcct2}`);
       console.log(`bookiePool ${bookiePool}`);

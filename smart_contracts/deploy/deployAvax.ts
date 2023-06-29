@@ -154,7 +154,7 @@ async function main() {
   const betdata0 = await betting.betData(0);
   console.log(`betdata ${betdata0}`);
 
-  const betfunds = await betting.userBalance(accounts[1]);
+  const betfunds = (await betting.userStruct(accounts[1])).userBalance;
   console.log(`funds ${betfunds}`);
 
   const bookiefunds = (await betting.lpStruct(accounts[0])).shares;

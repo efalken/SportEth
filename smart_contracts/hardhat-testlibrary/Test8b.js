@@ -88,7 +88,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart = 1688218363 + 7 * 86400;
 
       await oracle.initPost(
         [
@@ -168,7 +168,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.initProcess();
     });
 
@@ -203,7 +203,7 @@ describe("Betting", function () {
     });
 
     it("bump1", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.settleProcess();
     });
   });
@@ -308,7 +308,7 @@ describe("Betting", function () {
       // await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.initProcess();
     });
 
@@ -343,7 +343,7 @@ describe("Betting", function () {
       // await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.settleProcess();
     });
 
@@ -472,7 +472,7 @@ describe("Betting", function () {
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.initProcess();
     });
 
@@ -503,7 +503,7 @@ describe("Betting", function () {
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.settleProcess();
     });
 
@@ -632,7 +632,7 @@ describe("Betting", function () {
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.connect(account1).initProcess();
       const activeState = await oracle.reviewStatus();
       // console.log(`activestate, ${activeState}`);
@@ -702,7 +702,7 @@ describe("Betting", function () {
       ).timestamp;
       await oracle.connect(owner).vote(true);
       await oracle.connect(account2).vote(true);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.connect(account1).settleProcess();
     });
 
@@ -815,7 +815,7 @@ describe("Betting", function () {
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       //   console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.initProcess();
 
       const activeState = await oracle.reviewStatus();
@@ -858,7 +858,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.connect(account2).vote(true);
       await oracle.settleProcess();
     });
@@ -965,7 +965,7 @@ describe("Betting", function () {
       );
       await oracle.connect(account2).vote(true);
       // await oracle.connect(account2).vote(true);
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.initProcess();
     });
 

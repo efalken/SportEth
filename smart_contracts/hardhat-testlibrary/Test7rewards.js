@@ -70,7 +70,7 @@ describe("test rewards 7", function () {
     _timestamp = (
       await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
     ).timestamp;
-    nextStart = _timestamp + 7 * 86400;
+    nextStart = 1688218363 + 7 * 86400;
     await oracle.initPost(
       [
         "NFL:ARI:LAC",
@@ -152,7 +152,7 @@ describe("test rewards 7", function () {
   });
 
   it("process data", async () => {
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     await oracle.initProcess();
     // margin0 = await betting.margin(0);
     // margin4 = await betting.margin(4);
@@ -247,7 +247,7 @@ describe("test rewards 7", function () {
       1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 0,
     ]);
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     result = await oracle.settleProcess();
     receipt = await result.wait();
   });
@@ -390,7 +390,7 @@ describe("test rewards 7", function () {
     ).timestamp;
     _date = new Date(1000 * _timestamp + offset);
     _hour = _date.getHours();
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     result = await oracle.initProcess();
     receipt = await result.wait();
     await betting.connect(account2).bet(0, 0, "5000");
@@ -412,7 +412,7 @@ describe("test rewards 7", function () {
       0, 0, 0, 0, 0, 0, 0,
     ]);
 
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     await oracle.settleProcess();
 
     result = await tokenrewards.getTokenRewards();
@@ -567,7 +567,7 @@ describe("test rewards 7", function () {
     ).timestamp;
     _date = new Date(1000 * _timestamp + offset);
     _hour = _date.getHours();
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     result = await oracle.initProcess();
     receipt = await result.wait();
     await betting.connect(account2).bet(0, 0, "5000");
@@ -589,7 +589,7 @@ describe("test rewards 7", function () {
       0, 0, 0, 0, 0, 0, 0,
     ]);
 
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     await oracle.settleProcess();
 
     result = await tokenrewards.getTokenRewards();
@@ -745,7 +745,7 @@ describe("test rewards 7", function () {
     ).timestamp;
     _date = new Date(1000 * _timestamp + offset);
     _hour = _date.getHours();
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     result = await oracle.initProcess();
     receipt = await result.wait();
     await betting.connect(account2).bet(0, 0, "5000");
@@ -767,7 +767,7 @@ describe("test rewards 7", function () {
       0, 0, 0, 0, 0, 0, 0,
     ]);
 
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     await oracle.settleProcess();
 
     result = await tokenrewards.getTokenRewards();
@@ -924,7 +924,7 @@ describe("test rewards 7", function () {
     ).timestamp;
     _date = new Date(1000 * _timestamp + offset);
     _hour = _date.getHours();
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     result = await oracle.initProcess();
     receipt = await result.wait();
     await betting.connect(account2).bet(0, 0, "5000");
@@ -946,7 +946,7 @@ describe("test rewards 7", function () {
       0, 0, 0, 0, 0, 0, 0,
     ]);
 
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     await oracle.settleProcess();
 
     result = await tokenrewards.getTokenRewards();
@@ -1106,7 +1106,7 @@ describe("test rewards 7", function () {
     ).timestamp;
     _date = new Date(1000 * _timestamp + offset);
     _hour = _date.getHours();
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     result = await oracle.initProcess();
     receipt = await result.wait();
     await betting.connect(account2).bet(0, 0, "5000");
@@ -1128,7 +1128,7 @@ describe("test rewards 7", function () {
       0, 0, 0, 0, 0, 0, 0,
     ]);
 
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     await oracle.settleProcess();
 
     result = await tokenrewards.getTokenRewards();
@@ -1286,7 +1286,7 @@ describe("test rewards 7", function () {
     ).timestamp;
     _date = new Date(1000 * _timestamp + offset);
     _hour = _date.getHours();
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     result = await oracle.initProcess();
     receipt = await result.wait();
     await betting.connect(account2).bet(0, 0, "5000");
@@ -1308,7 +1308,7 @@ describe("test rewards 7", function () {
       0, 0, 0, 0, 0, 0, 0,
     ]);
 
-    await helper.advanceTimeAndBlock(secondsInHour * 6);
+    await helper.advanceTimeAndBlock(secondsInHour * 12);
     await oracle.settleProcess();
 
     result = await tokenrewards.getTokenRewards();

@@ -86,7 +86,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart = 1688218363 + 7 * 86400;
       console.log(`time is ${nextStart}`);
       await oracle.initPost(
         [
@@ -165,17 +165,17 @@ describe("Betting", function () {
       );
     });
 
-    it("fast forward 6 hours", async () => {
+    it("fast forward 12 hours", async () => {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
-    // it("approve and send to betting contract", async () => {
-    //   await oracle.initProcess();
-    // });
+    it("approve and send to betting contract", async () => {
+      await oracle.initProcess();
+    });
 
     it("Acct 0 Fund Betting Contract", async () => {
       await betting.fundBook({
@@ -221,8 +221,8 @@ describe("Betting", function () {
       ]);
     });
 
-    it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+    it("fast forward 12 hours", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("Approve and send result data", async () => {
@@ -365,13 +365,13 @@ describe("Betting", function () {
       console.log(`gas on first post ${gasUsed}`);
     });
 
-    it("fast forward 4 hours", async () => {
+    it("fast forward 12 hours", async () => {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("approve and send to betting contract #2", async () => {
@@ -405,13 +405,13 @@ describe("Betting", function () {
       ]);
     });
 
-    it("fast forward 4 hours", async () => {
+    it("fast forward 12 hours", async () => {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("Approve and send result data 2", async () => {
@@ -587,13 +587,13 @@ describe("Betting", function () {
       console.log(`gas on second post ${gasUsed}`);
     });
 
-    it("fast forward 4 hours", async () => {
+    it("fast forward 12 hours", async () => {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("approve and send to betting contract #3", async () => {
@@ -633,8 +633,8 @@ describe("Betting", function () {
       ]);
     });
 
-    it("fast forward 3 hours and send settle", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+    it("fast forward 12 hours and send settle", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.settleProcess();
     });
 

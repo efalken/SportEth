@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import fs from "fs";
 var result;
-var nextStart = 1688169600;
+var nextStart = 1688251202;
 var receipt;
 var hash;
 
@@ -359,8 +359,8 @@ async function main() {
       result = await oracle.initProcess();
       receipt = await result.wait();
 
-      const userBalanceAcct1 = await betting.userBalance(accounts[1]);
-      const userBalanceAcct2 = await betting.userBalance(accounts[2]);
+      const userBalanceAcct1 = (await betting.userStruct(accounts[1])).userBalance;
+      const userBalanceAcct2 = (await betting.userStruct(accounts[2])).userBalance;
       const ownershares = (await betting.lpStruct(accounts[0])).shares;
       console.log(`add1 ${userBalanceAcct1}`);
       console.log(`add2 ${userBalanceAcct2}`);

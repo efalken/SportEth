@@ -9,7 +9,7 @@ import "./Token.sol";
 
 import "./ConstantsBetting.sol";
 
-contract Betting {
+contract Betting99 {
   /** 0 bookie capital total, 1 bookie capital Locked, 2 bettorLocked,
   3 betEpoch, 4 totalShares, 5 concentration Limit, 6 nonce, 7 first Start Time
   */
@@ -214,7 +214,7 @@ contract Betting {
     require(_betAmount <= userStruct[msg.sender].userBalance, "NSF");
     // data in raw decimal form, times 100. Standard 1.91 odds would be 191
     // this targets trolls who post extreme odds hoping a confused or lazy person accidentally takes their offered bet. It's annoyingly common
-    require(_decOddsBB > 100 && _decOddsBB < 900, "invalid odds");
+    require(_decOddsBB > 110 && _decOddsBB < 900, "invalid odds");
     userStruct[msg.sender].bbEpoch = margin[3];
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;

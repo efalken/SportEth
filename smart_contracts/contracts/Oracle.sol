@@ -112,7 +112,7 @@ contract Oracle {
     // set sequencer to 10, only initProcess can function next
     reviewStatus = INIT_PROC_NEXT;
   }
-
+  
   function initProcess() external returns (bool) {
     // requires new init data posted
     require(reviewStatus == INIT_PROC_NEXT, "wrong data");
@@ -240,8 +240,8 @@ contract Oracle {
   }
 
   function post() internal {
-    uint256 hour = hourOfDay();
-    //require(hour == HOUR_POST, "wrong hour");
+    // ********* TAKE OUT IN PRODUCTION 
+   // require(hourOfDay() == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 5% of tokens");
     uint64 _tokens = adminStruct[msg.sender].tokens;

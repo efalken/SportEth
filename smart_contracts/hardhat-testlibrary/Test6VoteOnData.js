@@ -61,7 +61,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
+      var nextStart = 1688218363 + 7 * 86400;
       console.log(`time is ${nextStart}`);
     });
   });
@@ -251,7 +251,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 3 days", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 192);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("approve and send correct data to betting contract", async () => {
@@ -315,8 +315,8 @@ describe("Betting", function () {
       console.log(`tokBal10 ${tokBal98}`);
     });
 
-    it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+    it("fast forward 12 hours", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("process vote, should send odds", async () => {
@@ -391,8 +391,8 @@ describe("Betting", function () {
       gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
-    it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+    it("fast forward 12 hours", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("show votes", async () => {

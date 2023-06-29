@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 //SPDX-License-Identifier: BUSL-1.1
-
+    
 // hour of day in GMT one can post new data for voting
 uint32 constant HOUR_POST = 12; // 12 in prod
 // hour of day in GMT after whic one can submit a data proposal for processing

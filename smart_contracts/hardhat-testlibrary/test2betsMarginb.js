@@ -59,7 +59,7 @@ describe("Test2b", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
+      var nextStart = 1688218363 + 7 * 86400;
       console.log(`time is ${nextStart}`);
       await oracle.initPost(
         [

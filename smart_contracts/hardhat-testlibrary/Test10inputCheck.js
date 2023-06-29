@@ -62,7 +62,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart = 1688218363 + 7 * 86400;
 
       await oracle.initPost(
         [
@@ -142,7 +142,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("Send Initial Data", async () => {
@@ -213,7 +213,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.updateProcess();
       const betData7b = await betting.betData(7);
       //const str = bn.toString(16);

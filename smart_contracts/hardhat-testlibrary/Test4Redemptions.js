@@ -63,7 +63,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
+      var nextStart = 1688218363 + 7 * 86400;
 
       await oracle.initPost(
         [
@@ -192,7 +192,8 @@ describe("Betting", function () {
       contractHash1 = receipt.events[0].args.contractHash;
       const gasUsed4 = receipt.gasUsed;
       console.log(`gas on fourth bet ${gasUsed4}`);
-      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      const userBalanceAcct2 = (await betting.userStruct(account2.address))
+        .userBalance;
       console.log(`acct2 balance after bet ${userBalanceAcct2}`);
     });
 
@@ -268,7 +269,8 @@ describe("Betting", function () {
         await ethers.provider.getBalance(betting.address),
         "finney"
       );
-      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      const userBalanceAcct2 = (await betting.userStruct(account2.address))
+        .userBalance;
       console.log(`acct2 ${userBalanceAcct2}`);
       console.log(`oracleBal ${oracleBal}`);
       console.log(`bettingKethbal ${bettingKethbal}`);
@@ -309,7 +311,8 @@ describe("Betting", function () {
         await ethers.provider.getBalance(betting.address),
         "finney"
       );
-      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      const userBalanceAcct2 = (await betting.userStruct(account2.address))
+        .userBalance;
       account2eo = ethers.utils.formatUnits(
         await ethers.provider.getBalance(account2.address),
         "finney"
@@ -322,7 +325,8 @@ describe("Betting", function () {
     });
 
     it("State Variables in Betting Contract after Acct2 withdrawal", async () => {
-      const playerbalance = await betting.userBalance(account2.address);
+      const playerbalance = (await betting.userStruct(account2.address))
+        .userBalance;
       const result = await betting
         .connect(account2)
         .withdrawBettor(playerbalance, { gasPrice: 200n * gwei });
@@ -345,7 +349,8 @@ describe("Betting", function () {
         await ethers.provider.getBalance(betting.address),
         "finney"
       );
-      const userBalanceAcct2 = await betting.userBalance(account2.address);
+      const userBalanceAcct2 = (await betting.userStruct(account2.address))
+        .userBalance;
       const Acct2EOaccount = ethers.utils.formatUnits(
         await ethers.provider.getBalance(account2.address),
         "finney"

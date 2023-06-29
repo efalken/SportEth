@@ -272,9 +272,9 @@ describe("Betting", function () {
     //     await ethers.provider.getBalance(betting.address),
     //     "finney"
     //   );
-    //   const userBalanceAcct2 = await betting.userBalance(account2.address);
+    //   const userBalanceAcct2 = (await betting.userStruct(account2.address)).userBalance;
     //   console.log(`acct2 ${userBalanceAcct2}`);
-    //   const userBalanceAcct3 = await betting.userBalance(account3.address);
+    //   const userBalanceAcct3 = (await betting.userStruct(account3.address)).userBalance;
     //   console.log(`acct3 ${userBalanceAcct3}`);
     //   console.log(`bookiePool ${bookiePool}`);
     //   console.log(`bettorLocked ${bettorLocked}`);
@@ -358,9 +358,9 @@ describe("Betting", function () {
     //   await betting.connect(account2).redeem(hash10);
     //   await betting.connect(account2).redeem(hash11);
     //   await betting.connect(account3).redeem(hash12);
-    //   const userBalanceAcct2 = await betting.userBalance(account2.address);
+    //   const userBalanceAcct2 = (await betting.userStruct(account2.address)).userBalance;
     //   console.log(`acct2 ${userBalanceAcct2}`);
-    //   const userBalanceAcct3 = await betting.userBalance(account3.address);
+    //   const userBalanceAcct3 = (await betting.userStruct(account3.address)).userBalance;
     //   console.log(`acct3 ${userBalanceAcct3}`);
 
     //   console.log(`bookiePool ${bookiePool}`);
