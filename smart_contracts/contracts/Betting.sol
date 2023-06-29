@@ -150,7 +150,7 @@ contract Betting {
     );
     // if passed to here, subtract desired bet amount from user balance
     userBalance[msg.sender] -= _betAmt;
-    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));
+    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;
     order.bettor = msg.sender;
     order.betAmount = _betAmt;
@@ -206,10 +206,10 @@ contract Betting {
     require(_betAmount >= margin[0] / margin[5], "too small");
     // cannot bet more than one has
     require(_betAmount <= userBalance[msg.sender], "NSF");
-    // data in raw decimal form, times 1000. Standard 1.91 odds would be 1910
+    // data in raw decimal form, times 100. Standard 1.91 odds would be 191
     // this targets trolls who post extreme odds hoping a confused or lazy person accidentally takes their offered bet. It's annoyingly common
-    require(_decOddsBB > 1000 && _decOddsBB < 9000, "invalid odds");
-    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.timestamp));
+    require(_decOddsBB > 110 && _decOddsBB < 900, "invalid odds");
+    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;
     order.pick = _team0or1;
     order.matchNum = _matchNum;
@@ -217,7 +217,7 @@ contract Betting {
     order.bettor = msg.sender;
     order.betAmount = _betAmount;
     // payoff determines the money needed to take the other side of this bet
-    order.payoff = ((_decOddsBB - 1000) * _betAmount) / 1000;
+    order.payoff = ((_decOddsBB - 100) * _betAmount) / 100;
     offerContracts[subkID] = order;
     margin[6]++;
     emit OfferRecord(
@@ -267,7 +267,7 @@ contract Betting {
       _subkid
     );
     // creates hash of bet for taker
-    bytes32 subkID2 = keccak256(abi.encodePacked(margin[6], block.timestamp));
+    bytes32 subkID2 = keccak256(abi.encodePacked(margin[6], block.number));
     k.bettor = msg.sender;
     // reverses payout and betamount for taker
     (k.payoff, k.betAmount) = (k.betAmount, k.payoff);
@@ -487,7 +487,9 @@ contract Betting {
   ) external onlyAdmin returns (bool) {
     require(margin[2] == 0);
     betData = _oddsAndStart;
-    margin[7] = uint32(_oddsAndStart[0] >> 64);
+    uint32 x = uint32(_oddsAndStart[0] >> 64);
+    margin[7] = x - ((x - 1687543200) % 604800);
+    //margin[7] = uint32(_oddsAndStart[0] >> 64);
     // resets the paused matches (99 will never be possible)
     paused[0] = 99;
     paused[1] = 99;

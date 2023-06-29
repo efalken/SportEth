@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import fs from "fs";
 var result;
-var nextStart = 1687965292;
+var nextStart = 1688169600;
 var receipt;
 var hash;
 
@@ -262,11 +262,12 @@ async function main() {
       receipt = await result.wait();
       hash = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(4, 0, 20);
+
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).postBigBet(6, 0, 220, 1972);
+      result = await betting.connect(signers[1]).postBigBet(6, 0, 220, 197);
       receipt = await result.wait();
       hash = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[1]).postBigBet(7, 1, 201, 1999);
+      result = await betting.connect(signers[1]).postBigBet(7, 1, 201, 199);
       receipt = await result.wait();
       hash = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).takeBigBet(hash);
@@ -364,11 +365,11 @@ async function main() {
       console.log(`add1 ${userBalanceAcct1}`);
       console.log(`add2 ${userBalanceAcct2}`);
       console.log(`owner ${ownershares}`);
-      result = await betting.connect(signers[2]).postBigBet(0, 0, 200, 2000);
+      result = await betting.connect(signers[2]).postBigBet(0, 0, 200, 200);
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).postBigBet(0, 0, 200, 4000);
+      result = await betting.connect(signers[1]).postBigBet(0, 0, 200, 400);
       receipt = await result.wait();
-      result = await betting.connect(signers[2]).postBigBet(0, 0, 201, 1999);
+      result = await betting.connect(signers[2]).postBigBet(0, 0, 201, 199);
       receipt = await result.wait();
       result = await betting.connect(signers[1]).bet(4, 0, 20);
       receipt = await result.wait();

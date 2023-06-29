@@ -15,26 +15,27 @@ function SplashDrizzleContract({ showActions }) {
     <Flex
       style={{
         borderRadius: Radius,
-        overflow: "hidden",
+        overflow: "hidden"
       }}
     >
       <Box width={1} flexDirection="row" style={{ display: "flex" }}>
         {showActions && (
           <Box
             style={{
-              backgroundColor: B,
+             // backgroundColor: "#ffff00",
               cursor: "pointer",
               display: "flex",
               borderRadius: "2px",
               alignItems: "center",
-              width: "15em",
+              width: "10em",
               justifyContent: "flex-end",
+             // font-size: "18px"
             }}
             display="flex"
             flexDirection="row"
           >
             <ChainSwitch />
-            <a href={"/betpage"} style={{ textDecoration: "none" }}></a>
+            <a href={"/betpage"} style={{ textDecoration: "none" } }></a>
           </Box>
         )}
       </Box>
@@ -75,11 +76,12 @@ const ChainSwitch = () => {
         <Box>
           <button
             style={{
-              //backgroundColor: "#707070",
-             //color: "white",
+              backgroundColor: "#121823",
+              color: "#ffff4d",
+             // size: "24px",
               borderRadius: "2px",
               cursor: "pointer",
-              padding: "10px",
+              padding: "10px"
             }}
             //    onClick={() => switchToAvalanche()}
             //    href={"/betpage"}
@@ -98,7 +100,8 @@ const ChainSwitch = () => {
            // backgroundColor: "#424242",
             borderRadius: "2px",
             cursor: "pointer",
-            color: "white",
+
+           // color: "#0ff000",
             padding: "10px",
           }}
           onClick={() => switchChain()}

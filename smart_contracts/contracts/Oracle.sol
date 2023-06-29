@@ -63,7 +63,7 @@ contract Oracle {
 
   event SchedulePosted(uint32 epoch, uint32 propnum, string[32] sched);
 
-  event Funding(uint64 tokensChange, uint256 etherChange, address transactor);
+  event Funding(uint64 tokensChange, uint256 etherChange, address transactor, bool withdrawal);
 
   constructor(address payable bettingk, address payable _token) {
     bettingContract = Betting(bettingk);
@@ -211,54 +211,32 @@ contract Oracle {
   }
 
   function depositTokens(uint64 _amt) external {
-    uint256 ethClaim;
-    bool success;
-    if (adminStruct[msg.sender].tokens > 0) {
-      ethClaim =
-        uint256(
-          adminStruct[msg.sender].tokens *
-            (feeData[1] - adminStruct[msg.sender].initFeePool)
-        ) *
-        TOKEN_ADJ;
-      //payable(msg.sender).transfer(ethClaim);
-      (success, ) = payable(msg.sender).call{value: ethClaim}("");
-      require(success, "eth payment failed");
-    }
-    (success) = token.transferSpecial(msg.sender, _amt);
-    require(success, "not success");
+    uint256 _ethOut;
+    feeData[0] += _amt;
+    if (adminStruct[msg.sender].tokens > 0) 
+      { _ethOut = adjustFeeData();
+      }
     adminStruct[msg.sender].initFeePool = feeData[1];
     adminStruct[msg.sender].tokens += _amt;
     adminStruct[msg.sender].initEpoch = betEpochOracle;
-    feeData[0] += _amt;
-    emit Funding(_amt, ethClaim, msg.sender);
+    adminStruct[msg.sender].totalVotes = adminStruct[msg.sender].tokens / 2;
+   (bool success) = token.transferSpecial(msg.sender, _amt);
+   require(success, "token transfer failed");
+   emit Funding(_amt, _ethOut, msg.sender, true);
   }
 
-  function withdrawTokens(uint64 _amtTokens) external {
-    require(_amtTokens <= adminStruct[msg.sender].tokens, "nsf tokens");
-    // this prevents voting more than once or oracle proposals with token balance.
+  function withdrawTokens(uint64 _amt) external {
+    require(_amt <= adminStruct[msg.sender].tokens, "nsf tokens");
     require(reviewStatus < 10, "no wd during vote");
-    uint64 numVotes = uint64(betEpochOracle - adminStruct[msg.sender].initEpoch);
-    require(numVotes > 0, "no wd for at least 1 week");
-    if (adminStruct[msg.sender].totalVotes > adminStruct[msg.sender].tokens) {adminStruct[msg.sender].totalVotes = adminStruct[msg.sender].tokens;}
-    bool success;
-    uint256 ethTot = uint256(
-      adminStruct[msg.sender].tokens * 
-        (feeData[1] - adminStruct[msg.sender].initFeePool)
-    ) * TOKEN_ADJ; 
-    uint256 lpPayout = adminStruct[msg.sender].totalVotes * ethTot / numVotes;
-    uint256 ploughBack = ethTot - lpPayout;
-    feeData[0] -= _amtTokens;
-    feeData[1] += uint64(ploughBack / uint256(feeData[0]) / 1e5);
-        adminStruct[msg.sender].initFeePool = feeData[1];
-    adminStruct[msg.sender].tokens -= _amtTokens;
+    feeData[0] -= _amt;
+    uint256 _ethOut = adjustFeeData();
+    adminStruct[msg.sender].initFeePool = feeData[1];
+    adminStruct[msg.sender].tokens -= _amt;
     adminStruct[msg.sender].initEpoch = betEpochOracle;
-    adminStruct[msg.sender].totalVotes = 0;
-    //payable(msg.sender).transfer(ethClaim);
-    (success, ) = payable(msg.sender).call{value: lpPayout}("");
-    require(success, "eth payment failed");
-    (success) = token.transfer(msg.sender, _amtTokens);
-    require(success, "token failed");
-    emit Funding(_amtTokens, lpPayout, msg.sender);
+    adminStruct[msg.sender].totalVotes = adminStruct[msg.sender].tokens / 2;
+         (bool success) = token.transfer(msg.sender, _amt);
+    require(success, "token transfer failed");
+    emit Funding(_amt, _ethOut, msg.sender, false);
   }
 
   function post() internal {
@@ -330,6 +308,19 @@ contract Oracle {
       outv[i] = out;
       delete out;
     }
+  }
+
+  function adjustFeeData() internal returns(uint256){
+    uint256 voteRecord = uint256(adminStruct[msg.sender].totalVotes / (betEpochOracle - adminStruct[msg.sender].initEpoch));
+    if (voteRecord > adminStruct[msg.sender].tokens) 
+    {voteRecord = adminStruct[msg.sender].tokens;}
+    uint256 ethTot = uint256(adminStruct[msg.sender].tokens * (feeData[1] - adminStruct[msg.sender].initFeePool)) * TOKEN_ADJ; 
+    uint256 _ethOut = voteRecord * ethTot / adminStruct[msg.sender].tokens;
+    uint256 ploughBack = ethTot - _ethOut;
+    feeData[1] += uint64(ploughBack / uint256(feeData[0]) / 1e5);
+    (bool success, ) = payable(msg.sender).call{value: _ethOut}("");
+    require(success, "eth payment failed");
+    return _ethOut;
   }
 
   function hourOfDay() internal view returns (uint256 hour) {

@@ -3,7 +3,7 @@ import Split from "../layout/Split";
 import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
-import { G, cyellow, cwhite } from "../basics/Colors";
+import { G,  cwhite } from "../basics/Colors";
 import LabeledText from "../basics/LabeledText";
 import Form from "../basics/Form";
 import TruncatedAddress from "../basics/TruncatedAddress";
@@ -31,7 +31,7 @@ function BookiePage() {
   const [usedCapital, setUsedCapital] = useState(0);
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
-  const [newBets, setNewBets] = useState(false);
+  //const [newBets, setNewBets] = useState(false);
   const [betData, setBetData] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -67,9 +67,9 @@ function BookiePage() {
     }
   }
 
-  async function inactivateBook() {
-    await bettingContract.inactiveBook();
-  }
+  // async function inactivateBook() {
+  //   await bettingContract.inactiveBook();
+  // }
 
   async function findValues() {
     let _unusedCapital =
@@ -88,14 +88,15 @@ function BookiePage() {
     let _totalShares = (await bettingContract.margin(4)) || "0";
     setTotalShares(_totalShares);
 
-    let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
-    setNewBets(_newBets);
+    // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
+    // setNewBets(_newBets);
 
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
 
     let sctring = await oracleContract.showSchedString();
-    if (sctring && _newBets) {
+    //if (sctring && _newBets) {
+    if (sctring) {
       setScheduleString(sctring);
     }
 
@@ -130,13 +131,13 @@ function BookiePage() {
     return ints;
   }
 
-  function getSpreadText(spreadnumber) {
-    let outspread = spreadnumber / 10;
-    if (outspread > 0) {
-      outspread = "+" + outspread;
-    }
-    return outspread;
-  }
+  // function getSpreadText(spreadnumber) {
+  //   let outspread = spreadnumber / 10;
+  //   if (outspread > 0) {
+  //     outspread = "+" + outspread;
+  //   }
+  //   return outspread;
+  // }
 
   let ethBookie =
     (Number(bookieShares) * (Number(unusedCapital) + Number(usedCapital))) /
@@ -204,8 +205,8 @@ function BookiePage() {
 
   for (let i = 0; i < 32; i++) {
     allMatches.push(
-      <tr key={i} style={{ width: "25%", textAlign: "center" }}>
-        <td>{teamSplit[i][0]}</td>
+      <tr key={i} style={{ width: "25%", textAlign: "left" }}>
+        <td>{i}</td>
         <td>{teamSplit[i][1]}</td>
         <td>{teamSplit[i][2]}</td>
         <td>{(bets0[i] / 10).toFixed(3)}</td>
@@ -457,7 +458,7 @@ function BookiePage() {
                 {" "}
                 This page helps LPs understand their netLiab exposure to this
                 week's events. The NetLiability is the amount paid out by the
-                contract if the Home or Away Team wins. If negative this means
+                contract if the Favorite or Underdog Team wins. If negative this means
                 the LPs are credited AVAX. LPs can fund and withdraw using the
                 left-hand fields.
               </Text>
@@ -495,14 +496,14 @@ function BookiePage() {
                   }}
                 >
                   <tbody>
-                    <tr font="sans-serif" style={{ width: "50%", textAlign: "center"}}>
-                      <th>sport</th>
-                      <th>Home Team</th>
-                      <th>Away Team</th>
-                      <th>HomeBets</th>
-                      <th>AwayBets</th>
-                      <th>NetLiabHome</th>
-                      <th>NetLiabAway</th>
+                    <tr font="sans-serif" style={{ width: "50%", textAlign: "left"}}>
+                      <th>Match</th>
+                      <th>Favorite</th>
+                      <th>Underdog</th>
+                      <th>Fave Bets</th>
+                      <th>Dog Bets</th>
+                      <th>NetLiabFave</th>
+                      <th>NetLiabDog</th>
                     </tr>
                     {allMatches}
                   </tbody>
