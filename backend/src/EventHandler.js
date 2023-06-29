@@ -1,11 +1,15 @@
-import { minBlock } from "./config";
+import { minBlock, provider } from "./config.js";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class EventHandler {
   constructor(contract, fields, table, eventName) {
     this.contract = contract;
     this.fields = fields;
-    this.table = table;
+    this.table = prisma[table];
     this.filter = contract.filters[eventName];
+    console.log(table);
   }
 
   async syncEvent() {
@@ -25,12 +29,23 @@ export class EventHandler {
       orderBy: { blockNumber: "desc" },
     });
     const lastBlock = lastEvent?.blockNumber || minBlock;
-    const emittedEvents = await this.contract.queryFilter(
-      this.filter,
-      lastBlock
-    );
-    for (const eventEmitted of emittedEvents) {
-      await this.addEvent(eventEmitted);
+    let startBlock = lastBlock;
+    let tillBlock = await provider.getBlockNumber();
+    let blocks = tillBlock - startBlock;
+    while (tillBlock >= startBlock) {
+      try {
+        const emittedEvents = await this.contract.queryFilter(
+          this.filter,
+          startBlock,
+          startBlock + blocks
+        );
+        for (const eventEmitted of emittedEvents) {
+          await this.addEvent(eventEmitted);
+        }
+        startBlock += blocks;
+      } catch (err) {
+        blocks = Math.floor(blocks / 2);
+      }
     }
   }
 
@@ -38,6 +53,8 @@ export class EventHandler {
     const { blockNumber, transactionHash, transactionIndex, logIndex, args } =
       event;
     const data = this.parse(event);
+    console.log(event);
+    console.log(data);
 
     const oldEvent = await this.table.findUnique({
       where: {
