@@ -43,4 +43,4 @@ export const tokenContract = new ethers.Contract(
   provider
 );
 
-export const minBlock = process.env.MIN_BLOCK;
+export const minBlock = Number(process.env.MIN_BLOCK || "0");

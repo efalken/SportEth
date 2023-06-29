@@ -1,10 +1,13 @@
-import { minBlock } from "./config";
+import { minBlock, provider } from "./config.js";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class EventHandler {
   constructor(contract, fields, table, eventName) {
     this.contract = contract;
     this.fields = fields;
-    this.table = table;
+    this.table = prisma[table];
     this.filter = contract.filters[eventName];
   }
 
@@ -25,18 +28,35 @@ export class EventHandler {
       orderBy: { blockNumber: "desc" },
     });
     const lastBlock = lastEvent?.blockNumber || minBlock;
-    const emittedEvents = await this.contract.queryFilter(
-      this.filter,
-      lastBlock
-    );
-    for (const eventEmitted of emittedEvents) {
-      await this.addEvent(eventEmitted);
+    let startBlock = lastBlock;
+    let tillBlock = Number(await provider.getBlockNumber());
+    let blocks = tillBlock - startBlock;
+    while (tillBlock >= startBlock) {
+      try {
+        const emittedEvents = await this.contract.queryFilter(
+          this.filter,
+          startBlock,
+          Math.min(startBlock + blocks, tillBlock)
+        );
+        for (const eventEmitted of emittedEvents) {
+          await this.addEvent(eventEmitted);
+        }
+        startBlock += blocks + 1;
+      } catch (err) {
+        blocks = Math.floor(blocks / 2);
+      }
     }
   }
 
   async addEvent(event) {
-    const { blockNumber, transactionHash, transactionIndex, logIndex, args } =
-      event;
+    let { blockNumber, transactionHash, transactionIndex, index, log } = event;
+    if (log) {
+      blockNumber = log.blockNumber;
+      transactionHash = log.transactionHash;
+      transactionIndex = log.transactionIndex;
+      index = log.index;
+    }
+
     const data = this.parse(event);
 
     const oldEvent = await this.table.findUnique({
@@ -45,7 +65,7 @@ export class EventHandler {
           blockNumber,
           transactionHash,
           transactionIndex,
-          logIndex,
+          logIndex: index,
         },
       },
     });
@@ -55,13 +75,20 @@ export class EventHandler {
   }
 
   parse(event) {
-    const { blockNumber, transactionHash, transactionIndex, logIndex, args } =
+    let { blockNumber, transactionHash, transactionIndex, index, log, args } =
       event;
+    if (log) {
+      blockNumber = log.blockNumber;
+      transactionHash = log.transactionHash;
+      transactionIndex = log.transactionIndex;
+      index = log.index;
+    }
+
     const data = {
       blockNumber,
       transactionHash,
       transactionIndex,
-      logIndex,
+      logIndex: index,
     };
     for (const [argName, fieldName, fieldType] of this.fields) {
       data[fieldName] = this.parseField(fieldType, args[argName]);

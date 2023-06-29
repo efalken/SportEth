@@ -5,5 +5,8 @@ import web3EventListeners from "./web3EventListeners/index.js";
 
 const app = express();
 
-web3EventListeners();
+// start the server
 app.listen(PORT, () => console.log(`The server is listening on port ${PORT}`));
+
+// start the web3 event listeners
+web3EventListeners();
