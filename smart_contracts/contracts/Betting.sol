@@ -34,8 +34,8 @@ contract Betting {
   /// and also when it can first withdraw capital (two settlement periods)
   mapping(address => LPStruct) public lpStruct;
   /// this struct holds a user's ETH balance
-  mapping(address => uint32) public userBalance;
-  mapping(address => bytes32) public lastTransaction;
+  mapping(address => UserStruct) public userStruct;
+  //mapping(address => bytes32) public lastTransaction;
 
   struct Subcontract {
     uint8 epoch;
@@ -44,6 +44,12 @@ contract Betting {
     uint32 betAmount;
     uint32 payoff;
     address bettor;
+  }
+
+  struct UserStruct {
+    bytes32 lastTransaction;
+    uint32 userBalance;
+    uint32 bbEpoch;
   }
 
   struct LPStruct {
@@ -116,7 +122,7 @@ contract Betting {
    */
   function bet(uint8 _matchNumber, uint8 _team0or1, uint32 _betAmt) external returns (bytes32) {
     // user needs sufficient capital to make bet
-    require(_betAmt <= userBalance[msg.sender] && _betAmt >= MIN_BET, "NSF ");
+    require(_betAmt <= userStruct[msg.sender].userBalance && _betAmt >= MIN_BET, "NSF ");
     // pause[0] and [1] can be used to prevent betting when an odds number posted is very wrong
     // this provides an emergency method to limit the damage of bad odds
     require(_matchNumber != paused[0] && _matchNumber != paused[1]);
@@ -149,7 +155,7 @@ contract Betting {
       "betsize over unpledged capital"
     );
     // if passed to here, subtract desired bet amount from user balance
-    userBalance[msg.sender] -= _betAmt;
+    userStruct[msg.sender].userBalance -= _betAmt;
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;
     order.bettor = msg.sender;
@@ -177,7 +183,7 @@ contract Betting {
     betData[_matchNumber] = encoded;
     // increment nonce used for unique bet hash IDs
     margin[6]++;
-    lastTransaction[msg.sender] = subkID;
+    userStruct[msg.sender].lastTransaction = subkID;
     emit BetRecord(
       msg.sender,
       uint8(margin[3]),
@@ -205,10 +211,11 @@ contract Betting {
     // we only want large bets, not just custom bets
     require(_betAmount >= margin[0] / margin[5], "too small");
     // cannot bet more than one has
-    require(_betAmount <= userBalance[msg.sender], "NSF");
+    require(_betAmount <= userStruct[msg.sender].userBalance, "NSF");
     // data in raw decimal form, times 100. Standard 1.91 odds would be 191
     // this targets trolls who post extreme odds hoping a confused or lazy person accidentally takes their offered bet. It's annoyingly common
     require(_decOddsBB > 110 && _decOddsBB < 900, "invalid odds");
+    userStruct[msg.sender].bbEpoch = margin[3];
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;
     order.pick = _team0or1;
@@ -241,8 +248,8 @@ contract Betting {
     require(betDatav[4] > block.timestamp, "game started");
     require(k.epoch == margin[3], "expired bet");
     require(
-      userBalance[k.bettor] >= k.betAmount &&
-        userBalance[msg.sender] >= k.payoff,
+      userStruct[k.bettor].userBalance >= k.betAmount &&
+        userStruct[msg.sender].userBalance >= k.payoff,
       "NSF"
     );
     // bet amount for big bet proposer
@@ -254,7 +261,7 @@ contract Betting {
     // bet payoff for big bet taker
     betDatav[3 - k.pick] += k.betAmount;
     // subtracts proposer bet amount from proposer's balance
-    userBalance[k.bettor] -= k.betAmount;
+    userStruct[k.bettor].userBalance  -= k.betAmount;
     // puts proposer's big bet info into struct that can be accessed via hash mapping
     betContracts[_subkid] = k;
     emit BetRecord(
@@ -273,7 +280,7 @@ contract Betting {
     (k.payoff, k.betAmount) = (k.betAmount, k.payoff);
     // if proposal is 1, taker gets 0, if proposal 0 taker gets 1
     k.pick = 1 - k.pick;
-    userBalance[msg.sender] -= k.betAmount;
+    userStruct[msg.sender].userBalance -= k.betAmount;
     margin[2] += (k.payoff + k.betAmount);
     emit OfferRecord(
       msg.sender,
@@ -385,7 +392,7 @@ contract Betting {
   function fundBettor() external payable {
     // removes unneeded decimals for internal accounting
     uint32 amt = uint32(msg.value / UNITS_TRANS14);
-    userBalance[msg.sender] += amt;
+    userStruct[msg.sender].userBalance += amt;
     emit Funding(msg.sender, msg.value, margin[3], 0);
   }
 
@@ -432,7 +439,7 @@ contract Betting {
     }
     delete betContracts[_subkId];
     // credit principle + payoff to redeemer's balance
-    userBalance[msg.sender] += payoff;
+    userStruct[msg.sender].userBalance += payoff;
     emit Funding(msg.sender, payoff, margin[3], 2);
   }
 
@@ -441,8 +448,9 @@ contract Betting {
    */
   function withdrawBettor(uint32 _amt) external {
     // basic budget constraint: check
-    require(_amt <= userBalance[msg.sender]);
-    userBalance[msg.sender] -= _amt;
+    require(_amt <= userStruct[msg.sender].userBalance);
+    require(margin[3] > userStruct[msg.sender].bbEpoch, "too soon");
+    userStruct[msg.sender].userBalance -= _amt;
     uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     // payable(msg.sender).transfer(amt256);
     (bool success, ) = payable(msg.sender).call{value: amt256}("");
@@ -455,6 +463,7 @@ contract Betting {
    */
   function withdrawBook(uint32 _sharesToSell) external {
     require(block.timestamp < uint32(margin[7]), "only prior to first event");
+
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
     // process check
     require(margin[3] > lpStruct[msg.sender].outEpoch, "too soon");

@@ -88,7 +88,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart = 1688218363 + 7 * 86400;
 
       await oracle.initPost(
         [
@@ -170,12 +170,23 @@ describe("Betting", function () {
       ).timestamp;
       await helper.advanceTimeAndBlock(secondsInHour * 6);
       await oracle.initProcess();
+      console.log(`timestamp ${_timestamp}`);
     });
 
     it("Send  Bet #1", async () => {
+      const _timestamp2 = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      console.log(`timestamp2 ${_timestamp2}`);
+      const xx = await betting.margin(7);
+      console.log(`nextstart ${nextStart}`);
+      console.log(`margin7 ${xx}`);
+      console.log(`margin7 ${_timestamp2 - xx}`);
+
       await betting.connect(account4).fundBook({
         value: 5n * eths,
       });
+
       await betting.connect(account5).fundBettor({
         value: 5n * eths,
       });
@@ -183,7 +194,7 @@ describe("Betting", function () {
       receipt = await result.wait();
       contractHash1 = receipt.events[0].args.contractHash;
       _hourSolidity = await reader.hourOfDay();
-      // console.log(`hour in EVM ${_hourSolidity}`);
+      console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
         hourOffset = 36 - _hourSolidity;
@@ -195,7 +206,8 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart = 1688218363; //_timestamp + 7 * 86400;
+
       await oracle.settlePost([
         0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,

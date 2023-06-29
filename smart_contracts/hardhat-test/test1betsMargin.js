@@ -75,7 +75,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart = 1688218363 + 7 * 86400;
 
       console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
