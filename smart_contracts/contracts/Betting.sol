@@ -16,7 +16,7 @@ contract Betting {
   uint32[8] public margin;
   // for emergency shutdown
   uint8[2] public paused;
-  /// betLong[favorite], betLong[away], betPayout[favorite], betPayout[underdog], starttime, odds
+  /// betLong[favorite], betLong[away], betPayout[favorite], betPayout[underdog], starttime, odds[fave], odds[underdog]
   uint256[32] public betData;
   // only oracle contract can execute several functions
   address payable public oracleAdmin;

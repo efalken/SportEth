@@ -2,27 +2,27 @@ const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
 const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
-var hourOffset;
-var _hourSolidity;
-var _timestamp;
-var nextStart;
-var _date;
-var _hour;
-var hash1;
-var hash2;
-var hash3;
-var hash4;
-var hash5;
-var hash6;
-var hash7;
-var hash8;
-var hash9;
-var hash10;
-var hash11;
-var hash12;
-var result;
-var receipt;
-var gasUsed;
+var hourOffset,
+  _hourSolidity,
+  _timestamp,
+  nextStart,
+  _date,
+  _hour,
+  hash1,
+  hash2,
+  hash3,
+  hash4,
+  hash5,
+  hash6,
+  hash7,
+  hash8,
+  hash9,
+  hash10,
+  hash11,
+  hash12,
+  result,
+  receipt,
+  gasUsed;
 const finneys = BigInt("1000000000000000");
 const eths = BigInt("1000000000000000000");
 const million = BigInt("1000000");

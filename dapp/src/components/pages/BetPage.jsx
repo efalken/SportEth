@@ -160,7 +160,7 @@ function BetPage() {
 
     let _userBalance =
       Number(
-        (await bettingContract.userBalance(await signer.getAddress())) || "0"
+        (await bettingContract.userStruct(await signer.getAddress()).userBalance) || "0"
       ) / 10000;
     setUserBalance(_userBalance);
 
