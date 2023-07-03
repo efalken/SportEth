@@ -11,19 +11,21 @@ const million = BigInt("1000000");
 function saveABIFile(
   fileName: string,
   content: string,
-  dirPath = "../dapp/src/abis"
+  dirPaths = ["../dapp/src/abis", "../backend/src/abis"]
 ) {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath);
+  for (const dirPath of dirPaths) {
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath);
+    }
+
+    const filePath = `${dirPath}/${fileName}`;
+
+    if (fs.existsSync(filePath)) {
+      fs.rmSync(filePath);
+    }
+
+    fs.writeFileSync(filePath, content);
   }
-
-  const filePath = `${dirPath}/${fileName}`;
-
-  if (fs.existsSync(filePath)) {
-    fs.rmSync(filePath);
-  }
-
-  fs.writeFileSync(filePath, content);
 }
 
 async function main() {
