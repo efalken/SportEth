@@ -12,6 +12,7 @@ export const AuthContext = createContext({
   signer: null,
   provider: null,
   setSigner(newSigner) {},
+  async connect() {},
   bettingContractReadOnly: null,
   oracleContractReadOnly: null,
   tokenContractReadOnly: null,
@@ -123,11 +124,19 @@ export function AuthContextProvider({ children }) {
     })();
   }, [provider, signer]);
 
+  async function connect() {
+    await provider.send("eth_requestAccounts", []);
+    const signer = await provider.getSigner();
+    console.log(signer);
+    setSigner(signer);
+  }
+
   return (
     <AuthContext.Provider
       value={{
         signer,
         setSigner,
+        connect,
         provider,
         account,
         bettingContractReadOnly,

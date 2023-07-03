@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "../basics/Logo";
 import { Flex, Box } from "rebass";
 import Text from "../basics/Text";
 import VBackground from "../basics/VBackgroundFull";
 import SplashDrizzleContract from "../blocks/SplashDrizzleContract";
+import { useAuthContext } from "../../contexts/AuthContext";
 // import wppdf from "../whitepaper/SportEth.pdf";
 // import excelSheet from "../whitepaper/sportEthData.xlsx";
 
@@ -38,24 +39,12 @@ export default function Splash() {
         px={30}> */}
 
         <Flex width={1} flexWrap="wrap">
-          <Flex
-            width={1}
-            padding="10px"
-            justifyContent="space-between"
-          >
+          <Flex width={1} padding="10px" justifyContent="space-between">
             <Box>
               <Logo />
             </Box>
-
-
-
           </Flex>
-          <Flex
-            width={1}
-            justifyContent="center"
-            alignItems="center"
-
-          >
+          <Flex width={1} justifyContent="center" alignItems="center">
             <Box mt="50px">
               <Flex
                 mt="20px"
@@ -84,8 +73,6 @@ export default function Splash() {
           </Flex>
         </Flex>
       </Flex>
-
-
 
       <div className="footer-links-wrapper" style={{ width: "115%" }}>
         {/* <Flex width="100%" alignItems="center" justifyContent="center">
@@ -117,11 +104,10 @@ export default function Splash() {
                 width: "20em",
                 alignItems: "flex-start",
                 display: "flex",
-              //  color: "#white",
+                //  color: "#white",
               }}
               href={
-                new URL(`../../../../docs/SportEth.pdf`, import.meta.url)
-                  .href
+                new URL(`../../../../docs/SportEth.pdf`, import.meta.url).href
               }
               download=""
             >
@@ -129,44 +115,47 @@ export default function Splash() {
             </a>
           </Text>
         </Flex>
-        <Flex><Box>" "</Box></Flex>
-
+        <Flex>
+          <Box>" "</Box>
+        </Flex>
 
         <Flex width="100%" alignItems="center" justifyContent="center">
           <Text size="16px">
-          <a
-                      className="nav-header"
-                      style={{
-                        textDecoration: "none",
-                        cursor: "pointer",
-                        width: "20em",
-                        alignItems: "flex-start",
-                        display: "flex",
-                      }}
-                      href="/faqs"
-                    >
-                      FAQs
-                    </a>
+            <a
+              className="nav-header"
+              style={{
+                textDecoration: "none",
+                cursor: "pointer",
+                width: "20em",
+                alignItems: "flex-start",
+                display: "flex",
+              }}
+              href="/faqs"
+            >
+              FAQs
+            </a>
           </Text>
         </Flex>
         <Flex>
           <Text> </Text>
         </Flex>
-        <Flex><Box>" "</Box></Flex>
+        <Flex>
+          <Box>" "</Box>
+        </Flex>
         <Flex width="100%" alignItems="center" justifyContent="center">
           <Text size="16px">
- <a
-                      className="nav-header"
-                      style={{
-                        textDecoration: "none",
-                        cursor: "pointer",
-                        width: "20em",
-                        alignItems: "flex-start",
-                        display: "flex",
-                      }}
-                      href="http://github.com/efalken/SportEth"
-                      //    href="FAQ.js"
-                    >
+            <a
+              className="nav-header"
+              style={{
+                textDecoration: "none",
+                cursor: "pointer",
+                width: "20em",
+                alignItems: "flex-start",
+                display: "flex",
+              }}
+              href="http://github.com/efalken/SportEth"
+              //    href="FAQ.js"
+            >
               Github Codebase and Docs
             </a>
           </Text>
@@ -174,9 +163,6 @@ export default function Splash() {
         <Flex>
           <Text> </Text>
         </Flex>
-
-
-
       </div>
     </div>
   );

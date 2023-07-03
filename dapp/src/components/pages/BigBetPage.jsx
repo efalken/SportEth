@@ -16,14 +16,7 @@ import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
 
 export default function BigBetPage() {
-  const {
-    oracleContract,
-    bettingContract,
-    provider,
-    signer,
-    setSigner,
-    account,
-  } = useAuthContext();
+  const { oracleContract, bettingContract, signer, account } = useAuthContext();
 
   const [userOffers, setUserOffers] = useState([]);
   const [currentOffers, setCurrentOffers] = useState([]);
@@ -43,7 +36,7 @@ export default function BigBetPage() {
   const [currW, setCurrW] = useState("");
   const [subcontracts, setSubcontracts] = useState({});
   const [subcontracts2, setSubcontracts2] = useState({});
- // const [newBets, setNewBets] = useState(false);
+  // const [newBets, setNewBets] = useState(false);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
@@ -243,7 +236,8 @@ export default function BigBetPage() {
     // ].methods.userBalance.cacheCall(account);
     let _userBalance =
       Number(
-        (await bettingContract.userStruct(await signer.getAddress()).userBalance) || "0"
+        (await bettingContract.userStruct(await signer.getAddress())
+          .userBalance) || "0"
       ) / 10000;
     setUserBalance(_userBalance);
 
@@ -271,7 +265,7 @@ export default function BigBetPage() {
     // setNewBets(_newBets);
 
     let sctring = await oracleContract.showSchedString();
-   // if (sctring && _newBets) {
+    // if (sctring && _newBets) {
     if (sctring) {
       setScheduleString(sctring);
     }
@@ -400,20 +394,6 @@ export default function BigBetPage() {
     }
   }, [currentOffers, bigBetsSet, teamSplit]);
 
-  async function connect() {
-    await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    setSigner(signer);
-  }
-
-  if (!signer) {
-    return (
-      <div>
-        <button onClick={connect}>connect</button>
-      </div>
-    );
-  }
-
   return (
     <div>
       <VBackgroundCom />
@@ -486,7 +466,9 @@ export default function BigBetPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text color="#ffffff" size="14px">Connected Account Address</Text>
+              <Text color="#ffffff" size="14px">
+                Connected Account Address
+              </Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
@@ -494,7 +476,7 @@ export default function BigBetPage() {
                 transform="uppercase"
                 spacing="1px"
               />
-              <Text  color="#ffffff" size="14px">
+              <Text color="#ffffff" size="14px">
                 Your available capital: {Number(userBalance).toFixed(4)} AVAX
               </Text>
             </Box>
@@ -514,11 +496,13 @@ export default function BigBetPage() {
                     cursor: "pointer",
                     color: "yellow",
                     border: "1px solid #ffff00",
-                    padding: "4px"
+                    padding: "4px",
                   }}
                   onClick={() => switchOdds()}
                 >
-                  {showDecimalOdds ? "Switch to MoneyLine Odds" : "Switch to Decimal Odds"}
+                  {showDecimalOdds
+                    ? "Switch to MoneyLine Odds"
+                    : "Switch to Decimal Odds"}
                 </button>{" "}
               </Box>
             </Flex>{" "}
@@ -530,17 +514,29 @@ export default function BigBetPage() {
               ></Flex>
             </Box>
             <Flex justifyContent="left">
-              <Text size="14px"  color="#ffffff">Active Week: {currW}</Text>
+              <Text size="14px" color="#ffffff">
+                Active Week: {currW}
+              </Text>
             </Flex>
             <br />
             <Flex>
               {Object.keys(userOffers).map((id) => (
                 <div key={id} style={{ width: "100%", float: "left" }}>
-                  <Text color= "#ffffff" size="14px" fontFamily="Arial"> Your Unclaimed Active Offers</Text>
+                  <Text color="#ffffff" size="14px" fontFamily="Arial">
+                    {" "}
+                    Your Unclaimed Active Offers
+                  </Text>
                   <br />
-                  <table style={{ width: "100%", fontSize: "14px",  color: "#ffffff", fontFamily:"Arial"}}>
+                  <table
+                    style={{
+                      width: "100%",
+                      fontSize: "14px",
+                      color: "#ffffff",
+                      fontFamily: "Arial",
+                    }}
+                  >
                     <tbody>
-                      <tr style={{ width: "50%", color: "#ffffff"}}>
+                      <tr style={{ width: "50%", color: "#ffffff" }}>
                         <td>Week</td>
                         <td>Bet Size</td>
                         <td>Contract Hash ID</td>
@@ -550,8 +546,11 @@ export default function BigBetPage() {
                         (event, index) =>
                           event.Epoch === currW &&
                           subcontracts[event.Hashoutput] && (
-                            <tr key={index} style={{ width: "50%", color: "#ffffff" }}>
-                              <td  color= "#ffffff">{event.Epoch}</td>
+                            <tr
+                              key={index}
+                              style={{ width: "50%", color: "#ffffff" }}
+                            >
+                              <td color="#ffffff">{event.Epoch}</td>
                               <td>{Number(event.BetSize).toFixed(2)}</td>
 
                               <td>
@@ -571,7 +570,7 @@ export default function BigBetPage() {
                                     cursor: "pointer",
                                     color: "yellow",
                                     border: "1px solid #fff000",
-                                    padding: "4px"
+                                    padding: "4px",
                                     // border: "1px solid #ffff00"
                                   }}
                                   value={event.Hashoutput}
@@ -624,8 +623,8 @@ export default function BigBetPage() {
                   borderRadius="4px"
                   placeholder="# avax"
                   buttonLabel="WithDraw"
-                  border-color= "yellow"
-                 background-color= "black"
+                  border-color="yellow"
+                  background-color="black"
                 />
               </Box>
             </Flex>
@@ -675,11 +674,16 @@ export default function BigBetPage() {
             </Flex>
             <Box>
               <Box>
-                <Text  color="white" size="14px"> MoneyLine to Decimal odds converter</Text>
+                <Text color="white" size="14px">
+                  {" "}
+                  MoneyLine to Decimal odds converter
+                </Text>
               </Box>
 
               <Flex mt="10px" mb="10px">
-                <Text width="50%"  color="white" size="14px">MoneyLine: </Text>
+                <Text width="50%" color="white" size="14px">
+                  MoneyLine:{" "}
+                </Text>
                 <Input
                   onChange={({ target: { value } }) =>
                     translateMoneyLine(value)
@@ -688,32 +692,40 @@ export default function BigBetPage() {
                   placeholder={"eg, -110 or 220"}
                   marginLeft="10px"
                   marginRight="5px"
-                 // color= "#ffffff"
+                  // color= "#ffffff"
                 />
               </Flex>
               <Flex>
-                <Text width="50%"  color="white" size="14px">Decimal odds:</Text>
+                <Text width="50%" color="white" size="14px">
+                  Decimal odds:
+                </Text>
                 <Text width="5%"></Text>
-                <Text  color="white" size="14px" marginLeft="10px">     {decTransform1}</Text>
+                <Text color="white" size="14px" marginLeft="10px">
+                  {" "}
+                  {decTransform1}
+                </Text>
               </Flex>
             </Box>
           </Box>
         }
       >
         <Flex justifyContent="center">
-          <Text size="25px" color="white">Big Bets: Offer or Take Bets too large for LPs</Text>
+          <Text size="25px" color="white">
+            Big Bets: Offer or Take Bets too large for LPs
+          </Text>
         </Flex>
 
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifyContent="marginLeft">
             <Text size="14px" weight="300" color="white">
               {" "}
-              Bet size must be greater than what is maximally feasible on the straight-up betting page. Toggle the match and
-              team you want to bet on, and the offers, if any, will appear
-              below. You can place your showLongs large bet above. Your
-              unclaimed bets are on the left tab (this sends your AVAX back).
-              Enter odds in decimal form, but only to two decimals (eg, 1.9123456 will be recorded as 1.91).
-              These are the odds you are asking for on your winning payoff. 
+              Bet size must be greater than what is maximally feasible on the
+              straight-up betting page. Toggle the match and team you want to
+              bet on, and the offers, if any, will appear below. You can place
+              your showLongs large bet above. Your unclaimed bets are on the
+              left tab (this sends your AVAX back). Enter odds in decimal form,
+              but only to two decimals (eg, 1.9123456 will be recorded as 1.91).
+              These are the odds you are asking for on your winning payoff.
             </Text>
           </Flex>
         </Box>
@@ -784,7 +796,7 @@ export default function BigBetPage() {
                     float: "right",
                     marginLeft: "20px",
                     border: "1px solid yellow",
-                    padding: "4px"
+                    padding: "4px",
                   }}
                   onClick={makeBigBet}
                 >
@@ -810,7 +822,7 @@ export default function BigBetPage() {
                 <Button
                   style={{
                     border: "1px solid yellow",
-                  padding: "4px"
+                    padding: "4px",
                   }}
                   onClick={() => takeBigBet()}
                 >
@@ -833,7 +845,9 @@ export default function BigBetPage() {
           {teamPick !== null ? (
             <div>
               <Box mt="10px" mb="10px" ml="40px" mr="40px"></Box>
-              <Text color="white" size="14px">Current Offers</Text>
+              <Text color="white" size="14px">
+                Current Offers
+              </Text>
               <Box mt="10px" mb="10px" ml="40px" mr="40px"></Box>
               <table
                 style={{
@@ -844,7 +858,7 @@ export default function BigBetPage() {
                 }}
               >
                 <thead>
-                  <tr style={{ width: "100%", color: "white", font: "Arial"}}>
+                  <tr style={{ width: "100%", color: "white", font: "Arial" }}>
                     <td>Take </td>
                     <td
                       onClick={() => sortByBetSize()}
@@ -872,7 +886,7 @@ export default function BigBetPage() {
                     )
                     .map((bet, index) => (
                       //    bet.OfferTeamNum === teamPick &&
-                      <tr key={index} style={{ width: "100%", color:"white" }}>
+                      <tr key={index} style={{ width: "100%", color: "white" }}>
                         <td>
                           <input
                             type="radio"

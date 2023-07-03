@@ -13,17 +13,11 @@ import { ethers } from "ethers";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function BetPage() {
-  const {
-    oracleContract,
-    bettingContract,
-    provider,
-    signer,
-    setSigner,
-    account,
-  } = useAuthContext();
+  const { oracleContract, bettingContract, provider, signer, account } =
+    useAuthContext();
 
   const [betAmount, setBetAmount] = useState("");
   const [fundAmount, setFundAmount] = useState("");
@@ -160,7 +154,8 @@ function BetPage() {
 
     let _userBalance =
       Number(
-        (await bettingContract.userStruct(await signer.getAddress()).userBalance) || "0"
+        (await bettingContract.userStruct(await signer.getAddress())
+          .userBalance) || "0"
       ) / 10000;
     setUserBalance(_userBalance);
 
@@ -293,21 +288,6 @@ function BetPage() {
     setTeamSplit(_teamSplit);
   }, [scheduleString]);
 
-  async function connect() {
-    await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    console.log(signer);
-    setSigner(signer);
-  }
-
-  if (!signer) {
-    return (
-      <div>
-        <button onClick={connect}>connect</button>
-      </div>
-    );
-  }
-
   return (
     <div>
       <VBackgroundCom />
@@ -333,7 +313,7 @@ function BetPage() {
             </Box>
             <Box>
               <Flex>
-                <Text size="14px" color= "#000">
+                <Text size="14px" color="#000">
                   <Link
                     className="nav-header"
                     style={{
@@ -357,7 +337,7 @@ function BetPage() {
                       cursor: "pointer",
                       color: "#fff000",
                       fontStyle: "italic",
-                     // font: "sans-serif"
+                      // font: "sans-serif"
                     }}
                     to="/bigbetpage"
                   >
@@ -368,7 +348,7 @@ function BetPage() {
             </Box>
             <Box>
               <Flex
-                width="100%"  
+                width="100%"
                 alignItems="center"
                 justifyContent="marginLeft"
               >
@@ -388,13 +368,15 @@ function BetPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">Connected Account Address</Text>
+              <Text size="14px" className="style">
+                Connected Account Address
+              </Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
                 end="0"
                 transform="uppercase"
-                spacing="1px"   
+                spacing="1px"
               />
               <Text size="14px" className="style">
                 Your available capital: {Number(userBalance).toFixed(3)} AVAX
@@ -415,15 +397,16 @@ function BetPage() {
                     borderRadius: "5px",
                     cursor: "pointer",
                     color: "yellow",
-                    border: "1px solid #ffff00", 
-                    padding: "4px"
-            // width: width ? width : 120,
-            // color: "#00ff00",
-
+                    border: "1px solid #ffff00",
+                    padding: "4px",
+                    // width: width ? width : 120,
+                    // color: "#00ff00",
                   }}
                   onClick={() => switchOdds()}
                 >
-                  {showDecimalOdds ? "Switch to MoneyLine Odds" : "Switch to Decimal Odds"}
+                  {showDecimalOdds
+                    ? "Switch to MoneyLine Odds"
+                    : "Switch to Decimal Odds"}
                 </button>{" "}
               </Box>
             </Flex>{" "}
@@ -438,19 +421,31 @@ function BetPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
-            <Flex justifyContent="left">
-              <Text size="14px"  color="#ffffff">Active Week: {currW4}</Text>
-            </Flex>
+              <Flex justifyContent="left">
+                <Text size="14px" color="#ffffff">
+                  Active Week: {currW4}
+                </Text>
+              </Flex>
             </Box>
             <Box>
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text  className="style" color= "#ffffff" size="14px"> Your active bets</Text>  
+                    <Text className="style" color="#ffffff" size="14px">
+                      {" "}
+                      Your active bets
+                    </Text>
                     <br />
-                    <table style={{ width: "100%", fontSize: "14px", fontFamily: "sans-serif", color: "#ffffff"}}>
-                      <tbody >
-                        <tr style={{ width: "33%", color: "#ffffff"}}>
+                    <table
+                      style={{
+                        width: "100%",
+                        fontSize: "14px",
+                        fontFamily: "sans-serif",
+                        color: "#ffffff",
+                      }}
+                    >
+                      <tbody>
+                        <tr style={{ width: "33%", color: "#ffffff" }}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
@@ -501,9 +496,14 @@ function BetPage() {
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text size="14px" className="style">Active Epoch: {currW4}</Text>
+                    <Text size="14px" className="style">
+                      Active Epoch: {currW4}
+                    </Text>
                     <br />
-                    <Text  className="style" size="14px"> Your unclaimed winning bets</Text>
+                    <Text className="style" size="14px">
+                      {" "}
+                      Your unclaimed winning bets
+                    </Text>
                     <br />
                     <table
                       style={{
@@ -512,21 +512,23 @@ function BetPage() {
                         float: "left",
                         fontFamily: "sans-serif",
                       }}
-                    
                     >
                       <tbody>
-                        <tr style={{ width: "33%", color: "#ffffff"}}>
+                        <tr style={{ width: "33%", color: "#ffffff" }}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
                           <td>Your Payout</td>
-                          <td >Click to Claim</td>
+                          <td>Click to Claim</td>
                         </tr>
                         {betHistory[id].map(
                           (event, index) =>
                             //  (event.Epoch = currW4) &&
                             subcontracts[event.Hashoutput] && (
-                              <tr key={index} style={{ width: "33%", color: "#ffffff" }}>
+                              <tr
+                                key={index}
+                                style={{ width: "33%", color: "#ffffff" }}
+                              >
                                 <td>{event.Epoch}</td>
                                 <td>{teamSplit[event.MatchNum][0]}</td>
                                 <td>
@@ -548,9 +550,9 @@ function BetPage() {
                                       //borderRadius: "1px",
                                       cursor: "pointer",
                                       color: "yellow",
-                                      border: "1px solid #ffff00", 
-            // width: width ? width : 120,
-            // color: "#00ff00",
+                                      border: "1px solid #ffff00",
+                                      // width: width ? width : 120,
+                                      // color: "#00ff00",
                                     }}
                                     value={event.Hashoutput}
                                     onClick={(e) => {
@@ -581,7 +583,7 @@ function BetPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
-            </Box> 
+            </Box>
             <Flex
               mt="5px"
               flexDirection="row"
@@ -589,7 +591,7 @@ function BetPage() {
               alignItems="center"
             >
               <Box>
-                <Form 
+                <Form
                   onChange={setWdAmount}
                   value={wdAmount}
                   onSubmit={withdrawBettor}
@@ -633,7 +635,9 @@ function BetPage() {
         }
       >
         <Flex justifyContent="center">
-          <Text size="25px" className="style">Place Bets Here</Text>
+          <Text size="25px" className="style">
+            Place Bets Here
+          </Text>
         </Flex>
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifyContent="marginLeft">
@@ -642,8 +646,8 @@ function BetPage() {
               Toggle radio button on the team/player you want to bet on to win.
               Enter desired avax bet in the box (eg, 1.123). Prior wins, tie, or
               cancelled bets are redeemable on the left panel. This sends avax
-              directly to your avax address. Scroll down to see all of the week's
-              contests.
+              directly to your avax address. Scroll down to see all of the
+              week's contests.
             </Text>
           </Flex>
         </Box>
@@ -665,32 +669,36 @@ function BetPage() {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Text size="14px" weight="400" color= "white" style={{ paddingLeft: "10px" }}>
+            <Text
+              size="14px"
+              weight="400"
+              color="white"
+              style={{ paddingLeft: "10px" }}
+            >
               Bet Amount
             </Text>
 
             <Input
               onChange={({ target: { value } }) => setBetAmount(value)}
               width="100px"
-              color = "black"
-
-              font = "sans-serif"
+              color="black"
+              font="sans-serif"
               placeholder={"# avax"}
               marginLeft="10px"
               marginRignt="5px"
-             // color="yellow"
+              // color="yellow"
               value={betAmount}
             />
             <Box mt="10px" mb="10px">
               <Button
                 style={{
                   //height: "30px",
-                 // width: "100px",
+                  // width: "100px",
                   float: "right",
                   marginLeft: "5px",
                   border: "1px solid yellow",
-                  padding: "4px"
-                 // color: "black"
+                  padding: "4px",
+                  // color: "black"
                 }}
                 onClick={() => takeBet()}
               >
@@ -713,7 +721,7 @@ function BetPage() {
 
         <Flex
           style={{
-          //  color: "#000",
+            //  color: "#000",
             fontSize: "14px",
           }}
         >

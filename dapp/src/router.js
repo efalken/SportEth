@@ -10,6 +10,7 @@ import EventSchedule from "./components/pages/EventSchedule";
 import EventStartTime from "./components/pages/EventStartTime";
 import EventGameResults from "./components/pages/EventGameResults";
 import { createBrowserRouter } from "react-router-dom";
+import AuthRequired from "./components/layout/AuthRequired";
 
 const router = createBrowserRouter([
   {
@@ -17,9 +18,31 @@ const router = createBrowserRouter([
     element: <Splash />,
   },
   { path: "/faqs", element: <FAQ /> },
-  { path: "/betpage", element: <BetPage /> },
-  { path: "/bigbetpage", element: <BigBetPage /> },
-  { path: "/bookiepage", element: <BookiePage /> },
+  {
+    path: "/betpage",
+    element: (
+      <AuthRequired>
+        <BetPage />
+      </AuthRequired>
+    ),
+  },
+  {
+    path: "/bigbetpage",
+    element: (
+      <AuthRequired>
+        {" "}
+        <BigBetPage />
+      </AuthRequired>
+    ),
+  },
+  {
+    path: "/bookiepage",
+    element: (
+      <AuthRequired>
+        <BookiePage />
+      </AuthRequired>
+    ),
+  },
   { path: "/bethistory", element: <EventBetRecord /> },
   { path: "/bigbethistory", element: <EventBigBetRecord /> },
   { path: "/oddshistory", element: <EventOdds /> },
