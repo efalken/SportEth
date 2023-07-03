@@ -91,12 +91,12 @@ export class EventHandler {
       logIndex: index,
     };
     for (const [argName, fieldName, fieldType] of this.fields) {
-      data[fieldName] = this.parseField(fieldType, args[argName]);
+      data[fieldName] = this.encodeField(fieldType, args[argName]);
     }
     return data;
   }
 
-  parseField(type, value) {
+  encodeField(type, value) {
     if (type === "string") return value;
     if (type === "bigint") return value;
     if (type === "int") return Number(value);
@@ -104,5 +104,30 @@ export class EventHandler {
       return value.map((el) => Number(el).toString()).join(",");
     }
     return value;
+  }
+
+  decodeField(type, value) {
+    if (type === "int[]") {
+      return value.split(",");
+    }
+    return value;
+  }
+
+  async getAllRouteHandler(req, res) {
+    const fromBlock = Number(req.query.fromBlock || 0);
+    const toBlock = Number(
+      req.query.toBlock || (await provider.getBlockNumber())
+    );
+
+    let events = await this.table.findMany({
+      where: { blockNumber: { gte: fromBlock, lte: toBlock } },
+    });
+    events = events.map((event) => {
+      for (const [argName, fieldName, fieldType] of this.fields) {
+        event[fieldName] = this.decodeField(fieldType, event[argName]);
+      }
+      return event;
+    });
+    res.json({ events });
   }
 }

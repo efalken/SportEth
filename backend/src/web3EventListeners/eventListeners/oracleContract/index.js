@@ -25,95 +25,103 @@ import { oracleContract } from "../../../config.js";
 
 // event Funding(uint64 tokensChange, uint256 etherChange, address transactor);
 
-export async function oracleContractEventListener() {
-  const oracleResultsPostedEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["epoch", "epoch", "int"],
-      ["propnum", "propnum", "int"],
-      ["winner", "winner", "int[]"],
-    ],
-    "oracleResultsPostedEvent",
-    "ResultsPosted"
-  );
-  const oracleDecOddsPostedEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["epoch", "epoch", "int"],
-      ["propnum", "propnum", "int"],
-      ["decOdds", "decOdds", "int[]"],
-    ],
-    "oracleDecOddsPostedEvent",
-    "DecOddsPosted"
-  );
-  const oracleVoteOutcomeEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["epoch", "epoch", "int"],
-      ["propnum", "propnum", "int"],
-      ["voteResult", "voteResult", "bool"],
-      ["yesvotes", "yesvotes", "bigint"],
-      ["novotes", "novotes", "bigint"],
-    ],
-    "oracleVoteOutcomeEvent",
-    "VoteOutcome"
-  );
-  const oracleBetDataPostedEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["epoch", "epoch", "int"],
-      ["propnum", "propnum", "int"],
-      ["oddsStart", "oddsStart", "int[]"],
-    ],
-    "oracleBetDataPostedEvent",
-    "BetDataPosted"
-  );
-  const oracleParamsPostedEventHandler = new EventHandler(
-    oracleContract,
-    [["concLimit", "concLimit", "int"]],
-    "oracleParamsPostedEvent",
-    "ParamsPosted"
-  );
-  const oraclePausePostedEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["pausedMatch1", "pausedMatch1", "int"],
-      ["pausedMatch2", "pausedMatch2", "int"],
-    ],
-    "oraclePausePostedEvent",
-    "PausePosted"
-  );
-  const oracleStartTimesPostedEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["epoch", "epoch", "int"],
-      ["propnum", "propnum", "int"],
-      ["starttimes", "starttimes", "int[]"],
-    ],
-    "oracleStartTimesPostedEvent",
-    "StartTimesPosted"
-  );
-  const oracleSchedulePostedEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["epoch", "epoch", "int"],
-      ["propnum", "propnum", "int"],
-      ["sched", "sched", "int[]"],
-    ],
-    "oracleSchedulePostedEvent",
-    "SchedulePosted"
-  );
-  const oracleFundingEventHandler = new EventHandler(
-    oracleContract,
-    [
-      ["tokensChange", "tokensChange", "bigint"],
-      ["etherChange", "etherChange", "bigint"],
-      ["transactor", "transactor", "string"],
-    ],
-    "oracleFundingEvent",
-    "Funding"
-  );
+export const oracleResultsPostedEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["epoch", "epoch", "int"],
+    ["propnum", "propnum", "int"],
+    ["winner", "winner", "int[]"],
+  ],
+  "oracleResultsPostedEvent",
+  "ResultsPosted"
+);
 
+export const oracleDecOddsPostedEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["epoch", "epoch", "int"],
+    ["propnum", "propnum", "int"],
+    ["decOdds", "decOdds", "int[]"],
+  ],
+  "oracleDecOddsPostedEvent",
+  "DecOddsPosted"
+);
+
+export const oracleVoteOutcomeEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["epoch", "epoch", "int"],
+    ["propnum", "propnum", "int"],
+    ["voteResult", "voteResult", "bool"],
+    ["yesvotes", "yesvotes", "bigint"],
+    ["novotes", "novotes", "bigint"],
+  ],
+  "oracleVoteOutcomeEvent",
+  "VoteOutcome"
+);
+
+export const oracleBetDataPostedEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["epoch", "epoch", "int"],
+    ["propnum", "propnum", "int"],
+    ["oddsStart", "oddsStart", "int[]"],
+  ],
+  "oracleBetDataPostedEvent",
+  "BetDataPosted"
+);
+
+export const oracleParamsPostedEventHandler = new EventHandler(
+  oracleContract,
+  [["concLimit", "concLimit", "int"]],
+  "oracleParamsPostedEvent",
+  "ParamsPosted"
+);
+
+export const oraclePausePostedEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["pausedMatch1", "pausedMatch1", "int"],
+    ["pausedMatch2", "pausedMatch2", "int"],
+  ],
+  "oraclePausePostedEvent",
+  "PausePosted"
+);
+
+export const oracleStartTimesPostedEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["epoch", "epoch", "int"],
+    ["propnum", "propnum", "int"],
+    ["starttimes", "starttimes", "int[]"],
+  ],
+  "oracleStartTimesPostedEvent",
+  "StartTimesPosted"
+);
+
+export const oracleSchedulePostedEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["epoch", "epoch", "int"],
+    ["propnum", "propnum", "int"],
+    ["sched", "sched", "int[]"],
+  ],
+  "oracleSchedulePostedEvent",
+  "SchedulePosted"
+);
+
+export const oracleFundingEventHandler = new EventHandler(
+  oracleContract,
+  [
+    ["tokensChange", "tokensChange", "bigint"],
+    ["etherChange", "etherChange", "bigint"],
+    ["transactor", "transactor", "string"],
+  ],
+  "oracleFundingEvent",
+  "Funding"
+);
+
+export async function oracleContractEventListener() {
   // sync old events and start the event listener for the new events
   await oracleResultsPostedEventHandler.syncEvent();
   await oracleDecOddsPostedEventHandler.syncEvent();

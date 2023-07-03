@@ -28,47 +28,49 @@ import { bettingContract } from "../../../config.js";
 //   uint32 action
 // );
 
-export async function bettingContractEventListener() {
-  const bettingBetRecordEventHandler = new EventHandler(
-    bettingContract,
-    [
-      ["bettor", "bettor", "string"],
-      ["epoch", "epoch", "int"],
-      ["matchNum", "matchNum", "int"],
-      ["pick", "pick", "int"],
-      ["betAmount", "betAmount", "int"],
-      ["payoff", "payoff", "int"],
-      ["contractHash", "contractHash", "string"],
-    ],
-    "bettingBetRecordEvent",
-    "BetRecord"
-  );
-  const bettingOfferRecordEventHandler = new EventHandler(
-    bettingContract,
-    [
-      ["bettor", "bettor", "string"],
-      ["epoch", "epoch", "int"],
-      ["matchNum", "matchNum", "int"],
-      ["pick", "pick", "int"],
-      ["betAmount", "betAmount", "int"],
-      ["payoff", "payoff", "int"],
-      ["contractHash", "contractHash", "string"],
-    ],
-    "bettingOfferRecordEvent",
-    "OfferRecord"
-  );
-  const bettingFundingEventHandler = new EventHandler(
-    bettingContract,
-    [
-      ["bettor", "bettor", "string"],
-      ["moveAmount", "moveAmount", "bigint"],
-      ["epoch", "epoch", "int"],
-      ["action", "action", "int"],
-    ],
-    "bettingFundingEvent",
-    "Funding"
-  );
+export const bettingBetRecordEventHandler = new EventHandler(
+  bettingContract,
+  [
+    ["bettor", "bettor", "string"],
+    ["epoch", "epoch", "int"],
+    ["matchNum", "matchNum", "int"],
+    ["pick", "pick", "int"],
+    ["betAmount", "betAmount", "int"],
+    ["payoff", "payoff", "int"],
+    ["contractHash", "contractHash", "string"],
+  ],
+  "bettingBetRecordEvent",
+  "BetRecord"
+);
 
+export const bettingOfferRecordEventHandler = new EventHandler(
+  bettingContract,
+  [
+    ["bettor", "bettor", "string"],
+    ["epoch", "epoch", "int"],
+    ["matchNum", "matchNum", "int"],
+    ["pick", "pick", "int"],
+    ["betAmount", "betAmount", "int"],
+    ["payoff", "payoff", "int"],
+    ["contractHash", "contractHash", "string"],
+  ],
+  "bettingOfferRecordEvent",
+  "OfferRecord"
+);
+
+export const bettingFundingEventHandler = new EventHandler(
+  bettingContract,
+  [
+    ["bettor", "bettor", "string"],
+    ["moveAmount", "moveAmount", "bigint"],
+    ["epoch", "epoch", "int"],
+    ["action", "action", "int"],
+  ],
+  "bettingFundingEvent",
+  "Funding"
+);
+
+export async function bettingContractEventListener() {
   // sync old events and start the event listener for the new events
   await bettingBetRecordEventHandler.syncEvent();
   await bettingOfferRecordEventHandler.syncEvent();
