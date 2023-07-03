@@ -113,21 +113,28 @@ export class EventHandler {
     return value;
   }
 
-  async getAllRouteHandler(req, res) {
-    const fromBlock = Number(req.query.fromBlock || 0);
-    const toBlock = Number(
-      req.query.toBlock || (await provider.getBlockNumber())
-    );
+  getAllRouteHandler(filters = []) {
+    return async function (req, res) {
+      const fromBlock = Number(req.query.fromBlock || 0);
+      const toBlock = Number(
+        req.query.toBlock || (await provider.getBlockNumber())
+      );
 
-    let events = await this.table.findMany({
-      where: { blockNumber: { gte: fromBlock, lte: toBlock } },
-    });
-    events = events.map((event) => {
-      for (const [argName, fieldName, fieldType] of this.fields) {
-        event[fieldName] = this.decodeField(fieldType, event[argName]);
+      const filterObj = {};
+      for (const filter of filters) {
+        filterObj[filter] = req.query[filter];
       }
-      return event;
-    });
-    res.json({ events });
+
+      let events = await this.table.findMany({
+        where: { blockNumber: { gte: fromBlock, lte: toBlock }, ...filterObj },
+      });
+      events = events.map((event) => {
+        for (const [_argName, fieldName, fieldType] of this.fields) {
+          event[fieldName] = this.decodeField(fieldType, event[fieldName]);
+        }
+        return event;
+      });
+      res.json({ events });
+    }.bind(this);
   }
 }

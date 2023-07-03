@@ -15,55 +15,29 @@ const router = Router();
 
 router.get(
   "/ResultsPosted",
-  oracleResultsPostedEventHandler.getAllRouteHandler.bind(
-    oracleResultsPostedEventHandler
-  )
+  oracleResultsPostedEventHandler.getAllRouteHandler()
 );
 router.get(
   "/DecOddsPosted",
-  oracleDecOddsPostedEventHandler.getAllRouteHandler.bind(
-    oracleDecOddsPostedEventHandler
-  )
+  oracleDecOddsPostedEventHandler.getAllRouteHandler()
 );
-router.get(
-  "/VoteOutcome",
-  oracleVoteOutcomeEventHandler.getAllRouteHandler.bind(
-    oracleVoteOutcomeEventHandler
-  )
-);
+router.get("/VoteOutcome", oracleVoteOutcomeEventHandler.getAllRouteHandler());
 router.get(
   "/BetDataPosted",
-  oracleBetDataPostedEventHandler.getAllRouteHandler.bind(
-    oracleBetDataPostedEventHandler
-  )
+  oracleBetDataPostedEventHandler.getAllRouteHandler()
 );
 router.get(
   "/ParamsPosted",
-  oracleParamsPostedEventHandler.getAllRouteHandler.bind(
-    oracleParamsPostedEventHandler
-  )
+  oracleParamsPostedEventHandler.getAllRouteHandler()
 );
-router.get(
-  "/PausePosted",
-  oraclePausePostedEventHandler.getAllRouteHandler.bind(
-    oraclePausePostedEventHandler
-  )
-);
+router.get("/PausePosted", oraclePausePostedEventHandler.getAllRouteHandler());
 router.get(
   "/StartTimesPosted",
-  oracleStartTimesPostedEventHandler.getAllRouteHandler.bind(
-    oracleStartTimesPostedEventHandler
-  )
+  oracleStartTimesPostedEventHandler.getAllRouteHandler()
 );
 router.get(
   "/SchedulePosted",
-  oracleSchedulePostedEventHandler.getAllRouteHandler.bind(
-    oracleSchedulePostedEventHandler
-  )
+  oracleSchedulePostedEventHandler.getAllRouteHandler()
 );
-router.get(
-  "/Funding",
-  oracleFundingEventHandler.getAllRouteHandler.bind(oracleFundingEventHandler)
-);
-
+router.get("/Funding", oracleFundingEventHandler.getAllRouteHandler());
 export default router;

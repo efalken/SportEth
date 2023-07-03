@@ -10,19 +10,13 @@ const router = Router();
 
 router.get(
   "/Transfer",
-  tokenTransferEventHandler.getAllRouteHandler.bind(tokenTransferEventHandler)
+  tokenTransferEventHandler.getAllRouteHandler(["from", "to"])
 );
-router.get(
-  "/Burn",
-  tokenBurnEventHandler.getAllRouteHandler.bind(tokenBurnEventHandler)
-);
-router.get(
-  "/Mint",
-  tokenMintEventHandler.getAllRouteHandler.bind(tokenMintEventHandler)
-);
+router.get("/Burn", tokenBurnEventHandler.getAllRouteHandler(["from"]));
+router.get("/Mint", tokenMintEventHandler.getAllRouteHandler(["from"]));
 router.get(
   "/Approval",
-  tokenApprovalEventHandler.getAllRouteHandler.bind(tokenApprovalEventHandler)
+  tokenApprovalEventHandler.getAllRouteHandler(["owner", "spender"])
 );
 
 export default router;

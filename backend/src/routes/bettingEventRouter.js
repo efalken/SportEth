@@ -9,19 +9,15 @@ const router = Router();
 
 router.get(
   "/BetRecord",
-  bettingBetRecordEventHandler.getAllRouteHandler.bind(
-    bettingBetRecordEventHandler
-  )
+  bettingBetRecordEventHandler.getAllRouteHandler(["bettor"])
 );
 router.get(
   "/OfferRecord",
-  bettingOfferRecordEventHandler.getAllRouteHandler.bind(
-    bettingOfferRecordEventHandler
-  )
+  bettingOfferRecordEventHandler.getAllRouteHandler(["bettor"])
 );
 router.get(
   "/Funding",
-  bettingFundingEventHandler.getAllRouteHandler.bind(bettingFundingEventHandler)
+  bettingFundingEventHandler.getAllRouteHandler(["bettor"])
 );
 
 export default router;
