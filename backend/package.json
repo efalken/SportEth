@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "studio": "prisma studio",
+    "reset": "prisma migrate reset",
+    "migrate": "prisma migrate dev",
     "start": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
