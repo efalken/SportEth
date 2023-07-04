@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { useAuthContext } from "../../contexts/AuthContext";
 import moment from "moment";
+import { indexerEndpoint } from "../../config";
+import axios from "axios";
 
 export default function EventOdds() {
   const { oracleContractReadOnly } = useAuthContext();

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Text from "../basics/Text";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { indexerEndpoint } from "../../config";
+import axios from "axios";
 
 export default function EventGameoutcomes() {
   const { oracleContractReadOnly } = useAuthContext();

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import IndicatorD from "../basics/IndicatorD";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { indexerEndpoint } from "../../config";
+import axios from "axios";
 
 export default function EventBetRecord() {
   const [priceHistory, setPriceHistory] = useState([]);

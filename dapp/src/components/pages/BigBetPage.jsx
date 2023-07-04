@@ -21,7 +21,7 @@ export default function BigBetPage() {
   const { oracleContract, bettingContract, signer, account } = useAuthContext();
 
   const [userOffers, setUserOffers] = useState([{}]);
-  const [currentOffers, setCurrentOffers] = useState([]);
+  const [currentOffers, setCurrentOffers] = useState([{}]);
   const [contractID, setContractID] = useState("");
   const [betAmount, setBetAmount] = useState("");
   const [teamPick, setTeamPick] = useState(null);
@@ -437,6 +437,8 @@ export default function BigBetPage() {
   let oddsTot = [odds0, odds1];
 
   useEffect(() => {
+    if (!teamSplit || teamSplit.length == 0) return;
+
     let _bigBets = [];
 
     currentOffers.forEach((bet) => {
@@ -605,7 +607,7 @@ export default function BigBetPage() {
                         <td>Contract Hash ID</td>
                         <td>Click to Retract</td>
                       </tr>
-                      {userOffers[id].map(
+                      {Object.values(userOffers[id]).map(
                         (event, index) =>
                           event.Epoch === currW &&
                           subcontracts[event.Hashoutput] && (
