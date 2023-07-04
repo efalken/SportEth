@@ -141,8 +141,6 @@ function BetPage() {
   useEffect(() => {
     if (!bettingContract || !account) return;
 
-    console.log(bettingContract, account);
-    console.log("B");
     getbetHistoryArray();
 
     const BetRecordFilter = bettingContract.filters.BetRecord(account);
