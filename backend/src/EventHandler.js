@@ -122,7 +122,10 @@ export class EventHandler {
 
       const filterObj = {};
       for (const filter of filters) {
-        filterObj[filter] = req.query[filter];
+        const type = this.fields.filter((field) => field[1] === filter)[0][2];
+        filterObj[filter] = req.query[filter]
+          ? this.encodeField(type, req.query[filter])
+          : undefined;
       }
 
       let events = await this.table.findMany({

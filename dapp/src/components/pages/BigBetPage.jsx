@@ -441,7 +441,7 @@ export default function BigBetPage() {
 
     let _bigBets = [];
 
-    currentOffers.forEach((bet) => {
+    Object.values(currentOffers[0]).forEach((bet) => {
       let bigBet = {
         teamAbbrevName: teamSplit[bet.MatchNum2][bet.OfferedTeam2 + 1],
         BigBetSize: Number(bet.Payoff2 / 10000).toFixed(3),
