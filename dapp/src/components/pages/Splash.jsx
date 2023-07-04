@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Logo from "../basics/Logo";
 import { Flex, Box } from "rebass";
 import Text from "../basics/Text";
 import VBackground from "../basics/VBackgroundFull";
 import SplashDrizzleContract from "../blocks/SplashDrizzleContract";
-import { useAuthContext } from "../../contexts/AuthContext";
 // import wppdf from "../whitepaper/SportEth.pdf";
 // import excelSheet from "../whitepaper/sportEthData.xlsx";
 

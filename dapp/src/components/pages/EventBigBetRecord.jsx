@@ -12,22 +12,19 @@ export default function EventBigBetRecord() {
 
     (async () => {
       const pricedata = [];
-
-      const OfferRecordEvent = bettingContractReadOnly.filters.OfferRecord();
-      const events = await bettingContractReadOnly.queryFilter(
-        OfferRecordEvent
-      );
+      const {
+        data: { events },
+      } = await axios.get(`${indexerEndpoint}/events/betting/OfferRecord`);
       for (const event of events) {
-        const { args, blockNumber } = event;
         pricedata.push({
-          blockNumber: Number(blockNumber),
-          Hashoutput: args.contractHash,
-          BettorAddress: args.bettor,
-          Epoch: Number(args.epoch),
-          BetSize: Number(args.betAmount),
-          Payoff: Number(args.payoff),
-          LongPick: Number(args.pick),
-          MatchNum: Number(args.matchNum),
+          blockNumber: Number(event.blockNumber),
+          Hashoutput: event.contractHash,
+          BettorAddress: event.bettor,
+          Epoch: Number(event.epoch),
+          BetSize: Number(event.betAmount),
+          Payoff: Number(event.payoff),
+          LongPick: Number(event.pick),
+          MatchNum: Number(event.matchNum),
         });
       }
       setBigBetHistory(pricedata);

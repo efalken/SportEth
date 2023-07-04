@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 
 import { PORT } from "./config.js";
 import bettingEventRouter from "./routes/bettingEventRouter.js";
@@ -11,6 +12,9 @@ BigInt.prototype["toJSON"] = function () {
 };
 
 const app = express();
+
+// add middlewares
+app.use(cors());
 
 app.use("/events/betting", bettingEventRouter);
 app.use("/events/oracle", oracleEventRouter);

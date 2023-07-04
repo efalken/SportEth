@@ -14,11 +14,13 @@ import { useAuthContext } from "../../contexts/AuthContext";
 import { ethers } from "ethers";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { indexerEndpoint } from "../../config";
 
 export default function BigBetPage() {
   const { oracleContract, bettingContract, signer, account } = useAuthContext();
 
-  const [userOffers, setUserOffers] = useState([]);
+  const [userOffers, setUserOffers] = useState([{}]);
   const [currentOffers, setCurrentOffers] = useState([]);
   const [contractID, setContractID] = useState("");
   const [betAmount, setBetAmount] = useState("");
@@ -36,13 +38,11 @@ export default function BigBetPage() {
   const [currW, setCurrW] = useState("");
   const [subcontracts, setSubcontracts] = useState({});
   const [subcontracts2, setSubcontracts2] = useState({});
-  // const [newBets, setNewBets] = useState(false);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
   const [teamSplit, setTeamSplit] = useState([]);
   const [betData, setBetData] = useState([]);
-  // const [offstring, setOffstring] = useState("");
   const [userBalance, setUserBalance] = useState("0");
 
   useEffect(() => {
@@ -55,11 +55,8 @@ export default function BigBetPage() {
 
     findValues();
     document.title = "Big Bets";
-    getUserActiveOffers();
-    getCurrentOffers();
     const interval1 = setInterval(() => {
       findValues();
-      getCurrentOffers();
     }, 1000);
 
     return () => {
@@ -106,90 +103,156 @@ export default function BigBetPage() {
     await bettingContract.takeBigBet(contractID);
   }
 
-  async function getUserActiveOffers() {
-    const eventdata = [];
-    const _subcontracts = {};
+  async function addOfferRecord({
+    bettor,
+    epoch,
+    matchNum,
+    pick,
+    betAmount,
+    payoff,
+    contractHash,
+    blockNumber,
+    transactionHash,
+    logIndex,
+    transactionIndex,
+  }) {
+    console.log(subcontracts);
+    if (Object.keys(subcontracts).includes(contractHash)) return;
 
-    const BetRecordEvent = bettingContract.filters.OfferRecord(account);
-    const events = await bettingContract.queryFilter(BetRecordEvent);
-
-    // TODO: Fix below
-    for (const event of events) {
-      //   const {args, blockNumber} = event;
-      const {
-        args: {
-          bettor,
-          epoch,
-          matchNum,
-          pick,
-          betAmount,
-          payoff,
-          contractHash,
-        },
-        blockNumber,
-      } = event;
-
-      // const block = await provider.getBlock(blockNumber);
-
-      eventdata.push({
-        Hashoutput: contractHash,
-        BettorAddress: bettor,
-        Epoch: Number(epoch),
-        timestamp: Number(blockNumber),
-        BetSize: Number(betAmount),
-        MyTeamPick: Number(pick),
-        MatchNum: Number(matchNum),
-        Payoff: Number(payoff),
-      });
-      _subcontracts[contractHash] = await bettingContract.checkOffer(
-        contractHash
-      );
-    }
-    userOffers[0] = eventdata;
-    setSubcontracts(_subcontracts);
+    userOffers[0][contractHash] = {
+      Hashoutput: contractHash,
+      BettorAddress: bettor,
+      Epoch: Number(epoch),
+      timestamp: Number(blockNumber),
+      BetSize: Number(betAmount),
+      MyTeamPick: Number(pick),
+      MatchNum: Number(matchNum),
+      Payoff: Number(payoff),
+    };
+    subcontracts[contractHash] = await bettingContract.checkOffer(contractHash);
+    setSubcontracts(subcontracts);
     setUserOffers(userOffers);
   }
 
-  async function getCurrentOffers() {
-    const eventdata2 = [];
-    const _subcontracts2 = {};
-    if (!currW) return;
-    const BetRecordEvent = bettingContract.filters.OfferRecord(null, currW);
-    const events = await bettingContract.queryFilter(BetRecordEvent);
-
+  async function getUserActiveOffers() {
+    const {
+      data: { events },
+    } = await axios.get(
+      `${indexerEndpoint}/events/betting/OfferRecord?bettor=${account}`
+    );
+    // const events = await bettingContract.queryFilter(BetRecordEvent);
+    // TODO: Fix below
     for (const event of events) {
-      // const {args, blockNumber} = event;
-      const {
-        args: {
-          bettor,
-          epoch,
-          matchNum,
-          pick,
-          betAmount,
-          payoff,
-          contractHash,
-        },
-        blockNumber,
-      } = event;
-
-      //   const block = await provider.getBlock(blockNumber);
-
-      eventdata2.push({
-        Hashoutput2: contractHash,
-        BettorAddress2: bettor,
-        Epoch2: Number(epoch),
-        MatchNum2: Number(matchNum),
-        OfferedTeam2: 1 - Number(pick),
-        timestamp2: Number(blockNumber),
-        BetSize2: Number(betAmount),
-        Payoff2: Number(payoff),
-      });
-      _subcontracts2[contractHash] = await bettingContract.checkOffer(
-        contractHash
-      );
+      await addOfferRecord(event);
     }
-    setSubcontracts2(_subcontracts2);
-    setCurrentOffers(eventdata2);
+  }
+
+  useEffect(() => {
+    if (!bettingContract || !account) return;
+
+    getUserActiveOffers();
+
+    const OfferRecordFilter = bettingContract.filters.BetRecord(account);
+    bettingContract.on(OfferRecordFilter, (eventEmitted) => {
+      const { bettor, epoch, matchNum, pick, betAmount, payoff, contractHash } =
+        eventEmitted.args;
+      const {
+        transactionHash,
+        transactionIndex,
+        blockNumber,
+        index: logIndex,
+      } = eventEmitted.log;
+      addOfferRecord({
+        bettor,
+        epoch,
+        matchNum,
+        pick,
+        betAmount,
+        payoff,
+        contractHash,
+        transactionHash,
+        transactionIndex,
+        blockNumber,
+        logIndex,
+      });
+    });
+  }, [bettingContract, account]);
+
+  async function addCurrentOfferRecord({
+    bettor,
+    epoch,
+    matchNum,
+    pick,
+    betAmount,
+    payoff,
+    contractHash,
+    blockNumber,
+    transactionHash,
+    logIndex,
+    transactionIndex,
+  }) {
+    if (Object.keys(subcontracts2).includes(contractHash)) return;
+
+    currentOffers[0][contractHash] = {
+      Hashoutput2: contractHash,
+      BettorAddress2: bettor,
+      Epoch2: Number(epoch),
+      MatchNum2: Number(matchNum),
+      OfferedTeam2: 1 - Number(pick),
+      timestamp2: Number(blockNumber),
+      BetSize2: Number(betAmount),
+      Payoff2: Number(payoff),
+    };
+    subcontracts2[contractHash] = await bettingContract.checkOffer(
+      contractHash
+    );
+    setSubcontracts2(subcontracts2);
+    setCurrentOffers(currentOffers);
+  }
+
+  useEffect(() => {
+    if (!bettingContract || !currW) return;
+
+    getCurrentOffers();
+
+    const OfferRecordFilter = bettingContract.filters.BetRecord(null, currW);
+
+    bettingContract.on(OfferRecordFilter, (eventEmitted) => {
+      const { bettor, epoch, matchNum, pick, betAmount, payoff, contractHash } =
+        eventEmitted.args;
+      const {
+        transactionHash,
+        transactionIndex,
+        blockNumber,
+        index: logIndex,
+      } = eventEmitted.log;
+      addCurrentOfferRecord({
+        bettor,
+        epoch,
+        matchNum,
+        pick,
+        betAmount,
+        payoff,
+        contractHash,
+        transactionHash,
+        transactionIndex,
+        blockNumber,
+        logIndex,
+      });
+    });
+  }, [bettingContract, currW]);
+
+  async function getCurrentOffers() {
+    const {
+      data: { events },
+    } = await axios.get(
+      `${indexerEndpoint}/events/betting/OfferRecord?epoch=${currW}`
+    );
+    // const events = await bettingContract.queryFilter(BetRecordEvent);
+    // TODO: Fix below
+    for (const event of events) {
+      await addCurrentOfferRecord(event);
+    }
   }
 
   function radioFavePick(matchpic) {

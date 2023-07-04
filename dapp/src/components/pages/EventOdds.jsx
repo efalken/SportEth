@@ -12,16 +12,14 @@ export default function EventOdds() {
 
     (async () => {
       const pricedata = [];
-      const DecOddsPostedEvent = oracleContractReadOnly.filters.DecOddsPosted();
-      const events = await oracleContractReadOnly.queryFilter(
-        DecOddsPostedEvent
-      );
+      const {
+        data: { events },
+      } = await axios.get(`${indexerEndpoint}/events/oracle/DecOddsPosted`);
       for (const event of events) {
-        const { args, blockNumber } = event;
         pricedata.push({
-          Epoch: Number(args.epoch),
-          time: Number(blockNumber),
-          decOdds: args.decOdds,
+          Epoch: Number(event.epoch),
+          time: Number(event.blockNumber),
+          decOdds: event.decOdds,
         });
       }
       setPriceHistory(pricedata);

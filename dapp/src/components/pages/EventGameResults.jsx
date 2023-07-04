@@ -11,17 +11,15 @@ export default function EventGameoutcomes() {
 
     (async () => {
       const pricedata = [];
-      const ResultsPostedEvent = oracleContractReadOnly.filters.ResultsPosted();
-      const events = await oracleContractReadOnly.queryFilter(
-        ResultsPostedEvent
-      );
+      const {
+        data: { events },
+      } = await axios.get(`${indexerEndpoint}/events/oracle/ResultsPosted`);
       for (const event of events) {
-        const { args, blockNumber } = event;
         pricedata.push({
-          timestamp: blockNumber,
-          outcome: Number(args.winner),
-          Epoch: Number(args.epoch),
-          outcome: args.winner,
+          timestamp: event.blockNumber,
+          outcome: Number(event.winner),
+          Epoch: Number(event.epoch),
+          outcome: event.winner,
         });
       }
       setPriceHistory(pricedata);

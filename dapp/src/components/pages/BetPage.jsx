@@ -4,16 +4,17 @@ import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
 import Form from "../basics/Form";
-import { G, cblack } from "../basics/Colors";
+import { G } from "../basics/Colors";
 import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
 import { ethers } from "ethers";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { networkConfig } from "../../config";
+import { indexerEndpoint, networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 function BetPage() {
   const { oracleContract, bettingContract, provider, signer, account } =
@@ -26,7 +27,7 @@ function BetPage() {
   const [matchPick, setMatchPick] = useState(null);
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
-  const [betHistory, setBetHistory] = useState([]);
+  const [betHistory, setBetHistory] = useState([{}]);
   const [subcontracts, setSubcontracts] = useState({});
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -43,20 +44,13 @@ function BetPage() {
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
 
-    getbetHistoryArray();
     document.title = "Instant Bets";
     const interval1 = setInterval(() => {
       findValues();
-      //  this.getbetHistoryArray();
-      //  this.checkRedeem();
     }, 1000);
-    const interval2 = setInterval(() => {
-      getbetHistoryArray();
-    }, 5000);
 
     return () => {
       clearInterval(interval1);
-      clearInterval(interval2);
     };
   }, [bettingContract, oracleContract]);
 
@@ -95,48 +89,87 @@ function BetPage() {
     setViewedTxs(viewedTxs + 1);
   }
 
-  async function getbetHistoryArray() {
-    const eventdata = [];
-    const _subcontracts = {};
+  async function addBetRecord({
+    bettor,
+    epoch,
+    matchNum,
+    pick,
+    betAmount,
+    payoff,
+    contractHash,
+    blockNumber,
+    transactionHash,
+    logIndex,
+    transactionIndex,
+  }) {
+    console.log(subcontracts);
+    if (Object.keys(subcontracts).includes(contractHash)) return;
 
-    const bettor = await signer.getAddress();
-    const BetRecordEvent = bettingContract.filters.BetRecord(bettor);
-    const events = await bettingContract.queryFilter(BetRecordEvent);
-    // TODO: Fix below
-    for (const event of events) {
-      const {
-        args: {
-          bettor,
-          epoch,
-          matchNum,
-          pick,
-          betAmount,
-          payoff,
-          contractHash,
-        },
-        blockNumber,
-      } = event;
+    const block = await provider.getBlock(blockNumber);
 
-      const block = await provider.getBlock(blockNumber);
-
-      eventdata.push({
-        Hashoutput: contractHash,
-        BettorAddress: bettor,
-        Epoch: Number(epoch),
-        timestamp: Number(block.timestamp),
-        BetSize: Number(betAmount) / 10000,
-        LongPick: Number(pick),
-        MatchNum: Number(matchNum),
-        Payoff: (0.95 * Number(payoff)) / 10000,
-      });
-      _subcontracts[contractHash] = await bettingContract.checkRedeem(
-        contractHash
-      );
-    }
-    betHistory[0] = eventdata;
-    setSubcontracts(_subcontracts);
+    betHistory[0][contractHash] = {
+      Hashoutput: contractHash,
+      BettorAddress: bettor,
+      Epoch: Number(epoch),
+      timestamp: Number(block.timestamp),
+      BetSize: Number(betAmount) / 10000,
+      LongPick: Number(pick),
+      MatchNum: Number(matchNum),
+      Payoff: (0.95 * Number(payoff)) / 10000,
+    };
+    subcontracts[contractHash] = await bettingContract.checkRedeem(
+      contractHash
+    );
+    setSubcontracts(subcontracts);
     setBetHistory(betHistory);
   }
+
+  async function getbetHistoryArray() {
+    const bettor = await signer.getAddress();
+    const {
+      data: { events },
+    } = await axios.get(
+      `${indexerEndpoint}/events/betting/BetRecord?bettor=${bettor}`
+    );
+    // const events = await bettingContract.queryFilter(BetRecordEvent);
+    // TODO: Fix below
+    for (const event of events) {
+      await addBetRecord(event);
+    }
+  }
+
+  useEffect(() => {
+    if (!bettingContract || !account) return;
+
+    console.log(bettingContract, account);
+    console.log("B");
+    getbetHistoryArray();
+
+    const BetRecordFilter = bettingContract.filters.BetRecord(account);
+    bettingContract.on(BetRecordFilter, (eventEmitted) => {
+      const { bettor, epoch, matchNum, pick, betAmount, payoff, contractHash } =
+        eventEmitted.args;
+      const {
+        transactionHash,
+        transactionIndex,
+        blockNumber,
+        index: logIndex,
+      } = eventEmitted.log;
+      addBetRecord({
+        bettor,
+        epoch,
+        matchNum,
+        pick,
+        betAmount,
+        payoff,
+        contractHash,
+        transactionHash,
+        transactionIndex,
+        blockNumber,
+        logIndex,
+      });
+    });
+  }, [bettingContract, account]);
 
   function radioFavePick(teampic) {
     setMatchPick(teampic);
@@ -452,7 +485,7 @@ function BetPage() {
                           <td>BetSize</td>
                           <td>DecOdds</td>
                         </tr>
-                        {betHistory[id].map(
+                        {Object.values(betHistory[id]).map(
                           (event, index) =>
                             event.Epoch === currW4 && (
                               <tr key={index} style={{ width: "33%" }}>
@@ -521,7 +554,7 @@ function BetPage() {
                           <td>Your Payout</td>
                           <td>Click to Claim</td>
                         </tr>
-                        {betHistory[id].map(
+                        {Object.values(betHistory[id]).map(
                           (event, index) =>
                             //  (event.Epoch = currW4) &&
                             subcontracts[event.Hashoutput] && (

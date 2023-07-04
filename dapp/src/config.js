@@ -34,3 +34,5 @@ export const networkConfig = {
   },
   rpcUrls: ["http://127.0.0.1:8545"],
 };
+
+export const indexerEndpoint = "http://localhost:8000";

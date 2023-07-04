@@ -12,17 +12,14 @@ export default function EventStartTime() {
 
     (async () => {
       const pricedata = [];
-      const StartTimesPostedEvent =
-        oracleContractReadOnly.filters.StartTimesPosted();
-      const events = await oracleContractReadOnly.queryFilter(
-        StartTimesPostedEvent
-      );
+      const {
+        data: { events },
+      } = await axios.get(`${indexerEndpoint}/events/oracle/StartTimesPosted`);
       for (const event of events) {
-        const { args, blockNumber } = event;
         pricedata.push({
-          time: Number(blockNumber),
-          Epoch: Number(args.epoch),
-          games: args.starttimes,
+          time: Number(event.blockNumber),
+          Epoch: Number(event.epoch),
+          games: event.starttimes,
         });
       }
       setMatchHistory(pricedata);
