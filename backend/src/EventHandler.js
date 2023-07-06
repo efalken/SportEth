@@ -1,5 +1,9 @@
+import { ethers } from "ethers";
 import { minBlock, provider } from "./config.js";
 import { PrismaClient } from "@prisma/client";
+import { body } from "express-validator";
+import { isValidTransactionHash } from "./customValidators.js";
+import { validate } from "./middlewares.js";
 
 const prisma = new PrismaClient();
 
@@ -9,6 +13,7 @@ export class EventHandler {
     this.fields = fields;
     this.table = prisma[table];
     this.filter = contract.filters[eventName];
+    this.topic = this.getTopic();
   }
 
   async syncEvent() {
@@ -25,6 +30,7 @@ export class EventHandler {
 
   async syncEventTillNow() {
     const lastEvent = await this.table.findFirst({
+      where: { manualEntry: false },
       orderBy: { blockNumber: "desc" },
     });
     const lastBlock = lastEvent?.blockNumber || minBlock;
@@ -48,7 +54,7 @@ export class EventHandler {
     }
   }
 
-  async addEvent(event) {
+  async addEvent(event, manualEntry = false) {
     let { blockNumber, transactionHash, transactionIndex, index, log } = event;
     if (log) {
       blockNumber = log.blockNumber;
@@ -69,9 +75,26 @@ export class EventHandler {
         },
       },
     });
-    if (oldEvent) return;
+    if (oldEvent) {
+      if (oldEvent.manualEntry && !manualEntry) {
+        await this.table.update({
+          where: {
+            blockNumber_transactionHash_transactionIndex_logIndex: {
+              blockNumber,
+              transactionHash,
+              transactionIndex,
+              logIndex: index,
+            },
+          },
+          data: {
+            manualEntry,
+          },
+        });
+      }
+      return;
+    }
 
-    await this.table.create({ data });
+    await this.table.create({ data: { ...data, manualEntry } });
   }
 
   parse(event) {
@@ -139,5 +162,28 @@ export class EventHandler {
       });
       res.json({ events });
     }.bind(this);
+  }
+
+  getTopic() {
+    const { name, inputs } = this.filter.fragment;
+    let eventSelector = `${name}(${inputs
+      .map((input) => input.type)
+      .join(",")})`;
+    const topic = ethers.keccak256(ethers.toUtf8Bytes(eventSelector));
+    return topic;
+  }
+
+  async syncEventsFromTransaction(transactionReceipt) {
+    const logs = transactionReceipt.logs.filter(
+      (log) =>
+        log.address.toLowerCase() === this.contract.target.toLowerCase() &&
+        log.topics[0] === this.topic
+    );
+    console.log(logs);
+    for (const log of logs) {
+      const eventEmitted = this.contract.interface.parseLog(log);
+      log.args = eventEmitted.args;
+      await this.addEvent(log, true);
+    }
   }
 }
