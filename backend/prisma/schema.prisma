@@ -18,6 +18,7 @@ model TokenTransferEvent {
   from             String
   to               String
   value            BigInt
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -29,6 +30,7 @@ model TokenBurnEvent {
   logIndex         Int
   from             String
   value            BigInt
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -40,6 +42,7 @@ model TokenMintEvent {
   logIndex         Int
   from             String
   value            BigInt
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -52,6 +55,7 @@ model TokenApprovalEvent {
   owner            String
   spender          String
   value            BigInt
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -68,6 +72,7 @@ model BettingBetRecordEvent {
   betAmount        Int
   payoff           Int
   contractHash     String
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -84,6 +89,7 @@ model BettingOfferRecordEvent {
   betAmount        Int
   payoff           Int
   contractHash     String
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -97,6 +103,7 @@ model BettingFundingEvent {
   epoch            Int
   moveAmount       BigInt
   action           Int
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -108,7 +115,8 @@ model OracleResultsPostedEvent {
   logIndex         Int
   epoch            Int
   propnum          Int
-  winner           String @db.VarChar(3000) // encode int[] to string
+  winner           String  @db.VarChar(3000) // encode int[] to string
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -120,7 +128,8 @@ model OracleDecOddsPostedEvent {
   logIndex         Int
   epoch            Int
   propnum          Int
-  decOdds          String @db.VarChar(3000) // encode int[] to string
+  decOdds          String  @db.VarChar(3000) // encode int[] to string
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -135,6 +144,7 @@ model OracleVoteOutcomeEvent {
   voteResult       Boolean
   yesvotes         BigInt
   novotes          BigInt
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -146,7 +156,8 @@ model OracleBetDataPostedEvent {
   logIndex         Int
   epoch            Int
   propnum          Int
-  oddsStart        String @db.VarChar(3000) // encode int[] to string
+  oddsStart        String  @db.VarChar(3000) // encode int[] to string
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -157,6 +168,7 @@ model OracleParamsPostedEvent {
   transactionIndex Int
   logIndex         Int
   concLimit        Int
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -168,6 +180,7 @@ model OraclePausePostedEvent {
   logIndex         Int
   pausedMatch1     Int
   pausedMatch2     Int
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -179,7 +192,8 @@ model OracleStartTimesPostedEvent {
   logIndex         Int
   propnum          Int
   epoch            Int
-  starttimes       String @db.VarChar(3000) // encode int[] to string
+  starttimes       String  @db.VarChar(3000) // encode int[] to string
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -191,7 +205,8 @@ model OracleSchedulePostedEvent {
   logIndex         Int
   propnum          Int
   epoch            Int
-  sched            String @db.VarChar(3000) // encode int[] to string
+  sched            String  @db.VarChar(3000) // encode int[] to string
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
@@ -204,6 +219,7 @@ model OracleFundingEvent {
   tokensChange     BigInt
   etherChange      BigInt
   transactor       String
+  manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
