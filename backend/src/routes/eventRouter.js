@@ -3,7 +3,7 @@ import {
   bettingBetRecordEventHandler,
   bettingFundingEventHandler,
   bettingOfferRecordEventHandler,
-} from "../web3EventListeners/eventListeners/bettingContract";
+} from "../web3EventListeners/eventListeners/bettingContract/index.js";
 import {
   oracleBetDataPostedEventHandler,
   oracleDecOddsPostedEventHandler,
@@ -14,13 +14,13 @@ import {
   oracleSchedulePostedEventHandler,
   oracleStartTimesPostedEventHandler,
   oracleVoteOutcomeEventHandler,
-} from "../web3EventListeners/eventListeners/oracleContract";
+} from "../web3EventListeners/eventListeners/oracleContract/index.js";
 import {
   tokenApprovalEventHandler,
   tokenBurnEventHandler,
   tokenMintEventHandler,
   tokenTransferEventHandler,
-} from "../web3EventListeners/eventListeners/tokenContract";
+} from "../web3EventListeners/eventListeners/tokenContract/index.js";
 
 const router = Router();
 

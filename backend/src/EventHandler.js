@@ -1,9 +1,6 @@
 import { ethers } from "ethers";
 import { minBlock, provider } from "./config.js";
 import { PrismaClient } from "@prisma/client";
-import { body } from "express-validator";
-import { isValidTransactionHash } from "./customValidators.js";
-import { validate } from "./middlewares.js";
 
 const prisma = new PrismaClient();
 
