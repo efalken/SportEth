@@ -16,6 +16,7 @@ import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { indexerEndpoint } from "../../config";
+import { syncEvents } from "../../helpers/syncEvents";
 
 export default function BigBetPage() {
   const { oracleContract, bettingContract, signer, account } = useAuthContext();
@@ -69,7 +70,9 @@ export default function BigBetPage() {
   // }
 
   async function killBet(x) {
-    await bettingContract.cancelBigBet(x);
+    const tx = await bettingContract.cancelBigBet(x);
+    const receipt = await tx.wait(1);
+    await syncEvents(receipt.hash);
   }
 
   async function fundBettor(x) {
@@ -91,16 +94,20 @@ export default function BigBetPage() {
   }
 
   async function makeBigBet() {
-    await bettingContract.postBigBet(
+    const tx = await bettingContract.postBigBet(
       matchPick,
       teamPick,
       Math.round(betAmount * 10000),
       Math.round(decOddsOffered * 1000)
     );
+    const receipt = await tx.wait(1);
+    await syncEvents(receipt.hash);
   }
 
   async function takeBigBet() {
-    await bettingContract.takeBigBet(contractID);
+    const tx = await bettingContract.takeBigBet(contractID);
+    const receipt = await tx.wait(1);
+    await syncEvents(receipt.hash);
   }
 
   async function addOfferRecord({
@@ -298,10 +305,8 @@ export default function BigBetPage() {
     //   "BettingMain"
     // ].methods.userBalance.cacheCall(account);
     let _userBalance =
-      Number(
-        (await bettingContract.userStruct(await signer.getAddress())
-          .userBalance) || "0"
-      ) / 10000;
+      Number((await bettingContract.userStruct(account)).userBalance || "0") /
+      10000;
     setUserBalance(_userBalance);
 
     // betDataKey =
@@ -563,7 +568,7 @@ export default function BigBetPage() {
                     border: "1px solid #ffff00",
                     padding: "4px",
                   }}
-                  onClick={() => switchOdds()}
+                  onClick={switchOdds}
                 >
                   {showDecimalOdds
                     ? "Switch to MoneyLine Odds"
@@ -889,7 +894,7 @@ export default function BigBetPage() {
                     border: "1px solid yellow",
                     padding: "4px",
                   }}
-                  onClick={() => takeBigBet()}
+                  onClick={takeBigBet}
                 >
                   Click to Take {Number(betAmount).toFixed(3)} on{" "}
                   {teamSplit[matchPick][1 + Number(teamPick)]} {"  "}
@@ -925,10 +930,7 @@ export default function BigBetPage() {
                 <thead>
                   <tr style={{ width: "100%", color: "white", font: "Arial" }}>
                     <td>Take </td>
-                    <td
-                      onClick={() => sortByBetSize()}
-                      style={{ cursor: "pointer" }}
-                    >
+                    <td onClick={sortByBetSize} style={{ cursor: "pointer" }}>
                       Size
                       <Triangle
                         rotation={!betSize ? "180deg" : ""}

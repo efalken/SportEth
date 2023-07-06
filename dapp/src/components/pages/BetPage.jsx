@@ -15,6 +15,7 @@ import { indexerEndpoint, networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { syncEvents } from "../../helpers/syncEvents";
 
 function BetPage() {
   const { oracleContract, bettingContract, provider, signer, account } =
@@ -70,11 +71,19 @@ function BetPage() {
   }
 
   async function takeBet() {
-    await bettingContract.bet(matchPick, teamPick, betAmount * 10000);
+    const tx = await bettingContract.bet(
+      matchPick,
+      teamPick,
+      betAmount * 10000
+    );
+    const receipt = await tx.wait(1);
+    await syncEvents(receipt.hash);
   }
 
   async function redeemBet(x) {
-    await bettingContract.redeem(x);
+    const tx = await bettingContract.redeem(x);
+    const receipt = await tx.wait(1);
+    await syncEvents(receipt.hash);
   }
 
   function switchOdds() {
@@ -184,10 +193,8 @@ function BetPage() {
     setBetData(_betData);
 
     let _userBalance =
-      Number(
-        (await bettingContract.userStruct(await signer.getAddress())
-          .userBalance) || "0"
-      ) / 10000;
+      Number((await bettingContract.userStruct(account)).userBalance || "0") /
+      10000;
     setUserBalance(_userBalance);
 
     let _unusedCapital = (await bettingContract.margin(0)) || "0";
@@ -410,7 +417,7 @@ function BetPage() {
                 spacing="1px"
               />
               <Text size="14px" className="style">
-                Your available capital: {Number(userBalance).toFixed(3)} AVAX
+                Your available capital: {Number(userBalance).toFixed(4)} AVAX
               </Text>
             </Box>
             <Box>
@@ -433,7 +440,7 @@ function BetPage() {
                     // width: width ? width : 120,
                     // color: "#00ff00",
                   }}
-                  onClick={() => switchOdds()}
+                  onClick={switchOdds}
                 >
                   {showDecimalOdds
                     ? "Switch to MoneyLine Odds"
@@ -731,7 +738,7 @@ function BetPage() {
                   padding: "4px",
                   // color: "black"
                 }}
-                onClick={() => takeBet()}
+                onClick={takeBet}
               >
                 Bet Now{" "}
               </Button>{" "}
