@@ -203,10 +203,10 @@ function BookiePage() {
         <td>{i}</td>
         <td>{teamSplit[i][1]}</td>
         <td>{teamSplit[i][2]}</td>
-        <td>{(bets0[i] / 10).toFixed(3)}</td>
-        <td>{(bets1[i] / 10).toFixed(3)}</td>
-        <td>{(payoff0[i] / 10 - bets1[i] / 10).toFixed(3)}</td>
-        <td>{(payoff1[i] / 10 - bets0[i] / 10).toFixed(3)}</td>
+        <td>{(bets0[i] / 10000).toFixed(1)}</td>
+        <td>{(bets1[i] / 10000).toFixed(1)}</td>
+        <td>{(payoff0[i] / 10000 - bets1[i] / 10000).toFixed(1)}</td>
+        <td>{(payoff1[i] / 10000 - bets0[i] / 10000).toFixed(1)}</td>
       </tr>
     );
   }
