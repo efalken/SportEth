@@ -11,7 +11,7 @@ import "./ConstantsBetting.sol";
 
 contract Betting {
   /** 0 bookie capital total, 1 bookie capital Locked, 2 bettorLocked,
-  3 betEpoch, 4 totalShares, 5 concentration Limit, 6 nonce, 7 first Start Time
+  3 betEpoch, 4 totalShares, 5 concentration Limit, 6 n  once, 7 first Start Time
   */
   uint32[8] public margin;
   // for emergency shutdown
@@ -47,9 +47,9 @@ contract Betting {
   }
 
   struct UserStruct {
-    bytes32 lastTransaction;
     uint32 userBalance;
-    uint32 bbEpoch;
+    uint32 counter;
+    bytes32[16] betHashes;
   }
 
   struct LPStruct {
@@ -183,7 +183,10 @@ contract Betting {
     betData[_matchNumber] = encoded;
     // increment nonce used for unique bet hash IDs
     margin[6]++;
-    userStruct[msg.sender].lastTransaction = subkID;
+    // userStruct[msg.sender].betHashes = subkID;
+    // userStruct[msg.sender].betHashes.push(subkID);
+    userStruct[msg.sender].betHashes[userStruct[msg.sender].counter] = subkID;
+    userStruct[msg.sender].counter++;
     emit BetRecord(
       msg.sender,
       uint8(margin[3]),
@@ -212,10 +215,7 @@ contract Betting {
     require(_betAmount >= margin[0] / margin[5], "too small");
     // cannot bet more than one has
     require(_betAmount <= userStruct[msg.sender].userBalance, "NSF");
-    // data in raw decimal form, times 100. Standard 1.91 odds would be 191
-    // this targets trolls who post extreme odds hoping a confused or lazy person accidentally takes their offered bet. It's annoyingly common
     require(_decOddsBB > 100 && _decOddsBB < 900, "invalid odds");
-    userStruct[msg.sender].bbEpoch = margin[3];
     bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
     Subcontract memory order;
     order.pick = _team0or1;
@@ -419,26 +419,54 @@ contract Betting {
     emit Funding(msg.sender, msg.value, margin[3], 1);
   }
 
-  /** @dev redeems winning bet and allocates winnings to user's balance for later withdrawal or future betting
-   * @param _subkId is the bet's unique ID
+  // function redeem(bytes32 _subkId) external {
+  //   require(betContracts[_subkId].bettor == msg.sender, "wrong account");
+  //   // creates epoch~matchnumber~pick number via concatenation
+  //   uint32 epochMatch = betContracts[_subkId].epoch *
+  //     1000 +
+  //     betContracts[_subkId].matchNum *
+  //     10 +
+  //     betContracts[_subkId].pick;
+  //   require(outcomeMap[epochMatch] != 0, "need win or tie");
+  //   // to get this far, user has either won or tied, and thus gets back initial
+  //   // bet amount
+  //   uint32 payoff = betContracts[_subkId].betAmount;
+  //   // a winner gets the payoff, which is adjusted by 0.95 to pay oracle
+  //   if (outcomeMap[epochMatch] == 2) {
+  //     payoff += (betContracts[_subkId].payoff * 95) / 100;
+  //   }
+  //   delete betContracts[_subkId];
+  //   // credit principle + payoff to redeemer's balance
+  //   userStruct[msg.sender].userBalance += payoff;
+  //   emit Funding(msg.sender, payoff, margin[3], 2);
+  // }
+
+/** @dev redeems winning bet and allocates winnings to user's balance for later withdrawal or future betting
    */
-  function redeem(bytes32 _subkId) external {
-    require(betContracts[_subkId].bettor == msg.sender, "wrong account");
+    function redeem() external {
+    uint numberBets = userStruct[msg.sender].counter;
+    uint32 payoff;
+    for (uint i = 0; i < numberBets; i++) {
+    bytes32 _subkId = userStruct[msg.sender].betHashes[i];
     // creates epoch~matchnumber~pick number via concatenation
     uint32 epochMatch = betContracts[_subkId].epoch *
       1000 +
       betContracts[_subkId].matchNum *
       10 +
       betContracts[_subkId].pick;
-    require(outcomeMap[epochMatch] != 0, "need win or tie");
+    if(outcomeMap[epochMatch] != 0) {
     // to get this far, user has either won or tied, and thus gets back initial
     // bet amount
-    uint32 payoff = betContracts[_subkId].betAmount;
+    payoff += betContracts[_subkId].betAmount;
     // a winner gets the payoff, which is adjusted by 0.95 to pay oracle
     if (outcomeMap[epochMatch] == 2) {
       payoff += (betContracts[_subkId].payoff * 95) / 100;
     }
-    delete betContracts[_subkId];
+    // delete betContracts[_subkId];
+    }
+    }
+    //delete userStruct[msg.sender].betHashes;
+    userStruct[msg.sender].counter = 0;
     // credit principle + payoff to redeemer's balance
     userStruct[msg.sender].userBalance += payoff;
     emit Funding(msg.sender, payoff, margin[3], 2);
@@ -450,7 +478,6 @@ contract Betting {
   function withdrawBettor(uint32 _amt) external {
     // basic budget constraint: check
     require(_amt <= userStruct[msg.sender].userBalance);
-    require(margin[3] > userStruct[msg.sender].bbEpoch, "too soon");
     userStruct[msg.sender].userBalance -= _amt;
     uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     // payable(msg.sender).transfer(amt256);
@@ -498,7 +525,7 @@ contract Betting {
     require(margin[2] == 0);
     betData = _oddsAndStart;
     uint32 x = uint32(_oddsAndStart[0] >> 64);
-    margin[7] = x - ((x - 1687543200) % 604800);
+    margin[7] = x - ((x - 1687564800) % 604800);
     //margin[7] = uint32(_oddsAndStart[0] >> 64);
     // resets the paused matches (99 will never be possible)
     paused[0] = 99;
@@ -508,6 +535,10 @@ contract Betting {
 
   function showBetData() external view returns (uint256[32] memory _betData) {
     _betData = betData;
+  }
+
+     function showUserBetData() external view returns (bytes32[16] memory _betDataUser) {
+    _betDataUser = userStruct[msg.sender].betHashes;
   }
 
   /** @dev processes updates to epoch's odds

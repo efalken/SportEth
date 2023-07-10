@@ -323,7 +323,19 @@ contract Oracle {
     return _ethOut;
   }
 
-  function hourOfDay() internal view returns (uint256 hour) {
+  // function showOdds() external view returns (uint16[32] memory _propOdds) {
+  //   _propOdds = propOdds;
+  // }
+
+  //   function showStarts() external view returns (uint32[32] memory _propStarts) {
+  //   _propStarts = propStartTimes;
+  // }
+
+    function showResults() external view returns (uint8[32] memory _propResults) {
+    _propResults = propResults;
+  }
+
+  function hourOfDay() public view returns (uint256 hour) {
     // 86400 is seconds in a day, 3600 seconds in an hour
     hour = (block.timestamp % 86400) / 3600;
   }

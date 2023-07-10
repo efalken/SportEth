@@ -3,6 +3,7 @@ import FAQ from "./components/pages/FAQ";
 import BetPage from "./components/pages/BetPage";
 import BigBetPage from "./components/pages/BigBetPage";
 import BookiePage from "./components/pages/BookiePage";
+import TestPage from "./components/pages/TestPage";
 import EventBetRecord from "./components/pages/EventBetRecord";
 import EventBigBetRecord from "./components/pages/EventBigBetRecord";
 import EventOdds from "./components/pages/EventOdds";
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
   { path: "/schedhistory", element: <EventSchedule /> },
   { path: "/starthistory", element: <EventStartTime /> },
   { path: "/resultshistory", element: <EventGameResults /> },
+  { path: "/TestPage", element: <TestPage /> },
 ]);
 
 export default router;

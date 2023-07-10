@@ -24,6 +24,7 @@ function BookiePage() {
   const [usedCapital, setUsedCapital] = useState(0);
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
+  const [betNumber, setBetNumber] = useState(0);
   //const [newBets, setNewBets] = useState(false);
   const [betData, setBetData] = useState([]);
   const [scheduleString, setScheduleString] = useState(

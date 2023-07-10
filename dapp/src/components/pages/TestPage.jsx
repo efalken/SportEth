@@ -4,95 +4,91 @@ import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
 import Form from "../basics/Form";
-import { G } from "../basics/Colors";
+import { G, cblack } from "../basics/Colors";
 import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
 import { ethers } from "ethers";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { indexerEndpoint, networkConfig } from "../../config";
-import TeamTable from "../blocks/TeamTable";
+import { networkConfig } from "../../config";
+import TeamTable from "../blocks/TeamTable2";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { syncEvents } from "../../helpers/syncEvents";
 
-function BetPage() {
-  const { oracleContract, bettingContract, provider, signer, account } =
-    useAuthContext();
+function TestPage() {
+  const {
+    oracleContract,
+    bettingContract,
+    tokenContract,
+    provider,
+    signer,
+    setSigner,
+    account,
+  } = useAuthContext();
 
   const [betAmount, setBetAmount] = useState("");
   const [fundAmount, setFundAmount] = useState("");
   const [wdAmount, setWdAmount] = useState("");
+  const [hashInput, setHashInput] = useState("");
   const [teamPick, setTeamPick] = useState(null);
   const [matchPick, setMatchPick] = useState(null);
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
-  const [betHistory, setBetHistory] = useState([{}]);
+  const [betHistory, setBetHistory] = useState([]);
   const [subcontracts, setSubcontracts] = useState({});
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
   const [lastBetHash, setLastBetHash] = useState([]);
+  const [outcomes, setOutcomes] = useState([]);
+  const [tokenEoaBalance, setTokenEoaBalance] = useState("0");
+  const [lpEpochReward, setLpEpochReward] = useState("0");
+  const [voteNo, setVoteNo] = useState("0");
+  const [voteYes, setVoteYes] = useState("0");
+  const [voteTracker, setVoteTracker] = useState("0");
+  const [propNumber, setPropNumber] = useState("0");
+  const [reviewStatus, setReviewStatus] = useState("0");
   const [betData, setBetData] = useState([]);
   const [userBalance, setUserBalance] = useState("0");
   const [unusedCapital, setUnusedCapital] = useState("0");
   const [usedCapital, setUsedCapital] = useState("0");
   const [currW4, setCurrW4] = useState("0");
   const [concentrationLimit, setConcentrationLimit] = useState("0");
+  //const [newBets, setNewBets] = useState(false);
   const [teamSplit, setTeamSplit] = useState([]);
-  const [betNumber, setBetNumber] = useState("0");
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
 
-    document.title = "Betting Page";
+      document.title = "Test Page";
     const interval1 = setInterval(() => {
       findValues();
+      //  this.getbetHistoryArray();
+      //  this.checkRedeem();
     }, 1000);
+
 
     return () => {
       clearInterval(interval1);
     };
   }, [bettingContract, oracleContract]);
 
-  async function fundBettor(x) {
-    try {
-      const stackId = await bettingContract.fundBettor({
-        value: ethers.parseEther(fundAmount),
-      });
-      console.log("stackid", stackId);
-    } catch (error) {
-      console.log("igotanerror", error);
-    }
+
+
+  async function redeemBet(x) {
+    await bettingContract.redeem();
   }
 
-  async function withdrawBettor(x) {
-    await bettingContract.withdrawBettor(wdAmount * 10000);
-  }
-
-  async function takeBet() {
-    const tx = await bettingContract.bet(
-      matchPick,
-      teamPick,
-      betAmount * 10000
-    );
-    const receipt = await tx.wait(1);
-    await syncEvents(receipt.hash);
-  }
-
-  async function redeemBet() {
-    const tx = await bettingContract.redeem();
-    const receipt = await tx.wait(1);
-    await syncEvents(receipt.hash);
+  async function checkRedeem(hashInput0) {
+    await bettingContract.redeem(hashInput0);
   }
 
   function switchOdds() {
     setShowDecimalOdds(!showDecimalOdds);
   }
 
-  async function getBets(hash) {
-    const betParams = await bettingContract.betContracts(hash);
+  async function vote() {
+    await oracleContract.vote();
   }
 
   function openEtherscan(txhash) {
@@ -103,85 +99,7 @@ function BetPage() {
     setViewedTxs(viewedTxs + 1);
   }
 
-  async function addBetRecord({
-    bettor,
-    epoch,
-    matchNum,
-    pick,
-    betAmount,
-    payoff,
-    contractHash,
-    blockNumber,
-    transactionHash,
-    logIndex,
-    transactionIndex,
-  }) {
-    console.log(subcontracts);
-    if (Object.keys(subcontracts).includes(contractHash)) return;
 
-    const block = await provider.getBlock(blockNumber);
-
-    betHistory[0][contractHash] = {
-      Hashoutput: contractHash,
-      BettorAddress: bettor,
-      Epoch: Number(epoch),
-      timestamp: Number(block.timestamp),
-      BetSize: Number(betAmount),
-      LongPick: Number(pick),
-      MatchNum: Number(matchNum),
-      Payoff: (0.95 * Number(payoff)),
-    };
-    subcontracts[contractHash] = await bettingContract.checkRedeem(
-      contractHash
-    );
-    setSubcontracts(subcontracts);
-    setBetHistory(betHistory);
-  }
-
-  async function getbetHistoryArray() {
-    const bettor = await signer.getAddress();
-    const {
-      data: { events },
-    } = await axios.get(
-      `${indexerEndpoint}/events/betting/BetRecord?bettor=${bettor}`
-    );
-    // const events = await bettingContract.queryFilter(BetRecordEvent);
-    // TODO: Fix below
-    for (const event of events) {
-      await addBetRecord(event);
-    }
-  }
-
-  useEffect(() => {
-    if (!bettingContract || !account) return;
-
-    getbetHistoryArray();
-
-    const BetRecordFilter = bettingContract.filters.BetRecord(account);
-    bettingContract.on(BetRecordFilter, (eventEmitted) => {
-      const { bettor, epoch, matchNum, pick, betAmount, payoff, contractHash } =
-        eventEmitted.args;
-      const {
-        transactionHash,
-        transactionIndex,
-        blockNumber,
-        index: logIndex,
-      } = eventEmitted.log;
-      addBetRecord({
-        bettor,
-        epoch,
-        matchNum,
-        pick,
-        betAmount,
-        payoff,
-        contractHash,
-        transactionHash,
-        transactionIndex,
-        blockNumber,
-        logIndex,
-      });
-    });
-  }, [bettingContract, account]);
 
   function radioFavePick(teampic) {
     setMatchPick(teampic);
@@ -197,29 +115,47 @@ function BetPage() {
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
 
-    
-
     let us = await bettingContract.userStruct(account);
-    let _betNumber = us ? us.counter.toString() : "0";
-    setBetNumber(_betNumber);
-
     let _userBalance = us ? us.userBalance.toString() : "0";
     setUserBalance(_userBalance);
+
+    let _yesVotes = Number(await oracleContract.votes(0)) || "0";
+    setVoteYes(_yesVotes);
+
+    let _noVotes = Number(await oracleContract.votes(1)) || "0";
+    setVoteNo(_noVotes);
+
+    
+    let _propNumber = Number(await oracleContract.propNumber()) || "0";
+    setPropNumber(_propNumber);
+
+    let _reviewStatus = Number(await oracleContract.reviewStatus()) || "0";
+    setReviewStatus(_reviewStatus);
+
+    let _tokenEoaBalance = (await tokenContract.balanceOf(account)) || "0";
+    setTokenEoaBalance(_tokenEoaBalance);
+
+    let _outcomes =  (await oracleContract.showResults()) || [];
+    setOutcomes(_outcomes);
 
     let _lastBetHash =  (await bettingContract.showUserBetData()) || [];
     setLastBetHash(_lastBetHash);
 
-    let _unusedCapital = (await bettingContract.margin(0)) || "0";
-    setUnusedCapital(_unusedCapital);
-
-    let _usedCapital = (await bettingContract.margin(1)) || "0";
-    setUsedCapital(_usedCapital);
-
     let _currW4 = Number((await bettingContract.margin(3)) || "0");
     setCurrW4(_currW4);
 
-    let _concentrationLimit = await bettingContract.margin(5);
+    let _concentrationLimit = Number((await bettingContract.margin(5)) || "0");
     setConcentrationLimit(_concentrationLimit);
+
+    let oc = await oracleContract.adminStruct(account);
+    let _lpEpochReward = oc ? oc.initEpoch.toString() : "0";
+    setLpEpochReward(_lpEpochReward);
+
+    // let _lastBetHash = us ? us.lastTransaction.toString() : "0";
+    // setLastBetHash(_lastBetHash);
+
+    let _voteTracker = oc ? oc.voteTracker.toString() : "0";
+    setVoteTracker(_voteTracker);
 
     // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
     // setNewBets(_newBets);
@@ -238,6 +174,11 @@ function BetPage() {
     if (maxSize2 < maxSize) {
       maxSize = maxSize2;
     }
+    return maxSize;
+  }
+
+  function getMaxSize2(netExposure) {
+    let maxSize = (usedCapital + unusedCapital) / concentrationLimit + netExposure;
     return maxSize;
   }
 
@@ -274,6 +215,29 @@ function BetPage() {
     return moneyline;
   }
 
+  function getOutcome(outcomei) {
+    let outx = "lose";
+    if (outcomei === 1) {
+     outx = "win";
+    } else if (outcomei === 2) {
+      outx = "tie";
+    }
+    return outx;
+  }
+
+  let statusWord = "na";
+  function reviewStatusWord(revStatusi) {
+  statusWord = "na";
+  if (revStatusi === 0) {statusWord = 'init'}
+  else if (revStatusi === 10) {statusWord = 'process Initial'}
+  else if (revStatusi === 20) {statusWord = 'process update'}
+  else if (revStatusi === 30) {statusWord = 'process Settle'}
+  else if (revStatusi === 2) {statusWord = 'waiting for update or settlement'};
+  return statusWord;
+  }
+
+
+
   let [startTimeColumn, setStartTimeColumn] = useState([
     1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
     1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
@@ -306,6 +270,8 @@ function BetPage() {
     -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123,
     -123, -123, -123, -123, -123, -123, -123, -123,
   ]);
+  let [outcomev, setOutcomev] = useState([ 0, 0, 0, 0, 0, 0, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,]);
 
   let netLiab = [liab0, liab1];
 
@@ -313,7 +279,10 @@ function BetPage() {
 
   useEffect(() => {
     if (betData[0]) xdecode = unpack256(betData[0]);
-    if (xdecode[6] > 0) {
+    if (xdecode[6] > 0)
+    console.log("xdecode256 ===", xdecode[0]);
+    console.log("betdata ===", betData);
+    {
       for (let ii = 0; ii < 32; ii++) {
         if (betData[ii]) xdecode = unpack256(betData[ii]);
         odds0[ii] = Number(xdecode[6]);
@@ -321,6 +290,7 @@ function BetPage() {
         startTimeColumn[ii] = xdecode[5];
         netLiab[0][ii] = (Number(xdecode[2]) - Number(xdecode[1])) / 10;
         netLiab[1][ii] = (Number(xdecode[3]) - Number(xdecode[0])) / 10;
+        outcomev[ii] = Number(outcomes[ii]);
       }
     }
     setOdds0(odds0);
@@ -329,6 +299,7 @@ function BetPage() {
     setLiab1(liab1);
     setStartTimeColumn(startTimeColumn);
     setXdecode(xdecode);
+    setOutcomev(outcomev);
   }, [betData]);
 
   let oddsTot = [odds0, odds1];
@@ -337,6 +308,21 @@ function BetPage() {
     let _teamSplit = scheduleString.map((s) => (s ? s.split(":") : undefined));
     setTeamSplit(_teamSplit);
   }, [scheduleString]);
+
+  async function connect() {
+    await provider.send("eth_requestAccounts", []);
+    const signer = await provider.getSigner();
+    console.log(signer);
+    setSigner(signer);
+  }
+
+  if (!signer) {
+    return (
+      <div>
+        <button onClick={connect}>connect</button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -363,7 +349,7 @@ function BetPage() {
             </Box>
             <Box>
               <Flex>
-                <Text size="14px" color="#000">
+                <Text size="14px" color= "#000">
                   <Link
                     className="nav-header"
                     style={{
@@ -387,18 +373,18 @@ function BetPage() {
                       cursor: "pointer",
                       color: "#fff000",
                       fontStyle: "italic",
-                      // font: "sans-serif"
+                     // font: "sans-serif"
                     }}
-                    to="/testpage"
+                    to="/bigbetpage"
                   >
-                    Test Page
+                    Big Bet Page
                   </Link>
                 </Text>
               </Flex>
             </Box>
             <Box>
               <Flex
-                width="100%"
+                width="100%"  
                 alignItems="center"
                 justifyContent="marginLeft"
               >
@@ -418,18 +404,16 @@ function BetPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                Connected Account Address
-              </Text>
+              <Text size="14px" className="style">Connected Account Address</Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
                 end="0"
                 transform="uppercase"
-                spacing="1px"
+                spacing="1px"   
               />
               <Text size="14px" className="style">
-                Your available capital: {(Number(userBalance)/1e4).toFixed(4)} AVAX
+                Your available capital: {Number(userBalance).toFixed(3)} AVAX
               </Text>
             </Box>
             <Box>
@@ -447,16 +431,15 @@ function BetPage() {
                     borderRadius: "5px",
                     cursor: "pointer",
                     color: "yellow",
-                    border: "1px solid #ffff00",
-                    padding: "4px",
-                    // width: width ? width : 120,
-                    // color: "#00ff00",
+                    border: "1px solid #ffff00", 
+                    padding: "4px"
+            // width: width ? width : 120,
+            // color: "#00ff00",
+
                   }}
-                  onClick={switchOdds}
+                  onClick={() => switchOdds()}
                 >
-                  {showDecimalOdds
-                    ? "Switch to MoneyLine Odds"
-                    : "Switch to Decimal Odds"}
+                  {showDecimalOdds ? "Switch to MoneyLine Odds" : "Switch to Decimal Odds"}
                 </button>{" "}
               </Box>
             </Flex>{" "}
@@ -471,38 +454,26 @@ function BetPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
-              <Flex justifyContent="left">
-                <Text size="14px" color="#ffffff">
-                  Active Week: {currW4}
-                </Text>
-              </Flex>
+            <Flex justifyContent="left">
+              <Text size="14px"  color="#ffffff">Active Week: {currW4}</Text>
+            </Flex>
             </Box>
             <Box>
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text className="style" color="#ffffff" size="14px">
-                      {" "}
-                      Your active bets
-                    </Text>
+                    <Text  className="style" color= "#ffffff" size="14px"> Your active bets</Text>  
                     <br />
-                    <table
-                      style={{
-                        width: "100%",
-                        fontSize: "14px",
-                        fontFamily: "sans-serif",
-                        color: "#ffffff",
-                      }}
-                    >
-                      <tbody>
-                        <tr style={{ width: "33%", color: "#ffffff" }}>
+                    <table style={{ width: "100%", fontSize: "14px", fontFamily: "sans-serif", color: "#ffffff"}}>
+                      <tbody >
+                        <tr style={{ width: "33%", color: "#ffffff"}}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
                           <td>BetSize</td>
                           <td>DecOdds</td>
                         </tr>
-                        {Object.values(betHistory[id]).map(
+                        {betHistory[id].map(
                           (event, index) =>
                             event.Epoch === currW4 && (
                               <tr key={index} style={{ width: "33%" }}>
@@ -543,84 +514,6 @@ function BetPage() {
               ></Flex>
             </Box>
             <Box>
-              <Flex>
-                {Object.keys(betHistory).map((id) => (
-                  <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text size="14px" className="style">
-                      Active Epoch: {currW4}
-                    </Text>
-                    <br />
-                    <Text className="style" size="14px">
-                      {" "}
-                      Your unclaimed winning bets
-                    </Text>
-                    <br />
-                    <table
-                      style={{
-                        width: "100%",
-                        fontSize: "14px",
-                        float: "left",
-                        fontFamily: "sans-serif",
-                      }}
-                    >
-                      <tbody>
-                        <tr style={{ width: "33%", color: "#ffffff" }}>
-                          <td>Epoch</td>
-                          <td>Match</td>
-                          <td>Pick</td>
-                          <td>Your Payout</td>
-                          <td>Click to Claim</td>
-                        </tr>
-                        {Object.values(betHistory[id]).map(
-                          (event, index) =>
-                            //  (event.Epoch = currW4) &&
-                            subcontracts[event.Hashoutput] && (
-                              <tr
-                                key={index}
-                                style={{ width: "33%", color: "#ffffff" }}
-                              >
-                                <td>{event.Epoch}</td>
-                                <td>{teamSplit[event.MatchNum][0]}</td>
-                                <td>
-                                  {
-                                    teamSplit[event.MatchNum][
-                                      event.LongPick + 1
-                                    ]
-                                  }
-                                </td>
-                                <td>
-                                  {(event.Payoff + event.BetSize).toFixed(3)}
-                                </td>
-                                <td>
-                                  <button
-                                    style={{
-                                      backgroundColor: "black",
-                                      borderRadius: "5px",
-                                      padding: "4px",
-                                      //borderRadius: "1px",
-                                      cursor: "pointer",
-                                      color: "yellow",
-                                      border: "1px solid #ffff00",
-                                      // width: width ? width : 120,
-                                      // color: "#00ff00",
-                                    }}
-                                    value={event.Hashoutput}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      redeemBet();
-                                    }}
-                                  >
-                                    Redeem
-                                  </button>
-                                </td>
-                              </tr>
-                            )
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </Flex>
             </Box>
             <Box>
               <Flex
@@ -633,7 +526,7 @@ function BetPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
-            </Box>
+            </Box> 
             <Flex
               mt="5px"
               flexDirection="row"
@@ -641,120 +534,94 @@ function BetPage() {
               alignItems="center"
             >
               <Box>
-                <Form
-                  onChange={setWdAmount}
-                  value={wdAmount}
-                  onSubmit={withdrawBettor}
-                  mb="20px"
-                  justifyContent="flex-start"
-                  buttonWidth="95px"
-                  color="yellow"
-                  inputWidth="100px"
-                  borderRadius="1px"
-                  placeholder="# avax"
-                  buttonLabel="WithDraw"
-                  padding="4px"
-                />
-              </Box>
-
-              <Box mt="10px" mb="10px" ml="80px" mr="80px"></Box>
-            </Flex>
-            <Flex
-              mt="5px"
-              flexDirection="row"
-              justifyContent="flex-start"
-              alignItems="center"
+              <button
+              style={{
+                backgroundColor: "black",
+                borderRadius: "5px",
+                padding: "4px",
+                //borderRadius: "1px",
+                cursor: "pointer",
+                color: "yellow",
+                border: "1px solid #ffff00", 
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                vote();
+              }}
             >
-              <Box>
-                <Form
-                  onChange={setFundAmount}
-                  value={fundAmount}
-                  onSubmit={fundBettor}
-                  mb="20px"
-                  justifyContent="flex-start"
-                  buttonWidth="95px"
-                  inputWidth="100px"
-                  borderRadius="1px"
-                  placeholder="# avax"
-                  //backgroundColor = "#fff"
-                  buttonLabel="Fund"
-                />
+              Vote
+            </button>
               </Box>
               </Flex>
 
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-betHash0: {lastBetHash[0]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  betHash1: {lastBetHash[1]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-betHash2: {lastBetHash[2]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  betHash3: {lastBetHash[3]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash4: {lastBetHash[4]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash5: {lastBetHash[5]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash6: {lastBetHash[6]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash7: {lastBetHash[7]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash8: {lastBetHash[8]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash9: {lastBetHash[9]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash10: {lastBetHash[10]} 
-</Text>
-</Box>
+              <Box>
+                <Form
+                  onChange={setHashInput}
+                  value={hashInput}
+                  onSubmit={checkRedeem}
+                  mb="20px"
+                  justifyContent="flex-start"
+                  buttonWidth="95px"
+                  inputWidth="100px"
+                  borderRadius="1px"
+                  placeholder="bet ID"
+                  //backgroundColor = "#fff"
+                  buttonLabel="checkRedeem"
+                />
+              </Box>
+              <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                No Votes: {voteNo} 
+              </Text>
+            </Box>
 
-  </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+              Yes Votes: {voteYes} 
+              </Text>
+            </Box>
+
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+              initEpoch: {lpEpochReward} 
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+              ConcentrationLimit: {concentrationLimit} 
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+              ReviewStatus: {reviewStatusWord(reviewStatus)} 
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+              tokenBalance: {tokenEoaBalance} 
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+              currentSubNumber: {propNumber} 
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+              voteTracker: {voteTracker} 
+              </Text>
+            </Box>
+          </Box>
         }
       >
         <Flex justifyContent="center">
-          <Text size="25px" className="style">
-            Place Bets Here
-          </Text>
+          <Text size="25px" className="style">test Page </Text>
         </Flex>
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifyContent="marginLeft">
             <Text size="14px" weight="300" className="style">
               {" "}
-              Toggle radio button on the team/player you want to bet on to win.
-              Enter desired avax bet in the box (eg, 1.123). Prior wins, tie, or
-              cancelled bets are redeemable on the left panel. This sends avax
-              directly to your avax address. Scroll down to see all of the
-              week's contests.
+              shows data submitted by oracle token holder for vote
             </Text>
           </Flex>
         </Box>
@@ -776,38 +643,33 @@ betHash2: {lastBetHash[2]}
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Text
-              size="14px"
-              weight="400"
-              color="white"
-              style={{ paddingLeft: "10px" }}
-            >
+            <Text size="14px" weight="400" color= "white" style={{ paddingLeft: "10px" }}>
               Bet Amount
             </Text>
 
             <Input
               onChange={({ target: { value } }) => setBetAmount(value)}
               width="100px"
-              color="black"
-              font="sans-serif"
+              color = "black"
+
+              font = "sans-serif"
               placeholder={"# avax"}
               marginLeft="10px"
               marginRignt="5px"
-              // color="yellow"
+             // color="yellow"
               value={betAmount}
             />
             <Box mt="10px" mb="10px">
               <Button
                 style={{
                   //height: "30px",
-                  // width: "100px",
+                 // width: "100px",
                   float: "right",
                   marginLeft: "5px",
                   border: "1px solid yellow",
-                  padding: "4px",
-                  // color: "black"
+                  padding: "4px"
+                 // color: "black"
                 }}
-                onClick={takeBet}
               >
                 Bet Now{" "}
               </Button>{" "}
@@ -828,7 +690,7 @@ betHash2: {lastBetHash[2]}
 
         <Flex
           style={{
-            //  color: "#000",
+          //  color: "#000",
             fontSize: "14px",
           }}
         >
@@ -843,10 +705,7 @@ betHash2: {lastBetHash[2]}
               {"),  "}
               MaxBet:{" "}
               {parseFloat(
-                getMaxSize(
-                  unusedCapital,
-                  usedCapital,
-                  concentrationLimit,
+                getMaxSize2(
                   netLiab[teamPick][matchPick]
                 ) / 1e3
               ).toFixed(2)}
@@ -880,8 +739,9 @@ betHash2: {lastBetHash[2]}
                 radioFavePick={radioFavePick}
                 showDecimalOdds={showDecimalOdds}
                 oddsTot={oddsTot}
-                radioUnderPick={radioUnderPick}
                 getMoneyLine={getMoneyLine}
+                outcomev={outcomev}
+                getOutcome={getOutcome}
               />
             </Flex>{" "}
           </Box>
@@ -891,4 +751,4 @@ betHash2: {lastBetHash[2]}
   );
 }
 
-export default BetPage;
+export default TestPage;
