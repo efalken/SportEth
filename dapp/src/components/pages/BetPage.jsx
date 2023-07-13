@@ -11,15 +11,12 @@ import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
 import { ethers } from "ethers";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { indexerEndpoint, networkConfig } from "../../config";
+import { networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { syncEvents } from "../../helpers/syncEvents";
 
 function BetPage() {
-  const { oracleContract, bettingContract, provider, signer, account } =
-    useAuthContext();
+  const { oracleContract, bettingContract, account } = useAuthContext();
 
   const [betAmount, setBetAmount] = useState("");
   const [fundAmount, setFundAmount] = useState("");
@@ -47,6 +44,7 @@ function BetPage() {
     if (!bettingContract || !oracleContract) return;
 
     document.title = "Betting Page";
+    updateBetHashes();
     const interval1 = setInterval(() => {
       findValues();
     }, 1000);
@@ -78,13 +76,13 @@ function BetPage() {
       betAmount * 10000
     );
     const receipt = await tx.wait(1);
-    await syncEvents(receipt.hash);
+    // await syncEvents(receipt.hash);
   }
 
   async function redeemBet() {
     const tx = await bettingContract.redeem();
     const receipt = await tx.wait(1);
-    await syncEvents(receipt.hash);
+    // await syncEvents(receipt.hash);
   }
 
   function switchOdds() {
@@ -103,33 +101,21 @@ function BetPage() {
     setViewedTxs(viewedTxs + 1);
   }
 
-  async function addBetRecord({
-    bettor,
-    epoch,
-    matchNum,
-    pick,
-    betAmount,
-    payoff,
-    contractHash,
-    blockNumber,
-    transactionHash,
-    logIndex,
-    transactionIndex,
-  }) {
+  async function addBetRecord(contractHash) {
     console.log(subcontracts);
-    if (Object.keys(subcontracts).includes(contractHash)) return;
+    const { epoch, matchNum, pick, betAmount, payoff, bettor } =
+      await bettingContract.betContracts(contractHash);
 
-    const block = await provider.getBlock(blockNumber);
+    if (Object.keys(subcontracts).includes(contractHash)) return;
 
     betHistory[0][contractHash] = {
       Hashoutput: contractHash,
       BettorAddress: bettor,
       Epoch: Number(epoch),
-      timestamp: Number(block.timestamp),
       BetSize: Number(betAmount),
       LongPick: Number(pick),
       MatchNum: Number(matchNum),
-      Payoff: (0.95 * Number(payoff)),
+      Payoff: 0.95 * Number(payoff),
     };
     subcontracts[contractHash] = await bettingContract.checkRedeem(
       contractHash
@@ -138,48 +124,14 @@ function BetPage() {
     setBetHistory(betHistory);
   }
 
-  async function getbetHistoryArray() {
-    const bettor = await signer.getAddress();
-    const {
-      data: { events },
-    } = await axios.get(
-      `${indexerEndpoint}/events/betting/BetRecord?bettor=${bettor}`
-    );
-    // const events = await bettingContract.queryFilter(BetRecordEvent);
-    // TODO: Fix below
-    for (const event of events) {
-      await addBetRecord(event);
-    }
-  }
-
   useEffect(() => {
     if (!bettingContract || !account) return;
 
-    getbetHistoryArray();
-
     const BetRecordFilter = bettingContract.filters.BetRecord(account);
     bettingContract.on(BetRecordFilter, (eventEmitted) => {
-      const { bettor, epoch, matchNum, pick, betAmount, payoff, contractHash } =
-        eventEmitted.args;
-      const {
-        transactionHash,
-        transactionIndex,
-        blockNumber,
-        index: logIndex,
-      } = eventEmitted.log;
-      addBetRecord({
-        bettor,
-        epoch,
-        matchNum,
-        pick,
-        betAmount,
-        payoff,
-        contractHash,
-        transactionHash,
-        transactionIndex,
-        blockNumber,
-        logIndex,
-      });
+      const { contractHash } = eventEmitted.args;
+      console.log(contractHash);
+      addBetRecord(contractHash);
     });
   }, [bettingContract, account]);
 
@@ -193,11 +145,22 @@ function BetPage() {
     setTeamPick(1);
   }
 
+  async function updateBetHashes() {
+    let _lastBetHash = (await bettingContract.showUserBetData()) || [];
+    console.log(_lastBetHash);
+    setLastBetHash(_lastBetHash);
+    for (const betHash of _lastBetHash) {
+      if (
+        betHash !=
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+      )
+        await addBetRecord(betHash);
+    }
+  }
+
   async function findValues() {
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
-
-    
 
     let us = await bettingContract.userStruct(account);
     let _betNumber = us ? us.counter.toString() : "0";
@@ -205,9 +168,6 @@ function BetPage() {
 
     let _userBalance = us ? us.userBalance.toString() : "0";
     setUserBalance(_userBalance);
-
-    let _lastBetHash =  (await bettingContract.showUserBetData()) || [];
-    setLastBetHash(_lastBetHash);
 
     let _unusedCapital = (await bettingContract.margin(0)) || "0";
     setUnusedCapital(_unusedCapital);
@@ -429,7 +389,8 @@ function BetPage() {
                 spacing="1px"
               />
               <Text size="14px" className="style">
-                Your available capital: {(Number(userBalance)/1e4).toFixed(4)} AVAX
+                Your available capital: {(Number(userBalance) / 1e4).toFixed(4)}{" "}
+                AVAX
               </Text>
             </Box>
             <Box>
@@ -680,65 +641,63 @@ function BetPage() {
                   buttonLabel="Fund"
                 />
               </Box>
-              </Flex>
-
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-betHash0: {lastBetHash[0]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  betHash1: {lastBetHash[1]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-betHash2: {lastBetHash[2]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  betHash3: {lastBetHash[3]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash4: {lastBetHash[4]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash5: {lastBetHash[5]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash6: {lastBetHash[6]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash7: {lastBetHash[7]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash8: {lastBetHash[8]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash9: {lastBetHash[9]} 
-</Text>
-</Box>
-<Box mb="10px" mt="10px">
-<Text size="14px" className="style">
-  bethash10: {lastBetHash[10]} 
-</Text>
-</Box>
-
-  </Box>
+            </Flex>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash0: {lastBetHash[0]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash1: {lastBetHash[1]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash2: {lastBetHash[2]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash3: {lastBetHash[3]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash4: {lastBetHash[4]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash5: {lastBetHash[5]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash6: {lastBetHash[6]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash7: {lastBetHash[7]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash8: {lastBetHash[8]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash9: {lastBetHash[9]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash10: {lastBetHash[10]}
+              </Text>
+            </Box>
+          </Box>
         }
       >
         <Flex justifyContent="center">
