@@ -60,20 +60,17 @@ function TestPage() {
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
 
-      document.title = "Test Page";
+    document.title = "Test Page";
     const interval1 = setInterval(() => {
       findValues();
       //  this.getbetHistoryArray();
       //  this.checkRedeem();
     }, 1000);
 
-
     return () => {
       clearInterval(interval1);
     };
   }, [bettingContract, oracleContract]);
-
-
 
   async function redeemBet(x) {
     await bettingContract.redeem();
@@ -99,8 +96,6 @@ function TestPage() {
     setViewedTxs(viewedTxs + 1);
   }
 
-
-
   function radioFavePick(teampic) {
     setMatchPick(teampic);
     setTeamPick(0);
@@ -125,7 +120,6 @@ function TestPage() {
     let _noVotes = Number(await oracleContract.votes(1)) || "0";
     setVoteNo(_noVotes);
 
-    
     let _propNumber = Number(await oracleContract.propNumber()) || "0";
     setPropNumber(_propNumber);
 
@@ -135,10 +129,10 @@ function TestPage() {
     let _tokenEoaBalance = (await tokenContract.balanceOf(account)) || "0";
     setTokenEoaBalance(_tokenEoaBalance);
 
-    let _outcomes =  (await oracleContract.showResults()) || [];
+    let _outcomes = (await oracleContract.showResults()) || [];
     setOutcomes(_outcomes);
 
-    let _lastBetHash =  (await bettingContract.showUserBetData()) || [];
+    let _lastBetHash = (await bettingContract.showUserBetData()) || [];
     setLastBetHash(_lastBetHash);
 
     let _currW4 = Number((await bettingContract.margin(3)) || "0");
@@ -178,7 +172,8 @@ function TestPage() {
   }
 
   function getMaxSize2(netExposure) {
-    let maxSize = (usedCapital + unusedCapital) / concentrationLimit + netExposure;
+    let maxSize =
+      (usedCapital + unusedCapital) / concentrationLimit + netExposure;
     return maxSize;
   }
 
@@ -218,7 +213,7 @@ function TestPage() {
   function getOutcome(outcomei) {
     let outx = "lose";
     if (outcomei === 1) {
-     outx = "win";
+      outx = "win";
     } else if (outcomei === 2) {
       outx = "tie";
     }
@@ -227,16 +222,20 @@ function TestPage() {
 
   let statusWord = "na";
   function reviewStatusWord(revStatusi) {
-  statusWord = "na";
-  if (revStatusi === 0) {statusWord = 'init'}
-  else if (revStatusi === 10) {statusWord = 'process Initial'}
-  else if (revStatusi === 20) {statusWord = 'process update'}
-  else if (revStatusi === 30) {statusWord = 'process Settle'}
-  else if (revStatusi === 2) {statusWord = 'waiting for update or settlement'};
-  return statusWord;
+    statusWord = "na";
+    if (revStatusi === 0) {
+      statusWord = "init";
+    } else if (revStatusi === 10) {
+      statusWord = "process Initial";
+    } else if (revStatusi === 20) {
+      statusWord = "process update";
+    } else if (revStatusi === 30) {
+      statusWord = "process Settle";
+    } else if (revStatusi === 2) {
+      statusWord = "waiting for update or settlement";
+    }
+    return statusWord;
   }
-
-
 
   let [startTimeColumn, setStartTimeColumn] = useState([
     1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
@@ -270,8 +269,10 @@ function TestPage() {
     -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123,
     -123, -123, -123, -123, -123, -123, -123, -123,
   ]);
-  let [outcomev, setOutcomev] = useState([ 0, 0, 0, 0, 0, 0, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,]);
+  let [outcomev, setOutcomev] = useState([
+    0, 0, 0, 0, 0, 0, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0,
+  ]);
 
   let netLiab = [liab0, liab1];
 
@@ -279,8 +280,7 @@ function TestPage() {
 
   useEffect(() => {
     if (betData[0]) xdecode = unpack256(betData[0]);
-    if (xdecode[6] > 0)
-    console.log("xdecode256 ===", xdecode[0]);
+    if (xdecode[6] > 0) console.log("xdecode256 ===", xdecode[0]);
     console.log("betdata ===", betData);
     {
       for (let ii = 0; ii < 32; ii++) {
@@ -349,7 +349,7 @@ function TestPage() {
             </Box>
             <Box>
               <Flex>
-                <Text size="14px" color= "#000">
+                <Text size="14px" color="#000">
                   <Link
                     className="nav-header"
                     style={{
@@ -364,7 +364,7 @@ function TestPage() {
                 </Text>
               </Flex>
             </Box>
-            <Box>
+            {/* <Box>
               <Flex>
                 <Text size="14px">
                   <Link
@@ -373,7 +373,7 @@ function TestPage() {
                       cursor: "pointer",
                       color: "#fff000",
                       fontStyle: "italic",
-                     // font: "sans-serif"
+                      // font: "sans-serif"
                     }}
                     to="/bigbetpage"
                   >
@@ -381,10 +381,10 @@ function TestPage() {
                   </Link>
                 </Text>
               </Flex>
-            </Box>
+            </Box> */}
             <Box>
               <Flex
-                width="100%"  
+                width="100%"
                 alignItems="center"
                 justifyContent="marginLeft"
               >
@@ -404,13 +404,15 @@ function TestPage() {
               </Flex>
             </Box>
             <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">Connected Account Address</Text>
+              <Text size="14px" className="style">
+                Connected Account Address
+              </Text>
               <TruncatedAddress
                 addr={account}
                 start="8"
                 end="0"
                 transform="uppercase"
-                spacing="1px"   
+                spacing="1px"
               />
               <Text size="14px" className="style">
                 Your available capital: {Number(userBalance).toFixed(3)} AVAX
@@ -431,15 +433,16 @@ function TestPage() {
                     borderRadius: "5px",
                     cursor: "pointer",
                     color: "yellow",
-                    border: "1px solid #ffff00", 
-                    padding: "4px"
-            // width: width ? width : 120,
-            // color: "#00ff00",
-
+                    border: "1px solid #ffff00",
+                    padding: "4px",
+                    // width: width ? width : 120,
+                    // color: "#00ff00",
                   }}
                   onClick={() => switchOdds()}
                 >
-                  {showDecimalOdds ? "Switch to MoneyLine Odds" : "Switch to Decimal Odds"}
+                  {showDecimalOdds
+                    ? "Switch to MoneyLine Odds"
+                    : "Switch to Decimal Odds"}
                 </button>{" "}
               </Box>
             </Flex>{" "}
@@ -454,19 +457,31 @@ function TestPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
-            <Flex justifyContent="left">
-              <Text size="14px"  color="#ffffff">Active Week: {currW4}</Text>
-            </Flex>
+              <Flex justifyContent="left">
+                <Text size="14px" color="#ffffff">
+                  Active Week: {currW4}
+                </Text>
+              </Flex>
             </Box>
             <Box>
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text  className="style" color= "#ffffff" size="14px"> Your active bets</Text>  
+                    <Text className="style" color="#ffffff" size="14px">
+                      {" "}
+                      Your active bets
+                    </Text>
                     <br />
-                    <table style={{ width: "100%", fontSize: "14px", fontFamily: "sans-serif", color: "#ffffff"}}>
-                      <tbody >
-                        <tr style={{ width: "33%", color: "#ffffff"}}>
+                    <table
+                      style={{
+                        width: "100%",
+                        fontSize: "14px",
+                        fontFamily: "sans-serif",
+                        color: "#ffffff",
+                      }}
+                    >
+                      <tbody>
+                        <tr style={{ width: "33%", color: "#ffffff" }}>
                           <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
@@ -513,8 +528,7 @@ function TestPage() {
                 }}
               ></Flex>
             </Box>
-            <Box>
-            </Box>
+            <Box></Box>
             <Box>
               <Flex
                 mt="20px"
@@ -526,7 +540,7 @@ function TestPage() {
                   borderTop: `thin solid ${G}`,
                 }}
               ></Flex>
-            </Box> 
+            </Box>
             <Flex
               mt="5px"
               flexDirection="row"
@@ -534,88 +548,87 @@ function TestPage() {
               alignItems="center"
             >
               <Box>
-              <button
-              style={{
-                backgroundColor: "black",
-                borderRadius: "5px",
-                padding: "4px",
-                //borderRadius: "1px",
-                cursor: "pointer",
-                color: "yellow",
-                border: "1px solid #ffff00", 
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                vote();
-              }}
-            >
-              Vote
-            </button>
+                <button
+                  style={{
+                    backgroundColor: "black",
+                    borderRadius: "5px",
+                    padding: "4px",
+                    //borderRadius: "1px",
+                    cursor: "pointer",
+                    color: "yellow",
+                    border: "1px solid #ffff00",
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    vote();
+                  }}
+                >
+                  Vote
+                </button>
               </Box>
-              </Flex>
-
-              <Box>
-                <Form
-                  onChange={setHashInput}
-                  value={hashInput}
-                  onSubmit={checkRedeem}
-                  mb="20px"
-                  justifyContent="flex-start"
-                  buttonWidth="95px"
-                  inputWidth="100px"
-                  borderRadius="1px"
-                  placeholder="bet ID"
-                  //backgroundColor = "#fff"
-                  buttonLabel="checkRedeem"
-                />
-              </Box>
-              <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                No Votes: {voteNo} 
-              </Text>
+            </Flex>
+            <Box>
+              <Form
+                onChange={setHashInput}
+                value={hashInput}
+                onSubmit={checkRedeem}
+                mb="20px"
+                justifyContent="flex-start"
+                buttonWidth="95px"
+                inputWidth="100px"
+                borderRadius="1px"
+                placeholder="bet ID"
+                //backgroundColor = "#fff"
+                buttonLabel="checkRedeem"
+              />
             </Box>
-
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-              Yes Votes: {voteYes} 
-              </Text>
-            </Box>
-
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-              initEpoch: {lpEpochReward} 
+                No Votes: {voteNo}
               </Text>
             </Box>
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-              ConcentrationLimit: {concentrationLimit} 
+                Yes Votes: {voteYes}
               </Text>
             </Box>
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-              ReviewStatus: {reviewStatusWord(reviewStatus)} 
+                initEpoch: {lpEpochReward}
               </Text>
             </Box>
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-              tokenBalance: {tokenEoaBalance} 
+                ConcentrationLimit: {concentrationLimit}
               </Text>
             </Box>
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-              currentSubNumber: {propNumber} 
+                ReviewStatus: {reviewStatusWord(reviewStatus)}
               </Text>
             </Box>
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-              voteTracker: {voteTracker} 
+                tokenBalance: {tokenEoaBalance}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                currentSubNumber: {propNumber}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                voteTracker: {voteTracker}
               </Text>
             </Box>
           </Box>
         }
       >
         <Flex justifyContent="center">
-          <Text size="25px" className="style">test Page </Text>
+          <Text size="25px" className="style">
+            test Page{" "}
+          </Text>
         </Flex>
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifyContent="marginLeft">
@@ -643,32 +656,36 @@ function TestPage() {
             justifyContent="flex-start"
             alignItems="center"
           >
-            <Text size="14px" weight="400" color= "white" style={{ paddingLeft: "10px" }}>
+            <Text
+              size="14px"
+              weight="400"
+              color="white"
+              style={{ paddingLeft: "10px" }}
+            >
               Bet Amount
             </Text>
 
             <Input
               onChange={({ target: { value } }) => setBetAmount(value)}
               width="100px"
-              color = "black"
-
-              font = "sans-serif"
+              color="black"
+              font="sans-serif"
               placeholder={"# avax"}
               marginLeft="10px"
               marginRignt="5px"
-             // color="yellow"
+              // color="yellow"
               value={betAmount}
             />
             <Box mt="10px" mb="10px">
               <Button
                 style={{
                   //height: "30px",
-                 // width: "100px",
+                  // width: "100px",
                   float: "right",
                   marginLeft: "5px",
                   border: "1px solid yellow",
-                  padding: "4px"
-                 // color: "black"
+                  padding: "4px",
+                  // color: "black"
                 }}
               >
                 Bet Now{" "}
@@ -690,7 +707,7 @@ function TestPage() {
 
         <Flex
           style={{
-          //  color: "#000",
+            //  color: "#000",
             fontSize: "14px",
           }}
         >
@@ -705,9 +722,7 @@ function TestPage() {
               {"),  "}
               MaxBet:{" "}
               {parseFloat(
-                getMaxSize2(
-                  netLiab[teamPick][matchPick]
-                ) / 1e3
+                getMaxSize2(netLiab[teamPick][matchPick]) / 1e3
               ).toFixed(2)}
               {"  "}
               opponent: {teamSplit[matchPick][2 - teamPick]}

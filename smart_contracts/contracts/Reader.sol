@@ -43,11 +43,11 @@ contract Reader {
       .betContracts(_subkID);
   }
 
-  function checkOffer(bytes32 _subkID) external view returns (bool) {
-    (, , , uint32 betamt, , ) = betting.offerContracts(_subkID);
-    bool takeable = (betamt > 0);
-    return takeable;
-  }
+  // function checkOffer(bytes32 _subkID) external view returns (bool) {
+  //   (, , , uint32 betamt, , ) = betting.offerContracts(_subkID);
+  //   bool takeable = (betamt > 0);
+  //   return takeable;
+  // }
 
   function checkRedeem(bytes32 _subkID) external view returns (bool) {
     (uint8 epoch, uint8 matchNum, uint8 pick, , , ) = betting.betContracts(

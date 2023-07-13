@@ -25,7 +25,7 @@ contract Betting {
   // individual bet contracts
   mapping(bytes32 => Subcontract) public betContracts;
   // individual offered big bets
-  mapping(bytes32 => Subcontract) public offerContracts;
+  // mapping(bytes32 => Subcontract) public offerContracts;
   /// this maps the set {epoch, match, team} to its event outcome,
   ///where 0 is a loss, 1 is a tie or postponement, 2 a win
   /// The outcome defaults to 0, so that these need not be updated for a loss
@@ -67,15 +67,15 @@ contract Betting {
     bytes32 contractHash
   );
 
-  event OfferRecord(
-    address indexed bettor,
-    uint8 indexed epoch,
-    uint8 matchNum,
-    uint8 pick,
-    uint32 betAmount,
-    uint32 payoff,
-    bytes32 contractHash
-  );
+  // event OfferRecord(
+  //   address indexed bettor,
+  //   uint8 indexed epoch,
+  //   uint8 matchNum,
+  //   uint8 pick,
+  //   uint32 betAmount,
+  //   uint32 payoff,
+  //   bytes32 contractHash
+  // );
 
   event Funding(
     address bettor,
@@ -108,10 +108,10 @@ contract Betting {
     oracleAdmin = _oracleAddress;
   }
 
-  function checkOffer(bytes32 _subkID) external view returns (bool) {
-    bool takeable = (offerContracts[_subkID].betAmount > 0);
-    return takeable;
-  }
+  // function checkOffer(bytes32 _subkID) external view returns (bool) {
+  //   bool takeable = (offerContracts[_subkID].betAmount > 0);
+  //   return takeable;
+  // }
 
   receive() external payable {}
 
@@ -199,133 +199,133 @@ contract Betting {
     return subkID;
   }
 
-  /** @dev processes large bet where the size and odds are of the poster's choosing
-   * @param _matchNum is 0 to 31, representing the match
-   * @param _team0or1 is the initial favorite (0) and underdog (1) poster wants to win
-   * @param _betAmount is the amount bet in 10s of finney, 0.0001 ether
-   * @param _decOddsBB is the proposed odds on tthte poster's desired team, decimal odds for 1.909 are input as 1909
-   */
-  function postBigBet(
-    uint8 _matchNum,
-    uint8 _team0or1,
-    uint32 _betAmount,
-    uint32 _decOddsBB
-  ) external returns (bytes32) {
-    // we only want large bets, not just custom bets
-    require(_betAmount >= margin[0] / margin[5], "too small");
-    // cannot bet more than one has
-    require(_betAmount <= userStruct[msg.sender].userBalance, "NSF");
-    require(_decOddsBB > 100 && _decOddsBB < 900, "invalid odds");
-    bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
-    Subcontract memory order;
-    order.pick = _team0or1;
-    order.matchNum = _matchNum;
-    order.epoch = uint8(margin[3]);
-    order.bettor = msg.sender;
-    order.betAmount = _betAmount;
-    // payoff determines the money needed to take the other side of this bet
-    order.payoff = ((_decOddsBB - 100) * _betAmount) / 100;
-    offerContracts[subkID] = order;
-    margin[6]++;
-    emit OfferRecord(
-      msg.sender,
-      uint8(margin[3]),
-      _matchNum,
-      _team0or1,
-      order.betAmount,
-      order.payoff,
-      subkID
-    );
-    return subkID;
-  }
+  // /** @dev processes large bet where the size and odds are of the poster's choosing
+  //  * @param _matchNum is 0 to 31, representing the match
+  //  * @param _team0or1 is the initial favorite (0) and underdog (1) poster wants to win
+  //  * @param _betAmount is the amount bet in 10s of finney, 0.0001 ether
+  //  * @param _decOddsBB is the proposed odds on tthte poster's desired team, decimal odds for 1.909 are input as 1909
+  //  */
+  // function postBigBet(
+  //   uint8 _matchNum,
+  //   uint8 _team0or1,
+  //   uint32 _betAmount,
+  //   uint32 _decOddsBB
+  // ) external returns (bytes32) {
+  //   // we only want large bets, not just custom bets
+  //   require(_betAmount >= margin[0] / margin[5], "too small");
+  //   // cannot bet more than one has
+  //   require(_betAmount <= userStruct[msg.sender].userBalance, "NSF");
+  //   require(_decOddsBB > 100 && _decOddsBB < 900, "invalid odds");
+  //   bytes32 subkID = keccak256(abi.encodePacked(margin[6], block.number));
+  //   Subcontract memory order;
+  //   order.pick = _team0or1;
+  //   order.matchNum = _matchNum;
+  //   order.epoch = uint8(margin[3]);
+  //   order.bettor = msg.sender;
+  //   order.betAmount = _betAmount;
+  //   // payoff determines the money needed to take the other side of this bet
+  //   order.payoff = ((_decOddsBB - 100) * _betAmount) / 100;
+  //   offerContracts[subkID] = order;
+  //   margin[6]++;
+  //   emit OfferRecord(
+  //     msg.sender,
+  //     uint8(margin[3]),
+  //     _matchNum,
+  //     _team0or1,
+  //     order.betAmount,
+  //     order.payoff,
+  //     subkID
+  //   );
+  //   return subkID;
+  // }
 
-  /* @dev takes outstanding offered bet
-   * @param _subkid is the bet offer's unique HashID
-   */
-  function takeBigBet(bytes32 _subkid) external returns (bytes32) {
-    Subcontract memory k = offerContracts[_subkid];
-    uint32[7] memory betDatav = decodeNumber(betData[k.matchNum]);
-    require(betDatav[4] > block.timestamp, "game started");
-    require(k.epoch == margin[3], "expired bet");
-    require(
-      userStruct[k.bettor].userBalance >= k.betAmount &&
-        userStruct[msg.sender].userBalance >= k.payoff,
-      "NSF"
-    );
-    // bet amount for big bet proposer
-    betDatav[k.pick] += k.betAmount;
-    // bet payoff for big bet proposer
-    betDatav[2 + k.pick] += k.payoff;
-    // bet amount for big bet taker
-    betDatav[1 - k.pick] += k.payoff;
-    // bet payoff for big bet taker
-    betDatav[3 - k.pick] += k.betAmount;
-    // subtracts proposer bet amount from proposer's balance
-    userStruct[k.bettor].userBalance  -= k.betAmount;
-    // puts proposer's big bet info into struct that can be accessed via hash mapping
-    betContracts[_subkid] = k;
-    emit BetRecord(
-      k.bettor,
-      uint8(margin[3]),
-      k.matchNum,
-      k.pick,
-      k.betAmount,
-      k.payoff,
-      _subkid
-    );
-    margin[6]++;
-    // creates hash of bet for taker
-    bytes32 subkID2 = keccak256(abi.encodePacked(margin[6], block.number));
-    k.bettor = msg.sender;
-    // reverses payout and betamount for taker
-    (k.payoff, k.betAmount) = (k.betAmount, k.payoff);
-    // if proposal is 1, taker gets 0, if proposal 0 taker gets 1
-    k.pick = 1 - k.pick;
-    userStruct[msg.sender].userBalance -= k.betAmount;
-    margin[2] += (k.payoff + k.betAmount);
-    // emit OfferRecord(
-    //   msg.sender,
-    //   uint8(margin[3]),
-    //   k.matchNum,
-    //   k.pick,
-    //   k.betAmount,
-    //   k.payoff,
-    //   _subkid
-    // );
-    emit BetRecord(
-      msg.sender,
-      uint8(margin[3]),
-      k.matchNum,
-      k.pick,
-      k.betAmount,
-      k.payoff,
-      subkID2
-    );
-    // net betting data for this match are saved
-    uint256 encoded;
-    encoded |= uint256(betDatav[0]) << 224;
-    encoded |= uint256(betDatav[1]) << 192;
-    encoded |= uint256(betDatav[2]) << 160;
-    encoded |= uint256(betDatav[3]) << 128;
-    encoded |= uint256(betDatav[4]) << 64;
-    encoded |= uint256(betDatav[5]) << 32;
-    encoded |= uint256(betDatav[6]);
-    betData[k.matchNum] = encoded;
-    // adds bet of taker to betContract struct
-    betContracts[subkID2] = k;
-    margin[6]++;
-    delete offerContracts[_subkid];
-    return subkID2;
-  }
+  // /* @dev takes outstanding offered bet
+  //  * @param _subkid is the bet offer's unique HashID
+  //  */
+  // function takeBigBet(bytes32 _subkid) external returns (bytes32) {
+  //   Subcontract memory k = offerContracts[_subkid];
+  //   uint32[7] memory betDatav = decodeNumber(betData[k.matchNum]);
+  //   require(betDatav[4] > block.timestamp, "game started");
+  //   require(k.epoch == margin[3], "expired bet");
+  //   require(
+  //     userStruct[k.bettor].userBalance >= k.betAmount &&
+  //       userStruct[msg.sender].userBalance >= k.payoff,
+  //     "NSF"
+  //   );
+  //   // bet amount for big bet proposer
+  //   betDatav[k.pick] += k.betAmount;
+  //   // bet payoff for big bet proposer
+  //   betDatav[2 + k.pick] += k.payoff;
+  //   // bet amount for big bet taker
+  //   betDatav[1 - k.pick] += k.payoff;
+  //   // bet payoff for big bet taker
+  //   betDatav[3 - k.pick] += k.betAmount;
+  //   // subtracts proposer bet amount from proposer's balance
+  //   userStruct[k.bettor].userBalance  -= k.betAmount;
+  //   // puts proposer's big bet info into struct that can be accessed via hash mapping
+  //   betContracts[_subkid] = k;
+  //   emit BetRecord(
+  //     k.bettor,
+  //     uint8(margin[3]),
+  //     k.matchNum,
+  //     k.pick,
+  //     k.betAmount,
+  //     k.payoff,
+  //     _subkid
+  //   );
+  //   margin[6]++;
+  //   // creates hash of bet for taker
+  //   bytes32 subkID2 = keccak256(abi.encodePacked(margin[6], block.number));
+  //   k.bettor = msg.sender;
+  //   // reverses payout and betamount for taker
+  //   (k.payoff, k.betAmount) = (k.betAmount, k.payoff);
+  //   // if proposal is 1, taker gets 0, if proposal 0 taker gets 1
+  //   k.pick = 1 - k.pick;
+  //   userStruct[msg.sender].userBalance -= k.betAmount;
+  //   margin[2] += (k.payoff + k.betAmount);
+  //   // emit OfferRecord(
+  //   //   msg.sender,
+  //   //   uint8(margin[3]),
+  //   //   k.matchNum,
+  //   //   k.pick,
+  //   //   k.betAmount,
+  //   //   k.payoff,
+  //   //   _subkid
+  //   // );
+  //   emit BetRecord(
+  //     msg.sender,
+  //     uint8(margin[3]),
+  //     k.matchNum,
+  //     k.pick,
+  //     k.betAmount,
+  //     k.payoff,
+  //     subkID2
+  //   );
+  //   // net betting data for this match are saved
+  //   uint256 encoded;
+  //   encoded |= uint256(betDatav[0]) << 224;
+  //   encoded |= uint256(betDatav[1]) << 192;
+  //   encoded |= uint256(betDatav[2]) << 160;
+  //   encoded |= uint256(betDatav[3]) << 128;
+  //   encoded |= uint256(betDatav[4]) << 64;
+  //   encoded |= uint256(betDatav[5]) << 32;
+  //   encoded |= uint256(betDatav[6]);
+  //   betData[k.matchNum] = encoded;
+  //   // adds bet of taker to betContract struct
+  //   betContracts[subkID2] = k;
+  //   margin[6]++;
+  //   delete offerContracts[_subkid];
+  //   return subkID2;
+  // }
 
-  /* @dev cancels outstanding offered bet
-   * @param _subkid is the bet's unique ID
-   * unnecessary for expired bet offers, which cannot be taken and do not affect user balances
-   */
-  function cancelBigBet(bytes32 _subkid) external {
-    require(offerContracts[_subkid].bettor == msg.sender, "wrong account");
-    delete offerContracts[_subkid];
-  }
+  // /* @dev cancels outstanding offered bet
+  //  * @param _subkid is the bet's unique ID
+  //  * unnecessary for expired bet offers, which cannot be taken and do not affect user balances
+  //  */
+  // function cancelBigBet(bytes32 _subkid) external {
+  //   require(offerContracts[_subkid].bettor == msg.sender, "wrong account");
+  //   delete offerContracts[_subkid];
+  // }
 
   /* @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
    * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win, 2 for tie or no contest

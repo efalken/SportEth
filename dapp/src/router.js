@@ -1,15 +1,15 @@
 import Splash from "./components/pages/Splash";
 import FAQ from "./components/pages/FAQ";
 import BetPage from "./components/pages/BetPage";
-import BigBetPage from "./components/pages/BigBetPage";
+// import BigBetPage from "./components/pages/BigBetPage";
 import BookiePage from "./components/pages/BookiePage";
 import TestPage from "./components/pages/TestPage";
-import EventBetRecord from "./components/pages/EventBetRecord";
-import EventBigBetRecord from "./components/pages/EventBigBetRecord";
-import EventOdds from "./components/pages/EventOdds";
-import EventSchedule from "./components/pages/EventSchedule";
-import EventStartTime from "./components/pages/EventStartTime";
-import EventGameResults from "./components/pages/EventGameResults";
+// import EventBetRecord from "./components/pages/EventBetRecord";
+// import EventBigBetRecord from "./components/pages/EventBigBetRecord";
+// import EventOdds from "./components/pages/EventOdds";
+// import EventSchedule from "./components/pages/EventSchedule";
+// import EventStartTime from "./components/pages/EventStartTime";
+// import EventGameResults from "./components/pages/EventGameResults";
 import { createBrowserRouter } from "react-router-dom";
 import AuthRequired from "./components/layout/AuthRequired";
 
@@ -27,15 +27,15 @@ const router = createBrowserRouter([
       </AuthRequired>
     ),
   },
-  {
-    path: "/bigbetpage",
-    element: (
-      <AuthRequired>
-        {" "}
-        <BigBetPage />
-      </AuthRequired>
-    ),
-  },
+  // {
+  //   path: "/bigbetpage",
+  //   element: (
+  //     <AuthRequired>
+  //       {" "}
+  //       <BigBetPage />
+  //     </AuthRequired>
+  //   ),
+  // },
   {
     path: "/bookiepage",
     element: (
@@ -44,12 +44,12 @@ const router = createBrowserRouter([
       </AuthRequired>
     ),
   },
-  { path: "/bethistory", element: <EventBetRecord /> },
-  { path: "/bigbethistory", element: <EventBigBetRecord /> },
-  { path: "/oddshistory", element: <EventOdds /> },
-  { path: "/schedhistory", element: <EventSchedule /> },
-  { path: "/starthistory", element: <EventStartTime /> },
-  { path: "/resultshistory", element: <EventGameResults /> },
+  // { path: "/bethistory", element: <EventBetRecord /> },
+  // { path: "/bigbethistory", element: <EventBigBetRecord /> },
+  // { path: "/oddshistory", element: <EventOdds /> },
+  // { path: "/schedhistory", element: <EventSchedule /> },
+  // { path: "/starthistory", element: <EventStartTime /> },
+  // { path: "/resultshistory", element: <EventGameResults /> },
   { path: "/TestPage", element: <TestPage /> },
 ]);
 
