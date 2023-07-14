@@ -11,16 +11,15 @@ import "./ConstantsBetting.sol";
 contract Betting {
   // for emergency shutdown
   uint8[2] public paused;
-  uint16[32] public odds; //
+  uint16[32] public odds; 
   //0 betEpoch, 1 concentration Limit, 2 nonce, 3 first Start Time
   uint32[4] public params;
-  // starttime, 1 odds
-  uint32[32] public startTime; //
-  // only oracle contract can execute several functions
+  // starttime
+  uint32[32] public startTime; 
   /** 0 total LPcapital, 1 LPcapitalLocked, 2 bettorLocked, 3 totalShares
    */
   uint64[4] public margin;
-  /// 0-betLong[favorite], 1-betLong[away], 2-betPayout[favorite], 3-betPayout[underdog], starttime, odds
+  /// 0-betLong[favorite], 1-betLong[away], 2-betPayout[favorite], 3-betPayout[underdog]
   uint256[32] public betData;
   address payable public oracleAdmin;
   /// for transacting with the external stablecoin
@@ -69,12 +68,7 @@ contract Betting {
     bytes32 contractHash
   );
 
-  event Funding(
-    address indexed bettor,
-    uint64 moveAmount,
-    uint32 epoch,
-    uint32 action
-  );
+  event Funding(address bettor, uint64 moveAmount, uint32 epoch, uint32 action);
 
   constructor(address payable _tokenAddress) {
     // concentration limit
@@ -250,7 +244,7 @@ contract Betting {
   /// @dev bettor funds account for bets
   function fundBettor() external payable {
     // removes unneeded decimals for internal accounting
-    uint32 amt = uint32(msg.value / UNITS_TRANS14);
+    uint64 amt = uint64(msg.value / UNITS_TRANS14);
     userStruct[msg.sender].userBalance += amt;
     emit Funding(msg.sender, amt, params[0], 0);
   }
@@ -258,14 +252,14 @@ contract Betting {
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
     // require(block.timestamp < params[3], "only prior to first event");
-    uint256 netinvestment = (msg.value / 1e14);
-    uint32 _shares = 0;
+    uint256 netinvestment = (msg.value / 1e10);
+    uint64 _shares = 0;
     if (margin[0] > 0) {
-      _shares = uint32(
+      _shares = uint64(
         (netinvestment * uint256(margin[3])) / uint256(margin[0])
       );
     } else {
-      _shares = uint32(netinvestment);
+      _shares = uint64(netinvestment);
     }
     margin[0] = margin[0] + uint64(netinvestment);
     // LP can only withdraw after this epoch
@@ -376,7 +370,7 @@ contract Betting {
     _betData = betData;
   }
 
-  function showOdds() external view returns (uint16[32] memory _odds) {
+    function showOdds() external view returns (uint16[32] memory _odds) {
     _odds = odds;
   }
 

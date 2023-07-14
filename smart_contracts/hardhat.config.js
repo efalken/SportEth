@@ -71,6 +71,7 @@ module.exports = {
     avaxtest: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       avaxtest: true,
+      chainId: 43113,
       accounts: {
         mnemonic: `${process.env.GOERLI_WALLET_MNEMONIC}`,
         path: "m/44'/60'/0'/0",

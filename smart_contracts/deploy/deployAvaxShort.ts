@@ -9,7 +9,7 @@ var hash1100, hash1201, hash1110, hash1131, hash2130, hash2140, hash2130, hash21
 
 //var finney = "1000000000000000"
 const finneys = BigInt('1000000000000000');
-const eths =    BigInt('1000000000000000000');
+const eths = BigInt('1000000000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(
@@ -49,20 +49,13 @@ async function main() {
   const oracle = await Oracle.deploy(betting.address, token.address);
   await oracle.deployed();
   console.log(`Oracle contract was deployed to ${oracle.address}`);
-  await betting.setOracleAddress(oracle.address);
-
-  await token.setAdmin(oracle.address);
-
-  result = await oracle.depositTokens(500n*million);
+  result = await betting.setOracleAddress(oracle.address);
+  await result.wait();
+  result = await token.setAdmin(oracle.address);
+  await result.wait();
+  result = await oracle.depositTokens(560n*million);
   await result.wait();
   console.log(`got here2`);
-
-  const _timestamp0 = (
-    await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-    ).timestamp;
-    console.log(`time is ${_timestamp0}`);
-
- 
 
   
   // result = await oracle.tokenReward();
@@ -168,46 +161,46 @@ async function main() {
     value: 200n*finneys,
   });
   await result.wait();
-  console.log(`fundbettor ${margin00}`);
+  console.log(`fundbettor`);
 
   result = await betting.connect(signers[2]).fundBettor({
     value: 200n*finneys,
   });
   await result.wait();
-  console.log(`fundbettor2 ${margin00}`);
+  console.log(`fundbettor`);
 
-  result = await betting.connect(signers[1]).bet(0, 1, 10000);
+  result = await betting.connect(signers[1]).bet(0, 1, 1000);
       receipt = await result.wait();
-      console.log(`bet01 ${margin00}`);
-    //  hash1100 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(0, 0, 11000);
+      console.log(`bet01`);
+  //    hash1100 = receipt.events[0].args.contractHash;
+      result = await betting.connect(signers[2]).bet(0, 0, 1100);
       receipt = await result.wait();
-      console.log(`bet02 ${margin00}`);
-      //  hash1100 = receipt.events[0].args.contractHash;
-   //   hash1201 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[1]).bet(1, 0, 12000);
+ //     hash1201 = receipt.events[0].args.contractHash;
+      result = await betting.connect(signers[1]).bet(1, 0, 1200);
       receipt = await result.wait();
-      hash1110 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(1, 1, 13000);
+   //   hash1110 = receipt.events[0].args.contractHash;
+      result = await betting.connect(signers[2]).bet(1, 1, 1300);
       receipt = await result.wait();
       //hash4 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[1]).bet(3, 1, 14000);
+      result = await betting.connect(signers[1]).bet(3, 1, 1400);
       receipt = await result.wait();
-      hash1131 = receipt.events[0].args.contractHash;
+   //   hash1131 = receipt.events[0].args.contractHash;
      // hash5 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(3, 0, 15000);
+      result = await betting.connect(signers[2]).bet(3, 0, 1500);
       receipt = await result.wait();
-      hash1230 = receipt.events[0].args.contractHash;
+  //    hash1230 = receipt.events[0].args.contractHash;
 
       result = await oracle.settlePost([
         1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
-      await helper.advanceTimeAndBlock(48 * secondsInHour);
+      console.log(`settlepost`);
+     // await helper.advanceTimeAndBlock(48 * secondsInHour);
       result = await oracle.settleProcess();
       receipt = result.wait();
-      nextStart = nextStart + 7 * 24 * secondsInHour;
+      console.log(`settleprocess`);
+      //nextStart = nextStart + 7 * 24 * secondsInHour;
       result = await oracle.initPost(
         [
           "NFL:CLE:NYJ",
@@ -284,35 +277,38 @@ async function main() {
         ]
       );
       receipt = result.wait();
+      console.log(`initpost`);
      
       result = await oracle.initProcess();
       receipt = result.wait();
+      console.log(`initprocess`);
 
-      result = await betting.connect(signers[1]).bet(0, 1, 13000);
+      result = await betting.connect(signers[1]).bet(0, 1, 1300);
       receipt = await result.wait();
-      let hash101 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(0, 0, 14000);
+      console.log(`bet process`);
+   //   let hash101 = receipt.events[0].args.contractHash;
+      result = await betting.connect(signers[2]).bet(0, 0, 1400);
       receipt = await result.wait();
-      let hash200 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[1]).bet(1, 0, 15000);
+   //   let hash200 = receipt.events[0].args.contractHash;
+      result = await betting.connect(signers[1]).bet(1, 0, 1500);
       receipt = await result.wait();
-      let hash110 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(1, 1, 16000);
+   //   let hash110 = receipt.events[0].args.contractHash;
+      result = await betting.connect(signers[2]).bet(1, 1, 1600);
       receipt = await result.wait();
-      let hash211 = receipt.events[0].args.contractHash;
+    //  let hash211 = receipt.events[0].args.contractHash;
  
       result = await oracle.settlePost([
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
-      await helper.advanceTimeAndBlock(48 * secondsInHour);
+      //await helper.advanceTimeAndBlock(48 * secondsInHour);
       result = await oracle.settleProcess();
       receipt = result.wait();
 
       //nextStart = nextStart + 7 * 24 * secondsInHour;
       
-      
+      /*
       result = await oracle.initPost(
         [
           "NHL:Colorado:Washington",
@@ -416,10 +412,10 @@ async function main() {
       const userbets1b =  (await betting.betContracts(hash1100));
       console.log(`array ${userbets1b}`);
       console.log(`element in array ${userbets1b[0]}`);
-      // const userbets2 =  await betting.connect(signers[1]).showUserBetData();
-      // console.log(`acct1 hash ${userbets2[0]}`);
-      // const userbets3 =  await betting.connect(signers[1]).checkRedeem(hash1100);
-     // console.log(`redeem info ${userbets3}`);
+      const userbets2 =  await betting.connect(signers[1]).showUserBetData();
+      console.log(`acct1 hash ${userbets2[0]}`);
+      const userbets3 =  await betting.connect(signers[1]).checkRedeem(hash1100);
+      console.log(`redeem info ${userbets3}`);
 
       const userbets1c =  (await betting.betContracts(hash1201)).betAmount;
       console.log(`betsAcct hash ${hash1201}`);
@@ -437,9 +433,9 @@ async function main() {
       console.log(`acct1 Amt 10000 ${betParams0}`);
 
       console.log(`betsAcct12 hash ${hash1201}`);
-      //console.log(`betsAcct 2 ${userbets2(0)}`);
+      console.log(`betsAcct 2 ${userbets2(0)}`);
   
-
+*/
 
       // ***************************************
 

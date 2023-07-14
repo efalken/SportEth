@@ -144,7 +144,7 @@ contract Oracle {
       // sends to the betting contract
       bettingContract.transmitInit(propOdds, propStartTimes);
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
-      mintReward();
+    // mintReward();
     } else {
       burnAndReset();
     }
@@ -174,7 +174,7 @@ contract Oracle {
     if (votes[0] > votes[1]) {
       bettingContract.transmitUpdate(propOdds);
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
-      mintReward();
+     // mintReward();
     } else {
       burnAndReset();
     }
@@ -207,13 +207,12 @@ contract Oracle {
       betEpochOracle = xx;
       feeData[1] += uint64(ethDividend / uint256(feeData[0]) / 1e5);
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
-      mintReward();
+     // mintReward();
     } else {
       burnAndReset();
     }
     reset();
     reviewStatus = 0;
-
     return true;
   }
 
@@ -334,9 +333,9 @@ contract Oracle {
     _propResults = propResults;
   }
 
-  function mintReward() internal {
-    // token.mint(proposer, ORACLE_REWARD);
-  }
+  // function mintReward() internal {
+  //   // token.mint(proposer, ORACLE_REWARD);
+  // }
 
   function adjustFeeData() internal returns (uint256) {
     uint256 voteRecord = uint256(
