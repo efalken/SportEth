@@ -9,19 +9,18 @@ import "./Token.sol";
 import "./ConstantsBetting.sol";
 
 contract Betting {
- 
   // for emergency shutdown
   uint8[2] public paused;
-  uint16[32] public odds;//
+  uint16[32] public odds; //
   //0 betEpoch, 1 concentration Limit, 2 nonce, 3 first Start Time
   uint32[4] public params;
- // starttime, 1 odds
-  uint32[32] public startTime;//
+  // starttime, 1 odds
+  uint32[32] public startTime; //
   // only oracle contract can execute several functions
-   /** 0 total LPcapital, 1 LPcapitalLocked, 2 bettorLocked, 3 totalShares
-  */
+  /** 0 total LPcapital, 1 LPcapitalLocked, 2 bettorLocked, 3 totalShares
+   */
   uint64[4] public margin;
-    /// 0-betLong[favorite], 1-betLong[away], 2-betPayout[favorite], 3-betPayout[underdog], starttime, odds
+  /// 0-betLong[favorite], 1-betLong[away], 2-betPayout[favorite], 3-betPayout[underdog], starttime, odds
   uint256[32] public betData;
   address payable public oracleAdmin;
   /// for transacting with the external stablecoin
@@ -64,18 +63,13 @@ contract Betting {
     address indexed bettor,
     uint32 indexed epoch,
     uint32 matchNum,
-    uint32 pick,  
+    uint32 pick,
     uint64 betAmount,
     uint64 payoff,
     bytes32 contractHash
   );
 
-  event Funding(
-    address bettor,
-    uint64 moveAmount,
-    uint32 epoch,
-    uint32 action
-  );
+  event Funding(address bettor, uint64 moveAmount, uint32 epoch, uint32 action);
 
   constructor(address payable _tokenAddress) {
     // concentration limit
@@ -108,9 +102,16 @@ contract Betting {
    * @param _team0or1 denotes the initial favorite (0) and underdog (1) for a given epoch and matchNumber
    * @param _betAmt is the amount bet in 10s of finney, 0.0001 ether
    */
-  function bet(uint32 _matchNumber, uint32 _team0or1, int64 _betAmt) external returns (bytes32) {
+  function bet(
+    uint32 _matchNumber,
+    uint32 _team0or1,
+    int64 _betAmt
+  ) external returns (bytes32) {
     require(userStruct[msg.sender].counter < 16, "redeem bets to reset acct");
-    require(_betAmt <= int64(uint64(userStruct[msg.sender].userBalance)), "NSF ");
+    require(
+      _betAmt <= int64(uint64(userStruct[msg.sender].userBalance)),
+      "NSF "
+    );
     require(_betAmt >= MIN_BET, "NSF ");
     require(_matchNumber != paused[0] && _matchNumber != paused[1]);
     uint64[4] memory betDatav = decodeNumber(_matchNumber);
@@ -119,22 +120,23 @@ contract Betting {
     bool isMMA = (betPayoff > 10000) ? true : false;
     betPayoff = (betPayoff % 10000);
     if (_team0or1 == 0) {
-    betPayoff = int64(_betAmt * betPayoff) / 1000;
+      betPayoff = int64(_betAmt * betPayoff) / 1000;
     } else if (isMMA) {
-    betPayoff = int64(_betAmt) * 1e6 * 90 / (50 + betPayoff) / 1000 /100;
-     } else {
-    betPayoff = int64(_betAmt) * 1e6 * 95 / (50 + betPayoff) / 1000 /100;
-     }
+      betPayoff = (int64(_betAmt) * 1e6 * 90) / (50 + betPayoff) / 1000 / 100;
+    } else {
+      betPayoff = (int64(_betAmt) * 1e6 * 95) / (50 + betPayoff) / 1000 / 100;
+    }
     int64 netPosTeamBet = int64(betDatav[2 + _team0or1]) -
       int64(betDatav[1 - _team0or1]);
     require(
       int64(betPayoff + netPosTeamBet) < int64(margin[0] / uint64(params[1])),
-      "betsize over limit");
+      "betsize over limit"
+    );
     int64 netPosTeamOpp = int64(betDatav[3 - _team0or1]) -
       int64(betDatav[_team0or1]);
     int64 marginChange = maxZero(
       betPayoff + netPosTeamBet,
-      - _betAmt + netPosTeamOpp
+      -_betAmt + netPosTeamOpp
     ) - maxZero(netPosTeamBet, netPosTeamOpp);
     require(
       marginChange < int64(margin[0] - margin[1]),
@@ -155,15 +157,17 @@ contract Betting {
     betDatav[0 + _team0or1] += uint64(_betAmt);
     betDatav[2 + _team0or1] += uint64(betPayoff);
     uint256 encoded;
-     encoded |= uint256(betDatav[0]) << 192;
-     encoded |= uint256(betDatav[1]) << 128;
-     encoded |= uint256(betDatav[2]) << 64;
-     encoded |= uint256(betDatav[3]);
-     // moose = uint256(encoded);
-     betData[_matchNumber] = uint256(encoded);
+    encoded |= uint256(betDatav[0]) << 192;
+    encoded |= uint256(betDatav[1]) << 128;
+    encoded |= uint256(betDatav[2]) << 64;
+    encoded |= uint256(betDatav[3]);
+    // moose = uint256(encoded);
+    betData[_matchNumber] = uint256(encoded);
     params[2]++;
-   // userStruct[msg.sender].lastTransaction.push(subkID);
-    userStruct[msg.sender].lastTransaction[userStruct[msg.sender].counter] = subkID;
+    // userStruct[msg.sender].lastTransaction.push(subkID);
+    userStruct[msg.sender].lastTransaction[
+      userStruct[msg.sender].counter
+    ] = subkID;
     userStruct[msg.sender].counter++;
     emit BetRecord(
       msg.sender,
@@ -171,12 +175,12 @@ contract Betting {
       _matchNumber,
       _team0or1,
       uint32(int32(_betAmt)),
-      uint32(int32(betPayoff * 95 / 100)),
+      uint32(int32((betPayoff * 95) / 100)),
       subkID
     );
     return subkID;
   }
- 
+
   /**  @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
    * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win, 2 for tie or no contest
    * @return epoch is the first argument. The data epoch, match, pick create a tuple that uniquely identifies bets
@@ -245,10 +249,10 @@ contract Betting {
     userStruct[msg.sender].userBalance += amt;
     emit Funding(msg.sender, amt, params[0], 0);
   }
- 
+
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
-   // require(block.timestamp < params[3], "only prior to first event");
+    // require(block.timestamp < params[3], "only prior to first event");
     uint256 netinvestment = (msg.value / 1e14);
     uint32 _shares = 0;
     if (margin[0] > 0) {
@@ -274,23 +278,23 @@ contract Betting {
     uint numberBets = userStruct[msg.sender].counter;
     uint64 payout;
     for (uint i = 0; i < numberBets; i++) {
-    bytes32 _subkId = userStruct[msg.sender].lastTransaction[i];
-    // creates epoch~matchnumber~pick number via concatenation
-    uint32 epochMatch = betContracts[_subkId].epoch *
-      1000 +
-      betContracts[_subkId].matchNum *
-      10 +
-      betContracts[_subkId].pick;
-    if(outcomeMap[epochMatch] != 0) {
-    // to get this far, user has either won or tied, and thus gets back initial
-    // bet amount
-    payout += betContracts[_subkId].betAmount;
-    // a winner gets the payout, which is adjusted by 0.95 to pay oracle
-    if (outcomeMap[epochMatch] == 2) {
-      payout += (betContracts[_subkId].payoff * 95) / 100;
-    }
-    // delete betContracts[_subkId];
-    }
+      bytes32 _subkId = userStruct[msg.sender].lastTransaction[i];
+      // creates epoch~matchnumber~pick number via concatenation
+      uint32 epochMatch = betContracts[_subkId].epoch *
+        1000 +
+        betContracts[_subkId].matchNum *
+        10 +
+        betContracts[_subkId].pick;
+      if (outcomeMap[epochMatch] != 0) {
+        // to get this far, user has either won or tied, and thus gets back initial
+        // bet amount
+        payout += betContracts[_subkId].betAmount;
+        // a winner gets the payout, which is adjusted by 0.95 to pay oracle
+        if (outcomeMap[epochMatch] == 2) {
+          payout += (betContracts[_subkId].payoff * 95) / 100;
+        }
+        // delete betContracts[_subkId];
+      }
     }
     //delete userStruct[msg.sender].lastTransaction;
     userStruct[msg.sender].counter = 0;
@@ -320,7 +324,7 @@ contract Betting {
     require(block.timestamp < params[3], "only prior to first event");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
     // process check
-   // require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
+    // require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
     uint64 ethWithdraw = (_sharesToSell * margin[0]) / params[0];
     // LP cannot withdraw if bettors have locked up their capital
     //moose = ethWithdraw;
@@ -341,13 +345,13 @@ contract Betting {
     emit Funding(msg.sender, uint64(ethWithdraw), params[0], 4);
   }
 
-/** @dev processes initial odds and start times
-  * @param _odds is the epoch's set of odds and start times for matches.
-  * @param _starts are the start times
+  /** @dev processes initial odds and start times
+   * @param _odds is the epoch's set of odds and start times for matches.
+   * @param _starts are the start times
    */
   function transmitInit(
-  uint16[32] calldata _odds,
-  uint32[32] calldata _starts
+    uint16[32] calldata _odds,
+    uint32[32] calldata _starts
   ) external onlyAdmin returns (bool) {
     require(margin[2] == 0);
     startTime = _starts;
@@ -356,10 +360,10 @@ contract Betting {
     // sets start of games at Friday 7PM New York City time
     params[3] = _starts[0] - ((_starts[0] - 1687564800) % 604800);
     // resets the paused matches (99 will never be possible)
-      paused[0] = 99;
-      paused[1] = 99;
-      // paused[2] = 99;
-      // paused[3] = 99;
+    paused[0] = 99;
+    paused[1] = 99;
+    // paused[2] = 99;
+    // paused[3] = 99;
     return true;
   }
 
@@ -367,23 +371,33 @@ contract Betting {
     _betData = betData;
   }
 
-    function showstartTime() external view returns (uint32[32] memory _startTimeOdds) {
+  function showstartTime()
+    external
+    view
+    returns (uint32[32] memory _startTimeOdds)
+  {
     _startTimeOdds = startTime;
   }
 
-   function showUserBetData() external view returns (bytes32[16] memory _betDataUser) {
+  function showUserBetData()
+    external
+    view
+    returns (bytes32[16] memory _betDataUser)
+  {
     _betDataUser = userStruct[msg.sender].lastTransaction;
   }
 
   /** @dev processes updates to epoch's odds
    * @param _updateBetData updates the epoch's odds. Data are packed into uint64.
    */
-  function transmitUpdate(uint16[32] calldata _updateBetData) external onlyAdmin {
-      odds = _updateBetData;
-      paused[0] = 99;
-      paused[1] = 99;
-      // paused[2] = 99;
-      // paused[3] = 99;
+  function transmitUpdate(
+    uint16[32] calldata _updateBetData
+  ) external onlyAdmin {
+    odds = _updateBetData;
+    paused[0] = 99;
+    paused[1] = 99;
+    // paused[2] = 99;
+    // paused[3] = 99;
   }
 
   /** @dev It limits the amount of LP capital that can be applied to a single match.
@@ -398,7 +412,7 @@ contract Betting {
    * @param _badmatches is the first of two potential paused matches
    */
   function pauseMatch(uint8[2] memory _badmatches) external onlyAdmin {
-    paused= _badmatches;
+    paused = _badmatches;
   }
 
   function checkRedeem(bytes32 _subkID) external view returns (bool) {
