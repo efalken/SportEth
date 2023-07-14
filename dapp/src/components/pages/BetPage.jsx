@@ -117,6 +117,9 @@ function BetPage() {
       LongPick: Number(pick),
       MatchNum: Number(matchNum),
       Payoff: (0.95 * Number(payoff)/10000),
+      // Redeemable: await bettingContract.checkRedeem(
+      //   contractHash
+      // ),
     };
     subcontracts[contractHash] = await bettingContract.checkRedeem(
       contractHash
@@ -180,7 +183,7 @@ function BetPage() {
     let _usedCapital = (await bettingContract.margin(1)) || "0";
     setUsedCapital(_usedCapital);
 
-    let _currW4 = Number((await bettingContract.params(3)) || "0");
+    let _currW4 = Number((await bettingContract.params(0)) || "0");
     setCurrW4(_currW4);
 
     let _concentrationLimit = await bettingContract.params(1);
@@ -537,13 +540,13 @@ function BetPage() {
                         </tr>
                         {Object.values(betHistory[id]).map(
                           (event, index) =>
-                            //  (event.Epoch = currW4) &&
+                              (index < betNumber) &&
                             subcontracts[event.Hashoutput] && (
                               <tr
                                 key={index}
                                 style={{ width: "33%", color: "#ffffff" }}
                               >
-                                <td>{event.Epoch}</td>
+                                <td>{index}</td>
                                 <td>{teamSplit[event.MatchNum][0]}</td>
                                 <td>
                                   {
