@@ -69,7 +69,12 @@ contract Betting {
     bytes32 contractHash
   );
 
-  event Funding(address bettor, uint64 moveAmount, uint32 epoch, uint32 action);
+  event Funding(
+    address indexed bettor,
+    uint64 moveAmount,
+    uint32 epoch,
+    uint32 action
+  );
 
   constructor(address payable _tokenAddress) {
     // concentration limit
@@ -371,7 +376,7 @@ contract Betting {
     _betData = betData;
   }
 
-    function showOdds() external view returns (uint16[32] memory _odds) {
+  function showOdds() external view returns (uint16[32] memory _odds) {
     _odds = odds;
   }
 
