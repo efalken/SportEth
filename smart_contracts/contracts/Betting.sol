@@ -371,12 +371,16 @@ contract Betting {
     _betData = betData;
   }
 
-  function showstartTime()
+    function showOdds() external view returns (uint16[32] memory _odds) {
+    _odds = odds;
+  }
+
+  function showStartTime()
     external
     view
-    returns (uint32[32] memory _startTimeOdds)
+    returns (uint32[32] memory _startTime)
   {
-    _startTimeOdds = startTime;
+    _startTime = startTime;
   }
 
   function showUserBetData()

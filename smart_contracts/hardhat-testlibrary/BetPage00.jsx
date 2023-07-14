@@ -14,9 +14,6 @@ import { useAuthContext } from "../../contexts/AuthContext";
 import { networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
-import axios from "axios";
-//import { syncEvents } from "../../helpers/syncEvents";
-//import { BigNumber } from "bignumber.js";
 
 function BetPage() {
   const { oracleContract, bettingContract, account } = useAuthContext();
@@ -43,9 +40,6 @@ function BetPage() {
   const [teamSplit, setTeamSplit] = useState([]);
   const [betNumber, setBetNumber] = useState("0");
   const [eoaBalance, setEoaBalance] = useState("0");    
-  const [oddsVector, setOddsVector] = useState([]);
-  const [betData0, setBetData0] = useState("0");
-  const [startTime, setStartTime] = useState([]);
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
@@ -182,17 +176,6 @@ function BetPage() {
     let _unusedCapital = (await bettingContract.margin(0)) || "0";
     setUnusedCapital(_unusedCapital);
 
-    // let _oddsvector = unpack64("7253652274872844843");
-    // setOddsVector(_oddsvector);
-
-    let _startTimes = (await bettingContract.showStartTime()) || [];
-    setStartTime(_startTimes);
-
-    let _oddsvector = (await bettingContract.showOdds()) || [];
-    setOddsVector(_oddsvector);
-
-    console.log(oddsVector, "odds0")
-
     // let _eoaBalance = (await (account).getBalance())|| "0";
     // setEoaBalance(_eoaBalance);
     // console.log(`eoabal ${eoaBalance}`);
@@ -226,53 +209,24 @@ function BetPage() {
     return maxSize;
   }
 
-  // function unpack256(src) {
-  //   if (!src) return [];
-  //   //const str = bn.toString(16);
-  //   const str = src.toString(16).padStart(64, "0");
-  //   const pieces = str
-  //     .match(/.{1,2}/g)
-  //     .reverse()
-  //     .join("")
-  //     .match(/.{1,8}/g)
-  //     .map((s) =>
-  //       s
-  //         .match(/.{1,2}/g)
-  //         .reverse()
-  //         .join("")
-  //     );
-  //   const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
-  //   return ints;
-  // }
-
   function unpack256(src) {
     if (!src) return [];
     //const str = bn.toString(16);
     const str = src.toString(16).padStart(64, "0");
     const pieces = str
-      .toString(16)
-      .match(/.{1,16}/g)
-      .reverse();
+      .match(/.{1,2}/g)
+      .reverse()
+      .join("")
+      .match(/.{1,8}/g)
+      .map((s) =>
+        s
+          .match(/.{1,2}/g)
+          .reverse()
+          .join("")
+      );
     const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
     return ints;
   }
-
-  // function unpack64(num) {
-  //  let x = 7252038024299545485n;
-  //   //let x = BigInt(num);
-  //   let data = [];
-  //   //let xx = bn.toString(x);
-  //   //const outvec = [1688496681, 909]
-  //   const _mask = 4294967295n; // Mask to extract lower 32 bits
-  //   const _odds0 = Number(x & _mask); // Extract lower 32 bits
-  //   const _startUTC = (x >> 32n) & _mask; // Shift and extract higher
-  //   let startUTC = _startUTC;
-  //   let odds0 = _odds0;
-  //   data.push(startUTC);
-  //   data.push(odds0);
-  //   console.log("startUTC and odds0 ===", startUTC, odds0);
-  //   return data;
-  // }
 
   function getMoneyLine(decOddsi) {
     let moneyline = 0;
@@ -323,26 +277,18 @@ function BetPage() {
 
   let netLiab = [liab0, liab1];
 
-  //let [xdecode, setXdecode] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
-
-  let [xdecode256, setXdecode] = useState([0, 1, 2, 3]);
-  //let [xdecode64, setXdecode64] = useState([168123456, 99]);
-  let time999 = 0;
-  let odds999 = 0;
+  let [xdecode, setXdecode] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
 
   useEffect(() => {
-    console.log("startTime ===", startTime[1]);
-    console.log("odds0 ===", oddsVector[1]);
-    {
+    if (betData[0]) xdecode = unpack256(betData[0]);
+    if (xdecode[6] > 0) {
       for (let ii = 0; ii < 32; ii++) {
-        if (betData[ii]) xdecode256 = unpack256(betData[ii]);
-        if (startTime) time999 = startTime[ii];
-        if (oddsVector) odds999 = oddsVector[ii];
-        odds0[ii] = Number(odds999) || 0;
-        odds1[ii] = Math.floor(1000000 / (Number(odds999) + 50) - 1) || 0;
-        startTimeColumn[ii] = Number(time999);
-        netLiab[0][ii] = (Number(xdecode256[2]) - Number(xdecode256[1])) / 10;
-        netLiab[1][ii] = (Number(xdecode256[3]) - Number(xdecode256[0])) / 10;
+        if (betData[ii]) xdecode = unpack256(betData[ii]);
+        odds0[ii] = Number(xdecode[6]);
+        odds1[ii] = Number(xdecode[7]);
+        startTimeColumn[ii] = xdecode[5];
+        netLiab[0][ii] = (Number(xdecode[2]) - Number(xdecode[1])) / 10;
+        netLiab[1][ii] = (Number(xdecode[3]) - Number(xdecode[0])) / 10;
       }
     }
     setOdds0(odds0);
@@ -350,11 +296,10 @@ function BetPage() {
     setLiab0(liab0);
     setLiab1(liab1);
     setStartTimeColumn(startTimeColumn);
-    setXdecode(xdecode256);
+    setXdecode(xdecode);
   }, [betData]);
 
   let oddsTot = [odds0, odds1];
-  //console.log(`odd0 is ${oddsTot[0][1]}`)
 
   useEffect(() => {
     let _teamSplit = scheduleString.map((s) => (s ? s.split(":") : undefined));
@@ -601,7 +546,7 @@ function BetPage() {
                                 key={index}
                                 style={{ width: "33%", color: "#ffffff" }}
                               >
-                                <td>{currW4}</td>
+                                <td>{index}</td>
                                 <td>{teamSplit[event.MatchNum][0]}</td>
                                 <td>
                                   {
