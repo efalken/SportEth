@@ -76,10 +76,10 @@ function BookiePage() {
     let _betCapital = Number((await bettingContract.margin(2)) || "0") / 10000;
     setBetCapital(_betCapital);
 
-    let _currentWeek = Number(await bettingContract.margin(3));
+    let _currentWeek = Number(await bettingContract.params(0));
     setCurrentWeek(_currentWeek);
 
-    let _totalShares = (await bettingContract.margin(4)) || "0";
+    let _totalShares = (await bettingContract.margin(3)) || "0";
     setTotalShares(_totalShares);
 
     // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;

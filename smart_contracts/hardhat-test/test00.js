@@ -322,6 +322,7 @@ describe("Betting", function () {
       }
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      await helper.advanceTimeAndBlock(48 * secondsInHour);
     });
 
     it("Send Event Results to oracle", async () => {

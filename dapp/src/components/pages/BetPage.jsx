@@ -39,6 +39,7 @@ function BetPage() {
   const [concentrationLimit, setConcentrationLimit] = useState("0");
   const [teamSplit, setTeamSplit] = useState([]);
   const [betNumber, setBetNumber] = useState("0");
+  const [eoaBalance, setEoaBalance] = useState("0");    
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
@@ -89,9 +90,9 @@ function BetPage() {
     setShowDecimalOdds(!showDecimalOdds);
   }
 
-  async function getBets(hash) {
-    const betParams = await bettingContract.betContracts(hash);
-  }
+  // async function getBets(hash) {
+  //   const betParams = await bettingContract.betContracts(hash);
+  // }
 
   function openEtherscan(txhash) {
     const url = `${
@@ -112,10 +113,10 @@ function BetPage() {
       Hashoutput: contractHash,
       BettorAddress: bettor,
       Epoch: Number(epoch),
-      BetSize: Number(betAmount),
+      BetSize: (Number(betAmount)/10000),
       LongPick: Number(pick),
       MatchNum: Number(matchNum),
-      Payoff: 0.95 * Number(payoff),
+      Payoff: (0.95 * Number(payoff)/10000),
     };
     subcontracts[contractHash] = await bettingContract.checkRedeem(
       contractHash
@@ -172,13 +173,17 @@ function BetPage() {
     let _unusedCapital = (await bettingContract.margin(0)) || "0";
     setUnusedCapital(_unusedCapital);
 
+    // let _eoaBalance = (await (account).getBalance())|| "0";
+    // setEoaBalance(_eoaBalance);
+    // console.log(`eoabal ${eoaBalance}`);
+
     let _usedCapital = (await bettingContract.margin(1)) || "0";
     setUsedCapital(_usedCapital);
 
-    let _currW4 = Number((await bettingContract.margin(3)) || "0");
+    let _currW4 = Number((await bettingContract.params(3)) || "0");
     setCurrW4(_currW4);
 
-    let _concentrationLimit = await bettingContract.margin(5);
+    let _concentrationLimit = await bettingContract.params(1);
     setConcentrationLimit(_concentrationLimit);
 
     // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
@@ -389,7 +394,7 @@ function BetPage() {
                 spacing="1px"
               />
               <Text size="14px" className="style">
-                Your available capital: {(Number(userBalance) / 1e4).toFixed(4)}{" "}
+                Your free capital on contract: {(Number(userBalance) / 1e4).toFixed(3)}{" "}
                 AVAX
               </Text>
             </Box>
@@ -434,7 +439,7 @@ function BetPage() {
               ></Flex>
               <Flex justifyContent="left">
                 <Text size="14px" color="#ffffff">
-                  Active Week: {currW4}
+                  Current Epoch: {currW4} 
                 </Text>
               </Flex>
             </Box>
@@ -457,7 +462,6 @@ function BetPage() {
                     >
                       <tbody>
                         <tr style={{ width: "33%", color: "#ffffff" }}>
-                          <td>Epoch</td>
                           <td>Match</td>
                           <td>Pick</td>
                           <td>BetSize</td>
@@ -467,7 +471,6 @@ function BetPage() {
                           (event, index) =>
                             event.Epoch === currW4 && (
                               <tr key={index} style={{ width: "33%" }}>
-                                <td>{event.Epoch}</td>
                                 <td>{teamSplit[event.MatchNum][0]}</td>
                                 <td>
                                   {
@@ -476,7 +479,7 @@ function BetPage() {
                                     ]
                                   }
                                 </td>
-                                <td>{parseFloat(event.BetSize).toFixed(4)}</td>
+                                <td>{parseFloat(event.BetSize).toFixed(3)}</td>
                                 <td>
                                   {Number(
                                     event.Payoff / event.BetSize + 1
@@ -508,10 +511,10 @@ function BetPage() {
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
                     <Text size="14px" className="style">
-                      Active Epoch: {currW4}
+                    Bets to be Redeemed: {betNumber}
                     </Text>
                     <br />
-                    <Text className="style" size="14px">
+                    <Text className="style" size="14px"> 
                       {" "}
                       Your unclaimed winning bets
                     </Text>

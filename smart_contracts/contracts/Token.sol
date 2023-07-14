@@ -1,8 +1,8 @@
 pragma solidity ^0.8.0;
 
 /**
-SPDX-License-Identifier: MIT
-Copyright © 2021 Eric G. Falkenstone
+SPDX-License-Identifier: WTFPL
+@author Eric Falkenstein
 */
 
 contract Token {

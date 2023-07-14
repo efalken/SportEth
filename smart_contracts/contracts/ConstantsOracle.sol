@@ -22,8 +22,9 @@ uint32 constant MIN_DEC_ODDS_INIT = 125;
 uint32 constant MAX_DEC_ODDS_UPDATE = 1500;
 uint32 constant MIN_DEC_ODDS_UPDATE = 110;
 // parameter that enforces vig by applying to favorite 1e6/(odds + ODDS_FACTOR0) - ODDS_FACTOR1
-uint32 constant ODDS_FACTOR0 = 41; //42
-uint32 constant ODDS_FACTOR1 = 41; //45
+uint32 constant ODDS_FACTOR0 = 50; //42
+uint32 constant ODDS_FACTOR1 = 95; //45
+uint32 constant ODDS_FACTOR2 = 90; 
 // param to check if contract is voting on initial schedule & odds
 uint32 constant INIT_PROC_NEXT = 10;
 // param to check if contract is voting on an odds update
@@ -33,3 +34,7 @@ uint32 constant SETTLE_PROC_NEXT = 30;
 // param to check if contract is post initial data submission, pre-settlement submission
 uint32 constant ACTIVE_STATE = 2;
 // keeps track of  who supplied data proposal, will be fined if data submission voted down
+uint32 constant ACTIVE_STATE0 = 0;
+// keeps track of  who supplied data proposal, will be fined if data submission voted down
+
+uint256 constant EPOCH_AMOUNT = 16e6;
