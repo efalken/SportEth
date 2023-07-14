@@ -14,7 +14,6 @@ import { useAuthContext } from "../../contexts/AuthContext";
 import { networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
-import axios from "axios";
 //import { syncEvents } from "../../helpers/syncEvents";
 //import { BigNumber } from "bignumber.js";
 
@@ -33,7 +32,6 @@ function BetPage() {
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
-  const [lastBetHash, setLastBetHash] = useState([]);
   const [betData, setBetData] = useState([]);
   const [userBalance, setUserBalance] = useState("0");
   const [unusedCapital, setUnusedCapital] = useState("0");
@@ -42,16 +40,13 @@ function BetPage() {
   const [concentrationLimit, setConcentrationLimit] = useState("0");
   const [teamSplit, setTeamSplit] = useState([]);
   const [betNumber, setBetNumber] = useState("0");
-  const [eoaBalance, setEoaBalance] = useState("0");    
   const [oddsVector, setOddsVector] = useState([]);
-  const [betData0, setBetData0] = useState("0");
   const [startTime, setStartTime] = useState([]);
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
 
     document.title = "Betting Page";
-    updateBetHashes();
     const interval1 = setInterval(() => {
       findValues();
     }, 1000);
@@ -66,9 +61,9 @@ function BetPage() {
       const stackId = await bettingContract.fundBettor({
         value: ethers.parseEther(fundAmount),
       });
-      console.log("stackid", stackId);
+      // console.log("stackid", stackId);
     } catch (error) {
-      console.log("igotanerror", error);
+      // console.log("igotanerror", error);
     }
   }
 
@@ -109,7 +104,7 @@ function BetPage() {
   }
 
   async function addBetRecord(contractHash) {
-    console.log(subcontracts);
+    // console.log(subcontracts);
     const { epoch, matchNum, pick, betAmount, payoff, bettor } =
       await bettingContract.betContracts(contractHash);
 
@@ -119,10 +114,10 @@ function BetPage() {
       Hashoutput: contractHash,
       BettorAddress: bettor,
       Epoch: Number(epoch),
-      BetSize: (Number(betAmount)/10000),
+      BetSize: Number(betAmount) / 10000,
       LongPick: Number(pick),
       MatchNum: Number(matchNum),
-      Payoff: (0.95 * Number(payoff)/10000),
+      Payoff: (0.95 * Number(payoff)) / 10000,
       // Redeemable: await bettingContract.checkRedeem(
       //   contractHash
       // ),
@@ -137,11 +132,18 @@ function BetPage() {
   useEffect(() => {
     if (!bettingContract || !account) return;
 
+    updateBetHashes();
+
     const BetRecordFilter = bettingContract.filters.BetRecord(account);
     bettingContract.on(BetRecordFilter, (eventEmitted) => {
       const { contractHash } = eventEmitted.args;
       console.log(contractHash);
       addBetRecord(contractHash);
+    });
+
+    const FundingFilter = bettingContract.filters.Funding(account);
+    bettingContract.on(FundingFilter, () => {
+      updateBetHashes();
     });
   }, [bettingContract, account]);
 
@@ -156,9 +158,13 @@ function BetPage() {
   }
 
   async function updateBetHashes() {
-    let _lastBetHash = (await bettingContract.showUserBetData()) || [];
-    console.log(_lastBetHash);
-    setLastBetHash(_lastBetHash);
+    setSubcontracts({});
+    setBetHistory([{}]);
+    const userAccount = await bettingContract.userStruct(account);
+    const count = Number(userAccount.counter);
+    let _lastBetHash = (
+      Object.values(await bettingContract.showUserBetData()) || []
+    ).slice(0, count);
     for (const betHash of _lastBetHash) {
       if (
         betHash !=
@@ -191,11 +197,11 @@ function BetPage() {
     let _oddsvector = (await bettingContract.showOdds()) || [];
     setOddsVector(_oddsvector);
 
-    console.log(oddsVector, "odds0")
+    // console.log(oddsVector, "odds0");
 
     // let _eoaBalance = (await (account).getBalance())|| "0";
     // setEoaBalance(_eoaBalance);
-    // console.log(`eoabal ${eoaBalance}`);
+    // // console.log(`eoabal ${eoaBalance}`);
 
     let _usedCapital = (await bettingContract.margin(1)) || "0";
     setUsedCapital(_usedCapital);
@@ -270,7 +276,7 @@ function BetPage() {
   //   let odds0 = _odds0;
   //   data.push(startUTC);
   //   data.push(odds0);
-  //   console.log("startUTC and odds0 ===", startUTC, odds0);
+  //   // console.log("startUTC and odds0 ===", startUTC, odds0);
   //   return data;
   // }
 
@@ -331,8 +337,8 @@ function BetPage() {
   let odds999 = 0;
 
   useEffect(() => {
-    console.log("startTime ===", startTime[1]);
-    console.log("odds0 ===", oddsVector[1]);
+    // console.log("startTime ===", startTime[1]);
+    // console.log("odds0 ===", oddsVector[1]);
     {
       for (let ii = 0; ii < 32; ii++) {
         if (betData[ii]) xdecode256 = unpack256(betData[ii]);
@@ -354,7 +360,7 @@ function BetPage() {
   }, [betData]);
 
   let oddsTot = [odds0, odds1];
-  //console.log(`odd0 is ${oddsTot[0][1]}`)
+  //// console.log(`odd0 is ${oddsTot[0][1]}`)
 
   useEffect(() => {
     let _teamSplit = scheduleString.map((s) => (s ? s.split(":") : undefined));
@@ -452,8 +458,8 @@ function BetPage() {
                 spacing="1px"
               />
               <Text size="14px" className="style">
-                Your free capital on contract: {(Number(userBalance) / 1e4).toFixed(3)}{" "}
-                AVAX
+                Your free capital on contract:{" "}
+                {(Number(userBalance) / 1e4).toFixed(3)} AVAX
               </Text>
             </Box>
             <Box>
@@ -497,7 +503,7 @@ function BetPage() {
               ></Flex>
               <Flex justifyContent="left">
                 <Text size="14px" color="#ffffff">
-                  Current Epoch: {currW4} 
+                  Current Epoch: {currW4}
                 </Text>
               </Flex>
             </Box>
@@ -569,10 +575,10 @@ function BetPage() {
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
                     <Text size="14px" className="style">
-                    Bets to be Redeemed: {betNumber}
+                      Bets to be Redeemed: {betNumber}
                     </Text>
                     <br />
-                    <Text className="style" size="14px"> 
+                    <Text className="style" size="14px">
                       {" "}
                       Your unclaimed winning bets
                     </Text>
@@ -595,7 +601,7 @@ function BetPage() {
                         </tr>
                         {Object.values(betHistory[id]).map(
                           (event, index) =>
-                              (index < betNumber) &&
+                            index < betNumber &&
                             subcontracts[event.Hashoutput] && (
                               <tr
                                 key={index}
@@ -703,61 +709,6 @@ function BetPage() {
                 />
               </Box>
             </Flex>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                betHash0: {lastBetHash[0]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                betHash1: {lastBetHash[1]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                betHash2: {lastBetHash[2]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                betHash3: {lastBetHash[3]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                bethash4: {lastBetHash[4]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                bethash5: {lastBetHash[5]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                bethash6: {lastBetHash[6]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                bethash7: {lastBetHash[7]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                bethash8: {lastBetHash[8]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                bethash9: {lastBetHash[9]}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                bethash10: {lastBetHash[10]}
-              </Text>
-            </Box>
           </Box>
         }
       >
