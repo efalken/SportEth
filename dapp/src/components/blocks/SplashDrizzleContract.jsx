@@ -4,9 +4,9 @@ import { Radius } from "../basics/Style";
 import { useChainId } from "../../helpers/switchAvalanche.js";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { networkConfig } from "../../config";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-function SplashDrizzleContract({ showActions }) {
+function SplashDrizzleContract({ showActions, redirectURL }) {
   return (
     <Flex
       style={{
@@ -30,7 +30,7 @@ function SplashDrizzleContract({ showActions }) {
             display="flex"
             flexDirection="row"
           >
-            <ChainSwitch />
+            <ChainSwitch redirectURL={redirectURL} />
             <a href={"/betpage"} style={{ textDecoration: "none" }}></a>
           </Box>
         )}
@@ -39,12 +39,10 @@ function SplashDrizzleContract({ showActions }) {
   );
 }
 
-const ChainSwitch = () => {
+const ChainSwitch = ({ redirectURL }) => {
   const { provider, connect } = useAuthContext();
 
   const navigate = useNavigate();
-
-  console.log(provider);
 
   async function switchChain() {
     if (!provider) return;
@@ -81,7 +79,8 @@ const ChainSwitch = () => {
           }}
           onClick={async () => {
             await connect();
-            navigate("/betpage");
+            console.log(redirectURL);
+            navigate(redirectURL);
           }}
         >
           Connect Wallet and Enter

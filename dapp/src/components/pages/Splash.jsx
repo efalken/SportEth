@@ -1,14 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "../basics/Logo";
 import { Flex, Box } from "rebass";
 import Text from "../basics/Text";
 import VBackground from "../basics/VBackgroundFull";
 import SplashDrizzleContract from "../blocks/SplashDrizzleContract";
+import { useLocation, useNavigate } from "react-router-dom";
+import { networkConfig } from "../../config";
+import { useAuthContext } from "../../contexts/AuthContext";
+import { useChainId } from "../../helpers/switchAvalanche";
 // import wppdf from "../whitepaper/SportEth.pdf";
 // import excelSheet from "../whitepaper/sportEthData.xlsx";
 
 export default function Splash() {
   const [contracts, setContracts] = useState([{ asset: "NFL", id: 0 }]);
+  const { provider, connect } = useAuthContext();
+  const chainid = useChainId();
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const redirectURL =
+    new URLSearchParams(location.search).get("redirect") || "/betpage";
+
+  useEffect(() => {
+    if (!provider || chainid != parseInt(networkConfig.chainId)) return;
+
+    (async () => {
+      await connect();
+      navigate(redirectURL);
+    })();
+  }, [provider, chainid]);
 
   function openWhitepaper() {
     console.log("Opened whitepaper");
@@ -58,6 +78,7 @@ export default function Splash() {
                   contract.asset === "NFL" ? (
                     <Box mb="20px" key={contract.id}>
                       <SplashDrizzleContract
+                        redirectURL={redirectURL}
                         showActions={true}
                         key={contract.asset}
                         contract={contract}
