@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { Box, Flex } from "@rebass/grid";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { indexerEndpoint } from "../../config";
-import axios from "axios";
 
 export default function EventStartTime() {
   const { oracleContractReadOnly } = useAuthContext();
@@ -14,14 +12,17 @@ export default function EventStartTime() {
 
     (async () => {
       const pricedata = [];
-      const {
-        data: { events },
-      } = await axios.get(`${indexerEndpoint}/events/oracle/StartTimesPosted`);
+      const StartTimesPostedEvent =
+        oracleContractReadOnly.filters.StartTimesPosted();
+      const events = await oracleContractReadOnly.queryFilter(
+        StartTimesPostedEvent
+      );
       for (const event of events) {
+        const { args, blockNumber } = event;
         pricedata.push({
-          time: Number(event.blockNumber),
-          Epoch: Number(event.epoch),
-          games: event.starttimes,
+          time: Number(blockNumber),
+          Epoch: Number(args.epoch),
+          games: args.starttimes,
         });
       }
       setMatchHistory(pricedata);

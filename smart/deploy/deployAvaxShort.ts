@@ -4,8 +4,7 @@ import fs from "fs";
 var nextStart = 1690063475;
 const secondsInHour = 3600;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
-var hash001, hash011, hash010, hash031, hash230, hash240, hash230, hash231, hash230b;
-var hash1100, hash1201, hash1110, hash1131, hash2130, hash2140, hash2130, hash2131, hash2241, hash2240, hash2230, hash2131b, hash2130b, hash2231, hash1230;
+
 
 //var finney = "1000000000000000"
 const finneys = BigInt('1000000000000000');

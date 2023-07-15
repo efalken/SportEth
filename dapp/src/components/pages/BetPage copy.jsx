@@ -130,25 +130,22 @@ function BetPage() {
   }
 
   // useEffect(() => {
-  // updateBetHashes();
+  //   if (!bettingContract || !account) return;
 
-  useEffect(() => {
-    if (!bettingContract || !account) return;
+  //   updateBetHashes();
 
-    updateBetHashes();
+  //   const BetRecordFilter = bettingContract.filters.BetRecord(account);
+  //   bettingContract.on(BetRecordFilter, (eventEmitted) => {
+  //     const { contractHash } = eventEmitted.args;
+  //     console.log(contractHash);
+  //     addBetRecord(contractHash);
+  //   });
 
-    // const BetRecordFilter = bettingContract.filters.BetRecord(account);
-    // bettingContract.on(BetRecordFilter, (eventEmitted) => {
-    //   const { contractHash } = eventEmitted.args;
-    //   console.log(contractHash);
-    //   addBetRecord(contractHash);
-    // });
-
-    // const FundingFilter = bettingContract.filters.Funding(account);
-    // bettingContract.on(FundingFilter, () => {
-    //   updateBetHashes();
-    // });
-  }, [bettingContract, account]);
+  //   const FundingFilter = bettingContract.filters.Funding(account);
+  //   bettingContract.on(FundingFilter, () => {
+  //     updateBetHashes();
+  //   });
+  // }, [bettingContract, account]);
 
   function radioFavePick(teampic) {
     setMatchPick(teampic);
@@ -170,7 +167,7 @@ function BetPage() {
     ).slice(0, count);
     for (const betHash of _lastBetHash) {
       if (
-        betHash !==
+        betHash !=
         "0x0000000000000000000000000000000000000000000000000000000000000000"
       )
         await addBetRecord(betHash);
@@ -342,7 +339,7 @@ function BetPage() {
   useEffect(() => {
     // console.log("startTime ===", startTime[1]);
     // console.log("odds0 ===", oddsVector[1]);
-   // {
+    {
       for (let ii = 0; ii < 32; ii++) {
         if (betData[ii]) xdecode256 = unpack256(betData[ii]);
         if (startTime) time999 = startTime[ii];
@@ -353,7 +350,7 @@ function BetPage() {
         netLiab[0][ii] = (Number(xdecode256[2]) - Number(xdecode256[1])) / 10;
         netLiab[1][ii] = (Number(xdecode256[3]) - Number(xdecode256[0])) / 10;
       }
-   // }
+    }
     setOdds0(odds0);
     setOdds1(odds1);
     setLiab0(liab0);
@@ -410,9 +407,7 @@ function BetPage() {
                 </Text>
               </Flex>
             </Box>
-
             <Box>
-            
               <Flex>
                 <Text size="14px">
                   <Link
@@ -575,43 +570,14 @@ function BetPage() {
                 }}
               ></Flex>
             </Box>
-
             <Box>
-              { (betNumber > 0) ?
-            <button
-                style={{
-                  backgroundColor: "black",
-                  borderRadius: "5px",
-                  padding: "4px",
-                  //borderRadius: "1px",
-                  cursor: "pointer",
-                  color: "yellow",
-                  border: "1px solid #ffff00",
-                  // width: width ? width : 120,
-                  // color: "#00ff00",
-                }}
-                value={0}
-                onClick={(e) => {
-                  e.preventDefault();
-                  redeemBet();
-                }}
-              >
-                Redeem
-              </button>
-              : "" }
-              </Box>
-
-            <Box>
-
- 
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
                     <Text size="14px" className="style">
-                      Bets in stack: {betNumber}
+                      Bets to be Redeemed: {betNumber}
                     </Text>
                     <br />
-                   
                     <Text className="style" size="14px">
                       {" "}
                       Your unclaimed winning bets
@@ -628,8 +594,10 @@ function BetPage() {
                       <tbody>
                         <tr style={{ width: "33%", color: "#ffffff" }}>
                           <td>Epoch</td>
+                          <td>Match</td>
                           <td>Pick</td>
                           <td>Your Payout</td>
+                          <td>Click to Claim</td>
                         </tr>
                         {Object.values(betHistory[id]).map(
                           (event, index) =>
@@ -640,6 +608,7 @@ function BetPage() {
                                 style={{ width: "33%", color: "#ffffff" }}
                               >
                                 <td>{currW4}</td>
+                                <td>{teamSplit[event.MatchNum][0]}</td>
                                 <td>
                                   {
                                     teamSplit[event.MatchNum][
@@ -649,6 +618,28 @@ function BetPage() {
                                 </td>
                                 <td>
                                   {(event.Payoff + event.BetSize).toFixed(3)}
+                                </td>
+                                <td>
+                                  <button
+                                    style={{
+                                      backgroundColor: "black",
+                                      borderRadius: "5px",
+                                      padding: "4px",
+                                      //borderRadius: "1px",
+                                      cursor: "pointer",
+                                      color: "yellow",
+                                      border: "1px solid #ffff00",
+                                      // width: width ? width : 120,
+                                      // color: "#00ff00",
+                                    }}
+                                    value={event.Hashoutput}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      redeemBet();
+                                    }}
+                                  >
+                                    Redeem
+                                  </button>
                                 </td>
                               </tr>
                             )
@@ -718,92 +709,6 @@ function BetPage() {
                 />
               </Box>
             </Flex>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/bethistory"
-                  >
-                    bet history
-                  </Link>
-                </Text>
-              </Flex>
-            </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/oddshistory"
-                  >
-                    odds history
-                  </Link>
-                </Text>
-              </Flex>
-            </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/schedhistory"
-                  >
-                    schedule history
-                  </Link>
-                </Text>
-              </Flex>
-            </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/starthistory"
-                  >
-                    start history
-                  </Link>
-                </Text>
-              </Flex>
-            </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/resultshistory"
-                  >
-                    result history
-                  </Link>
-                </Text>
-              </Flex>
-            </Box>
-            <Box></Box>
           </Box>
         }
       >

@@ -179,12 +179,12 @@ async function main() {
   result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
       console.log(`bet01 ${margin00}`);
-    //  hash1100 = receipt.events[0].args.contractHash;
+      hash1100 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(0, 0, 11000);
       receipt = await result.wait();
       console.log(`bet02 ${margin00}`);
-      //  hash1100 = receipt.events[0].args.contractHash;
-   //   hash1201 = receipt.events[0].args.contractHash;
+      hash1100 = receipt.events[0].args.contractHash;
+      hash1201 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[1]).bet(1, 0, 12000);
       receipt = await result.wait();
       hash1110 = receipt.events[0].args.contractHash;
@@ -405,15 +405,18 @@ async function main() {
       receipt = await result.wait();
       let hash100 = receipt.events[0].args.contractHash;
       receipt = await result.wait();
+      console.log(`here0`);
       result = await betting.connect(signers[2]).bet(0, 1, 22000);
       receipt = await result.wait();
       let hash201 = receipt.events[0].args.contractHash;
       receipt = await result.wait();
+      console.log(`here1`);
 
-      const userbets1 =  (await betting.betContracts(hash1100)).betAmount;
+      const userbets1 =  (await betting.betContracts(hash100)).betAmount;
+      //receipt = await userbets1.wait();
       console.log(`betsAcct hash ${hash1100}`);
       console.log(`betsAcct hash betAmount=10k ${userbets1}`);
-      const userbets1b =  (await betting.betContracts(hash1100));
+      const userbets1b =  (await betting.betContracts(hash201));
       console.log(`array ${userbets1b}`);
       console.log(`element in array ${userbets1b[0]}`);
       // const userbets2 =  await betting.connect(signers[1]).showUserBetData();

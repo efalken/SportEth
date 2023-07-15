@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { useAuthContext } from "../../contexts/AuthContext";
 import moment from "moment";
-import { indexerEndpoint } from "../../config";
-import axios from "axios";
 
 export default function EventOdds() {
   const { oracleContractReadOnly } = useAuthContext();
@@ -14,14 +12,16 @@ export default function EventOdds() {
 
     (async () => {
       const pricedata = [];
-      const {
-        data: { events },
-      } = await axios.get(`${indexerEndpoint}/events/oracle/DecOddsPosted`);
+      const DecOddsPostedEvent = oracleContractReadOnly.filters.DecOddsPosted();
+      const events = await oracleContractReadOnly.queryFilter(
+        DecOddsPostedEvent
+      );
       for (const event of events) {
+        const { args, blockNumber } = event;
         pricedata.push({
-          Epoch: Number(event.epoch),
-          time: Number(event.blockNumber),
-          decOdds: event.decOdds,
+          Epoch: Number(args.epoch),
+          time: Number(blockNumber),
+          decOdds: args.decOdds,
         });
       }
       setPriceHistory(pricedata);
