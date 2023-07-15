@@ -104,7 +104,6 @@ function BetPage() {
   }
 
   async function addBetRecord(contractHash) {
-    // console.log(subcontracts);
     const { epoch, matchNum, pick, betAmount, payoff, bettor } =
       await bettingContract.betContracts(contractHash);
 
@@ -118,10 +117,9 @@ function BetPage() {
       LongPick: Number(pick),
       MatchNum: Number(matchNum),
       Payoff: (0.95 * Number(payoff)) / 10000,
-      // Redeemable: await bettingContract.checkRedeem(
-      //   contractHash
-      // ),
     };
+
+
     subcontracts[contractHash] = await bettingContract.checkRedeem(
       contractHash
     );
@@ -129,25 +127,9 @@ function BetPage() {
     setBetHistory(betHistory);
   }
 
-  // useEffect(() => {
-  // updateBetHashes();
-
   useEffect(() => {
     if (!bettingContract || !account) return;
-
     updateBetHashes();
-
-    // const BetRecordFilter = bettingContract.filters.BetRecord(account);
-    // bettingContract.on(BetRecordFilter, (eventEmitted) => {
-    //   const { contractHash } = eventEmitted.args;
-    //   console.log(contractHash);
-    //   addBetRecord(contractHash);
-    // });
-
-    // const FundingFilter = bettingContract.filters.Funding(account);
-    // bettingContract.on(FundingFilter, () => {
-    //   updateBetHashes();
-    // });
   }, [bettingContract, account]);
 
   function radioFavePick(teampic) {
@@ -191,9 +173,6 @@ function BetPage() {
     let _unusedCapital = (await bettingContract.margin(0)) || "0";
     setUnusedCapital(_unusedCapital);
 
-    // let _oddsvector = unpack64("7253652274872844843");
-    // setOddsVector(_oddsvector);
-
     let _startTimes = (await bettingContract.showStartTime()) || [];
     setStartTime(_startTimes);
 
@@ -215,9 +194,6 @@ function BetPage() {
     let _concentrationLimit = await bettingContract.params(1);
     setConcentrationLimit(_concentrationLimit);
 
-    // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
-    // setNewBets(_newBets);
-
     let sctring = await oracleContract.showSchedString();
     setScheduleString(sctring);
   }
@@ -235,25 +211,6 @@ function BetPage() {
     return maxSize;
   }
 
-  // function unpack256(src) {
-  //   if (!src) return [];
-  //   //const str = bn.toString(16);
-  //   const str = src.toString(16).padStart(64, "0");
-  //   const pieces = str
-  //     .match(/.{1,2}/g)
-  //     .reverse()
-  //     .join("")
-  //     .match(/.{1,8}/g)
-  //     .map((s) =>
-  //       s
-  //         .match(/.{1,2}/g)
-  //         .reverse()
-  //         .join("")
-  //     );
-  //   const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
-  //   return ints;
-  // }
-
   function unpack256(src) {
     if (!src) return [];
     //const str = bn.toString(16);
@@ -266,24 +223,23 @@ function BetPage() {
     return ints;
   }
 
-  // function unpack64(num) {
-  //  let x = 7252038024299545485n;
-  //   //let x = BigInt(num);
-  //   let data = [];
-  //   //let xx = bn.toString(x);
-  //   //const outvec = [1688496681, 909]
-  //   const _mask = 4294967295n; // Mask to extract lower 32 bits
-  //   const _odds0 = Number(x & _mask); // Extract lower 32 bits
-  //   const _startUTC = (x >> 32n) & _mask; // Shift and extract higher
-  //   let startUTC = _startUTC;
-  //   let odds0 = _odds0;
-  //   data.push(startUTC);
-  //   data.push(odds0);
-  //   // console.log("startUTC and odds0 ===", startUTC, odds0);
-  //   return data;
-  // }
+
 
   function getMoneyLine(decOddsi) {
+    let moneyline = 0;
+    if (decOddsi < 1000) {
+      moneyline = -1e5 / decOddsi;
+    } else {
+      moneyline = decOddsi / 10;
+    }
+    moneyline = moneyline.toFixed(0);
+    if (moneyline > 0) {
+      moneyline = "+" + moneyline;
+    }
+    return moneyline;
+  }
+
+  function getResults(decOddsi) {
     let moneyline = 0;
     if (decOddsi < 1000) {
       moneyline = -1e5 / decOddsi;
@@ -630,16 +586,17 @@ function BetPage() {
                           <td>Epoch</td>
                           <td>Pick</td>
                           <td>Your Payout</td>
+                          <td>Win?</td>
                         </tr>
                         {Object.values(betHistory[id]).map(
                           (event, index) =>
                             index < betNumber &&
-                            subcontracts[event.Hashoutput] && (
+                            (event.Epoch < Number(currW4)) && (
                               <tr
                                 key={index}
                                 style={{ width: "33%", color: "#ffffff" }}
                               >
-                                <td>{currW4}</td>
+                                <td>{event.Epoch}</td>
                                 <td>
                                   {
                                     teamSplit[event.MatchNum][
@@ -649,6 +606,9 @@ function BetPage() {
                                 </td>
                                 <td>
                                   {(event.Payoff + event.BetSize).toFixed(3)}
+                                </td>
+                                <td>
+                                  {subcontracts[event.Hashoutput] ? "yes" : "no"}
                                 </td>
                               </tr>
                             )
