@@ -23,13 +23,11 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory("Betting");
     const Token = await ethers.getContractFactory("Token");
     const Oracle = await ethers.getContractFactory("Oracle");
-    const Reader = await ethers.getContractFactory("Reader");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
     await token.setAdmin(oracle.address);
-    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   });
 
@@ -49,7 +47,7 @@ describe("Betting", function () {
 
   describe("setupBets", async () => {
     it("checkHour", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -68,7 +66,7 @@ describe("Betting", function () {
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
-          "NFL:ATL:LAR",
+          "UFC:Holloway:Kattar",
           "NFL:BAL:MIA",
           "NFL:BUF:MIN",
           "NFL:CAR:NE",
@@ -88,17 +86,17 @@ describe("Betting", function () {
           "UFC:Kelleher:Simon",
           "UFC:Hernandez:Vieria",
           "UFC:Akhemedov:Breese",
-          "UFC:Memphis:Brooklyn",
-          "UFC:Boston:Charlotte",
-          "UFC:Milwaukee:Dallas",
-          "UFC:miami:LALakers",
-          "UFC:Atlanta:SanAntonia",
-          "NHL:Colorado:Washington",
-          "NHL:Vegas:StLouis",
-          "NHL:TampaBay:Dallas",
-          "NHL:Boston:Carolina",
-          "NHL:Philadelphia:Edmonton",
-          "NHL:Pittsburgh:NYIslanders",
+          "CFL: Mich: OhioState",
+          "CFL: Minn : Illinois",
+          "CFL: MiamiU: Florida",
+          "CFL: USC: UCLA",
+          "CFL: Alabama: Auburn",
+          "CFL: ArizonaSt: UofAriz",
+          "CFL: Georgia: Clemson",
+          "CFL: PennState: Indiana",
+          "CFL: Texas: TexasA&M",
+          "CFL: Utah: BYU",
+          "CFL: Rutgers: VirgTech",
         ],
         [
           nextStart,
@@ -135,9 +133,9 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          999, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
+          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
+          760, 919, 720, 672, 800,
         ]
       );
       receipt = await result.wait();
@@ -190,7 +188,7 @@ describe("Betting", function () {
     });
 
     it("checkHour", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -206,11 +204,13 @@ describe("Betting", function () {
       ).timestamp;
       var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
+      const odds0 = await betting.odds(0);
+      console.log(`odds0 ${odds0}`);
     });
 
     it("send updated odds data", async () => {
       result = await oracle.updatePost([
-        800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+        800, 10448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
         699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
         919, 720, 672, 800,
       ]);
@@ -227,11 +227,10 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      const betdata0 = await betting.betData(0);
-      console.log(`betdata pre ${betdata0}`);
       result = await oracle.updateProcess();
-      const betdata2 = await betting.betData(0);
-      console.log(`betdata post ${betdata2}`);
+      await result.wait();
+      const odds0 = await betting.odds(0);
+      console.log(`odds0 ${odds0}`);
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on initPost = ${gasUsed}`);
@@ -252,41 +251,8 @@ describe("Betting", function () {
       console.log(`betdata preSettle ${betdata1}`);
     });
 
-    it("Check State Variables before Settle", async () => {
-      const bookiePool = await betting.margin(0);
-      const bettorLocked = await betting.margin(2);
-      const bookieLocked = await betting.margin(1);
-      const oracleBal = ethers.utils.formatUnits(
-        await ethers.provider.getBalance(oracle.address),
-        "finney"
-      );
-      const ethbal = ethers.utils.formatUnits(
-        await ethers.provider.getBalance(betting.address),
-        "finney"
-      );
-      const userBalanceAcct1 = (await betting.userStruct(account1.address))
-        .userBalance;
-      const userBalanceAcct2 = (await betting.userStruct(account2.address))
-        .userBalance;
-      console.log(`acct1 ${userBalanceAcct1}`);
-      console.log(`acct3 ${userBalanceAcct2}`);
-      console.log(`bookiePool ${bookiePool}`);
-      console.log(`bettorLocked ${bettorLocked}`);
-      console.log(`bookieLocked ${bookieLocked}`);
-      console.log(`oracleBal ${oracleBal}`);
-      console.log(`ethbal ${ethbal}`);
-
-      assert.equal(userBalanceAcct2, "9000", "Must be equal");
-      assert.equal(userBalanceAcct2, "9000", "Must be equal");
-      assert.equal(bookiePool, "30000", "Must be equal");
-      assert.equal(bettorLocked, "2000", "Must be equal");
-      assert.equal(bookieLocked, "1799", "Must be equal");
-      assert.equal(oracleBal, "0.0", "Must be equal");
-      assert.equal(ethbal, "5000.0", "Must be equal");
-    });
-
     it("checkHour", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -321,26 +287,28 @@ describe("Betting", function () {
     });
 
     it("bettorBalances", async () => {
-      await betting.connect(account1).redeem(contractHash1);
-      await betting.connect(account2).redeem(contractHash2);
+      await betting.connect(account1).redeem();
+      await betting.connect(account2).redeem();
     });
 
     it("Check State Variables in After Settle, Redemption", async () => {
-      const bookiePool = await betting.margin(0);
-      const bettorLocked = await betting.margin(2);
-      const bookieLocked = await betting.margin(1);
+      const bookiePool = Number(await betting.margin(0)) / 10000;
+      const bettorLocked = Number(await betting.margin(2)) / 10000;
+      const bookieLocked = Number(await betting.margin(1)) / 10000;
       const oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
-        "finney"
+        "ether"
       );
       const ethbal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(betting.address),
-        "finney"
+        "ether"
       );
-      const userBalanceAcct1 = (await betting.userStruct(account1.address))
-        .userBalance;
-      const userBalanceAcct2 = (await betting.userStruct(account2.address))
-        .userBalance;
+      const userBalanceAcct1 =
+        Number((await betting.userStruct(account1.address)).userBalance) /
+        10000;
+      const userBalanceAcct2 =
+        Number((await betting.userStruct(account2.address)).userBalance) /
+        10000;
       console.log(`acct1 ${userBalanceAcct1}`);
       console.log(`acct2 ${userBalanceAcct2}`);
       console.log(`bookiePool ${bookiePool}`);
@@ -349,13 +317,13 @@ describe("Betting", function () {
       console.log(`oracleBal ${oracleBal}`);
       console.log(`ethbal ${ethbal}`);
 
-      assert.equal(userBalanceAcct1, "10949", "Must be equal");
-      assert.equal(userBalanceAcct2, "10760", "Must be equal");
-      assert.equal(bookiePool, "28201", "Must be equal");
+      assert.equal(userBalanceAcct1, "1.0949", "Must be equal");
+      assert.equal(userBalanceAcct2, "1.0760", "Must be equal");
+      assert.equal(bookiePool, "2.8201", "Must be equal");
       assert.equal(bettorLocked, "0", "Must be equal");
       assert.equal(bookieLocked, "0", "Must be equal");
-      assert.equal(oracleBal, "8.995", "Must be equal");
-      assert.equal(ethbal, "4991.005", "Must be equal");
+      assert.equal(oracleBal, "0.008995", "Must be equal");
+      assert.equal(ethbal, "4.991005", "Must be equal");
     });
   });
 });

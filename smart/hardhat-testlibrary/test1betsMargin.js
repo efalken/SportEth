@@ -37,13 +37,12 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory("Betting");
     const Token = await ethers.getContractFactory("Token");
     const Oracle = await ethers.getContractFactory("Oracle");
-    const Reader = await ethers.getContractFactory("Reader");
+
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
     await token.setAdmin(oracle.address);
-    reader = await Reader.deploy(betting.address, token.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   });
 
@@ -62,7 +61,7 @@ describe("Betting", function () {
 
   describe("set up contract for taking bets", async () => {
     it("checkHour", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -81,7 +80,7 @@ describe("Betting", function () {
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
-          "NFL:ATL:LAR",
+          "UFC:Holloway:Kattar",
           "NFL:BAL:MIA",
           "NFL:BUF:MIN",
           "NFL:CAR:NE",
@@ -101,17 +100,17 @@ describe("Betting", function () {
           "UFC:Kelleher:Simon",
           "UFC:Hernandez:Vieria",
           "UFC:Akhemedov:Breese",
-          "UFC:Memphis:Brooklyn",
-          "UFC:Boston:Charlotte",
-          "UFC:Milwaukee:Dallas",
-          "UFC:miami:LALakers",
-          "UFC:Atlanta:SanAntonia",
-          "NHL:Colorado:Washington",
-          "NHL:Vegas:StLouis",
-          "NHL:TampaBay:Dallas",
-          "NHL:Boston:Carolina",
-          "NHL:Philadelphia:Edmonton",
-          "NHL:Pittsburgh:NYIslanders",
+          "CFL: Mich: OhioState",
+          "CFL: Minn : Illinois",
+          "CFL: MiamiU: Florida",
+          "CFL: USC: UCLA",
+          "CFL: Alabama: Auburn",
+          "CFL: ArizonaSt: UofAriz",
+          "CFL: Georgia: Clemson",
+          "CFL: PennState: Indiana",
+          "CFL: Texas: TexasA&M",
+          "CFL: Utah: BYU",
+          "CFL: Rutgers: VirgTech",
         ],
         [
           nextStart,
@@ -148,9 +147,9 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          999, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
+          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
+          760, 919, 720, 672, 800,
         ]
       );
       receipt = await result.wait();
@@ -169,20 +168,11 @@ describe("Betting", function () {
       console.log(`startTime is ${bookpool}`);
     });
 
-    it("HHHHHHHHHHHHHHHHHHHHHHH", async () => {
-      const tracker2 = await oracle.betEpochOracle();
-      console.log(`tracker111 ${tracker2}`);
-    });
-
     it("Fund Contract", async () => {
-      //  console.log(`startTime is ${nextStart}`);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      //const checkO = await betting.matches[0](contractHash3);
       console.log(`currTime is ${_timestamp}`);
-      //const startNow = await betting.startTime(0);
-      //console.log(`startTime is ${startNow}`);
       result = await betting.connect(owner).fundBook({
         value: 3n * eths,
       });
@@ -207,7 +197,6 @@ describe("Betting", function () {
       result = await betting.connect(account2).bet(0, 0, "1000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
-      //var receipt = await result.wait();
       hash1 = receipt.events[0].args.contractHash;
 
       result = await betting.connect(account3).bet(0, 1, "2000");
@@ -260,124 +249,85 @@ describe("Betting", function () {
       console.log(`gas ${gasUsed}`);
     });
 
-    // it("PostBet-PreSettle", async () => {
-    //   const bookiePool = await betting.margin(0);
-    //   const bettorLocked = await betting.margin(2);
-    //   const bookieLocked = await betting.margin(1);
-    //   const oracleBal = ethers.utils.formatUnits(
-    //     await ethers.provider.getBalance(oracle.address),
-    //     "finney"
-    //   );
-    //   const ethbal = ethers.utils.formatUnits(
-    //     await ethers.provider.getBalance(betting.address),
-    //     "finney"
-    //   );
-    //   const userBalanceAcct2 = (await betting.userStruct(account2.address)).userBalance;
-    //   console.log(`acct2 ${userBalanceAcct2}`);
-    //   const userBalanceAcct3 = (await betting.userStruct(account3.address)).userBalance;
-    //   console.log(`acct3 ${userBalanceAcct3}`);
-    //   console.log(`bookiePool ${bookiePool}`);
-    //   console.log(`bettorLocked ${bettorLocked}`);
-    //   console.log(`bookieLocked ${bookieLocked}`);
-    //   console.log(`oracleBal ${oracleBal}`);
-    //   console.log(`ethbal in finney ${ethbal}`);
-    //   console.log(`acct2 Bal ${userBalanceAcct2}`);
-    //   console.log(`acct3 Bal ${userBalanceAcct3}`);
+    it("checkHour", async () => {
+      _hourSolidity = await oracle.hourOfDay();
+      console.log(`hour in EVM ${_hourSolidity}`);
+      hourOffset = 0;
+      if (_hourSolidity > 12) {
+        hourOffset = 36 - _hourSolidity;
+      } else if (_hourSolidity < 12) {
+        hourOffset = 12 - _hourSolidity;
+      }
+      console.log(`hourAdj ${hourOffset}`);
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+    });
 
-    //   assert.equal(bookiePool, "30000", "mustBe equal");
-    //   assert.equal(bettorLocked, "15000", "Must be equal");
-    //   assert.equal(bookieLocked, "4458", "Must be equal");
-    //   assert.equal(oracleBal, "0.0", "Must be equal");
-    //   assert.equal(ethbal, "5000.0", "Must be equal");
-    // });
+    it("Send Event Results to oracle", async () => {
+      await oracle.settlePost([
+        1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+      ]);
+    });
 
-    // it("checkHour", async () => {
-    //   _hourSolidity = await reader.hourOfDay();
-    //   console.log(`hour in EVM ${_hourSolidity}`);
-    //   hourOffset = 0;
-    //   if (_hourSolidity > 12) {
-    //     hourOffset = 36 - _hourSolidity;
-    //   } else if (_hourSolidity < 12) {
-    //     hourOffset = 12 - _hourSolidity;
-    //   }
-    //   console.log(`hourAdj ${hourOffset}`);
-    //   await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-    // });
+    it("send result data to betting contract", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await oracle.settleProcess();
+    });
 
-    // it("Send Event Results to oracle", async () => {
-    //   await oracle.settlePost([
-    //     1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    //     0, 0, 0, 0, 0, 0, 0, 0,
-    //   ]);
-    // });
+    it("PostSettle", async () => {
+      const bookiePool = Number(await betting.margin(0)) / 10000;
+      const bettorLocked = Number(await betting.margin(2)) / 10000;
+      const bookieLocked = Number(await betting.margin(1)) / 10000;
+      const oracleBal = ethers.utils.formatUnits(
+        await ethers.provider.getBalance(oracle.address),
+        "ether"
+      );
+      const ethbal = ethers.utils.formatUnits(
+        await ethers.provider.getBalance(betting.address),
+        "ether"
+      );
+      console.log(`bookiePool ${bookiePool}`);
+      console.log(`bettorLocked ${bettorLocked}`);
+      console.log(`bookieLocked ${bookieLocked}`);
+      console.log(`oracleBal ${oracleBal}`);
+      console.log(`bettingk balance ${ethbal}`);
 
-    // it("send result data to betting contract", async () => {
-    //   await helper.advanceTimeAndBlock(secondsInHour * 6);
-    //   await oracle.settleProcess();
-    // });
+      const redeemCheck2 = await betting.checkRedeem(hash1);
+      const redeemCheck3 = await betting.checkRedeem(hash2);
+      console.log(`redeem should succeed ${redeemCheck2}`);
+      console.log(`redeem should succeed ${redeemCheck3}`);
 
-    // it("PostSettle", async () => {
-    //   const bookiePool = await betting.margin(0);
-    //   const bettorLocked = await betting.margin(2);
-    //   const bookieLocked = await betting.margin(1);
-    //   const oracleBal = ethers.utils.formatUnits(
-    //     await ethers.provider.getBalance(oracle.address),
-    //     "finney"
-    //   );
-    //   const ethbal = ethers.utils.formatUnits(
-    //     await ethers.provider.getBalance(betting.address),
-    //     "finney"
-    //   );
-    //   console.log(`bookiePool ${bookiePool}`);
-    //   console.log(`bettorLocked ${bettorLocked}`);
-    //   console.log(`bookieLocked ${bookieLocked}`);
-    //   console.log(`oracleBal ${oracleBal}`);
-    //   console.log(`bettingk balance ${ethbal}`);
+      let redeemCheck5 = await betting.outcomeMap(1001);
+      console.log(` ${redeemCheck5}`);
+      redeemCheck5 = await betting.outcomeMap(1000);
+      console.log(` ${redeemCheck5}`);
 
-    //   const redeemCheck2 = await reader.checkRedeem(hash1);
-    //   const redeemCheck3 = await reader.checkRedeem(hash2);
-    //   console.log(`redeem should succeed ${redeemCheck2}`);
-    //   console.log(`redeem should succeed ${redeemCheck3}`);
+      await betting.connect(account3).redeem();
+      await betting.connect(account2).redeem();
 
-    //   const redeemCheck4 = await reader.checkSingleBet(hash2);
-    //   console.log(` ${redeemCheck4}`);
+      const userBalanceAcct2 =
+        Number((await betting.userStruct(account2.address)).userBalance) /
+        10000;
 
-    //   let redeemCheck5 = await betting.outcomeMap(1001);
-    //   console.log(` ${redeemCheck5}`);
-    //   redeemCheck5 = await betting.outcomeMap(1000);
-    //   console.log(` ${redeemCheck5}`);
+      const userBalanceAcct3 =
+        Number((await betting.userStruct(account3.address)).userBalance) /
+        10000;
 
-    //   //  await betting.redeem(hash1, 1000, { from: accounts[2] });
-    //   await betting.connect(account3).redeem(hash2);
-    //   //await betting.connect(account2).redeem(hash1);
+      console.log(`bookiePool ${bookiePool}`);
+      console.log(`bettorLocked ${bettorLocked}`);
+      console.log(`bookieLocked ${bookieLocked}`);
+      console.log(`oracleBal ${oracleBal}`);
+      console.log(`ethbal in finney ${ethbal}`);
+      console.log(`acct2 Bal ${userBalanceAcct2}`);
+      console.log(`acct3 Bal ${userBalanceAcct3}`);
 
-    //   await betting.connect(account3).redeem(hash5);
-    //   await betting.connect(account2).redeem(hash7);
-    //   await betting.connect(account2).redeem(hash9);
-
-    //   await betting.connect(account2).redeem(hash10);
-    //   await betting.connect(account2).redeem(hash11);
-    //   await betting.connect(account3).redeem(hash12);
-    //   const userBalanceAcct2 = (await betting.userStruct(account2.address)).userBalance;
-    //   console.log(`acct2 ${userBalanceAcct2}`);
-    //   const userBalanceAcct3 = (await betting.userStruct(account3.address)).userBalance;
-    //   console.log(`acct3 ${userBalanceAcct3}`);
-
-    //   console.log(`bookiePool ${bookiePool}`);
-    //   console.log(`bettorLocked ${bettorLocked}`);
-    //   console.log(`bookieLocked ${bookieLocked}`);
-    //   console.log(`oracleBal ${oracleBal}`);
-    //   console.log(`ethbal in finney ${ethbal}`);
-    //   console.log(`acct2 Bal ${userBalanceAcct2}`);
-    //   console.log(`acct3 Bal ${userBalanceAcct3}`);
-
-    //   assert.equal(bookiePool, "29154", "mustBe equal");
-    //   assert.equal(bettorLocked, "0", "Must be equal");
-    //   assert.equal(bookieLocked, "0", "Must be equal");
-    //   assert.equal(oracleBal, "34.23", "Must be equal");
-    //   assert.equal(ethbal, "4965.77", "Must be equal");
-    //   assert.equal(userBalanceAcct2, "6950", "Must be equal");
-    //   assert.equal(userBalanceAcct3, "13553", "Must be equal");
-    // });
+      assert.equal(bookiePool, "2.9917", "mustBe equal");
+      assert.equal(bettorLocked, "0", "Must be equal");
+      assert.equal(bookieLocked, "0", "Must be equal");
+      assert.equal(oracleBal, "0.030415", "Must be equal");
+      assert.equal(ethbal, "4.969585", "Must be equal");
+      assert.equal(userBalanceAcct2, "0.695", "Must be equal");
+      assert.equal(userBalanceAcct3, "1.2828", "Must be equal");
+    });
   });
 });

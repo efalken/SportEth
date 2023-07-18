@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 // hour of day in GMT one can post new data for voting
 uint32 constant HOUR_POST = 12; // 12 in prod
 // hour of day in GMT after whic one can submit a data proposal for processing
-uint32 constant HOUR_PROCESS = 24; // 12 in prod
+uint32 constant HOUR_PROCESS = 12; // 12 in prod
 // minimum token requirement for data submissions
 uint32 constant MIN_SUBMIT = 5e7;
 // minimum token requirement for data submissions
@@ -16,7 +16,7 @@ uint64 constant ONE_MILLION = 1e6;
 // max for initial favorite
 uint32 constant MAX_DEC_ODDS_INIT = 1000;
 // max for initial favorite
-uint64 constant TOKEN_ADJ = 100000;
+//uint64 constant TOKEN_ADJ = 100000;
 // min odds for initial data submission
 uint32 constant MIN_DEC_ODDS_INIT = 125;
 uint32 constant MAX_DEC_ODDS_UPDATE = 1500;
@@ -37,4 +37,4 @@ uint32 constant ACTIVE_STATE = 2;
 uint32 constant ACTIVE_STATE0 = 0;
 // keeps track of  who supplied data proposal, will be fined if data submission voted down
 
-uint256 constant EPOCH_AMOUNT = 16e6;
+uint256 constant EPOCH_AMOUNT = 2e7;

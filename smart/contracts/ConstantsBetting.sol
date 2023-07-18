@@ -2,7 +2,7 @@ pragma solidity ^0.8.0;
 
 //SPDX-License-Identifier: BUSL-1.1
 
-uint256 constant UNITS_TRANS14 = 1e11;
+uint256 constant UNITS_TRANS14 = 1e14;
 // puts UTC ahead of now
 uint32 constant FUTURE_START = 2e9;
 // used to generate oracle payment

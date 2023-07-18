@@ -28,11 +28,9 @@ describe("Betting", function () {
     const Betting = await ethers.getContractFactory("Betting");
     const Token = await ethers.getContractFactory("Token");
     const Oracle = await ethers.getContractFactory("Oracle");
-    const Reader = await ethers.getContractFactory("Reader");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
-    reader = await Reader.deploy(betting.address, token.address);
     await betting.setOracleAddress(oracle.address);
     await token.setAdmin(oracle.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
@@ -48,7 +46,7 @@ describe("Betting", function () {
     });
 
     it("checkHour", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -115,7 +113,7 @@ describe("Betting", function () {
 
   describe("setupBets", async () => {
     it("checkHour", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -133,7 +131,7 @@ describe("Betting", function () {
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
-          "NFL:ATL:LAR",
+          "UFC:Holloway:Kattar",
           "NFL:BAL:MIA",
           "NFL:BUF:MIN",
           "NFL:CAR:NE",
@@ -153,17 +151,17 @@ describe("Betting", function () {
           "UFC:Kelleher:Simon",
           "UFC:Hernandez:Vieria",
           "UFC:Akhemedov:Breese",
-          "UFC:Memphis:Brooklyn",
-          "UFC:Boston:Charlotte",
-          "UFC:Milwaukee:Dallas",
-          "UFC:miami:LALakers",
-          "UFC:Atlanta:SanAntonia",
-          "NHL:Colorado:Washington",
-          "NHL:Vegas:StLouis",
-          "NHL:TampaBay:Dallas",
-          "NHL:Boston:Carolina",
-          "NHL:Philadelphia:Edmonton",
-          "NHL:Pittsburgh:NYIslanders",
+          "CFL: Mich: OhioState",
+          "CFL: Minn : Illinois",
+          "CFL: MiamiU: Florida",
+          "CFL: USC: UCLA",
+          "CFL: Alabama: Auburn",
+          "CFL: ArizonaSt: UofAriz",
+          "CFL: Georgia: Clemson",
+          "CFL: PennState: Indiana",
+          "CFL: Texas: TexasA&M",
+          "CFL: Utah: BYU",
+          "CFL: Rutgers: VirgTech",
         ],
         [
           nextStart,
@@ -200,9 +198,9 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          999, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
+          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
+          760, 919, 720, 672, 800,
         ]
       );
       receipt = await result.wait();
@@ -250,7 +248,7 @@ describe("Betting", function () {
       await expect(oracle.settleProcess()).to.be.reverted;
     });
 
-    it("fast forward 3 days", async () => {
+    it("fast forward 12 hours", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
@@ -261,7 +259,7 @@ describe("Betting", function () {
     });
 
     it("send updated odds data: 2000 for match 1, team 0", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -326,23 +324,23 @@ describe("Betting", function () {
     });
 
     it("See updated odds, should be new 2000", async () => {
-      const result2 = await betting.betData(1);
-      const str = result2.toHexString(16).slice(2).padStart(64, "0");
-      const pieces = str
-        .match(/.{1,2}/g)
-        .reverse()
-        .join("")
-        .match(/.{1,8}/g)
-        .map((s) =>
-          s
-            .match(/.{1,2}/g)
-            .reverse()
-            .join("")
-        );
-      const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
-      console.log(ints);
-      assert.equal(ints[6], "600", "Must be equal");
-      console.log(`tokBal ${ints[6]}`);
+      const result2 = await betting.odds(1);
+      // const str = result2.toHexString(16).slice(2).padStart(64, "0");
+      // const pieces = str
+      //   .match(/.{1,2}/g)
+      //   .reverse()
+      //   .join("")
+      //   .match(/.{1,8}/g)
+      //   .map((s) =>
+      //     s
+      //       .match(/.{1,2}/g)
+      //       .reverse()
+      //       .join("")
+      //   );
+      // const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
+      // console.log(ints);
+      assert.equal(result2, "600", "Must be equal");
+      console.log(`tokBal ${result2}`);
     });
 
     it("New token balance", async () => {
@@ -355,7 +353,7 @@ describe("Betting", function () {
     });
 
     it("update odds", async () => {
-      _hourSolidity = await reader.hourOfDay();
+      _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -426,23 +424,23 @@ describe("Betting", function () {
     });
 
     it("should be old 600, not new 700", async () => {
-      const result3 = await betting.betData(1);
+      const result3 = await betting.odds(1);
       console.log(`result3 ${result3}`);
       //const str = bn.toString(16);
-      const str = result3.toHexString(16).slice(2).padStart(64, "0");
-      const pieces = str
-        .match(/.{1,2}/g)
-        .reverse()
-        .join("")
-        .match(/.{1,8}/g)
-        .map((s) =>
-          s
-            .match(/.{1,2}/g)
-            .reverse()
-            .join("")
-        );
-      const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
-      assert.equal(ints[6], "600", "Must be equal");
+      // const str = result3.toHexString(16).slice(2).padStart(64, "0");
+      // const pieces = str
+      //   .match(/.{1,2}/g)
+      //   .reverse()
+      //   .join("")
+      //   .match(/.{1,8}/g)
+      //   .map((s) =>
+      //     s
+      //       .match(/.{1,2}/g)
+      //       .reverse()
+      //       .join("")
+      //   );
+      // const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
+      assert.equal(result3, "600", "Must be equal");
     });
 
     it("totalGas", async () => {

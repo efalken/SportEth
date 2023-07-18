@@ -82,9 +82,9 @@ contract Token {
     require(senderBalance >= _value);
     unchecked {
       balanceOf[_from] = senderBalance - _value;
-      balanceOf[oracleAdmin] += _value;
+     balanceOf[oracleAdmin] += _value;
     }
-    emit Transfer(_from, oracleAdmin, _value);
+   emit Transfer(_from, oracleAdmin, _value);
     return true;
   }
 

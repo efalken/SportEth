@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 /**
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: WTFPL
 @author Eric Falkenstein
 */
 
@@ -28,15 +28,13 @@ contract Betting {
   mapping(bytes32 => Subcontract) public betContracts;
   /// this maps the set {epoch, match, team} to its event outcome,
   ///where 0 is a loss, 1 is a tie or postponement, 2 a win
-  /// The outcome defaults to 0, so that these need not be updated for a loss
   mapping(uint32 => uint8) public outcomeMap;
   /// This keeps track of an LP's ownership in the LP ether capital,
   /// and also when it can first withdraw capital (two settlement periods)
   mapping(address => LPStruct) public lpStruct;
   /// this struct holds a user's ETH balance
   mapping(address => UserStruct) public userStruct;
-  //uint256 public moose;
-  //mapping(address => bytes32) public lastTransaction;
+
 
   struct Subcontract {
     uint32 epoch;
@@ -238,7 +236,7 @@ contract Betting {
     // sends the oracle contract its weekly fee
     (bool success, ) = oracleAdmin.call{value: oracleDiv}("");
     require(success, "Call failed");
-    return (params[0], oracleDiv);
+    return (params[0], (oracleDiv/1e9));
   }
 
   /// @dev bettor funds account for bets
@@ -252,7 +250,7 @@ contract Betting {
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
     // require(block.timestamp < params[3], "only prior to first event");
-    uint256 netinvestment = (msg.value / 1e10);
+    uint256 netinvestment = (msg.value / UNITS_TRANS14);
     uint64 _shares = 0;
     if (margin[0] > 0) {
       _shares = uint64(
@@ -275,9 +273,11 @@ contract Betting {
    */
   function redeem() external {
     uint numberBets = userStruct[msg.sender].counter;
+    require(numberBets > 0);
     uint64 payout;
     for (uint i = 0; i < numberBets; i++) {
       bytes32 _subkId = userStruct[msg.sender].lastTransaction[i];
+      if (betContracts[_subkId].epoch == params[3]) revert("bets active");
       // creates epoch~matchnumber~pick number via concatenation
       uint32 epochMatch = betContracts[_subkId].epoch *
         1000 +
@@ -292,10 +292,8 @@ contract Betting {
         if (outcomeMap[epochMatch] == 2) {
           payout += (betContracts[_subkId].payoff * 95) / 100;
         }
-        // delete betContracts[_subkId];
       }
     }
-    //delete userStruct[msg.sender].lastTransaction;
     userStruct[msg.sender].counter = 0;
     // credit principle + payout to redeemer's balance
     userStruct[msg.sender].userBalance += payout;
@@ -319,20 +317,19 @@ contract Betting {
   /** @dev processes withdrawal in 0.1 finney by LPs
    * @param _sharesToSell is the LP's ownership stake withdrawn.
    */
-  function withdrawBook(uint32 _sharesToSell) external {
+  function withdrawBook(uint64 _sharesToSell) external {
     require(block.timestamp < params[3], "only prior to first event");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
-    // process check
+    // REMOVE IN PRODUCTION
     // require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
-    uint64 ethWithdraw = (_sharesToSell * margin[0]) / params[0];
+    uint64 ethWithdraw = (_sharesToSell * margin[0]) / margin[3];
     // LP cannot withdraw if bettors have locked up their capital
-    //moose = ethWithdraw;
     require(
       ethWithdraw <= (margin[0] - margin[1]),
       "insufficient free capital"
     );
     // total shares decremented
-    margin[3] -= uint64(_sharesToSell);
+    margin[3] -= _sharesToSell;
     // individual shares decremented
     lpStruct[msg.sender].shares -= _sharesToSell;
     // LP capital decremented
@@ -391,12 +388,12 @@ contract Betting {
   }
 
   /** @dev processes updates to epoch's odds
-   * @param _updateBetData updates the epoch's odds. Data are packed into uint64.
+   * @param _updateOdds updates the epoch's odds. Data are packed into uint64.
    */
   function transmitUpdate(
-    uint16[32] calldata _updateBetData
+    uint16[32] calldata _updateOdds
   ) external onlyAdmin {
-    odds = _updateBetData;
+    odds = _updateOdds;
     paused[0] = 99;
     paused[1] = 99;
     // paused[2] = 99;
