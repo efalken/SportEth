@@ -46,8 +46,8 @@ contract Betting {
   }
 
   struct UserStruct {
-    uint64 userBalance;
     uint32 counter;
+    uint64 userBalance;
     bytes32[16] lastTransaction;
   }
 
@@ -117,11 +117,11 @@ contract Betting {
     bool isMMA = (betPayoff > 10000) ? true : false;
     betPayoff = (betPayoff % 10000);
     if (_team0or1 == 0) {
-      betPayoff = int64(_betAmt * betPayoff) / 1000;
+      betPayoff = (_betAmt * betPayoff) / 1000;
     } else if (isMMA) {
-      betPayoff = (int64(_betAmt) * 1e6 * 90) / (50 + betPayoff) / 1000 / 100;
+      betPayoff = (_betAmt * 1e6 * MMA_ADJ) / (ODDS_FACTOR + betPayoff) / 100000;
     } else {
-      betPayoff = (int64(_betAmt) * 1e6 * 95) / (50 + betPayoff) / 1000 / 100;
+      betPayoff = (_betAmt * 1e6 * FOOTBALL_ADJ) / (ODDS_FACTOR + betPayoff) / 100000;
     }
     int64 netPosTeamBet = int64(betDatav[2 + _team0or1]) -
       int64(betDatav[1 - _team0or1]);

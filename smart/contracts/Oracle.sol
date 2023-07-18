@@ -11,23 +11,23 @@ import "./ConstantsOracle.sol";
 contract Oracle {
   // results are 0 for team 0   winning, 1 for team 1 winning, 2 for a tie or no contest
   uint8[32] public propResults;
+  uint8 public reviewStatus;
   // slots are 0 for the initial favorite, 1 for initial underdog
   uint16[32] public propOdds;
-  // slots are 0 for the initial favorite, 1 for initial underdog
-  uint32[32] public propStartTimes;
-  uint32 public betEpochOracle;
-  uint32 public reviewStatus;
-  uint32 public propNumber;
+  uint16 public betEpochOracle;
+  uint16 public propNumber;
   // smaller data from propOddsStarts because one cannot change the start times
   //uint64[32] public propOddsUpdate;
   // uint32 public totVote;
-  uint64 public tokensInContract;
-  uint64 public moose;
+  uint32 public tokensInContract;
   // 0 yes votes, 1 no votes, epoch, reviewStatus, propNumber,
-  uint64[2] public votes;
+  uint32[2] public votes;
   //   0 total equity Tokens in Oracle, 1 feesPerLiqTracker
-  uint64[2] public feeData;
+  uint32[2] public feeData;
+    // slots are 0 for the initial favorite, 1 for initial underdog
+  uint32[32] public propStartTimes;
   // keeps track of  who supplied data proposal, will be fined if data submission voted down
+    uint64 public moose;
   address public proposer;
   /** the schedule is a record of "sport:home:away", such as "NFL:NYG:SF" for us football
    */
@@ -41,11 +41,12 @@ contract Oracle {
   Betting public bettingContract;
 
   struct AdminStruct {
-    uint32 baseEpoch;
-    uint64 tokens;
-    uint64 totalVotes;
-    uint64 voteTracker;
-    uint64 initFeePool;
+    uint16 baseEpoch;    // for rewards
+    uint16 voteEpoch;       // epochVotes
+    uint16 voteTracker;// propNumber
+    uint32 tokens;
+    uint32 totalVotes; // tokens x numberVotes
+    uint32 initFeePool;
   }
 
   event ResultsPosted(uint32 epoch, uint32 propnum, uint8[32] winner);
@@ -54,10 +55,10 @@ contract Oracle {
 
   event VoteOutcome(
     bool voteResult,
-    uint32 propnum,
-    uint32 epoch,
-    uint64 yesvotes,
-    uint64 novotes
+    uint16 propnum,
+    uint16 epoch,
+    uint32 yesvotes,
+    uint32 novotes
   );
 
   event BetDataPosted(uint32 epoch, uint32 propnum, uint32[32] oddsStart);
@@ -100,13 +101,20 @@ contract Oracle {
     // this prevents this account from voting again on this data proposal
     adminStruct[msg.sender].voteTracker = propNumber;
     // votes are simply one's entire token balance in this oracle contract
-    uint64 _tokens = adminStruct[msg.sender].tokens;
+    uint32 _tokens = adminStruct[msg.sender].tokens;
     if (_vote) {
       votes[0] += _tokens;
     } else {
       votes[1] += _tokens;
     }
-    adminStruct[msg.sender].totalVotes += _tokens;
+    if (adminStruct[msg.sender].voteEpoch < (2 * betEpochOracle)) {
+      adminStruct[msg.sender].totalVotes += _tokens;
+      adminStruct[msg.sender].voteEpoch = (2 * betEpochOracle);
+    } else if (adminStruct[msg.sender].voteEpoch == (2 * betEpochOracle) ) {
+      adminStruct[msg.sender].totalVotes += _tokens;
+      adminStruct[msg.sender].voteEpoch++;
+    }
+    
   }
 
   receive() external payable {}
@@ -120,7 +128,7 @@ contract Oracle {
     require(reviewStatus == ACTIVE_STATE0, "Already under Review");
     for (uint256 i = 0; i < 32; i++) {
       uint realOdds = _decimalOdds[i] % 10000;
-      require(realOdds < 1000);
+      require(realOdds < MAX_DEC_ODDS_INIT && realOdds > MIN_DEC_ODDS_INIT);
     }
     // require((_starts[0] - block.timestamp) < 604800 && (_starts[0] - block.timestamp) > 86400);
     propOdds = _decimalOdds;
@@ -207,8 +215,8 @@ contract Oracle {
     // totVote = votes[0] + votes[1];
     if (votes[0] > votes[1]) {
       (uint32 xx, uint256 ethDividend) = bettingContract.settle(propResults);
-      betEpochOracle = xx;
-      feeData[1] += uint64(ethDividend / uint256(feeData[0]));
+      betEpochOracle = uint16(xx);
+      feeData[1] += uint32(ethDividend / uint256(feeData[0]));
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
      // mintReward();
     } else {
@@ -239,7 +247,7 @@ contract Oracle {
     return matchSchedule;
   }
 
-  function depositTokens(uint64 _amt) external {
+  function depositTokens(uint32 _amt) external {
     uint256 _ethOut;
     feeData[0] += _amt;
     if (adminStruct[msg.sender].tokens > 0) {
@@ -254,7 +262,7 @@ contract Oracle {
     emit Funding(_amt, _ethOut, msg.sender, true);
   }
 
-  function withdrawTokens(uint64 _amt) external {
+  function withdrawTokens(uint32 _amt) external {
     require(_amt <= adminStruct[msg.sender].tokens, "nsf tokens");
     require(reviewStatus < 10, "no wd during vote");
     require(adminStruct[msg.sender].baseEpoch < betEpochOracle, "too soon");
@@ -278,7 +286,7 @@ contract Oracle {
       adminStruct[msg.sender].baseEpoch = betEpochOracle;
      } else if (lpepoch < betEpochOracle) {
       uint256 totShares = uint256(bettingContract.margin(3));
-      uint64 tokenRewards = uint64(
+      uint32 tokenRewards = uint32(
         (uint256(lpShares) * EPOCH_AMOUNT) / totShares
       );
      tokensInContract -= tokenRewards;
@@ -301,7 +309,7 @@ contract Oracle {
     // require(hourOfDay() == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
     require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 10% of tokens");
-    uint64 _tokens = adminStruct[msg.sender].tokens;
+    uint32 _tokens = adminStruct[msg.sender].tokens;
     votes[0] = _tokens;
     proposer = msg.sender;
     // this prevents proposer from voting again with his tokens on this submission
@@ -356,7 +364,7 @@ contract Oracle {
     );
     uint256 _ethOut = (votesPerEpoch * ethTot) / adminStruct[msgsender].tokens;
     uint256 ploughBack = ethTot - _ethOut;
-    feeData[1] += uint64(ploughBack / uint256(feeData[0]));
+    feeData[1] += uint32(ploughBack / uint256(feeData[0]));
     (bool success, ) = payable(msgsender).call{value: (_ethOut * 1e9)}("");
     require(success, "eth payment failed");
     //moose = _ethOut;
