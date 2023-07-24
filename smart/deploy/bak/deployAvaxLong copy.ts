@@ -1,7 +1,9 @@
 import { ethers } from "hardhat";
 import fs from "fs";
-var nextStart = 1688872528;
+var nextStart = 1689524202;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
+var hash001, hash011, hash010, hash031, hash230, hash240, hash230, hash231, hash230b;
+var hash1100, hash1201, hash1110, hash1131, hash2130, hash2140, hash2130, hash2131, hash2241, hash2240, hash2230, hash2131b, hash2130b, hash2231, hash1230;
 
 //var finney = "1000000000000000"
 const finneys = BigInt('1000000000000000');
@@ -150,25 +152,25 @@ async function main() {
   });
   await result.wait();
 
-  result = await betting.connect(signers[1]).bet(0, 0, 20);
+  result = await betting.connect(signers[1]).bet(0, 1, 20);
       receipt = await result.wait();
-
-
-      result = await betting.connect(signers[2]).bet(0, 1, 20);
+      hash1100 = receipt.events[0].args.contractHash;
+      result = await betting.connect(signers[2]).bet(0, 0, 20);
       receipt = await result.wait();
-
-      //hash2 = receipt.events[0].args.contractHash;
+      hash1201 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[1]).bet(1, 0, 15);
       receipt = await result.wait();
-     // hash3 = receipt.events[0].args.contractHash;
+      hash1110 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(1, 1, 25);
       receipt = await result.wait();
       //hash4 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[1]).bet(3, 1, 13);
       receipt = await result.wait();
+      hash1131 = receipt.events[0].args.contractHash;
      // hash5 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(3, 0, 21);
       receipt = await result.wait();
+      hash1230 = receipt.events[0].args.contractHash;
 
       result = await oracle.settlePost([
         1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -257,25 +259,39 @@ async function main() {
       receipt = result.wait();
       result = await oracle.initProcess();
       receipt = result.wait();
-    
+      
       result = await betting.connect(signers[1]).bet(3, 0, 13);
       receipt = await result.wait();
+      hash2130 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(3, 1, 20);
       receipt = await result.wait();
       result = await betting.connect(signers[1]).bet(4, 0, 13);
       receipt = await result.wait();
+      hash2140 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(4, 1, 20);
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).postBigBet(3, 0, 220, 200);
-      receipt = await result.wait();
-      hash = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[1]).postBigBet(3, 1, 201, 200);
-      receipt = await result.wait();
-      result = await betting.connect(signers[2]).takeBigBet(hash);
-      receipt = await result.wait();
+      // result = await betting.connect(signers[1]).   
+      // hash2130b = receipt.events[0].args.contractHash;
+      // hash = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[1]).postBigBet(3, 1, 201, 200);
+      // receipt = await result.wait();
+      // hash2131b = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[2]).takeBigBet(hash2130b);
+      // receipt = await result.wait();
+      // hash2231 = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[2]).takeBigBet(hash2131b);
+      // receipt = await result.wait();
+      // hash2230 = receipt.events[0].args.contractHash;
+      //  result = await betting.connect(signers[2]).postBigBet(4, 0, 220, 200);
+      // receipt = await result.wait();
+      // hash2240 = receipt.events[0].args.contractHash;
+      // hash = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[2]).postBigBet(4, 1, 201, 200);
+      // receipt = await result.wait();
+      // hash2241 = receipt.events[0].args.contractHash;
  
       result = await oracle.settlePost([
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
@@ -378,8 +394,33 @@ async function main() {
       receipt = await result.wait();
       result = await betting.connect(signers[2]).bet(0, 1, 20);
       receipt = await result.wait();
-     // const sto0 = await betting.showStartTimeOdds();
-     //const sto00 = await betting.startTimeOdds(0);
+      result = await betting.checkRedeem(hash1100);
+      console.log(`per1/acct1/0/0 loser ${result}`);
+      result = await betting.checkRedeem(hash1201);
+      console.log(`per1/acct2/0/1 winner ${result}`);
+      result = await betting.checkRedeem(hash1110);
+      console.log(`per1/acct1/1/0 loser${result}`);
+      result = await betting.checkRedeem(hash1131);
+      console.log(`per1/acct1/3/1 tie ${result}`);
+      result = await betting.checkRedeem(hash2130);
+      console.log(`per2/acct1/3/0 loser ${result}`);
+      result = await betting.checkRedeem(hash2140);
+      console.log(`per2/acct1/4/0 loser ${result}`);
+      result = await betting.checkRedeem(hash2130b);
+      console.log(`per2/acct1/3/0 loser ${result}`);
+      result = await betting.checkRedeem(hash2131b);
+      console.log(`per2/acct1/3/1 winner ${result}`);
+      result = await betting.checkRedeem(hash2231);
+      console.log(`per2/acct2/3/1 winner ${result}`);
+      result = await betting.checkRedeem(hash2230);
+      console.log(`per2/acct2/3/0 loser ${result}`);
+      result = await betting.checkRedeem(hash2240);
+      console.log(`per2/acct2/4/0 notTaken ${result}`);
+      result = await betting.checkRedeem(hash2241);
+      console.log(`per2/acct2/4/1 notTaken  ${result}`);
+      result = await betting.checkRedeem(hash1230);
+      console.log(`per1/acct2/3/0 tie  ${result}`);
+
 
       // result = await betting.connect(signers[1]).fundBook({
       //   value: 100n*finneys,
@@ -397,8 +438,9 @@ async function main() {
       console.log(`shares2 ${shares2}`);
       const betData0 = await betting.betData(0);
       console.log(`betData0 ${betData0}`);
+      const start = await betting.margin(7);
      // const startTime0 = await  betting.startTimeOdds(0);
-     // console.log(`startTime0 ${startTime0}`);
+      console.log(`startTime0 ${start}`);
 
 
       

@@ -6,7 +6,7 @@ _dateo = new Date();
 const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
 var hourOffset;
 var _hourSolidity;
-var nextStart = 1690025499;
+var nextStart = 1690659274;
 var _timestamp;
 var _date;
 var _hour;
@@ -23,7 +23,7 @@ var ethout8;
 var ethout;
 var tokensout;
 var receipt;
-var result;
+var result, gasUsed, gasPrice;
 const { assert } = require("chai");
 const finneys = BigInt("1000000000000000");
 const tenthEthInK = BigInt("1000");
@@ -86,8 +86,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-
-      await oracle.initPost(
+      result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
           "NFL:ATL:LAR",
@@ -162,22 +161,13 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-
+      receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       result = await oracle.initProcess();
       receipt = await result.wait();
     });
 
     it("Send  Bet #1", async () => {
-      // const _timestamp2 = (
-      //   await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      // ).timestamp;
-      // // console.log(`timestamp2 ${_timestamp2}`);
-      // const xx = await betting.params(3);
-      // // console.log(`nextStart ${nextStart}`);
-      // // console.log(`margin7 ${xx}`);
-      // // console.log(`margin7 ${_timestamp2 - xx}`);
-
       await betting.connect(account4).fundBook({
         value: 50n * eths,
       });
@@ -196,11 +186,6 @@ describe("Betting", function () {
         hourOffset = 12 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      nextStart = nextStart + 7 * 86400;
-
       await oracle.settlePost([
         0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
@@ -237,7 +222,7 @@ describe("Betting", function () {
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       nextStart = _timestamp + 7 * 86400;
-      await oracle.initPost(
+      result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
           "NFL:ATL:LAR",
@@ -312,10 +297,11 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      await oracle.connect(account1).vote(true);
+      receipt = await result.wait();
+      const gasUsed = receipt.gasUsed;
+      const gasPrice = result.gasPrice;
+      console.log(`gasPrice ${gasPrice} gasUsed ${gasUsed}`);
+      //await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
@@ -369,11 +355,11 @@ describe("Betting", function () {
         .depositTokens(100n * million);
       const receipt2 = await result2.wait();
       const gasUsed0 = receipt0.gasUsed;
-      // // console.log(`gas on tokenTransfer0 ${gasUsed0}`);
+      // console.log(`gas on tokenTransfer0 ${gasUsed0}`);
       const gasUsed1 = receipt1.gasUsed;
-      // // console.log(`gas on tokenTransfer1 ${gasUsed1}`);
+      // console.log(`gas on tokenTransfer1 ${gasUsed1}`);
       const gasUsed2 = receipt2.gasUsed;
-      // // console.log(`gas on tokenTransfer2 ${gasUsed2}`);
+      // console.log(`gas on tokenTransfer2 ${gasUsed2}`);
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -381,7 +367,7 @@ describe("Betting", function () {
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      // // console.log(`hourAdj ${hourOffset}`);
+      // console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -465,7 +451,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await oracle.connect(account1).vote(true);
+      // await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
@@ -601,14 +587,14 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await oracle.connect(account1).vote(true);
+      //await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.connect(account1).initProcess();
       const activeState = await oracle.reviewStatus();
-      // // console.log(`activestate, ${activeState}`);
+      // console.log(`activestate, ${activeState}`);
     });
 
     it("first Check", async () => {
@@ -634,20 +620,19 @@ describe("Betting", function () {
       tokens0 = (await oracle.adminStruct(owner.address)).tokens;
       tokens1 = await token.balanceOf(owner.address);
       tokens2 = await token.balanceOf(oracle.address);
-      // // console.log(`acct0 tokens in userAcct, ${tokens0}`);
-      // // console.log(`acct0 tokens in EOA, ${tokens1}`);
-      // // console.log(`acct0 tokens in K, ${tokens2}`);
+      // console.log(`acct0 tokens in userAcct, ${tokens0}`);
+      // console.log(`acct0 tokens in EOA, ${tokens1}`);
+      // console.log(`acct0 tokens in K, ${tokens2}`);
       ethout = ethers.utils.formatUnits(
         receipt.events[1].args.etherChange,
         "finney"
       );
-      // console.log(`account0 eth Out ${ethout}`);
+      console.log(`account0 eth Out ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
       );
-      console.log(`account0 wd1 ${ethout}`);
       assert.equal(ethout, "212.5", "Must be equal");
     });
 
@@ -690,10 +675,7 @@ describe("Betting", function () {
         hourOffset = 12 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart = nextStart + 7 * 86400;
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -769,7 +751,7 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-      await oracle.connect(account1).vote(true);
+      // await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
@@ -778,7 +760,7 @@ describe("Betting", function () {
 
       const activeState = await oracle.reviewStatus();
       const ortokens = (await oracle.adminStruct(account1.address)).tokens;
-      // console.log(`tokens, ${ortokens}`);
+      console.log(`tokens, ${ortokens}`);
       const betepoch = await oracle.betEpochOracle();
       // console.log(`betepoch, ${betepoch}`);
       const initepoch = (await oracle.adminStruct(account1.address)).baseEpoch;
@@ -790,6 +772,12 @@ describe("Betting", function () {
       feePool = await oracle.feeData(0);
       // console.log(`eth in Oracle Contract ${oracleBal}`);
       // console.log(`feePool Tracker ${feePool}`);
+      const totvot = (await oracle.adminStruct(account1.address)).totalVotes;
+      const baseep = (await oracle.adminStruct(account1.address)).baseEpoch;
+      const ep0 = await oracle.betEpochOracle();
+      console.log(`totalvotes ${totvot}`);
+      console.log(`lpEpoch ${baseep}`);
+      console.log(`epCont ${ep0}`);
       result = await oracle.connect(account1).withdrawTokens(150n * million);
       receipt = await result.wait();
       ethout = ethers.utils.formatUnits(
@@ -798,8 +786,8 @@ describe("Betting", function () {
       );
       moose = await oracle.moose();
       // console.log(`moose, ${moose}`);
-      console.log(`acct1 wd ${ethout}`);
-      assert.equal(ethout, "100.8", "Must be equal");
+      console.log(`acct1 Out ${ethout}`);
+      assert.equal(ethout, "50.4", "Must be equal");
       tokensout = receipt.events[1].args.tokensChange;
       // console.log(`tokens Out1 ${tokensout}`);
       result = await betting.connect(account5).bet(0, 0, 25n * tenthEthInK);
@@ -814,20 +802,20 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
-      result = await oracle.settlePost([
+      await oracle.settlePost([
         0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
-      receipt = await result.wait();
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.connect(account2).vote(true);
-      result = await oracle.settleProcess();
-      receipt = await result.wait();
+      await oracle.settleProcess();
     });
   });
 
-  describe("sixth epoch with 2 oracles", async () => {
+  describe("f6ithh epoch with 2 oracles", async () => {
     it("post init", async () => {
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
@@ -933,18 +921,18 @@ describe("Betting", function () {
         receipt.events[1].args.etherChange,
         "finney"
       );
-      console.log(`acct0 final wd ${ethout}`);
+      console.log(`acct0 Out ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
-      //console.log(`tokens Out0 ${tokensout}`);
-      assert.equal(ethout, "111.0", "Must be equal");
+      // console.log(`tokens Out0 ${tokensout}`);
+      assert.equal(ethout, "144.6", "Must be equal");
       //const betepoch = await oracle.betEpochOracle();
-      // // console.log(`betepoch, ${betepoch}`);
+      // console.log(`betepoch, ${betepoch}`);
       //const initepoch = (await oracle.adminStruct(account2.address)).baseEpoch;
-      // // console.log(`Acct2 baseEpoch, ${betepoch - initepoch}`);
+      // console.log(`Acct2 baseEpoch, ${betepoch - initepoch}`);
       const totvotes = (await oracle.adminStruct(account2.address)).totalVotes;
-      // // console.log(`Acct2 votes, ${totvotes}`);
+      // console.log(`Acct2 votes, ${totvotes}`);
       const ortokens = (await oracle.adminStruct(account2.address)).tokens;
-      // // console.log(`Acct2 tokens, ${ortokens}`);
+      // console.log(`Acct2 tokens, ${ortokens}`);
       const ethbal1 = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
@@ -973,10 +961,10 @@ describe("Betting", function () {
         receipt1.events[1].args.etherChange,
         "finney"
       );
-      console.log(`account2 wd ${ethout}`);
+      console.log(`ether acct2 ${ethout}`);
       const tokensout1 = receipt1.events[1].args.tokensChange;
-      // console.loassert.equalg(`tokens Out2 ${tokensout1}`);
-      ethout, "75.5", "Must be equal";
+      // console.log(`tokens Out2 ${tokensout1}`);
+      assert.equal(ethout, "92.3", "Must be equal");
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"

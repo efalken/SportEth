@@ -10,6 +10,7 @@ var _hour;
 var receipt;
 var gasUsed;
 var result;
+var nextStart = 1690659274;
 const { assert } = require("chai");
 require("chai").use(require("chai-as-promised")).should();
 const finneys = BigInt("1000000000000000");
@@ -61,7 +62,6 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = 1688218363 + 7 * 86400;
       console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
         [
@@ -144,7 +144,7 @@ describe("Betting", function () {
     });
 
     it("fast forward 4 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("Send Initial Data", async () => {
@@ -215,20 +215,20 @@ describe("Betting", function () {
         919, 720, 672, 800,
       ]);
       receipt = await result.wait();
-      gasUsed = receipt.gasUsed;
-      console.log(`gas on initPost = ${gasUsed}`);
+      gas0 = receipt.gasUsed;
     });
 
     it("fast forward 4 hours", async () => {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("approve and send to betting contract", async () => {
       result = await oracle.updateProcess();
-      await result.wait();
+      receipt = await result.wait();
+      gas1 = receipt.gasUsed;
       const odds0 = await betting.odds(0);
       console.log(`odds0 ${odds0}`);
       receipt = await result.wait();
@@ -278,7 +278,7 @@ describe("Betting", function () {
     });
 
     it("Approve results and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       const betdata0 = await betting.betData(0);
       console.log(`betdata preSettle ${betdata0}`);
       const betdata1 = await betting.betData(1);
@@ -324,6 +324,9 @@ describe("Betting", function () {
       assert.equal(bookieLocked, "0", "Must be equal");
       assert.equal(oracleBal, "0.008995", "Must be equal");
       assert.equal(ethbal, "4.991005", "Must be equal");
+
+      console.log(`gas0 on updatepost ${gas0}`);
+      console.log(`gas1 on updateprocess ${gas1}`);
     });
   });
 });

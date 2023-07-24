@@ -9,6 +9,7 @@ var _date;
 var _hour;
 var account2eo;
 var redeemCheck;
+nextStart = 1690659274;
 const finneys = BigInt("1000000000000000");
 const gwei = BigInt("1000000000");
 const eths = BigInt("1000000000000000000");
@@ -61,8 +62,6 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = 1688218363 + 7 * 86400;
-
       await oracle.initPost(
         [
           "NFL:ARI:LAC",

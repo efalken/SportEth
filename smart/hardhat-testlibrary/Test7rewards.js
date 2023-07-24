@@ -5,13 +5,28 @@ const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
 var hourOffset;
 var _hourSolidity;
 var _timestamp;
-var nextStart = 1690033762;
+var nextStart = 1690635899;
 var _date;
 var _hour;
 var result;
 var receipt;
-var token0, token1, token2, token0Pre, token1Pre, token2Pre;
-const firstStart = 1635695609;
+var token0,
+  token1,
+  token2,
+  token0Pre,
+  token1Pre,
+  token2Pre,
+  gas0,
+  gas0b,
+  gas1,
+  gas1b,
+  gas2,
+  gas2b,
+  gas3,
+  gas3b,
+  gas4,
+  gas4b;
+const firstStart = 1690659274;
 const { assert } = require("chai");
 const finneys = BigInt("1000000000000000");
 const eths = BigInt("1000000000000000000");
@@ -144,12 +159,14 @@ describe("test rewards 0", function () {
         ]
       );
       receipt = await result.wait();
+      gas0 = receipt.gasUsed;
     });
 
     it("process data", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       result = await oracle.initProcess();
       receipt = await result.wait();
+      gas1 = receipt.gasUsed;
       await betting.connect(owner).fundBook({
         value: 6n * eths,
       });
@@ -215,9 +232,11 @@ describe("test rewards 0", function () {
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = await result.wait();
+      gas2 = receipt.gasUsed;
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       result = await oracle.settleProcess();
       receipt = await result.wait();
+      gas3 = receipt.gasUsed;
     });
 
     it("state 2", async () => {
@@ -507,12 +526,14 @@ describe("test rewards 0", function () {
       );
       receipt = await result.wait();
 
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      console.log(`timestamp ${_timestamp}`);
+      console.log(`nextStart ${nextStart}`);
       result = await oracle.initProcess();
       receipt = await result.wait();
       result = await betting.connect(account2).bet(0, 0, "5000");
@@ -669,6 +690,7 @@ describe("test rewards 0", function () {
         ]
       );
       receipt = await result.wait();
+      gas0b = receipt.gasUsed;
 
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -678,6 +700,7 @@ describe("test rewards 0", function () {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       result = await oracle.initProcess();
       receipt = await result.wait();
+      gas1b = receipt.gasUsed;
       result = await betting.connect(account2).fundBook({
         value: 2n * eths,
       });
@@ -698,13 +721,17 @@ describe("test rewards 0", function () {
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       nextStart = _timestamp + 7 * 86400;
-      await oracle.settlePost([
+      result = await oracle.settlePost([
         1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
+      receipt = await result.wait();
+      gas2b = receipt.gasUsed;
 
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.settleProcess();
+      result = await oracle.settleProcess();
+      receipt = await result.wait();
+      gas3b = receipt.gasUsed;
     });
 
     it("state 5", async () => {
@@ -890,8 +917,10 @@ describe("test rewards 0", function () {
       receipt = await result.wait();
       result = await oracle.connect(account1).tokenReward();
       receipt = await result.wait();
+      gas4 = receipt.gasUsed;
       result = await oracle.connect(account2).tokenReward();
       receipt = await result.wait();
+      gas4b = receipt.gasUsed;
       token0Pre = token0;
       token1Pre = token1;
       result = await betting.withdrawBook(50000);
@@ -930,7 +959,7 @@ describe("test rewards 0", function () {
       console.log(
         `Epoch: owner ${epoch0} acct1 ${epoch1} kontract ${bkepoch} kontract ${okepoch}`
       );
-      7;
+
       const eoa0b = ethers.utils.formatUnits(
         await ethers.provider.getBalance(owner.address),
         "finney"
@@ -955,16 +984,22 @@ describe("test rewards 0", function () {
         "finney"
       );
       console.log(`betting k eth ${bettingeth}`);
+      console.log(`gas0 on init ${gas0} and  ${gas0b}`);
+      console.log(`gas1 on initprocess ${gas1} and  ${gas1b}`);
+      console.log(`gas2 on settle ${gas2} and  ${gas2b}`);
+      console.log(`gas3 on settle2 ${gas3} and  ${gas3b}`);
+      console.log(`gas3 on tokenRewards ${gas4} and  ${gas4b}`);
+
+      const ethRev0 = eoa0b - eoa0;
+      const ethRev1 = eoa1b - eoa1;
+      const ethRev2 = eoa2b - eoa2;
+      assert.equal(Math.floor(ethRev0), "6281", "Must be equal");
+      assert.equal(Math.floor(ethRev1), "4396", "Must be equal");
+      assert.equal(Math.floor(ethRev2), "2166", "Must be equal");
+      assert.equal(Math.floor(bettingeth), "7500", "Must be equal");
+      assert.equal(Math.floor(token0), "555543890", "Must be equal");
+      assert.equal(Math.floor(token1), "37926154", "Must be equal");
+      assert.equal(Math.floor(token2), "6750766", "Must be equal");
     });
-    const ethRev0 = eoa0b - eoa0;
-    const ethRev1 = eoa1b - eoa1;
-    const ethRev2 = eoa20b - eoa2;
-    assert.equal(Math.floor(ethRev0), "6281", "Must be equal");
-    assert.equal(Math.floor(ethRev1), "4396", "Must be equal");
-    assert.equal(Math.floor(ethRev2), "2166", "Must be equal");
-    assert.equal(Math.floor(bettingeth), "7500", "Must be equal");
-    assert.equal(Math.floor(token0), "555543890", "Must be equal");
-    assert.equal(Math.floor(token1), "37926154", "Must be equal");
-    assert.equal(Math.floor(token2), "6750766", "Must be equal");
   });
 });

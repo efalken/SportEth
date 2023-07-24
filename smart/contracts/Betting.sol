@@ -3,6 +3,10 @@ pragma solidity ^0.8.0;
 /**
 SPDX-License-Identifier: WTFPL
 @author Eric Falkenstein
+moose, bet()-startTime > timestamp, fundbook() timestamp < params[3]
+withdrawBook() outEpoch < params[0]
+concFactor, min submit in adjustParams()
+checkRedeem out?
 */
 
 import "./Token.sol";
@@ -21,6 +25,7 @@ contract Betting {
   uint64[4] public margin;
   /// 0-betLong[favorite], 1-betLong[away], 2-betPayout[favorite], 3-betPayout[underdog]
   uint256[32] public betData;
+  uint256 public moose;
   address payable public oracleAdmin;
   /// for transacting with the external stablecoin
   Token public token;
@@ -158,10 +163,8 @@ contract Betting {
     encoded |= uint256(betDatav[1]) << 128;
     encoded |= uint256(betDatav[2]) << 64;
     encoded |= uint256(betDatav[3]);
-    // moose = uint256(encoded);
     betData[_matchNumber] = uint256(encoded);
     params[2]++;
-    // userStruct[msg.sender].lastTransaction.push(subkID);
     userStruct[msg.sender].lastTransaction[
       userStruct[msg.sender].counter
     ] = subkID;
@@ -180,14 +183,13 @@ contract Betting {
 
   /**  @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
    * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win, 2 for tie or no contest
-   * @return epoch is the first argument. The data epoch, match, pick create a tuple that uniquely identifies bets
    * @return ethDividend, the second argument, is sent to the oracle contract
    * the oracle contract needs this number to adjust its global oracle fee variable
    * used to allocate oracle revenue among token holders
    */
   function settle(
     uint8[32] memory _winner
-  ) external onlyAdmin returns (uint32, uint256) {
+  ) external onlyAdmin returns (uint256) {
     uint64 redemptionPot;
     uint64 payoffPot;
     uint32 epochMatch;
@@ -196,47 +198,31 @@ contract Betting {
       winningTeam = _winner[i];
       uint64[4] memory betDatav = decodeNumber(i);
       epochMatch = i * 10 + params[0] * 1000;
-      // if no one bet on the match these numbers will both be zero, and it need not
-      // be processed because it will not change the state
       if ((betDatav[0] + betDatav[1]) > 0) {
-        //if not a tie
         if (winningTeam != 2) {
           redemptionPot += betDatav[winningTeam];
           payoffPot += betDatav[winningTeam + 2];
-          // winning bet assigned number 2
-          // useful because bettors redeem both wins and ties
           outcomeMap[(epochMatch + winningTeam)] = 2;
         } else {
-          // tie or no contest assigned number 1
           redemptionPot += (betDatav[0] + betDatav[1]);
           outcomeMap[epochMatch] = 1;
           outcomeMap[1 + epochMatch] = 1;
         }
       }
     }
-    // sending avax to oracle adjusts from 5 to 18 decimals, and applies the 5% multiplication factor
-    // 5e-2 is the factor to generate 5% of a number
     uint256 oracleDiv = ORACLE_5PERC * uint256(payoffPot);
-    // first throws bookie and bettor money into a pot, then subtracts the money due to
-    // bettors via payoff (payoffPot) and principal (redemptionPot)
-    // this is the new net bookie balance
     margin[0] = margin[0] + margin[2] - redemptionPot - payoffPot;
-    // bookie locked amount for the next week starts at zero
     margin[1] = 0;
-    // bet amount for the next week starts at zero
     margin[2] = 0;
-    // advances epoch
     params[0]++;
     delete betData;
-    // this sets the future start time in the future
-    // bookies can only add or remove from their accounts when games have not started
-    // this way bookies can add/withdraw when games are not active,
-    // but the new schedule has not been posted
-    params[3] = FUTURE_START;
-    // sends the oracle contract its weekly fee
-    (bool success, ) = oracleAdmin.call{value: oracleDiv}("");
-    require(success, "Call failed");
-    return (params[0], (oracleDiv/1e9));
+     params[3] = FUTURE_START;
+     moose = oracleDiv;
+     //payable(oracleAdmin).transfer(oracleDiv);
+    // (bool success, ) = oracleAdmin.call{value: oracleDiv}("");
+     (bool success, ) = oracleAdmin.call{value: oracleDiv}("");
+     require(success, "Call failed");
+     return (oracleDiv / 1e6);
   }
 
   /// @dev bettor funds account for bets
@@ -285,10 +271,9 @@ contract Betting {
         10 +
         betContracts[_subkId].pick;
       if (outcomeMap[epochMatch] != 0) {
-        // to get this far, user has either won or tied, and thus gets back initial
-        // bet amount
+        // to get bet amount back, user has either won or tied
         payout += betContracts[_subkId].betAmount;
-        // a winner gets the payout, which is adjusted by 0.95 to pay oracle
+        // a winning bet == 2, gets the payout, which is adjusted by 0.95 to pay oracle
         if (outcomeMap[epochMatch] == 2) {
           payout += (betContracts[_subkId].payoff * 95) / 100;
         }
@@ -318,7 +303,7 @@ contract Betting {
    * @param _sharesToSell is the LP's ownership stake withdrawn.
    */
   function withdrawBook(uint64 _sharesToSell) external {
-    require(block.timestamp < params[3], "only prior to first event");
+    // require(block.timestamp < params[3], "only prior to first event");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
     // REMOVE IN PRODUCTION
     // require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
@@ -352,13 +337,12 @@ contract Betting {
     require(margin[2] == 0);
     startTime = _starts;
     odds = _odds;
-    //uint64 x = uint64(_oddsAndStart[0] >> 32);
     // sets start of games at Friday 7PM New York City time
     params[3] = _starts[0] - ((_starts[0] - 1687564800) % 604800);
     // resets the paused matches (99 will never be possible)
     paused[0] = 99;
     paused[1] = 99;
-    // paused[2] = 99;
+    // MinSubmit[2] = 99;
     // paused[3] = 99;
     return true;
   }
@@ -396,8 +380,6 @@ contract Betting {
     odds = _updateOdds;
     paused[0] = 99;
     paused[1] = 99;
-    // paused[2] = 99;
-    // paused[3] = 99;
   }
 
   /** @dev It limits the amount of LP capital that can be applied to a single match.
@@ -411,7 +393,7 @@ contract Betting {
    * it takes a day to input new odds, so if they are really off this can limit the damage
    * @param _badmatches is the first of two potential paused matches
    */
-  function pauseMatch(uint8[2] memory _badmatches) external onlyAdmin {
+  function pauseMatch(uint8[2] calldata _badmatches) external onlyAdmin {
     paused = _badmatches;
   }
 

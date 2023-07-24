@@ -1,6 +1,11 @@
 /**
 SPDX-License-Identifier: WTFPL
 @author Eric Falkenstein
+settle() timestamp > weekOver
+baseEpoch set to epoch at deposit/reward/withdrawal 
+voteEpoch: 2 votes per week
+post() hourOfDay
+HOUR_PROCESS set to 12 in production
 */
 pragma solidity ^0.8.0;
 
@@ -23,16 +28,15 @@ contract Oracle {
   // 0 yes votes, 1 no votes, epoch, reviewStatus, propNumber,
   uint32[2] public votes;
   //   0 total equity Tokens in Oracle, 1 feesPerLiqTracker
-  uint32[2] public feeData;
+  uint64[2] public feeData;
     // slots are 0 for the initial favorite, 1 for initial underdog
   uint32[32] public propStartTimes;
   // keeps track of  who supplied data proposal, will be fined if data submission voted down
-    uint64 public moose;
+    uint256 public moose;
   address public proposer;
   /** the schedule is a record of "sport:home:away", such as "NFL:NYG:SF" for us football
    */
   string[32] public matchSchedule;
-  //uint64 public moose;
   // track token holders: ownership metric, whether they voted, their basis for the token fees
   mapping(address => AdminStruct) public adminStruct;
   // this allows the contract to send the tokens
@@ -46,12 +50,12 @@ contract Oracle {
     uint16 voteTracker;// propNumber
     uint32 tokens;
     uint32 totalVotes; // tokens x numberVotes
-    uint32 initFeePool;
+    uint64 initFeePool;
   }
 
-  event ResultsPosted(uint32 epoch, uint32 propnum, uint8[32] winner);
+  event ResultsPosted(uint16 epoch, uint16 propnum, uint8[32] winner);
 
-  event DecOddsPosted(uint32 epoch, uint32 propnum, uint16[32] decOdds);
+  event DecOddsPosted(uint16 epoch, uint16 propnum, uint16[32] decOdds);
 
   event VoteOutcome(
     bool voteResult,
@@ -61,24 +65,24 @@ contract Oracle {
     uint32 novotes
   );
 
-  event BetDataPosted(uint32 epoch, uint32 propnum, uint32[32] oddsStart);
+  event BetDataPosted(uint16 epoch, uint16 propnum, uint32[32] oddsStart);
 
   event ParamsPosted(uint32 concLimit);
 
   event PausePosted(uint8[2] pausedMatches);
 
-  event StartTimesPosted(uint32 propnum, uint32 epoch, uint32[32] starttimes);
+  event StartTimesPosted(uint16 epoch, uint16 propnum, uint32[32] starttimes);
 
-  event SchedulePosted(uint32 epoch, uint32 propnum, string[32] sched);
+  event SchedulePosted(uint16 epoch, uint16 propnum, string[32] sched);
 
   event Funding(
-    uint64 tokensChange,
+    uint32 tokensChange,
     uint256 etherChange,
     address transactor,
     bool withdrawal
   );
 
-  event TokenReward(address liqprovider, uint64 tokens, uint64 epoch);
+  //event TokenReward(address liqprovider, uint64 tokens, uint64 epoch);
 
   constructor(address payable bettingk, address payable _token) {
     bettingContract = Betting(bettingk);
@@ -141,27 +145,24 @@ contract Oracle {
     emit DecOddsPosted(betEpochOracle, propNumber, _decimalOdds);
     // set sequencer to 10, only initProcess can function next
     reviewStatus = INIT_PROC_NEXT;
-    // moose = propOddsStarts[1];
   }
 
   function initProcess() external returns (bool) {
     // requires new init data posted
     require(reviewStatus == INIT_PROC_NEXT, "wrong data");
     // can only send after 12 noon GMT
-    require(hourOfDay() < HOUR_PROCESS, "too soon");
+   // require(hourOfDay() < HOUR_PROCESS, "too soon");
     // only sent if 'null' vote does not win
     if (votes[0] > votes[1]) {
       // sends to the betting contract
       bettingContract.transmitInit(propOdds, propStartTimes);
-      emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
-    // mintReward();
+      emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]); 
+    reviewStatus = ACTIVE_STATE;
     } else {
-      burnAndReset();
+      burn();
     }
-    //totVote = votes[0] + votes[1];
     reset();
     // only update or settle allowed next
-    reviewStatus = ACTIVE_STATE;
     return true;
   }
 
@@ -180,17 +181,17 @@ contract Oracle {
   function updateProcess() external returns (bool) {
     // makes sure updated odds data was posted
     require(reviewStatus == UPDATE_PROC_NEXT, "wrong data");
-    // needs at least 6 hours
-    require(hourOfDay() < HOUR_PROCESS, "too soon");
+    // needs at least 12 hours
+    // require(hourOfDay() < HOUR_PROCESS, "too soon");
     if (votes[0] > votes[1]) {
       bettingContract.transmitUpdate(propOdds);
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
-     // mintReward();
+     reviewStatus = ACTIVE_STATE;
     } else {
-      burnAndReset();
+      burn();
     }
     reset();
-    reviewStatus = ACTIVE_STATE;
+
     return true;
   }
 
@@ -209,22 +210,21 @@ contract Oracle {
     return true;
   }
 
-  function settleProcess() external returns (bool) {
+  function settleProcess() external {
     require(reviewStatus == SETTLE_PROC_NEXT, "wrong data");
-    require(hourOfDay() < HOUR_PROCESS, "too soon");
+    // require(hourOfDay() < HOUR_PROCESS, "too soon");
     // totVote = votes[0] + votes[1];
     if (votes[0] > votes[1]) {
-      (uint32 xx, uint256 ethDividend) = bettingContract.settle(propResults);
-      betEpochOracle = uint16(xx);
-      feeData[1] += uint32(ethDividend / uint256(feeData[0]));
+      (uint256 ethDividend) = bettingContract.settle(propResults);
+      betEpochOracle++;
+    //  moose = ethDividend;
+     reviewStatus = 0;
+     feeData[1] += uint64(ethDividend/ uint256(feeData[0]));
       emit VoteOutcome(true, betEpochOracle, propNumber, votes[0], votes[1]);
-     // mintReward();
     } else {
-      burnAndReset();
+      burn();
     }
     reset();
-    reviewStatus = 0;
-    return true;
   }
 
   function concentrationFactor(
@@ -247,11 +247,23 @@ contract Oracle {
     return matchSchedule;
   }
 
+    function showPropOdds() external view returns (uint16[32] memory) {
+    return propOdds;
+  }
+
+    function showPropResults() external view returns (uint8[32] memory) {
+    return propResults;
+  }
+
+    function showPropStartTimes() external view returns (uint32[32] memory) {
+    return propStartTimes;
+  }
+
   function depositTokens(uint32 _amt) external {
-    uint256 _ethOut;
+    uint256 _ethOut2;
     feeData[0] += _amt;
     if (adminStruct[msg.sender].tokens > 0) {
-      ethClaim(msg.sender);
+    _ethOut2 =  ethClaim(msg.sender);
     }
     adminStruct[msg.sender].initFeePool = feeData[1];
     adminStruct[msg.sender].tokens += _amt;
@@ -259,7 +271,7 @@ contract Oracle {
     adminStruct[msg.sender].totalVotes = 0;
     bool success = token.transferSpecial(msg.sender, _amt);
     require(success, "token transfer failed");
-    emit Funding(_amt, _ethOut, msg.sender, true);
+    emit Funding(_amt, (_ethOut2 * 1e6), msg.sender, true);
   }
 
   function withdrawTokens(uint32 _amt) external {
@@ -267,14 +279,14 @@ contract Oracle {
     require(reviewStatus < 10, "no wd during vote");
     require(adminStruct[msg.sender].baseEpoch < betEpochOracle, "too soon");
     feeData[0] -= _amt;
-    ethClaim(msg.sender);
+    uint256 _ethOut1 = ethClaim(msg.sender);
     adminStruct[msg.sender].initFeePool = feeData[1];
-    adminStruct[msg.sender].tokens -= uint32(_amt);
+    adminStruct[msg.sender].tokens -= _amt;
     adminStruct[msg.sender].baseEpoch = betEpochOracle;
     adminStruct[msg.sender].totalVotes = 0;
     bool success = token.transfer(msg.sender, _amt);
     require(success, "token transfer failed");
-
+    emit Funding(_amt, (_ethOut1 * 1e6), msg.sender, true);
   }
 
   function tokenReward() external {
@@ -282,34 +294,36 @@ contract Oracle {
     (uint256 lpShares, ) = bettingContract.lpStruct(msg.sender);
     require(lpShares > 0, "only for liq providers");
     uint32 lpepoch = adminStruct[msg.sender].baseEpoch;
+    uint32 _amt;
+    uint256 _ethOut3;
     if (lpepoch == 0) {
       adminStruct[msg.sender].baseEpoch = betEpochOracle;
+      adminStruct[msg.sender].initFeePool = 0;
+
      } else if (lpepoch < betEpochOracle) {
       uint256 totShares = uint256(bettingContract.margin(3));
-      uint32 tokenRewards = uint32(
+       _amt = uint32(
         (uint256(lpShares) * EPOCH_AMOUNT) / totShares
       );
-     tokensInContract -= tokenRewards;
-     moose = tokenRewards;
-    uint256 _ethOut;
-    feeData[0] += tokenRewards;
-    if (adminStruct[msg.sender].tokens > 0)
-      { ethClaim(msg.sender);
-      }
-     adminStruct[msg.sender].initFeePool = feeData[1];
-     adminStruct[msg.sender].tokens += tokenRewards;
-     adminStruct[msg.sender].baseEpoch = betEpochOracle;
-     adminStruct[msg.sender].totalVotes = 0;
-    //emit TokenReward(msg.sender, tokenRewards, epoch);
+      tokensInContract -= _amt;
+      feeData[0] += _amt;
+      if (adminStruct[msg.sender].tokens > 0)
+        { _ethOut3 = ethClaim(msg.sender);
+        }
+      adminStruct[msg.sender].initFeePool = feeData[1];
+      adminStruct[msg.sender].tokens += _amt;
+      adminStruct[msg.sender].baseEpoch = betEpochOracle;
+      adminStruct[msg.sender].totalVotes = 0;
     }
+    emit Funding(_amt, (_ethOut3 * 1e6), msg.sender, true);
   }
 
   function post() internal {
     // ********* TAKE OUT IN PRODUCTION *****************************
     // require(hourOfDay() == HOUR_POST, "wrong hour");
     // this ensures only significant token holders are making proposals, blocks trolls
-    require(adminStruct[msg.sender].tokens >= MIN_SUBMIT, "Need 10% of tokens");
     uint32 _tokens = adminStruct[msg.sender].tokens;
+    require(_tokens >= MIN_SUBMIT, "Need 10% of tokens");
     votes[0] = _tokens;
     proposer = msg.sender;
     // this prevents proposer from voting again with his tokens on this submission
@@ -325,7 +339,7 @@ contract Oracle {
     votes[1] = 0;
   }
 
-  function burnAndReset() internal returns (bool success) {
+  function burn() internal returns (bool success) {
     // punishes proposer for sending data that was rejected
     feeData[0] -= BURN_AMT;
     adminStruct[proposer].tokens -= BURN_AMT;
@@ -346,30 +360,26 @@ contract Oracle {
     _propResults = propResults;
   }
 
-  // function mintReward() internal {
-  //   // token.mint(proposer, ORACLE_REWARD);
-  // }
-
-  function ethClaim(address msgsender) internal {
+  function ethClaim(address msgsender) internal returns(uint256 _ethOut0){
     uint256 votesPerEpoch = uint256(
       adminStruct[msgsender].totalVotes /
         (betEpochOracle - adminStruct[msgsender].baseEpoch) / 2
     );
-    if (votesPerEpoch > adminStruct[msgsender].tokens) {
-      votesPerEpoch = adminStruct[msgsender].tokens;
+    uint256 userTokens = adminStruct[msgsender].tokens;
+    if (votesPerEpoch > userTokens) {
+      votesPerEpoch = userTokens;
     }
     uint256 ethTot = uint256(
-      adminStruct[msgsender].tokens *
-        (feeData[1] - adminStruct[msgsender].initFeePool)
+      userTokens *
+        uint256(feeData[1] - adminStruct[msgsender].initFeePool)
     );
-    uint256 _ethOut = (votesPerEpoch * ethTot) / adminStruct[msgsender].tokens;
-    uint256 ploughBack = ethTot - _ethOut;
-    feeData[1] += uint32(ploughBack / uint256(feeData[0]));
-    (bool success, ) = payable(msgsender).call{value: (_ethOut * 1e9)}("");
+    _ethOut0 = (votesPerEpoch * ethTot) / uint256(userTokens);
+    uint256 ploughBack = ethTot - _ethOut0;
+    feeData[1] += uint64(ploughBack / uint256(feeData[0]));
+    (bool success, ) = payable(msgsender).call{value: (_ethOut0 * 1e6)}("");
+    // payable(msg.sender).transfer(amt256);
     require(success, "eth payment failed");
-    //moose = _ethOut;
-    emit Funding(0, uint64(_ethOut), msgsender, false);
-
+    moose = _ethOut0;
   }
 
   function hourOfDay() public view returns (uint256 hour) {

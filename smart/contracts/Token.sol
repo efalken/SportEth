@@ -23,9 +23,9 @@ contract Token {
   constructor() {
     balanceOf[msg.sender] = MINT_AMT;
     totalSupply = MINT_AMT;
-    name = "SportEth Token";
+    name = "SportBetWeekly";
     decimals = 0;
-    symbol = "SET";
+    symbol = "SBW";
   }
 
   function approve(
@@ -37,15 +37,15 @@ contract Token {
     return true;
   }
 
-  function mint(
-    address _spender,
-    uint64 _value
-  ) external onlyAdmin returns (bool success) {
-    totalSupply += _value;
-    balanceOf[_spender] += _value;
-    emit Mint(_spender, _value);
-    return true;
-  }
+  // function mint(
+  //   address _spender,
+  //   uint64 _value
+  // ) external onlyAdmin returns (bool success) {
+  //   totalSupply += _value;
+  //   balanceOf[_spender] += _value;
+  //   emit Mint(_spender, _value);
+  //   return true;
+  // }
 
   function transfer(address _recipient, uint64 _value) external returns (bool) {
     uint64 senderBalance = balanceOf[msg.sender];

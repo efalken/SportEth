@@ -5,7 +5,7 @@ const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
 var hourOffset,
   _hourSolidity,
   _timestamp,
-  nextStart,
+  nextStart = 1690659274,
   _date,
   _hour,
   hash1,
@@ -74,8 +74,6 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = 1688218363 + 7 * 86400;
-
       console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
         [
@@ -158,7 +156,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       result = await oracle.initProcess();
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
@@ -270,7 +268,7 @@ describe("Betting", function () {
     });
 
     it("send result data to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.settleProcess();
     });
 
@@ -292,15 +290,15 @@ describe("Betting", function () {
       console.log(`oracleBal ${oracleBal}`);
       console.log(`bettingk balance ${ethbal}`);
 
-      const redeemCheck2 = await betting.checkRedeem(hash1);
-      const redeemCheck3 = await betting.checkRedeem(hash2);
-      console.log(`redeem should succeed ${redeemCheck2}`);
-      console.log(`redeem should succeed ${redeemCheck3}`);
+      // const redeemCheck2 = await betting.checkRedeem(hash1);
+      // const redeemCheck3 = await betting.checkRedeem(hash2);
+      // console.log(`redeem should succeed ${redeemCheck2}`);
+      // console.log(`redeem should succeed ${redeemCheck3}`);
 
-      let redeemCheck5 = await betting.outcomeMap(1001);
-      console.log(` ${redeemCheck5}`);
-      redeemCheck5 = await betting.outcomeMap(1000);
-      console.log(` ${redeemCheck5}`);
+      // let redeemCheck5 = await betting.outcomeMap(1001);
+      // console.log(` ${redeemCheck5}`);
+      // redeemCheck5 = await betting.outcomeMap(1000);
+      // console.log(` ${redeemCheck5}`);
 
       await betting.connect(account3).redeem();
       await betting.connect(account2).redeem();

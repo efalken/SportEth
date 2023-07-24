@@ -11,6 +11,8 @@ var _hour;
 var result;
 var receipt;
 var gasUsed = 0;
+var nextStart = 1690659274;
+var gas0, gas1;
 
 const { assert } = require("chai");
 const finneys = BigInt("1000000000000000");
@@ -126,7 +128,6 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
         [
@@ -204,25 +205,25 @@ describe("Betting", function () {
         ]
       );
       receipt = await result.wait();
+      const gasInit = Number(receipt.gasUsed);
+      console.log(`gas init ${gasInit}`);
       gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("pull reviewData1 ", async () => {
-      const result = await oracle.reviewStatus();
+      result = await oracle.reviewStatus();
       console.log(`review1 ${result}`);
-      const result2 = await oracle.votes(0);
-      console.log(`voteYes ${result2}`);
+      result = await oracle.votes(0);
+
+      console.log(`voteYes ${result}`);
     });
 
     it("fail: try to send too soon", async () => {
-      //await oracle.initProcess();
       await expect(oracle.connect(owner).initProcess()).to.be.reverted;
-      //const result = await oracle.underReview();
-      //console.log(`review2 ${result}`);
     });
 
     it("fast forward 6 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 6);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
     it("pull reviewData3 ", async () => {
@@ -234,7 +235,6 @@ describe("Betting", function () {
       const _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 86400;
       await expect(
         oracle.updatePost([
           900, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
@@ -248,13 +248,15 @@ describe("Betting", function () {
       await expect(oracle.settleProcess()).to.be.reverted;
     });
 
-    it("fast forward 12 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
-    });
+    // it("fast forward 12 hours", async () => {
+    //   await helper.advanceTimeAndBlock(secondsInHour * 12);
+    // });
 
     it("approve and send correct data to betting contract", async () => {
       result = await oracle.initProcess();
       receipt = await result.wait();
+      const gasInit = Number(receipt.gasUsed);
+      console.log(`gas init ${gasInit}`);
       gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
@@ -280,24 +282,29 @@ describe("Betting", function () {
         919, 720, 672, 800,
       ]);
       receipt = await result.wait();
+      const gasInit = Number(receipt.gasUsed);
+      console.log(`gas init ${gasInit}`);
       gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("vote yes on odds", async () => {
       result = await oracle.connect(account2).vote(true);
       receipt = await result.wait();
+      gas0 = receipt.gasUsed;
       gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("vote no on odds", async () => {
       result = await oracle.connect(account1).vote(false);
       receipt = await result.wait();
+      gas1 = receipt.gasUsed;
       gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
 
     it("show votes", async () => {
       const yesvote = await oracle.votes(0);
       const novote = await oracle.votes(1);
+
       console.log(`Yes Vote 1 ${yesvote}: No Vote 1 ${novote}`);
       assert.equal(yesvote, "550000000", "Must be equal");
       assert.equal(novote, "250000000", "Must be equal");
@@ -445,6 +452,8 @@ describe("Betting", function () {
 
     it("totalGas", async () => {
       console.log(`totalGas ${gasUsed}`);
+      console.log(`gas0 on vote ${gas0}`);
+      console.log(`gas1 on vote2 ${gas1}`);
     });
   });
 });

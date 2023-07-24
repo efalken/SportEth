@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 const helper = require("../hardhat-helpers");
 import fs from "fs";
-var nextStart = 1690063475;
+var nextStart = 1690656253;
 const secondsInHour = 3600;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 var hash001, hash011, hash010, hash031, hash230, hash240, hash230, hash231, hash230b;
@@ -9,7 +9,7 @@ var hash1100, hash1201, hash1110, hash1131, hash2130, hash2140, hash2130, hash21
 
 //var finney = "1000000000000000"
 const finneys = BigInt('1000000000000000');
-const eths =    BigInt('1000000000000000000');
+const eths =    BigInt('100000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(
@@ -155,7 +155,7 @@ async function main() {
   
 
    result = await betting.fundBook({
-    value: 100n*finneys,
+    value: 10n*eths,
   });
   await result.wait();
 
@@ -165,13 +165,13 @@ async function main() {
       console.log(`margin0 ${margin00}`);
 
   result = await betting.connect(signers[1]).fundBettor({
-    value: 200n*finneys,
+    value: 20n*eths,
   });
   await result.wait();
   console.log(`fundbettor ${margin00}`);
 
   result = await betting.connect(signers[2]).fundBettor({
-    value: 200n*finneys,
+    value: 20n*eths,
   });
   await result.wait();
   console.log(`fundbettor2 ${margin00}`);
@@ -190,7 +190,7 @@ async function main() {
       hash1110 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(1, 1, 13000);
       receipt = await result.wait();
-      //hash4 = receipt.events[0].args.contractHash;
+      //hash4 = receipt.events[0].args.contractHash;B
       result = await betting.connect(signers[1]).bet(3, 1, 14000);
       receipt = await result.wait();
       hash1131 = receipt.events[0].args.contractHash;

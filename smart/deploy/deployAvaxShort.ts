@@ -1,14 +1,14 @@
 import { ethers } from "hardhat";
 const helper = require("../hardhat-helpers");
 import fs from "fs";
-var nextStart = 1690063475;
+var nextStart = 1690658739;
 const secondsInHour = 3600;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 
 
 //var finney = "1000000000000000"
-const finneys = BigInt('1000000000000000');
-const eths = BigInt('1000000000000000000');
+const finneys = BigInt('10000000000000');
+const eths = BigInt('10000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(
@@ -55,6 +55,12 @@ async function main() {
   result = await oracle.depositTokens(560n*million);
   await result.wait();
   console.log(`got here2`);
+  const tokens = await token.balanceOf(accounts[0]);
+  await result.wait();
+  console.log(`tokens in eoa ${tokens}`);
+  
+ const tokensInK = (await oracle.adminStruct(accounts[0])).tokens;
+ console.log(`tokens in k ${tokensInK}`);
 
   
   // result = await oracle.tokenReward();
@@ -64,7 +70,7 @@ async function main() {
   result = await oracle.initPost(
     [
       "NFL:ARI:LAC",
-      "NFL:ATL:LAR",
+      "UFC:Holloway:Kattar",
       "NFL:BAL:MIA",
       "NFL:BUF:MIN",
       "NFL:CAR:NE",
@@ -84,17 +90,17 @@ async function main() {
       "UFC:Kelleher:Simon",
       "UFC:Hernandez:Vieria",
       "UFC:Akhemedov:Breese",
-      "UFC:Memphis:Brooklyn",
-      "UFC:Boston:Charlotte",
-      "UFC:Milwaukee:Dallas",
-      "UFC:miami:LALakers",
-      "UFC:Atlanta:SanAntonia",
-      "NHL:Colorado:Washington",
-      "NHL:Vegas:StLouis",
-      "NHL:TampaBay:Dallas",
-      "NHL:Boston:Carolina",
-      "NHL:Philadelphia:Edmonton",
-      "NHL:Pittsburgh:NYIslanders",
+      "CFL: Mich: OhioState",
+      "CFL: Minn : Illinois",
+      "CFL: MiamiU: Florida",
+      "CFL: USC: UCLA",
+      "CFL: Alabama: Auburn",
+      "CFL: ArizonaSt: UofAriz",
+      "CFL: Georgia: Clemson",
+      "CFL: PennState: Indiana",
+      "CFL: Texas: TexasA&M",
+      "CFL: Utah: BYU",
+      "CFL: Rutgers: VirgTech",
     ],
     [
       nextStart,
@@ -130,13 +136,19 @@ async function main() {
       nextStart,
       nextStart,
     ],
-    [999,500,600,999,999,999,999,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800]
+    [
+      999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
+      730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
+      760, 919, 720, 672, 800,
+    ]
   );
-  await result.wait();
- 
+  receipt = await result.wait();
+  const revstat = await oracle.reviewStatus();
+  console.log(`revStatus ${revstat}`);
 
   
   result = await oracle.initProcess();
+  receipt = await result.wait();
   await result.wait();
   result = await betting.params(3);
   console.log(`start ${result}`);
@@ -147,7 +159,7 @@ async function main() {
   
 
    result = await betting.fundBook({
-    value: 100n*finneys,
+    value: 10n*eths,
   });
   await result.wait();
 
@@ -157,15 +169,15 @@ async function main() {
       console.log(`margin0 ${margin00}`);
 
   result = await betting.connect(signers[1]).fundBettor({
-    value: 200n*finneys,
+    value: 20n*eths,
   });
-  await result.wait();
+  receipt = await result.wait();
   console.log(`fundbettor`);
 
   result = await betting.connect(signers[2]).fundBettor({
-    value: 200n*finneys,
+    value: 20n*eths,
   });
-  await result.wait();
+  receipt = await result.wait();
   console.log(`fundbettor`);
 
   result = await betting.connect(signers[1]).bet(0, 1, 1000);
@@ -195,45 +207,59 @@ async function main() {
       ]);
       receipt = result.wait();
       console.log(`settlepost`);
-     // await helper.advanceTimeAndBlock(48 * secondsInHour);
+      // await new Promise((resolve) => setTimeout(resolve, 50000));
+      const rs = await oracle.reviewStatus();
+      console.log(`revStatusPre ${rs}`);
       result = await oracle.settleProcess();
       receipt = result.wait();
       console.log(`settleprocess`);
-      //nextStart = nextStart + 7 * 24 * secondsInHour;
+      const rsa = await oracle.reviewStatus();
+      console.log(`revStatusafter ${rsa}`);
+      // const vote0 = await oracle.votes(0);
+      // console.log(`vote0 ${vote0}`);
+      // const vote1 = await oracle.votes(1);
+      // console.log(`vote1 ${vote1}`);
+      // const ethdiv = await betting.moose();
+      // console.log(`ethdiv ${ethdiv}`);
+      // const ethbal1 = await ethers.provider.getBalance(betting.address);
+      // console.log(`ethbal1 ${ethbal1}`);
+      nextStart = 1691263539;
+      // await new Promise((resolve) => setTimeout(resolve, 50000));
+
       result = await oracle.initPost(
         [
-          "NFL:CLE:NYJ",
-          "NFL:GB:SEA",
-          "NFL:HOU:SF",
-          "NFL:IND:TB",
-          "NFL:JAX:TEN",
-          "NFL:KC:WSH",
-          "NFL:DAL:OAK",
-          "NFL:DEN:PHI",
-          "NFL:DET:PIT",
           "NFL:ARI:LAC",
-          "NFL:ATL:LAR",
+          "UFC:Holloway:Kattar",
           "NFL:BAL:MIA",
           "NFL:BUF:MIN",
           "NFL:CAR:NE",
           "NFL:CHI:NO",
           "NFL:CIN:NYG",
+          "NFL:CLE:NYJ",
+          "NFL:DAL:OAK",
+          "NFL:DEN:PHI",
+          "NFL:DET:PIT",
+          "NFL:GB:SEA",
+          "NFL:HOU:SF",
+          "NFL:IND:TB",
+          "NFL:JAX:TEN",
+          "NFL:KC:WSH",
           "UFC:Holloway:Kattar",
           "UFC:Ponzinibbio:Li",
           "UFC:Kelleher:Simon",
           "UFC:Hernandez:Vieria",
           "UFC:Akhemedov:Breese",
-          "UFC:Memphis:Brooklyn",
-          "UFC:Boston:Charlotte",
-          "UFC:Milwaukee:Dallas",
-          "UFC:miami:LALakers",
-          "UFC:Atlanta:SanAntonia",
-          "NHL:Colorado:Washington",
-          "NHL:Vegas:StLouis",
-          "NHL:TampaBay:Dallas",
-          "NHL:Boston:Carolina",
-          "NHL:Philadelphia:Edmonton",
-          "NHL:Pittsburgh:NYIslanders",
+          "CFL: Mich: OhioState",
+          "CFL: Minn : Illinois",
+          "CFL: MiamiU: Florida",
+          "CFL: USC: UCLA",
+          "CFL: Alabama: Auburn",
+          "CFL: ArizonaSt: UofAriz",
+          "CFL: Georgia: Clemson",
+          "CFL: PennState: Indiana",
+          "CFL: Texas: TexasA&M",
+          "CFL: Utah: BYU",
+          "CFL: Rutgers: VirgTech",
         ],
         [
           nextStart,
@@ -270,171 +296,30 @@ async function main() {
           nextStart,
         ],
         [
-          999, 500, 666, 777, 888, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
+          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
+          760, 919, 720, 672, 800,
         ]
       );
       receipt = result.wait();
       console.log(`initpost`);
+      // await new Promise((resolve) => setTimeout(resolve, 50000));
      
       result = await oracle.initProcess();
       receipt = result.wait();
       console.log(`initprocess`);
+      // await new Promise((resolve) => setTimeout(resolve, 50000));
 
       result = await betting.connect(signers[1]).bet(0, 1, 1300);
       receipt = await result.wait();
       console.log(`bet process`);
-   //   let hash101 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(0, 0, 1400);
       receipt = await result.wait();
-   //   let hash200 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[1]).bet(1, 0, 1500);
       receipt = await result.wait();
-   //   let hash110 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(1, 1, 1600);
       receipt = await result.wait();
-    //  let hash211 = receipt.events[0].args.contractHash;
  
-      result = await oracle.settlePost([
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-      ]);
-      receipt = result.wait();
-      //await helper.advanceTimeAndBlock(48 * secondsInHour);
-      result = await oracle.settleProcess();
-      receipt = result.wait();
-
-      //nextStart = nextStart + 7 * 24 * secondsInHour;
-      
-      /*
-      result = await oracle.initPost(
-        [
-          "NHL:Colorado:Washington",
-          "NHL:Vegas:StLouis",
-          "NHL:TampaBay:Dallas",
-          "NHL:Boston:Carolina",
-          "NHL:Philadelphia:Edmonton",
-          "NHL:Pittsburgh:NYIslanders",
-          "NFL:ARI:LAC",
-          "NFL:ATL:LAR",
-          "NFL:BAL:MIA",
-          "NFL:BUF:MIN",
-          "NFL:CAR:NE",
-          "NFL:CHI:NO",
-          "NFL:CIN:NYG",
-          "NFL:CLE:NYJ",
-          "NFL:DAL:OAK",
-          "NFL:DEN:PHI",
-          "NFL:DET:PIT",
-          "NFL:GB:SEA",
-          "NFL:HOU:SF",
-          "NFL:IND:TB",
-          "NFL:JAX:TEN",
-          "NFL:KC:WSH",
-          "UFC:Holloway:Kattar",
-          "UFC:Ponzinibbio:Li",
-          "UFC:Kelleher:Simon",
-          "UFC:Hernandez:Vieria",
-          "UFC:Akhemedov:Breese",
-          "UFC:Memphis:Brooklyn",
-          "UFC:Boston:Charlotte",
-          "UFC:Milwaukee:Dallas",
-          "UFC:miami:LALakers",
-          "UFC:Atlanta:SanAntonia",
-        ],
-        [
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-        ],
-        [
-          555, 902, 903, 904, 905, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
-        ]
-      );
-      receipt = await result.wait();
-      result = await oracle.initProcess();
-      receipt = await result.wait();
-
-      const userBalanceAcct1 = (await betting.userStruct(accounts[1])).userBalance;
-      const userBalanceAcct2 = (await betting.userStruct(accounts[2])).userBalance;
-      const ownershares = (await betting.lpStruct(accounts[0])).shares;
-      console.log(`acct1 balance ${userBalanceAcct1}`);
-      console.log(`acct2 balance ${userBalanceAcct2}`);
-      console.log(`acct0 shares ${ownershares}`);
-      const margin0 = await betting.margin(0);
-      console.log(`margin0 ${margin0}`);
-
-      result = await betting.connect(signers[1]).bet(0, 0, 21000);
-      receipt = await result.wait();
-      let hash100 = receipt.events[0].args.contractHash;
-      receipt = await result.wait();
-      result = await betting.connect(signers[2]).bet(0, 1, 22000);
-      receipt = await result.wait();
-      let hash201 = receipt.events[0].args.contractHash;
-      receipt = await result.wait();
-
-      const userbets1 =  (await betting.betContracts(hash1100)).betAmount;
-      console.log(`betsAcct hash ${hash1100}`);
-      console.log(`betsAcct hash betAmount=10k ${userbets1}`);
-      const userbets1b =  (await betting.betContracts(hash1100));
-      console.log(`array ${userbets1b}`);
-      console.log(`element in array ${userbets1b[0]}`);
-      const userbets2 =  await betting.connect(signers[1]).showUserBetData();
-      console.log(`acct1 hash ${userbets2[0]}`);
-      const userbets3 =  await betting.connect(signers[1]).checkRedeem(hash1100);
-      console.log(`redeem info ${userbets3}`);
-
-      const userbets1c =  (await betting.betContracts(hash1201)).betAmount;
-      console.log(`betsAcct hash ${hash1201}`);
-      console.log(`betsAcct hash betAmount=10k ${userbets1c}`);
-      const userbets1bc =  (await betting.betContracts(hash1201));
-      console.log(`array ${userbets1bc}`);
-      console.log(`element in array ${userbets1b[0]}`);
-      const userbets2c =  await betting.connect(signers[1]).showUserBetData();
-      console.log(`acct1 hash ${userbets2c[0]}`);
-      const userbets3c =  await betting.connect(signers[1]).checkRedeem(hash1201);
-      console.log(`redeem info ${userbets3c}`);
-
-
-      const betParams0 = (await betting.betContracts(hash1100)).betAmount;
-      console.log(`acct1 Amt 10000 ${betParams0}`);
-
-      console.log(`betsAcct12 hash ${hash1201}`);
-      console.log(`betsAcct 2 ${userbets2(0)}`);
-  
-*/
 
       // ***************************************
 
