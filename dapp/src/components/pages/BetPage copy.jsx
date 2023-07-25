@@ -17,8 +17,13 @@ import { Link } from "react-router-dom";
 //import { syncEvents } from "../../helpers/syncEvents";
 //import { BigNumber } from "bignumber.js";
 
-function BetPage() {
-  const { oracleContract, bettingContract, account } = useAuthContext();
+  import { useAuthContext } from "../../contexts/AuthContext";
+    function BetPage() {
+      const { oracleContract, bettingContract, account } = useAuthContext();
+      const [eoaBalance, setEoaBalance] = useState("0");
+        async function findValues() {
+          let _eoaBalance = (await ????.getBalance(account))|| "0";
+          setEoaBalance(_eoaBalance);
 
   const [betAmount, setBetAmount] = useState("");
   const [fundAmount, setFundAmount] = useState("");

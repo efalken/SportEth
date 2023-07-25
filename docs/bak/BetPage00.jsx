@@ -4,22 +4,19 @@ import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
 import Form from "../basics/Form";
-import { G } from "../basics/Colors";  
+import { G } from "../basics/Colors";
 import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
 import { ethers } from "ethers";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { networkConfig, provider} from "../../config";
+import { networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
-//import { syncEvents } from "../../helpers/syncEvents";
-//import { BigNumber } from "bignumber.js";
 
 function BetPage() {
-  const { oracleContract, bettingContract, account, provider } = useAuthContext();
-  //const provider = useAuthContext.provider;
+  const { oracleContract, bettingContract, account } = useAuthContext();
 
   const [betAmount, setBetAmount] = useState("");
   const [fundAmount, setFundAmount] = useState("");
@@ -29,26 +26,26 @@ function BetPage() {
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
   const [betHistory, setBetHistory] = useState([{}]);
+  const [subcontracts, setSubcontracts] = useState({});
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
+  const [lastBetHash, setLastBetHash] = useState([]);
   const [betData, setBetData] = useState([]);
   const [userBalance, setUserBalance] = useState("0");
-  const [bettorHashes, setBetHashes] = useState([]);
   const [unusedCapital, setUnusedCapital] = useState("0");
   const [usedCapital, setUsedCapital] = useState("0");
   const [currW4, setCurrW4] = useState("0");
   const [concentrationLimit, setConcentrationLimit] = useState("0");
   const [teamSplit, setTeamSplit] = useState([]);
   const [betNumber, setBetNumber] = useState("0");
-  const [oddsVector, setOddsVector] = useState([]);
-  const [startTime, setStartTime] = useState([]);
-  const [eoaBalance, setEoaBalance] = useState("0");
+  const [eoaBalance, setEoaBalance] = useState("0");    
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
 
     document.title = "Betting Page";
+    updateBetHashes();
     const interval1 = setInterval(() => {
       findValues();
     }, 1000);
@@ -63,9 +60,9 @@ function BetPage() {
       const stackId = await bettingContract.fundBettor({
         value: ethers.parseEther(fundAmount),
       });
-      // console.log("stackid", stackId);
+      console.log("stackid", stackId);
     } catch (error) {
-      // console.log("igotanerror", error);
+      console.log("igotanerror", error);
     }
   }
 
@@ -105,30 +102,41 @@ function BetPage() {
     setViewedTxs(viewedTxs + 1);
   }
 
-
   async function addBetRecord(contractHash) {
+    console.log(subcontracts);
     const { epoch, matchNum, pick, betAmount, payoff, bettor } =
       await bettingContract.betContracts(contractHash);
+
+    if (Object.keys(subcontracts).includes(contractHash)) return;
 
     betHistory[0][contractHash] = {
       Hashoutput: contractHash,
       BettorAddress: bettor,
       Epoch: Number(epoch),
-      BetSize: Number(betAmount) / 10000,
+      BetSize: (Number(betAmount)/10000),
       LongPick: Number(pick),
       MatchNum: Number(matchNum),
-      Payoff: (0.95 * Number(payoff)) / 10000,
-      Result9: await bettingContract.checkRedeem(
-        contractHash
-      ),
+      Payoff: (0.95 * Number(payoff)/10000),
+      // Redeemable: await bettingContract.checkRedeem(
+      //   contractHash
+      // ),
     };
+    subcontracts[contractHash] = await bettingContract.checkRedeem(
+      contractHash
+    );
+    setSubcontracts(subcontracts);
     setBetHistory(betHistory);
   }
 
   useEffect(() => {
-    if (!bettingContract || !account || !provider) return;
-    updateBetHashes();
-    getBal();
+    if (!bettingContract || !account) return;
+
+    const BetRecordFilter = bettingContract.filters.BetRecord(account);
+    bettingContract.on(BetRecordFilter, (eventEmitted) => {
+      const { contractHash } = eventEmitted.args;
+      console.log(contractHash);
+      addBetRecord(contractHash);
+    });
   }, [bettingContract, account]);
 
   function radioFavePick(teampic) {
@@ -141,23 +149,13 @@ function BetPage() {
     setTeamPick(1);
   }
 
-  async function getBal() {
-    let _eoaBalance = (await provider.getBalance(account))|| "0";
-    setEoaBalance(_eoaBalance);
-  }
- //console.log(`eoabal ${eoaBalance}`);
-
   async function updateBetHashes() {
-   // setSubcontracts({});
-    setBetHistory([{}]);
-    const userAccount = await bettingContract.userStruct(account);
-    const count = Number(userAccount.counter);
-    let _lastBetHash = (
-      Object.values(await bettingContract.showUserBetData()) || []
-    ).slice(0, count);
+    let _lastBetHash = (await bettingContract.showUserBetData()) || [];
+    console.log(_lastBetHash);
+    setLastBetHash(_lastBetHash);
     for (const betHash of _lastBetHash) {
       if (
-        betHash !==
+        betHash !=
         "0x0000000000000000000000000000000000000000000000000000000000000000"
       )
         await addBetRecord(betHash);
@@ -167,7 +165,6 @@ function BetPage() {
   async function findValues() {
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
-    //console.log(betData, "betData");
 
     let us = await bettingContract.userStruct(account);
     let _betNumber = us ? us.counter.toString() : "0";
@@ -176,17 +173,12 @@ function BetPage() {
     let _userBalance = us ? us.userBalance.toString() : "0";
     setUserBalance(_userBalance);
 
-    let _bettorHashes = (await bettingContract.showUserBetData()) || [];
-    setBetHashes(_bettorHashes);
-
     let _unusedCapital = (await bettingContract.margin(0)) || "0";
     setUnusedCapital(_unusedCapital);
 
-    let _startTimes = (await bettingContract.showStartTime()) || [];
-    setStartTime(_startTimes);
-
-    let _oddsvector = (await bettingContract.showOdds()) || [];
-    setOddsVector(_oddsvector);
+    // let _eoaBalance = (await (account).getBalance())|| "0";
+    // setEoaBalance(_eoaBalance);
+    // console.log(`eoabal ${eoaBalance}`);
 
     let _usedCapital = (await bettingContract.margin(1)) || "0";
     setUsedCapital(_usedCapital);
@@ -196,6 +188,9 @@ function BetPage() {
 
     let _concentrationLimit = await bettingContract.params(1);
     setConcentrationLimit(_concentrationLimit);
+
+    // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
+    // setNewBets(_newBets);
 
     let sctring = await oracleContract.showSchedString();
     setScheduleString(sctring);
@@ -219,13 +214,19 @@ function BetPage() {
     //const str = bn.toString(16);
     const str = src.toString(16).padStart(64, "0");
     const pieces = str
-      .toString(16)
-      .match(/.{1,16}/g)
-      .reverse();
+      .match(/.{1,2}/g)
+      .reverse()
+      .join("")
+      .match(/.{1,8}/g)
+      .map((s) =>
+        s
+          .match(/.{1,2}/g)
+          .reverse()
+          .join("")
+      );
     const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
     return ints;
   }
-
 
   function getMoneyLine(decOddsi) {
     let moneyline = 0;
@@ -239,17 +240,6 @@ function BetPage() {
       moneyline = "+" + moneyline;
     }
     return moneyline;
-  }
-
-  function getResults(outcomeB) {
-    let outcomeA = "lose";
-    if (outcomeB == 1) {
-      outcomeA = "win";
-    } 
-    else if (outcomeB == 2) {
-      outcomeA = "tie";
-    }
-    return outcomeA;
   }
 
   let [startTimeColumn, setStartTimeColumn] = useState([
@@ -286,28 +276,27 @@ function BetPage() {
   ]);
 
   let netLiab = [liab0, liab1];
-  
-  let [xdecode256, setXdecode] = useState([0, 1, 2, 3]);
-  let time999 = 0;
-  let odds999 = 0;
+
+  let [xdecode, setXdecode] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
 
   useEffect(() => {
+    if (betData[0]) xdecode = unpack256(betData[0]);
+    if (xdecode[6] > 0) {
       for (let ii = 0; ii < 32; ii++) {
-        if (betData) xdecode256 = unpack256(betData[ii]);
-        if (startTime) time999 = startTime[ii];
-        if (oddsVector) odds999 = oddsVector[ii];
-        odds0[ii] = Number(odds999) || 0;
-        odds1[ii] = Math.floor(1000000 / (Number(odds999) + 50) - 1) || 0;
-        startTimeColumn[ii] = Number(time999);
-        netLiab[0][ii] = (Number(xdecode256[2]) - Number(xdecode256[1])) / 10;
-        netLiab[1][ii] = (Number(xdecode256[3]) - Number(xdecode256[0])) / 10;
+        if (betData[ii]) xdecode = unpack256(betData[ii]);
+        odds0[ii] = Number(xdecode[6]);
+        odds1[ii] = Number(xdecode[7]);
+        startTimeColumn[ii] = xdecode[5];
+        netLiab[0][ii] = (Number(xdecode[2]) - Number(xdecode[1])) / 10;
+        netLiab[1][ii] = (Number(xdecode[3]) - Number(xdecode[0])) / 10;
       }
+    }
     setOdds0(odds0);
     setOdds1(odds1);
     setLiab0(liab0);
     setLiab1(liab1);
     setStartTimeColumn(startTimeColumn);
-    setXdecode(xdecode256);
+    setXdecode(xdecode);
   }, [betData]);
 
   let oddsTot = [odds0, odds1];
@@ -357,9 +346,7 @@ function BetPage() {
                 </Text>
               </Flex>
             </Box>
-
             <Box>
-            
               <Flex>
                 <Text size="14px">
                   <Link
@@ -410,13 +397,8 @@ function BetPage() {
                 spacing="1px"
               />
               <Text size="14px" className="style">
-                Your free capital on contract:{" "}
-                {(Number(userBalance) / 1e4).toFixed(3)} AVAX
-              </Text>
-              <br />
-              <Text size="14px" className="style">
-                AVAX in your Wallet:{" "}
-                {(Number(eoaBalance) / 1e18).toFixed(3)}
+                Your free capital on contract: {(Number(userBalance) / 1e4).toFixed(3)}{" "}
+                AVAX
               </Text>
             </Box>
             <Box>
@@ -460,7 +442,7 @@ function BetPage() {
               ></Flex>
               <Flex justifyContent="left">
                 <Text size="14px" color="#ffffff">
-                  Current Epoch: {currW4}
+                  Current Epoch: {currW4} 
                 </Text>
               </Flex>
             </Box>
@@ -527,46 +509,17 @@ function BetPage() {
                 }}
               ></Flex>
             </Box>
-
             <Box>
-              { (betNumber > 0) ?
-            <button
-                style={{
-                  backgroundColor: "black",
-                  borderRadius: "5px",
-                  padding: "4px",
-                  //borderRadius: "1px",
-                  cursor: "pointer",
-                  color: "yellow",
-                  border: "1px solid #ffff00",
-                  // width: width ? width : 120,
-                  // color: "#00ff00",
-                }}
-                value={0}
-                onClick={(e) => {
-                  e.preventDefault();
-                  redeemBet();
-                }}
-              >
-                Redeem
-              </button>
-              : "" }
-              </Box>
-
-            <Box>
-
- 
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
                     <Text size="14px" className="style">
-                      Bets in stack: {betNumber}
+                    Bets to be Redeemed: {betNumber}
                     </Text>
                     <br />
-                   
-                    <Text className="style" size="14px">
+                    <Text className="style" size="14px"> 
                       {" "}
-                      resolved bets to be processed via redeem
+                      Your unclaimed winning bets
                     </Text>
                     <br />
                     <table
@@ -580,19 +533,21 @@ function BetPage() {
                       <tbody>
                         <tr style={{ width: "33%", color: "#ffffff" }}>
                           <td>Epoch</td>
+                          <td>Match</td>
                           <td>Pick</td>
                           <td>Your Payout</td>
-                          <td>Win?</td>
+                          <td>Click to Claim</td>
                         </tr>
                         {Object.values(betHistory[id]).map(
                           (event, index) =>
-                            index < betNumber &&
-                            (event.Epoch < Number(currW4)) && (
+                              (index < betNumber) &&
+                            subcontracts[event.Hashoutput] && (
                               <tr
                                 key={index}
                                 style={{ width: "33%", color: "#ffffff" }}
                               >
-                                <td>{event.Epoch}</td>
+                                <td>{index}</td>
+                                <td>{teamSplit[event.MatchNum][0]}</td>
                                 <td>
                                   {
                                     teamSplit[event.MatchNum][
@@ -604,7 +559,26 @@ function BetPage() {
                                   {(event.Payoff + event.BetSize).toFixed(3)}
                                 </td>
                                 <td>
-                                  {event.Result9 ? "yes" : "no"}
+                                  <button
+                                    style={{
+                                      backgroundColor: "black",
+                                      borderRadius: "5px",
+                                      padding: "4px",
+                                      //borderRadius: "1px",
+                                      cursor: "pointer",
+                                      color: "yellow",
+                                      border: "1px solid #ffff00",
+                                      // width: width ? width : 120,
+                                      // color: "#00ff00",
+                                    }}
+                                    value={event.Hashoutput}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      redeemBet();
+                                    }}
+                                  >
+                                    Redeem
+                                  </button>
                                 </td>
                               </tr>
                             )
@@ -674,92 +648,61 @@ function BetPage() {
                 />
               </Box>
             </Flex>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/bethistory"
-                  >
-                    bet history
-                  </Link>
-                </Text>
-              </Flex>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash0: {lastBetHash[0]}
+              </Text>
             </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/oddshistory"
-                  >
-                    odds history
-                  </Link>
-                </Text>
-              </Flex>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash1: {lastBetHash[1]}
+              </Text>
             </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/schedhistory"
-                  >
-                    schedule history
-                  </Link>
-                </Text>
-              </Flex>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash2: {lastBetHash[2]}
+              </Text>
             </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/starthistory"
-                  >
-                    start history
-                  </Link>
-                </Text>
-              </Flex>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                betHash3: {lastBetHash[3]}
+              </Text>
             </Box>
-            <Box>
-              <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/resultshistory"
-                  >
-                    result history
-                  </Link>
-                </Text>
-              </Flex>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash4: {lastBetHash[4]}
+              </Text>
             </Box>
-            <Box></Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash5: {lastBetHash[5]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash6: {lastBetHash[6]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash7: {lastBetHash[7]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash8: {lastBetHash[8]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash9: {lastBetHash[9]}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                bethash10: {lastBetHash[10]}
+              </Text>
+            </Box>
           </Box>
         }
       >

@@ -27,19 +27,15 @@ function TestPage() {
   } = useAuthContext();
 
   const [betAmount, setBetAmount] = useState("");
-  const [fundAmount, setFundAmount] = useState("");
-  const [wdAmount, setWdAmount] = useState("");
   const [hashInput, setHashInput] = useState("");
   const [teamPick, setTeamPick] = useState(null);
   const [matchPick, setMatchPick] = useState(null);
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
   const [betHistory, setBetHistory] = useState([]);
-  const [subcontracts, setSubcontracts] = useState({});
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
-  const [lastBetHash, setLastBetHash] = useState([]);
   const [outcomes, setOutcomes] = useState([]);
   const [tokenEoaBalance, setTokenEoaBalance] = useState("0");
   const [lpEpochReward, setLpEpochReward] = useState("0");
@@ -54,7 +50,8 @@ function TestPage() {
   const [usedCapital, setUsedCapital] = useState("0");
   const [currW4, setCurrW4] = useState("0");
   const [concentrationLimit, setConcentrationLimit] = useState("0");
-  //const [newBets, setNewBets] = useState(false);
+  const [oddsVector, setOddsVector] = useState([]);
+  const [startTime, setStartTime] = useState([]);
   const [teamSplit, setTeamSplit] = useState([]);
 
   useEffect(() => {
@@ -63,18 +60,12 @@ function TestPage() {
     document.title = "Test Page";
     const interval1 = setInterval(() => {
       findValues();
-      //  this.getbetHistoryArray();
-      //  this.checkRedeem();
     }, 1000);
 
     return () => {
       clearInterval(interval1);
     };
   }, [bettingContract, oracleContract]);
-
-  async function redeemBet(x) {
-    await bettingContract.redeem();
-  }
 
   async function checkRedeem(hashInput0) {
     await bettingContract.redeem(hashInput0);
@@ -106,9 +97,14 @@ function TestPage() {
     setTeamPick(1);
   }
 
+  useEffect(() => {
+    if (!bettingContract || !account || !provider) return;
+  }, [bettingContract, account]);
+
   async function findValues() {
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
+    console.log(betData, "betData");
 
     let us = await bettingContract.userStruct(account);
     let _userBalance = us ? us.userBalance.toString() : "0";
@@ -126,23 +122,29 @@ function TestPage() {
     let _reviewStatus = Number(await oracleContract.reviewStatus()) || "0";
     setReviewStatus(_reviewStatus);
 
+    let _startTimes = (await oracleContract.showPropStartTimes()) || [];
+    setStartTime(_startTimes);
+
+    let _oddsvector = (await oracleContract.showPropOdds()) || [];
+    setOddsVector(_oddsvector);
+
     let _tokenEoaBalance = (await tokenContract.balanceOf(account)) || "0";
     setTokenEoaBalance(_tokenEoaBalance);
 
     let _outcomes = (await oracleContract.showResults()) || [];
     setOutcomes(_outcomes);
 
-    let _lastBetHash = (await bettingContract.showUserBetData()) || [];
-    setLastBetHash(_lastBetHash);
+    // let _lastBetHash = (await bettingContract.showUserBetData()) || [];
+    // setLastBetHash(_lastBetHash);
 
-    let _currW4 = Number((await bettingContract.margin(3)) || "0");
+    let _currW4 = Number((await bettingContract.params(0)) || "0");
     setCurrW4(_currW4);
 
-    let _concentrationLimit = Number((await bettingContract.margin(5)) || "0");
+    let _concentrationLimit = Number((await bettingContract.params(1)) || "0");
     setConcentrationLimit(_concentrationLimit);
 
     let oc = await oracleContract.adminStruct(account);
-    let _lpEpochReward = oc ? oc.initEpoch.toString() : "0";
+    let _lpEpochReward = oc ? oc.baseEpoch.toString() : "0";
     setLpEpochReward(_lpEpochReward);
 
     // let _lastBetHash = us ? us.lastTransaction.toString() : "0";
@@ -177,21 +179,15 @@ function TestPage() {
     return maxSize;
   }
 
+
   function unpack256(src) {
     if (!src) return [];
     //const str = bn.toString(16);
     const str = src.toString(16).padStart(64, "0");
     const pieces = str
-      .match(/.{1,2}/g)
-      .reverse()
-      .join("")
-      .match(/.{1,8}/g)
-      .map((s) =>
-        s
-          .match(/.{1,2}/g)
-          .reverse()
-          .join("")
-      );
+      .toString(16)
+      .match(/.{1,16}/g)
+      .reverse();
     const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
     return ints;
   }
@@ -270,37 +266,37 @@ function TestPage() {
     -123, -123, -123, -123, -123, -123, -123, -123,
   ]);
   let [outcomev, setOutcomev] = useState([
-    0, 0, 0, 0, 0, 0, 99, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0,
   ]);
 
   let netLiab = [liab0, liab1];
 
-  let [xdecode, setXdecode] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
+  let [xdecode256, setXdecode] = useState([0, 1, 2, 3]);
+  let time999 = 0;
+  let odds999 = 0;
+
 
   useEffect(() => {
-    if (betData[0]) xdecode = unpack256(betData[0]);
-    if (xdecode[6] > 0) console.log("xdecode256 ===", xdecode[0]);
-    console.log("betdata ===", betData);
-    {
-      for (let ii = 0; ii < 32; ii++) {
-        if (betData[ii]) xdecode = unpack256(betData[ii]);
-        odds0[ii] = Number(xdecode[6]);
-        odds1[ii] = Number(xdecode[7]);
-        startTimeColumn[ii] = xdecode[5];
-        netLiab[0][ii] = (Number(xdecode[2]) - Number(xdecode[1])) / 10;
-        netLiab[1][ii] = (Number(xdecode[3]) - Number(xdecode[0])) / 10;
-        outcomev[ii] = Number(outcomes[ii]);
-      }
+    for (let ii = 0; ii < 32; ii++) {
+      if (betData[ii]) xdecode256 = unpack256(betData[ii]);
+      if (startTime) time999 = startTime[ii];
+      if (oddsVector) odds999 = oddsVector[ii];
+      odds0[ii] = Number(odds999) || 0;
+      odds1[ii] = Math.floor(1000000 / (Number(odds999) + 50) - 1) || 0;
+      startTimeColumn[ii] = Number(time999);
+      netLiab[0][ii] = (Number(xdecode256[2]) - Number(xdecode256[1])) / 10;
+      netLiab[1][ii] = (Number(xdecode256[3]) - Number(xdecode256[0])) / 10;
+      
     }
-    setOdds0(odds0);
-    setOdds1(odds1);
-    setLiab0(liab0);
-    setLiab1(liab1);
-    setStartTimeColumn(startTimeColumn);
-    setXdecode(xdecode);
-    setOutcomev(outcomev);
-  }, [betData]);
+  setOdds0(odds0);
+  setOdds1(odds1);
+  setLiab0(liab0);
+  setLiab1(liab1);
+  setStartTimeColumn(startTimeColumn);
+  setXdecode(xdecode256);
+}, [betData]);
+
 
   let oddsTot = [odds0, odds1];
 
@@ -309,20 +305,6 @@ function TestPage() {
     setTeamSplit(_teamSplit);
   }, [scheduleString]);
 
-  async function connect() {
-    await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    console.log(signer);
-    setSigner(signer);
-  }
-
-  if (!signer) {
-    return (
-      <div>
-        <button onClick={connect}>connect</button>
-      </div>
-    );
-  }
 
   return (
     <div>

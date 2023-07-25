@@ -72,7 +72,7 @@ export default function EventBetRecord() {
           <div>
             <Text size="12px" weight="200">
               {" "}
-              {event.timestamp},{event.Epoch}, {event.MatchNum},{" "}
+              {event.blockNumber},{event.Epoch}, {event.MatchNum},{" "}
               {event.LongPick},{event.BetSize},{event.BettorAddress},{" "}
               {event.Hashoutput},{" "}
             </Text>

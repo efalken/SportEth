@@ -4,6 +4,7 @@ import BetPage from "./components/pages/BetPage";
 import BookiePage from "./components/pages/BookiePage";
 import TestPage from "./components/pages/TestPage";
 import EventBetRecord from "./components/pages/EventBetRecord";
+import EventBetRecordAxios from "./components/pages/EventBetRecordAxios";
 import EventOdds from "./components/pages/EventOdds";
 import EventSchedule from "./components/pages/EventSchedule";
 import EventStartTime from "./components/pages/EventStartTime";
@@ -42,12 +43,20 @@ const router = createBrowserRouter([
       </AuthRequired>
     ),
   },
+  {
+    path: "/testpage",
+    element: (
+      <AuthRequired>
+        <TestPage />
+      </AuthRequired>
+    ),
+  },
   { path: "/bethistory", element: <EventBetRecord /> },
-  { path: "/oddshistory", element: <EventOdds /> },
+  { path: "/oddshistory", element: <EventBetRecordAxios /> },
+  //{ path: "/oddshistory", element: <EventOdds /> },
   { path: "/schedhistory", element: <EventSchedule /> },
   { path: "/starthistory", element: <EventStartTime /> },
   { path: "/resultshistory", element: <EventGameResults /> },
-  { path: "/TestPage", element: <TestPage /> },
 ]);
 
 export default router;

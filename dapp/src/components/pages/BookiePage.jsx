@@ -19,13 +19,10 @@ function BookiePage() {
   const [fundAmount, setFundAmount] = useState("");
   const [sharesToSell, setSharesToSell] = useState("");
   const [currentWeek, setCurrentWeek] = useState("");
-
   const [unusedCapital, setUnusedCapital] = useState(0);
   const [usedCapital, setUsedCapital] = useState(0);
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
-  const [betNumber, setBetNumber] = useState(0);
-  //const [newBets, setNewBets] = useState(false);
   const [betData, setBetData] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -61,10 +58,6 @@ function BookiePage() {
     }
   }
 
-  // async function inactivateBook() {
-  //   await bettingContract.inactiveBook();
-  // }
-
   async function findValues() {
     let _unusedCapital =
       Number((await bettingContract.margin(0)) || "0") / 10000;
@@ -82,11 +75,9 @@ function BookiePage() {
     let _totalShares = (await bettingContract.margin(3)) || "0";
     setTotalShares(_totalShares);
 
-    // let _newBets = Number(await bettingContract.margin(7)) != 2000000000;
-    // setNewBets(_newBets);
-
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
+    //console.log(betData, "betData");
 
     let sctring = await oracleContract.showSchedString();
     //if (sctring && _newBets) {
@@ -109,42 +100,20 @@ function BookiePage() {
   }
 
   function unpack256(src) {
+    if (!src) return [0,0,0,0];
+    //const str = bn.toString(16);
     const str = src.toString(16).padStart(64, "0");
     const pieces = str
-      .match(/.{1,2}/g)
-      .reverse()
-      .join("")
-      .match(/.{1,8}/g)
-      .map((s) =>
-        s
-          .match(/.{1,2}/g)
-          .reverse()
-          .join("")
-      );
+      .toString(16)
+      .match(/.{1,16}/g)
+      .reverse();
     const ints = pieces.map((s) => parseInt("0x" + s)).reverse();
     return ints;
   }
 
-  // function getSpreadText(spreadnumber) {
-  //   let outspread = spreadnumber / 10;
-  //   if (outspread > 0) {
-  //     outspread = "+" + outspread;
-  //   }
-  //   return outspread;
-  // }
-
   let ethBookie =
     (Number(bookieShares) * (Number(unusedCapital) + Number(usedCapital))) /
     Number(totalShares);
-
-  let [startTimeColumn, setStartTimeColumn] = useState([
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932,
-  ]);
 
   let [bets0, setBets0] = useState([
     100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
@@ -170,23 +139,26 @@ function BookiePage() {
     100, 100,
   ]);
 
-  let [xdecode, setXdecode] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
+  let [xdecode256, setXdecode] = useState([0, 1, 2, 3]);
 
+  console.log(betData, "betData");
+  let xdecode256b = unpack256(betData[0]);
+  console.log(xdecode256b, "betData0");
+  let xdecode256c = unpack256(betData[1]);
+  console.log(xdecode256c, "betData1");
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
-      if (betData[ii]) xdecode = unpack256(betData[ii]);
-      startTimeColumn[ii] = xdecode[7];
-      bets0[ii] = Number(xdecode[0]);
-      bets1[ii] = Number(xdecode[1]);
-      payoff0[ii] = Number(xdecode[2]);
-      payoff1[ii] = Number(xdecode[3]);
+      if (betData) xdecode256 = unpack256(betData[ii]);
+      bets0[ii] = Number(xdecode256[0]) || 0;
+      bets1[ii] = Number(xdecode256[1]) || 0;
+      payoff0[ii] = Number(xdecode256[2]) || 0;
+      payoff1[ii] = Number(xdecode256[3]) || 0;
     }
     setBets0(bets0);
     setBets1(bets1);
     setPayoff0(payoff0);
     setPayoff1(payoff1);
-    setStartTimeColumn(startTimeColumn);
-    setXdecode(xdecode);
+    setXdecode(xdecode256);
   }, [betData]);
 
   let teamSplit = [];
