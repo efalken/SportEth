@@ -8,7 +8,7 @@ var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 
 //var finney = "1000000000000000"
 const finneys = BigInt('10000000000000');
-const eths = BigInt('1000000000000000000');
+const eths = BigInt('100000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(
@@ -159,12 +159,12 @@ async function main() {
   
 
    result = await betting.fundBook({
-    value: 10n*eths,
+    value: 20n*eths,
   });
   await result.wait();
 
   result = await betting.connect(signers[1]).fundBook({
-    value: 1n*eths,
+    value: 10n*eths,
   });
   await result.wait();
   result = await oracle.connect(signers[1]).tokenReward();
@@ -192,6 +192,7 @@ async function main() {
   //    hash1100 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(0, 0, 10000);
       receipt = await result.wait();
+
  //     hash1201 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[1]).bet(1, 0, 10000);
       receipt = await result.wait();
@@ -236,80 +237,107 @@ async function main() {
 
       result = await oracle.initPost(
         [
-          "NFL:ARI:LAC",
-          "UFC:Holloway:Kattar",
-          "NFL:BAL:MIA",
-          "NFL:BUF:MIN",
-          "NFL:CAR:NE",
-          "NFL:CHI:NO",
-          "NFL:CIN:NYG",
-          "NFL:CLE:NYJ",
-          "NFL:DAL:OAK",
-          "NFL:DEN:PHI",
-          "NFL:DET:PIT",
-          "NFL:GB:SEA",
-          "NFL:HOU:SF",
-          "NFL:IND:TB",
-          "NFL:JAX:TEN",
-          "NFL:KC:WSH",
-          "UFC:Holloway:Kattar",
-          "UFC:Ponzinibbio:Li",
-          "UFC:Kelleher:Simon",
-          "UFC:Hernandez:Vieria",
-          "UFC:Akhemedov:Breese",
-          "CFL: Mich: OhioState",
-          "CFL: Minn : Illinois",
-          "CFL: MiamiU: Florida",
-          "CFL: USC: UCLA",
-          "CFL: Alabama: Auburn",
-          "CFL: ArizonaSt: UofAriz",
-          "CFL: Georgia: Clemson",
-          "CFL: PennState: Indiana",
-          "CFL: Texas: TexasA&M",
-          "CFL: Utah: BYU",
-          "CFL: Rutgers: VirgTech",
-        ],
-        [
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-        ],
-        [
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
-          760, 919, 720, 672, 800,
-        ]
+          "NFL:Carolina:Atlanta",
+          "NFL:Cleveland:Cincinnati",
+          "NFL:Jacksonville:Indianapolis",
+          "NFL:TampaBay:Minnesota",
+          "NFL:Tennessee:NewOrleans",
+          "NFL:Pittsburgh:SanFrancisco",
+          "NFL:Washington:Arizona",
+          "NFL:Baltimore:Houston",
+          "NFL:Chicago:GreenBay",
+          "NFL:Denver:LasVegas",
+          "NFL:NewEngland:Philadelphia",
+          "NFL:LosAngelesChargers:Miami",
+          "NFL:Seattle:LosAngelesRams",
+          "NFL:NewYorkGiants:Dallas",
+          "CFL:FresnoState:EasternWashington",
+          "CFL:UtahState:IdahoState",
+          "CFL:WakeForest:Vanderbilt",
+          "CFL:Army:DelawareState",
+          "CFL:Nebraska:Colorado",
+          "CFL:Georgia:BallState",
+          "CFL:YoungstownState:OhioState",
+          "CFL:Delaware:PennState",
+          "CFL:Purdue:VirginiaTech",
+          "CFL:Utah:Baylor",
+          "CFL:NotreDame:NCState",
+          "MMA:Adensanya:Strickland",
+          "MMA:Tuivasa:Volkov",
+          "MMA:Kara-France:Kape",
+          "0",
+          "0",
+          "0",
+          "0"],
+          [
+          1694365200,
+          1694365200,
+          1694365200,
+          1694365200,
+          1694365200,
+          1694365200,
+          1694365200,
+          1694365200,
+          1694377500,
+          1694377500,
+          1694377500,
+          1694377500,
+          1694377500,
+          1694391600,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694278800,
+          1694300400,
+          1694300400,
+          1694300400,
+          0,
+          0,
+          0,
+          0],
+          [
+          177,
+          948,
+          635,
+          841,
+          955,
+          907,
+          693,
+          572,
+          485,
+          419,
+          367,
+          326,
+          292,
+          263,
+          239,
+          218,
+          200,
+          184,
+          229,
+          374,
+          918,
+          676,
+          537,
+          723,
+          371,
+          177,
+          126,
+          956,
+          126,
+          126,
+          126,
+          126]
       );
       receipt = result.wait();
+      await new Promise((resolve) => setTimeout(resolve, 50000));
       console.log(`initpost`);
       // await new Promise((resolve) => setTimeout(resolve, 50000));
      
@@ -317,16 +345,16 @@ async function main() {
       receipt = result.wait();
       console.log(`processVote`);
       //result = await oracle.connect(signers[1]).tokenReward();
-      // await new Promise((resolve) => setTimeout(resolve, 50000));
+      await new Promise((resolve) => setTimeout(resolve, 50000));
 
-      result = await betting.connect(signers[1]).bet(0, 1, 13000);
+      result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
       console.log(`bet process`);
-      result = await betting.connect(signers[2]).bet(0, 0, 14000);
+      result = await betting.connect(signers[2]).bet(0, 0, 50000);
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).bet(1, 0, 15000);
+      result = await betting.connect(signers[1]).bet(1, 0, 10000);
       receipt = await result.wait();
-      result = await betting.connect(signers[2]).bet(1, 1, 16000);
+      result = await betting.connect(signers[2]).bet(1, 1, 10000);
       receipt = await result.wait();
  
 

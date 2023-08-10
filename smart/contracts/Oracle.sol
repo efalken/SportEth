@@ -126,7 +126,7 @@ contract Oracle {
         for (uint256 i = 0; i < 32; i++) {
             require(
                 _decimalOdds[i] < MAX_DEC_ODDS_INIT &&
-                    _decimalOdds[i] > MIN_DEC_ODDS_INIT
+                    _decimalOdds[i] > MIN_DEC_ODDS_INIT, "odds outside range"
             );
         }
         // require((_starts[0] - block.timestamp) < 604800 && (_starts[0] - block.timestamp) > 86400);
