@@ -5,7 +5,7 @@ const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
 var hourOffset,
   _hourSolidity,
   _timestamp,
-  nextStart = 1690659274,
+  nextStart,
   _date,
   _hour,
   hash1,
@@ -52,13 +52,13 @@ describe("Betting", function () {
 
   describe("set up contract", async () => {
     it("Get Oracle Contract Address", async () => {
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
+      console.log(nextStart, "nextstart");
       console.log(`Oracle Address is ${oracle.address}`);
-    });
-
-    it("Authorize Oracle Token", async () => {
       await token.approve(oracle.address, 560n * million);
-    });
-    it("Deposit Tokens in Oracle Contract2", async () => {
       await oracle.connect(owner).depositTokens(560n * million);
     });
   });
@@ -150,9 +150,9 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
-          760, 919, 720, 672, 800,
+          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
         ]
       );
       receipt = await result.wait();
@@ -162,7 +162,7 @@ describe("Betting", function () {
 
     it("approve and send to betting contract", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      result = await oracle.initProcess();
+      result = await oracle.processVote();
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       console.log(`gas on secondSend = ${gasUsed}`);
@@ -285,7 +285,7 @@ describe("Betting", function () {
 
     it("send result data to betting contract", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.settleProcess();
+      await oracle.processVote();
     });
 
     it("PostSettle", async () => {
@@ -319,8 +319,8 @@ describe("Betting", function () {
       await betting.connect(account3).redeem();
       await betting.connect(account2).redeem();
 
-      xx = await betting.moose();
-      console.log(`moose ${xx}`);
+      //xx = await betting.moose();
+      //console.log(`moose ${xx}`);
 
       const userBalanceAcct2 =
         Number((await betting.userStruct(account2.address)).userBalance) /
@@ -338,13 +338,21 @@ describe("Betting", function () {
       console.log(`acct2 Bal ${userBalanceAcct2}`);
       console.log(`acct3 Bal ${userBalanceAcct3}`);
 
-      assert.equal(bookiePool, "2.9917", "mustBe equal");
+      assert.equal(Number(bookiePool).toFixed(3), "2.960", "mustBe equal");
       assert.equal(bettorLocked, "0", "Must be equal");
       assert.equal(bookieLocked, "0", "Must be equal");
-      assert.equal(oracleBal, "0.030415", "Must be equal");
-      assert.equal(ethbal, "4.969585", "Must be equal");
-      assert.equal(userBalanceAcct2, "0.695", "Must be equal");
-      assert.equal(userBalanceAcct3, "1.2828", "Must be equal");
+      assert.equal(Number(oracleBal).toFixed(3), "0.032", "Must be equal");
+      assert.equal(Number(ethbal).toFixed(3), "4.968", "Must be equal");
+      assert.equal(
+        Number(userBalanceAcct2).toFixed(3),
+        "0.695",
+        "Must be equal"
+      );
+      assert.equal(
+        Number(userBalanceAcct3).toFixed(3),
+        "1.313",
+        "Must be equal"
+      );
 
       console.log(`gas0 on bet ${gas0}`);
       console.log(`gas1 on bet ${gas1}`);

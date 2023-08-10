@@ -4,21 +4,20 @@ import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
 import Text from "../basics/Text";
 import Form from "../basics/Form";
-import { G } from "../basics/Colors";  
+import { G } from "../basics/Colors";
 import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
 import { ethers } from "ethers";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { networkConfig, provider} from "../../config";
+import { networkConfig } from "../../config";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
-//import { syncEvents } from "../../helpers/syncEvents";
-//import { BigNumber } from "bignumber.js";
 
 function BetPage() {
-  const { oracleContract, bettingContract, account, provider } = useAuthContext();
+  const { oracleContract, bettingContract, account, provider } =
+    useAuthContext();
   //const provider = useAuthContext.provider;
 
   const [betAmount, setBetAmount] = useState("");
@@ -29,43 +28,107 @@ function BetPage() {
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
   const [betHistory, setBetHistory] = useState([{}]);
+  //const [bettorHashes, setBetHashes] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
   const [betData, setBetData] = useState([]);
-  const [userBalance, setUserBalance] = useState("0");
-  const [bettorHashes, setBetHashes] = useState([]);
-  const [unusedCapital, setUnusedCapital] = useState("0");
-  const [usedCapital, setUsedCapital] = useState("0");
-  const [currW4, setCurrW4] = useState("0");
-  const [concentrationLimit, setConcentrationLimit] = useState("0");
+  const [userBalance, setUserBalance] = useState(0);
+  const [unusedCapital, setUnusedCapital] = useState(0);
+   const [usedCapital, setUsedCapital] = useState(0);
+  const [currW4, setCurrW4] = useState(0);
+  const [concentrationLimit, setConcentrationLimit] = useState(0);
   const [teamSplit, setTeamSplit] = useState([]);
-  const [betNumber, setBetNumber] = useState("0");
   const [oddsVector, setOddsVector] = useState([]);
   const [startTime, setStartTime] = useState([]);
   const [eoaBalance, setEoaBalance] = useState("0");
+  const [counter, setCounter] = useState(0);
+  const [odds0, setOdds0] = useState([
+    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
+    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
+    957, 957,
+  ]);
+  const [odds1, setOdds1] = useState([
+    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
+    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
+    957, 957,
+  ]);
+  const [liab0, setLiab0] = useState([
+    100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+    100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+    100, 100,
+  ]);
+  const [liab1, setLiab1] = useState([
+    100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+    100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
+    100, 100,
+  ]);
+  let netLiab = [liab0, liab1];
+
+  document.title = "Betting Page";
+
+  console.log(oddsVector, "odds");
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
-
-    document.title = "Betting Page";
     const interval1 = setInterval(() => {
-      findValues();
+      findValuesOnce();
     }, 1000);
-
     return () => {
       clearInterval(interval1);
     };
   }, [bettingContract, oracleContract]);
+
+  useEffect(() => {
+    if (!bettingContract || !oracleContract) return;
+    const interval2 = setInterval(() => {
+      updateBetRecord();
+    }, 1000);
+    return () => {
+      clearInterval(interval2);
+    };
+  }, [counter]);
+
+  useEffect(() => {
+    if (!bettingContract) return;
+    const interval3 = setInterval(() => {
+      findCounter(); 
+    }, 1000); 
+    return () => { 
+      clearInterval(interval3);
+    };
+  }, [bettingContract, counter]);
+
+  
+  let xdecode256 = [0, 1, 2, 3];
+  let odds999 = 0;
+  let oddsTot = [odds0, odds1];
+  useEffect(() => {
+    for (let ii = 0; ii < 32; ii++) {
+      if (betData) xdecode256 = unpack256(betData[ii]);
+      if (oddsVector) odds999 = Number(oddsVector[ii]);
+      odds0[ii] = odds999 || 0;
+      odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45) || 0;
+      netLiab[0][ii] = (xdecode256[2] - xdecode256[1]) / 10;
+      netLiab[1][ii] = (xdecode256[3] - xdecode256[0]) / 10;
+    }
+    setOdds0(odds0);
+    setOdds1(odds1);
+    setLiab0(liab0);
+    setLiab1(liab1);
+  }, [betData]);
+
+  useEffect(() => {
+    let _teamSplit = scheduleString.map((s) => (s ? s.split(":") : undefined));
+    setTeamSplit(_teamSplit);
+  }, [scheduleString]);
 
   async function fundBettor(x) {
     try {
       const stackId = await bettingContract.fundBettor({
         value: ethers.parseEther(fundAmount),
       });
-      // console.log("stackid", stackId);
     } catch (error) {
-      // console.log("igotanerror", error);
     }
   }
 
@@ -79,37 +142,23 @@ function BetPage() {
       teamPick,
       betAmount * 10000
     );
-    const receipt = await tx.wait(1);
-    // await syncEvents(receipt.hash);
+    const receipt0 = await tx.wait(0);
+    const receipt1 = await tx.wait(1);
+    console.log(receipt0, "receipt0");
+    console.log(receipt1, "receipt1");
+    console.log(tx, "tx");
   }
 
   async function redeemBet() {
     const tx = await bettingContract.redeem();
     const receipt = await tx.wait(1);
     // await syncEvents(receipt.hash);
+    //setTimeout(updateBetRecord, 5000, )
   }
-
-  function switchOdds() {
-    setShowDecimalOdds(!showDecimalOdds);
-  }
-
-  // async function getBets(hash) {
-  //   const betParams = await bettingContract.betContracts(hash);
-  // }
-
-  function openEtherscan(txhash) {
-    const url = `${
-      networkConfig.blockExplorerUrls ? networkConfig.blockExplorerUrls[0] : ""
-    }tx/${txhash}`;
-    window.open(url, "_blank");
-    setViewedTxs(viewedTxs + 1);
-  }
-
 
   async function addBetRecord(contractHash) {
     const { epoch, matchNum, pick, betAmount, payoff, bettor } =
       await bettingContract.betContracts(contractHash);
-
     betHistory[0][contractHash] = {
       Hashoutput: contractHash,
       BettorAddress: bettor,
@@ -118,68 +167,41 @@ function BetPage() {
       LongPick: Number(pick),
       MatchNum: Number(matchNum),
       Payoff: (0.95 * Number(payoff)) / 10000,
-      Result9: await bettingContract.checkRedeem(
-        contractHash
-      ),
+      Result9: await bettingContract.checkRedeem(contractHash),
     };
     setBetHistory(betHistory);
   }
 
-  useEffect(() => {
-    if (!bettingContract || !account || !provider) return;
-    updateBetHashes();
-    getBal();
-  }, [bettingContract, account]);
-
-  function radioFavePick(teampic) {
-    setMatchPick(teampic);
-    setTeamPick(0);
-  }
-
-  function radioUnderPick(teampic) {
-    setMatchPick(teampic);
-    setTeamPick(1);
-  }
-
-  async function getBal() {
-    let _eoaBalance = (await provider.getBalance(account))|| "0";
-    setEoaBalance(_eoaBalance);
-  }
- //console.log(`eoabal ${eoaBalance}`);
-
-  async function updateBetHashes() {
-   // setSubcontracts({});
-    setBetHistory([{}]);
-    const userAccount = await bettingContract.userStruct(account);
-    const count = Number(userAccount.counter);
-    let _lastBetHash = (
-      Object.values(await bettingContract.showUserBetData()) || []
-    ).slice(0, count);
+  async function updateBetRecord() {
+    let us = await bettingContract.userStruct(account);
+    //let _counter = us ? us.counter.toString() : 0;  thdthd   //
+    let _counter = us ? Number(us.counter) : 0;
+    setCounter(_counter);
+    let _bettorHashes = (await bettingContract.showUserBetData()) || [];
+    //setBetHashes(_bettorHashes);
+    let _lastBetHash = Object.values(_bettorHashes).slice(0, counter);
     for (const betHash of _lastBetHash) {
-      if (
-        betHash !==
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
-      )
-        await addBetRecord(betHash);
+      await addBetRecord(betHash);
+      setBetHistory(betHistory);
     }
   }
+// 
+  async function findCounter() {
+    let us = await bettingContract.userStruct(account);
+    let _counter = us ? Number(us.counter) : 0;
+    setCounter(_counter);
+  }
 
-  async function findValues() {
+  async function findValuesOnce() {
+    let _eoaBalance = (await provider.getBalance(account)) || "0";
+    setEoaBalance(_eoaBalance);
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
-    //console.log(betData, "betData");
-
     let us = await bettingContract.userStruct(account);
-    let _betNumber = us ? us.counter.toString() : "0";
-    setBetNumber(_betNumber);
-
-    let _userBalance = us ? us.userBalance.toString() : "0";
+    let _userBalance = us ? Number(us.userBalance) : 0;
     setUserBalance(_userBalance);
 
-    let _bettorHashes = (await bettingContract.showUserBetData()) || [];
-    setBetHashes(_bettorHashes);
-
-    let _unusedCapital = (await bettingContract.margin(0)) || "0";
+    let _unusedCapital = Number((await bettingContract.margin(0)) || "0");
     setUnusedCapital(_unusedCapital);
 
     let _startTimes = (await bettingContract.showStartTime()) || [];
@@ -187,27 +209,25 @@ function BetPage() {
 
     let _oddsvector = (await bettingContract.showOdds()) || [];
     setOddsVector(_oddsvector);
+    console.log(oddsVector, "odds");
 
-    let _usedCapital = (await bettingContract.margin(1)) || "0";
+    let _usedCapital = Number((await bettingContract.margin(1)) || "0");
     setUsedCapital(_usedCapital);
 
     let _currW4 = Number((await bettingContract.params(0)) || "0");
     setCurrW4(_currW4);
 
-    let _concentrationLimit = await bettingContract.params(1);
+    let _concentrationLimit = Number((await bettingContract.params(1)) || "0");
     setConcentrationLimit(_concentrationLimit);
 
     let sctring = await oracleContract.showSchedString();
     setScheduleString(sctring);
+     
   }
 
   function getMaxSize(unused0, used0, climit0, long0) {
-    let unused = Number(unused0);
-    let used = Number(used0);
-    let climit = Number(climit0);
-    let long = Number(long0);
-    let maxSize = (unused + used) / climit - long;
-    let maxSize2 = unused;
+    let maxSize = (unused0 + used0) / climit0 - (isNaN(long0) ? 0 : long0);
+    let maxSize2 = unused0 - used0;
     if (maxSize2 < maxSize) {
       maxSize = maxSize2;
     }
@@ -226,7 +246,6 @@ function BetPage() {
     return ints;
   }
 
-
   function getMoneyLine(decOddsi) {
     let moneyline = 0;
     if (decOddsi < 1000) {
@@ -241,81 +260,27 @@ function BetPage() {
     return moneyline;
   }
 
-  function getResults(outcomeB) {
-    let outcomeA = "lose";
-    if (outcomeB == 1) {
-      outcomeA = "win";
-    } 
-    else if (outcomeB == 2) {
-      outcomeA = "tie";
-    }
-    return outcomeA;
+  function switchOdds() {
+    setShowDecimalOdds(!showDecimalOdds);
   }
 
-  let [startTimeColumn, setStartTimeColumn] = useState([
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932, 1640455932, 1640455932, 1640455932, 1640455932,
-    1640455932, 1640455932,
-  ]);
+  function openEtherscan(txhash) {
+    const url = `${
+      networkConfig.blockExplorerUrls ? networkConfig.blockExplorerUrls[0] : ""
+    }tx/${txhash}`;
+    window.open(url, "_blank");
+    setViewedTxs(viewedTxs + 1);
+  }
 
-  let [odds0, setOdds0] = useState([
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957,
-  ]);
+  function radioFavePick(teampic) {
+    setMatchPick(teampic);
+    setTeamPick(0);
+  }
 
-  let [odds1, setOdds1] = useState([
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957,
-  ]);
-
-  let [liab0, setLiab0] = useState([
-    100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
-    100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
-    100, 100,
-  ]);
-
-  let [liab1, setLiab1] = useState([
-    -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123,
-    -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123, -123,
-    -123, -123, -123, -123, -123, -123, -123, -123,
-  ]);
-
-  let netLiab = [liab0, liab1];
-  
-  let [xdecode256, setXdecode] = useState([0, 1, 2, 3]);
-  let time999 = 0;
-  let odds999 = 0;
-
-  useEffect(() => {
-      for (let ii = 0; ii < 32; ii++) {
-        if (betData) xdecode256 = unpack256(betData[ii]);
-        if (startTime) time999 = startTime[ii];
-        if (oddsVector) odds999 = oddsVector[ii];
-        odds0[ii] = Number(odds999) || 0;
-        odds1[ii] = Math.floor(1000000 / (Number(odds999) + 50) - 1) || 0;
-        startTimeColumn[ii] = Number(time999);
-        netLiab[0][ii] = (Number(xdecode256[2]) - Number(xdecode256[1])) / 10;
-        netLiab[1][ii] = (Number(xdecode256[3]) - Number(xdecode256[0])) / 10;
-      }
-    setOdds0(odds0);
-    setOdds1(odds1);
-    setLiab0(liab0);
-    setLiab1(liab1);
-    setStartTimeColumn(startTimeColumn);
-    setXdecode(xdecode256);
-  }, [betData]);
-
-  let oddsTot = [odds0, odds1];
-
-  useEffect(() => {
-    let _teamSplit = scheduleString.map((s) => (s ? s.split(":") : undefined));
-    setTeamSplit(_teamSplit);
-  }, [scheduleString]);
+  function radioUnderPick(teampic) {
+    setMatchPick(teampic);
+    setTeamPick(1);
+  }
 
   return (
     <div>
@@ -357,9 +322,7 @@ function BetPage() {
                 </Text>
               </Flex>
             </Box>
-
             <Box>
-            
               <Flex>
                 <Text size="14px">
                   <Link
@@ -370,9 +333,9 @@ function BetPage() {
                       fontStyle: "italic",
                       // font: "sans-serif"
                     }}
-                    to="/testpage"
+                    to="/oraclepage"
                   >
-                    Test Page
+                    Oracle Page
                   </Link>
                 </Text>
               </Flex>
@@ -415,8 +378,7 @@ function BetPage() {
               </Text>
               <br />
               <Text size="14px" className="style">
-                AVAX in your Wallet:{" "}
-                {(Number(eoaBalance) / 1e18).toFixed(3)}
+                AVAX in your Wallet: {(Number(eoaBalance) / 1e18).toFixed(3).toLocaleString()}
               </Text>
             </Box>
             <Box>
@@ -500,7 +462,7 @@ function BetPage() {
                                     ]
                                   }
                                 </td>
-                                <td>{parseFloat(event.BetSize).toFixed(3)}</td>
+                                <td>{Number(event.BetSize).toFixed(3)}</td>
                                 <td>
                                   {Number(
                                     event.Payoff / event.BetSize + 1
@@ -527,43 +489,41 @@ function BetPage() {
                 }}
               ></Flex>
             </Box>
-
             <Box>
-              { (betNumber > 0) ?
-            <button
-                style={{
-                  backgroundColor: "black",
-                  borderRadius: "5px",
-                  padding: "4px",
-                  //borderRadius: "1px",
-                  cursor: "pointer",
-                  color: "yellow",
-                  border: "1px solid #ffff00",
-                  // width: width ? width : 120,
-                  // color: "#00ff00",
-                }}
-                value={0}
-                onClick={(e) => {
-                  e.preventDefault();
-                  redeemBet();
-                }}
-              >
-                Redeem
-              </button>
-              : "" }
-              </Box>
-
+              {counter > 0 ? (
+                <button
+                  style={{
+                    backgroundColor: "black",
+                    borderRadius: "5px",
+                    padding: "4px",
+                    //borderRadius: "1px",
+                    cursor: "pointer",
+                    color: "yellow",
+                    border: "1px solid #ffff00",
+                    // width: width ? width : 120,
+                    // color: "#00ff00",
+                  }}
+                  value={0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    redeemBet();
+                  }}
+                >
+                  Redeem
+                </button>
+              ) : (
+                ""
+              )}
+            </Box>
             <Box>
-
- 
               <Flex>
                 {Object.keys(betHistory).map((id) => (
                   <div key={id} style={{ width: "100%", float: "left" }}>
                     <Text size="14px" className="style">
-                      Bets in stack: {betNumber}
+                      Bets in stack: {counter}
                     </Text>
                     <br />
-                   
+
                     <Text className="style" size="14px">
                       {" "}
                       resolved bets to be processed via redeem
@@ -586,8 +546,8 @@ function BetPage() {
                         </tr>
                         {Object.values(betHistory[id]).map(
                           (event, index) =>
-                            index < betNumber &&
-                            (event.Epoch < Number(currW4)) && (
+                            index < counter &&
+                            event.Epoch < Number(currW4) && (
                               <tr
                                 key={index}
                                 style={{ width: "33%", color: "#ffffff" }}
@@ -603,9 +563,7 @@ function BetPage() {
                                 <td>
                                   {(event.Payoff + event.BetSize).toFixed(3)}
                                 </td>
-                                <td>
-                                  {event.Result9 ? "yes" : "no"}
-                                </td>
+                                <td>{event.Result9 ? "yes" : "no"}</td>
                               </tr>
                             )
                         )}
@@ -864,13 +822,12 @@ function BetPage() {
               {getMoneyLine(0.95 * oddsTot[teamPick][matchPick])}
               {"),  "}
               MaxBet:{" "}
-              {parseFloat(
+              {Number(
                 getMaxSize(
                   unusedCapital,
                   usedCapital,
                   concentrationLimit,
-                  netLiab[teamPick][matchPick]
-                ) / 1e3
+                  Number(netLiab[teamPick][matchPick])) / 1e3
               ).toFixed(2)}
               {"  "}
               opponent: {teamSplit[matchPick][2 - teamPick]}
@@ -898,7 +855,7 @@ function BetPage() {
             <Flex>
               <TeamTable
                 teamSplit={teamSplit}
-                startTimeColumn={startTimeColumn}
+                startTimeColumn={startTime}
                 radioFavePick={radioFavePick}
                 showDecimalOdds={showDecimalOdds}
                 oddsTot={oddsTot}

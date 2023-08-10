@@ -10,7 +10,7 @@ var _hour;
 var receipt;
 var gasUsed;
 var result;
-var nextStart = 1690659274;
+var nextStart;
 const { assert } = require("chai");
 require("chai").use(require("chai-as-promised")).should();
 const finneys = BigInt("1000000000000000");
@@ -62,6 +62,8 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
+      nextStart =
+        _timestamp - ((_timestamp - 1690588800) % 604800) + 14 * 86400;
       console.log(`time is ${nextStart}`);
       result = await oracle.initPost(
         [
@@ -133,14 +135,16 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
-          760, 919, 720, 672, 800,
+          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
         ]
       );
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on initPost = ${gasUsed}`);
+      console.log(`time is ${_timestamp}`);
+      console.log(`nextStart is ${nextStart}`);
     });
 
     it("fast forward 4 hours", async () => {
@@ -148,7 +152,7 @@ describe("Betting", function () {
     });
 
     it("Send Initial Data", async () => {
-      await oracle.initProcess();
+      await oracle.processVote();
       const betdata0 = await betting.betData(0);
       console.log(`betdata0 ${betdata0}`);
       receipt = await result.wait();
@@ -158,7 +162,7 @@ describe("Betting", function () {
 
     it("approve and send to betting contract", async () => {
       await betting.connect(owner).fundBook({
-        value: 3n * eths,
+        value: 10n * eths,
       });
     });
 
@@ -178,7 +182,7 @@ describe("Betting", function () {
   describe("Send Bets, update Odds, send more bets", async () => {
     let contractHash1;
     it("bet 10 on 0:0 (match 0: team 0)", async () => {
-      result = await betting.connect(account1).bet(0, 0, "1000");
+      result = await betting.connect(account1).bet(0, 0, "10000");
       receipt = await result.wait();
       contractHash1 = receipt.events[0].args.contractHash;
       const betdata0 = await betting.betData(0);
@@ -199,18 +203,18 @@ describe("Betting", function () {
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
 
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
-      console.log(`time is ${nextStart}`);
+      // _timestamp = (
+      //   await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      // ).timestamp;
+      // nextStart = _timestamp + 7 * 86400;
+      // console.log(`time is ${nextStart}`);
       const odds0 = await betting.odds(0);
       console.log(`odds0 ${odds0}`);
     });
 
     it("send updated odds data", async () => {
       result = await oracle.updatePost([
-        800, 10448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+        800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
         699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
         919, 720, 672, 800,
       ]);
@@ -226,7 +230,7 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      result = await oracle.updateProcess();
+      result = await oracle.processVote();
       receipt = await result.wait();
       gas1 = receipt.gasUsed;
       const odds0 = await betting.odds(0);
@@ -242,7 +246,8 @@ describe("Betting", function () {
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       console.log(`time is ${_timestamp}`);
-      result12 = await betting.connect(account2).bet(0, 0, "1000");
+      console.log(`nextStart is ${nextStart}`);
+      result12 = await betting.connect(account2).bet(0, 0, "10000");
       receipt = await result12.wait();
       contractHash2 = receipt.events[0].args.contractHash;
       const betdata0 = await betting.betData(0);
@@ -266,7 +271,6 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      var nextStart = _timestamp + 7 * 86400;
       console.log(`time is ${nextStart}`);
     });
 
@@ -283,7 +287,7 @@ describe("Betting", function () {
       console.log(`betdata preSettle ${betdata0}`);
       const betdata1 = await betting.betData(1);
       console.log(`betdata preSettle ${betdata1}`);
-      await oracle.settleProcess();
+      await oracle.processVote();
     });
 
     it("bettorBalances", async () => {
@@ -317,16 +321,24 @@ describe("Betting", function () {
       console.log(`oracleBal ${oracleBal}`);
       console.log(`ethbal ${ethbal}`);
 
-      assert.equal(userBalanceAcct1, "1.0949", "Must be equal");
-      assert.equal(userBalanceAcct2, "1.0760", "Must be equal");
-      assert.equal(bookiePool, "2.8201", "Must be equal");
+      assert.equal(Number(bookiePool).toFixed(3), "8.201", "mustBe equal");
       assert.equal(bettorLocked, "0", "Must be equal");
       assert.equal(bookieLocked, "0", "Must be equal");
-      assert.equal(oracleBal, "0.008995", "Must be equal");
-      assert.equal(ethbal, "4.991005", "Must be equal");
+      assert.equal(Number(oracleBal).toFixed(3), "0.090", "Must be equal");
+      assert.equal(Number(ethbal).toFixed(3), "11.910", "Must be equal");
+      assert.equal(
+        Number(userBalanceAcct1).toFixed(3),
+        "1.949",
+        "Must be equal"
+      );
+      assert.equal(
+        Number(userBalanceAcct2).toFixed(3),
+        "1.760",
+        "Must be equal"
+      );
 
       console.log(`gas0 on updatepost ${gas0}`);
-      console.log(`gas1 on updateprocess ${gas1}`);
+      console.log(`gas1 on processVote ${gas1}`);
     });
   });
 });

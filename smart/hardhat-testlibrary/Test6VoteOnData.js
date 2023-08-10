@@ -11,7 +11,7 @@ var _hour;
 var result;
 var receipt;
 var gasUsed = 0;
-var nextStart = 1690659274;
+var nextStart;
 var gas0, gas1;
 
 const { assert } = require("chai");
@@ -45,24 +45,6 @@ describe("Betting", function () {
         "gwei"
       );
       console.log(`tokenBal is ${tokBala} 1e9`);
-    });
-
-    it("checkHour", async () => {
-      _hourSolidity = await oracle.hourOfDay();
-      console.log(`hour in EVM ${_hourSolidity}`);
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      console.log(`hourAdj ${hourOffset}`);
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      var nextStart = 1688218363 + 7 * 86400;
-      console.log(`time is ${nextStart}`);
     });
   });
 
@@ -128,7 +110,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      console.log(`time is ${nextStart}`);
+      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -199,9 +181,9 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
-          760, 919, 720, 672, 800,
+          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
         ]
       );
       receipt = await result.wait();
@@ -219,7 +201,7 @@ describe("Betting", function () {
     });
 
     it("fail: try to send too soon", async () => {
-      await expect(oracle.connect(owner).initProcess()).to.be.reverted;
+      await expect(oracle.connect(owner).processVote()).to.be.reverted;
     });
 
     it("fast forward 6 hours", async () => {
@@ -244,16 +226,12 @@ describe("Betting", function () {
       ).to.be.reverted;
     });
 
-    it("fail:try to send results, not initial data", async () => {
-      await expect(oracle.settleProcess()).to.be.reverted;
-    });
-
     // it("fast forward 12 hours", async () => {
     //   await helper.advanceTimeAndBlock(secondsInHour * 12);
     // });
 
     it("approve and send correct data to betting contract", async () => {
-      result = await oracle.initProcess();
+      result = await oracle.processVote();
       receipt = await result.wait();
       const gasInit = Number(receipt.gasUsed);
       console.log(`gas init ${gasInit}`);
@@ -325,7 +303,7 @@ describe("Betting", function () {
     });
 
     it("process vote, should send odds", async () => {
-      result = await oracle.updateProcess();
+      result = await oracle.processVote();
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed) + gasUsed;
     });
@@ -410,7 +388,7 @@ describe("Betting", function () {
     });
 
     it("process should not send", async () => {
-      result = await oracle.updateProcess();
+      result = await oracle.processVote();
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed) + gasUsed;
       const tokBal98 = ethers.utils.formatUnits(

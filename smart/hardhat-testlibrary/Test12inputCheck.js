@@ -146,7 +146,7 @@ describe("Betting", function () {
     });
 
     it("Send Initial Data", async () => {
-      await oracle.initProcess();
+      await oracle.processVote();
       const betdata0 = await betting.betData(0);
       console.log(`betdata0 ${betdata0}`);
     });
@@ -214,7 +214,7 @@ describe("Betting", function () {
 
     it("fast forward 6 hours", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.updateProcess();
+      await oracle.processVote();
       const betData7b = await betting.betData(7);
       //const str = bn.toString(16);
       const strb = betData7b.toHexString(16).slice(2).padStart(64, "0");

@@ -139,7 +139,7 @@ async function main() {
   await result.wait();
 
   
-  result = await oracle.initProcess();
+  result = await oracle.processVote();
   await result.wait();
 
   result = await betting.connect(signers[1]).fundBettor({
@@ -178,7 +178,7 @@ async function main() {
       ]);
       receipt = result.wait();
 
-      result = await oracle.settleProcess();
+      result = await oracle.processVote();
       receipt = result.wait();
 
       result = await oracle.initPost(
@@ -257,7 +257,7 @@ async function main() {
         ]
       );
       receipt = result.wait();
-      result = await oracle.initProcess();
+      result = await oracle.processVote();
       receipt = result.wait();
       
       result = await betting.connect(signers[1]).bet(3, 0, 13);
@@ -295,7 +295,7 @@ async function main() {
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
-      result = await oracle.settleProcess();
+      result = await oracle.processVote();
       receipt = result.wait();
       console.log(`nextStart ${nextStart}`);
       
@@ -375,7 +375,7 @@ async function main() {
         ]
       );
       receipt = await result.wait();
-      result = await oracle.initProcess();
+      result = await oracle.processVote();
       receipt = await result.wait();
 
       const userBalanceAcct1 = (await betting.userStruct(accounts[1])).userBalance;

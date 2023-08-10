@@ -147,7 +147,7 @@ async function main() {
     ]
   );
   await result.wait();
-  result = await oracle.initProcess();
+  result = await oracle.processVote();
   await result.wait();
   result = await betting.connect(signers[1]).fundBettor({
     value: 300n * finneys,

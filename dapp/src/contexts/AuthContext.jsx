@@ -2,7 +2,6 @@ import { ethers } from "ethers";
 import { createContext, useContext, useEffect, useState } from "react";
 // import useError from "../hooks/useError";
 import { networkConfig } from "../config";
-// import SwitchNetworkPage from "../pages/SwitchNetworkPage/SwitchNetworkPage";
 import bettingContractConfig from "../abis/Betting.json";
 import tokenContractConfig from "../abis/Token.json";
 import oracleContractConfig from "../abis/Oracle.json";
@@ -32,6 +31,7 @@ export function AuthContextProvider({ children }) {
   const [tokenContract, setTokenContract] = useState(null);
   const [showSwitchNetworkPage, setShowSwitchNetworkPage] = useState(false);
   const [account, setAccount] = useState("");
+  // const [load, setLoad] = useState(false);
 
   useEffect(() => {
     if (!window.ethereum) {
@@ -47,24 +47,34 @@ export function AuthContextProvider({ children }) {
     });
 
     // reload if logged in and account changed
-    window.ethereum.on("accountsChanged", (_account) => {
-      if (signer) window.location.reload();
-    });
+    //window.ethereum?.on('accountsChanged', accountChangedHandler)
+
+    // window.ethereum.on("accountsChanged", (_account) => {
+    //   if (signer) window.location.reload(true);
+    //   setLoad(false);
+    // });
+
+    // window.onload = function pageLoad() {
+    //   if (load) {
+    //     window.location.reload(true);
+    //     setLoad(false);
+    //   }
+    // };
 
     (async () => {
       const { chainId } = await _provider.getNetwork();
-      if (chainId != parseInt(networkConfig.chainId)) {
+      if (chainId !== parseInt(networkConfig.chainId)) {
         setShowSwitchNetworkPage(true);
       }
     })();
-  }, []);
+  }, [signer]);
 
   useEffect(() => {
     if (!provider) return;
 
     (async () => {
       const chainId = (await provider.getNetwork()).chainId.toString();
-      if (chainId != parseInt(networkConfig.chainId).toString()) return;
+      if (chainId !== parseInt(networkConfig.chainId).toString()) return;
 
       const _bettingContractReadOnly = new ethers.Contract(
         bettingContractConfig.networks[chainId].address,
@@ -101,7 +111,7 @@ export function AuthContextProvider({ children }) {
       setAccount(_address);
 
       const chainId = (await provider.getNetwork()).chainId.toString();
-      if (chainId != parseInt(networkConfig.chainId).toString()) return;
+      if (chainId !== parseInt(networkConfig.chainId).toString()) return;
 
       const _bettingContract = new ethers.Contract(
         bettingContractConfig.networks[chainId].address,

@@ -6,6 +6,8 @@ import Text from "../basics/Text";
 import { G, cwhite } from "../basics/Colors";
 import LabeledText from "../basics/LabeledText";
 import Form from "../basics/Form";
+import Button from "../basics/Button";
+import { networkConfig } from "../../config";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
 import { ethers } from "ethers";
@@ -15,6 +17,7 @@ import { useAuthContext } from "../../contexts/AuthContext";
 function BookiePage() {
   const { oracleContract, bettingContract, tokenContract, account } =
     useAuthContext();
+
 
   const [fundAmount, setFundAmount] = useState("");
   const [sharesToSell, setSharesToSell] = useState("");
@@ -30,6 +33,9 @@ function BookiePage() {
   const [bookieShares, setBookieShares] = useState("0");
   const [bookieEpoch, setBookieEpoch] = useState("0");
   const [tokenAmount, setTokenAmount] = useState("0");
+  const [eoaTokens, setEoaTokens] = useState("0");
+  const [tokensInK, setTokensInK] = useState("0");
+
 
   document.title = "LP Page";
   useEffect(() => {
@@ -38,17 +44,22 @@ function BookiePage() {
     const interval1 = setInterval(() => {
       findValues();
     }, 1000);
-
     return () => {
       clearInterval(interval1);
     };
   }, [bettingContract, oracleContract, tokenContract]);
-
+//  ttt  
   async function wdBook() {
-    await bettingContract.withdrawBook(sharesToSell);
+    await bettingContract.withdrawBook(sharesToSell); 
   }
 
-  async function fundBook() {
+  async function claimRewards() {
+    const tx = await oracleContract.tokenReward();
+    const receipt = await tx.wait(1);
+  }
+
+
+  async function fundBook(x) {
     try {
       await bettingContract.fundBook({
         value: ethers.parseEther(fundAmount),
@@ -59,15 +70,24 @@ function BookiePage() {
   }
 
   async function findValues() {
+ // const findValues = useCallback(() => {
     let _unusedCapital =
       Number((await bettingContract.margin(0)) || "0") / 10000;
     setUnusedCapital(_unusedCapital);
 
     let _usedCapital = Number((await bettingContract.margin(1)) || "0") / 10000;
     setUsedCapital(_usedCapital);
+    //console.log(tokenAmount, "tokens");
 
     let _betCapital = Number((await bettingContract.margin(2)) || "0") / 10000;
     setBetCapital(_betCapital);
+
+    let _tokenInK = await oracleContract.rewardTokensLeft() || "0";
+    setTokensInK(_tokenInK);
+
+    let _eoaTokens =
+    (await tokenContract.balanceOf(account)) || "0";
+    setEoaTokens(_eoaTokens);
 
     let _currentWeek = Number(await bettingContract.params(0));
     setCurrentWeek(_currentWeek);
@@ -77,10 +97,8 @@ function BookiePage() {
 
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
-    //console.log(betData, "betData");
 
     let sctring = await oracleContract.showSchedString();
-    //if (sctring && _newBets) {
     if (sctring) {
       setScheduleString(sctring);
     }
@@ -92,11 +110,6 @@ function BookiePage() {
     let _bookieEpoch = bs ? bs.outEpoch.toString() : "0";
     setBookieEpoch(_bookieEpoch);
 
-    let _tokenAmount =
-      (await tokenContract.balanceOf(
-        "0x23cEd89B1F6baFa4F89063D7Af51a81a38d879d6"
-      )) || "0";
-    setTokenAmount(_tokenAmount);
   }
 
   function unpack256(src) {
@@ -112,7 +125,7 @@ function BookiePage() {
   }
 
   let ethBookie =
-    (Number(bookieShares) * (Number(unusedCapital) + Number(usedCapital))) /
+    (Number(bookieShares) * Number(unusedCapital)) /
     Number(totalShares);
 
   let [bets0, setBets0] = useState([
@@ -141,11 +154,7 @@ function BookiePage() {
 
   let [xdecode256, setXdecode] = useState([0, 1, 2, 3]);
 
-  console.log(betData, "betData");
-  let xdecode256b = unpack256(betData[0]);
-  console.log(xdecode256b, "betData0");
-  let xdecode256c = unpack256(betData[1]);
-  console.log(xdecode256c, "betData1");
+
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
       if (betData) xdecode256 = unpack256(betData[ii]);
@@ -220,6 +229,24 @@ function BookiePage() {
                 </Text>
               </Flex>
             </Box>
+            <Box>
+              <Flex>
+                <Text size="14px">
+                  <Link
+                    className="nav-header"
+                    style={{
+                      cursor: "pointer",
+                      color: "#fff000",
+                      fontStyle: "italic",
+                      // font: "sans-serif"
+                    }}
+                    to="/oraclepage"
+                  >
+                    Oracle Page
+                  </Link>
+                </Text>
+              </Flex>
+            </Box>
 
             <Box>
               <Flex
@@ -280,18 +307,23 @@ function BookiePage() {
                 buttonLabel="Fund"
               />
             </Box>
+            <Box>
+              {" "}
+              <Text size="14px" color={cwhite}>
+                {"You own: " +
+                  Number(bookieShares).toLocaleString() +
+                  "  out of " +
+                  Number(totalShares).toLocaleString() +
+                  " total shares"}
+              </Text>
+            </Box>
 
             <Box>
               {" "}
               <Text size="14px" color={cwhite}>
-                {"Tokens available for match funding: " +
-                  Number(tokenAmount)
-                    .toString()
-                    .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") +
-                  " finney"}
+                {"Your share value: " + Number(ethBookie).toFixed(3) + " AVAX "}
               </Text>
-            </Box>
-
+              <Box>
             <Box>
               <Flex>
                 <Flex width="100%" flexDirection="column">
@@ -308,7 +340,7 @@ function BookiePage() {
                       <LabeledText
                         //big
                         color="#00ff00"
-                        label="Available LP Capital"
+                        label="Total LP Capital (avax)"
                         size="14px"
                         text={Number(unusedCapital).toFixed(3)}
                         spacing="4px"
@@ -319,7 +351,7 @@ function BookiePage() {
                     <Box>
                       <LabeledText
                         color="red"
-                        label="Locked Capital"
+                        label="Locked LP Capital"
                         text={Number(usedCapital).toFixed(3)}
                         spacing="1px"
                       />
@@ -331,6 +363,16 @@ function BookiePage() {
                         big
                         label="Current Gross Bets"
                         text={Number(betCapital).toFixed(3)}
+                        spacing="1px"
+                      />
+                    </Box>
+                  </Flex>
+                  <Flex pt="10px" justifyContent="left">
+                    <Box>
+                      <LabeledText
+                        big
+                        label="Token Rewards Remaining"
+                        text={Number(tokensInK).toLocaleString()}
                         spacing="1px"
                       />
                     </Box>
@@ -347,22 +389,8 @@ function BookiePage() {
               ></Flex>
             </Box>
 
-            <Box>
-              {" "}
-              <Text size="14px" color={cwhite}>
-                {"You own: " +
-                  Number(bookieShares).toFixed(0) +
-                  "  out of " +
-                  Number(totalShares).toFixed(0) +
-                  " total shares"}
-              </Text>
-            </Box>
-            <Box>
-              {" "}
-              <Text size="14px" color={cwhite}>
-                {"Your share value: " + Number(ethBookie).toFixed(3) + " AVAX "}
-              </Text>
-              <Box>
+            
+
                 {" "}
                 <Text size="14px" color={cwhite}>
                   Current Epoch: {currentWeek}{" "}
@@ -375,6 +403,7 @@ function BookiePage() {
             </Box>
             <Box>
               {Number(bookieShares) > 0 ? (
+                <Box>
                 <Form
                   onChange={setSharesToSell}
                   value={sharesToSell}
@@ -386,7 +415,29 @@ function BookiePage() {
                   placeholder="# shares"
                   buttonLabel="Withdraw"
                 />
+                </Box>
               ) : null}
+            </Box>
+
+            <Box>
+                <button
+                style={{
+                  backgroundColor: "black",
+                  borderRadius: "10px",
+                  padding: "4px",
+                  //borderRadius: "1px",
+                  cursor: "pointer",
+                  color: "yellow",
+                  border: "1px solid #ffff00",
+                }}
+                value={0}
+                onClick={(e) => {
+                  e.preventDefault();
+                  claimRewards();
+                }}
+              >
+                Claim Reward
+              </button>
             </Box>
 
             <Box>

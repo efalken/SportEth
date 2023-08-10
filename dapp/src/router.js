@@ -2,7 +2,7 @@ import Splash from "./components/pages/Splash";
 import FAQ from "./components/pages/FAQ";
 import BetPage from "./components/pages/BetPage";
 import BookiePage from "./components/pages/BookiePage";
-import TestPage from "./components/pages/TestPage";
+import OraclePage from "./components/pages/OraclePage";
 import EventBetRecord from "./components/pages/EventBetRecord";
 import EventBetRecordAxios from "./components/pages/EventBetRecordAxios";
 import EventOdds from "./components/pages/EventOdds";
@@ -44,10 +44,10 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/testpage",
+    path: "/oraclepage",
     element: (
       <AuthRequired>
-        <TestPage />
+        <OraclePage />
       </AuthRequired>
     ),
   },

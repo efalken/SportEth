@@ -99,7 +99,7 @@ export default function TeamTable({
                 ? (1 + (95 * oddsTot[1][i]) / 100000).toFixed(3)
                 : getMoneyLine((95 * oddsTot[1][i]) / 100)}
             </td>
-            <td>{moment.unix(startTimeColumn[i]).format("MMMDD-ha")}</td>
+            <td>{moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}</td>
           </tr>
         ))}
       </tbody>

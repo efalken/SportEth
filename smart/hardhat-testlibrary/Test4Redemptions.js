@@ -9,7 +9,8 @@ var _date;
 var _hour;
 var account2eo;
 var redeemCheck;
-nextStart = 1690659274;
+var nextStart;
+var result;
 const finneys = BigInt("1000000000000000");
 const gwei = BigInt("1000000000");
 const eths = BigInt("1000000000000000000");
@@ -62,6 +63,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
+      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
       await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -132,9 +134,9 @@ describe("Betting", function () {
           nextStart,
         ],
         [
-          250, 10500, 200, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
-          760, 919, 720, 672, 800,
+          250, 500, 200, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
         ]
       );
 
@@ -147,44 +149,50 @@ describe("Betting", function () {
     });
 
     it("approve and send to betting contract", async () => {
-      await oracle.initProcess();
+      await oracle.processVote();
     });
 
     it("Fund Betting Contract", async () => {
-      await betting.connect(owner).fundBook({
-        value: 3n * eths,
+      result = await betting.connect(owner).fundBook({
+        value: 30n * eths,
       });
+      receipt = await result.wait();
+      gasUsed = Number(receipt.gasUsed);
+      console.log(`gas on fundBook ${gasUsed}`);
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account2).fundBettor({
-        value: 200n * finneys,
+        value: 2n * eths,
       });
     });
 
     it("Fund Betting Contract with 200 finney", async () => {
       await betting.connect(account3).fundBettor({
-        value: 300n * finneys,
+        value: 3n * eths,
       });
+      receipt = await result.wait();
+      gasUsed = Number(receipt.gasUsed);
+      console.log(`gas on fund ${gasUsed}`);
     });
   });
 
   describe("Send  Bets", async () => {
     let contractHash0;
     it("bet 10 on 0:0 (match 0: team 0)", async () => {
-      const result = await betting.connect(account3).bet(0, 0, "1000");
+      const result = await betting.connect(account3).bet(0, 0, "10000");
       const receipt = await result.wait();
       contractHash0 = receipt.events[0].args.contractHash;
       const gasUsed = receipt.gasUsed;
       console.log(`gas on initial bet ${gasUsed}`);
-      const result2 = await betting.connect(account3).bet(1, 0, "1000");
-      const result3 = await betting.connect(account3).bet(3, 1, "1000");
+      const result2 = await betting.connect(account3).bet(1, 0, "10000");
+      const result3 = await betting.connect(account3).bet(3, 1, "10000");
     });
 
     let contractHash1;
     let contractHash1b;
     it("bet 10 on 0:1", async () => {
-      const result2 = await betting.connect(account2).bet(0, 1, "1000");
+      const result2 = await betting.connect(account2).bet(0, 1, "10000");
       const receipt = await result2.wait();
       contractHash1 = receipt.events[0].args.contractHash;
       const gasUsed4 = receipt.gasUsed;
@@ -196,7 +204,7 @@ describe("Betting", function () {
 
     let contractHash21;
     it("bet 10 on 2:0 (match 2: team 1)", async () => {
-      const result = await betting.connect(account2).bet(2, 1, "1000");
+      const result = await betting.connect(account2).bet(2, 1, "10000");
       const receipt = await result.wait();
       contractHash21 = receipt.events[0].args.contractHash;
     });
@@ -239,7 +247,7 @@ describe("Betting", function () {
     });
 
     it("send result data to betting contract", async () => {
-      const result3 = await oracle.settleProcess();
+      const result3 = await oracle.processVote();
       const receipt = await result3.wait();
       // const gasUsed = receipt.gasUsed;
       // console.log(`gas on Settlement ${gasUsed}`);
@@ -309,16 +317,20 @@ describe("Betting", function () {
         await ethers.provider.getBalance(account2.address),
         "ether"
       );
-      const Acct2Increase = Acct2EOaccount - account2onK;
+      const Acct2Increase = Number(Acct2EOaccount - account2onK).toFixed(3);
 
       console.log(`oracleBal ${oracleBal}`);
       console.log(`bettingKethbal post Settle ${bettingKethbal}`);
       console.log(`Account2 bal preWD ${Number(userBalanceAcct2) / 10000}`);
       console.log(`Account2 increase in account value ${Acct2Increase}`);
-      assert.equal(oracleBal, "0.03733", "Must be equal");
-      assert.equal(bettingKethbal, "2.60097", "Must be equal");
-      const ethChange = Math.floor(Acct2Increase * 1000) / 1000;
-      assert.equal(ethChange, "0.854", "Must be equal");
+      assert.equal(Number(oracleBal).toFixed(3), "0.394", "Must be equal");
+      assert.equal(
+        Number(bettingKethbal).toFixed(3),
+        "25.595",
+        "Must be equal"
+      );
+      // const ethChange = Math.floor(Acct2Increase * 1000) / 1000;
+      assert.equal(Number(Acct2Increase).toFixed(3), "9.004", "Must be equal");
     });
   });
 });

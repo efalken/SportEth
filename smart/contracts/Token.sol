@@ -94,7 +94,7 @@ contract Token {
   }
 
   function setAdmin(address _oracle) external {
-    //require(oracleAdmin == address(0x0));
+    require(oracleAdmin == address(0x0));
     oracleAdmin = _oracle;
   }
 

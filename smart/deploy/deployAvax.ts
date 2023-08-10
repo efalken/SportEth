@@ -1,14 +1,14 @@
 import { ethers } from "hardhat";
 const helper = require("../hardhat-helpers");
 import fs from "fs";
-var nextStart = 1690658739;
+var nextStart = 1691856847;
 const secondsInHour = 3600;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 
 
 //var finney = "1000000000000000"
 const finneys = BigInt('10000000000000');
-const eths = BigInt('10000000000000');
+const eths = BigInt('1000000000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(
@@ -42,7 +42,7 @@ async function main() {
   const Betting = await ethers.getContractFactory("Betting");
   const betting = await Betting.deploy(token.address);
   await betting.deployed();
-  console.log(`Betting contract was deployed to ${betting.address}`);
+  console.log(`Betting contract was deployed to ${betting.address}`); 
 
   const Oracle = await ethers.getContractFactory("Oracle");
   const oracle = await Oracle.deploy(betting.address, token.address);
@@ -137,7 +137,7 @@ async function main() {
       nextStart,
     ],
     [
-      999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
+      500, 500, 500, 500, 999, 800, 510, 739, 620, 960, 650, 688, 970,
       730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
       760, 919, 720, 672, 800,
     ]
@@ -147,7 +147,7 @@ async function main() {
   console.log(`revStatus ${revstat}`);
 
   
-  result = await oracle.initProcess();
+  result = await oracle.processVote();
   receipt = await result.wait();
   await result.wait();
   result = await betting.params(3);
@@ -163,6 +163,12 @@ async function main() {
   });
   await result.wait();
 
+  result = await betting.connect(signers[1]).fundBook({
+    value: 1n*eths,
+  });
+  await result.wait();
+  result = await oracle.connect(signers[1]).tokenReward();
+
   const ownershares0 = (await betting.lpStruct(accounts[0])).shares;
       console.log(`acct0 shares ${ownershares0}`);
       const margin00 = await betting.margin(0);
@@ -172,37 +178,37 @@ async function main() {
     value: 20n*eths,
   });
   receipt = await result.wait();
-  console.log(`fundbettor`);
+  console.log(`fundbettor1`);
 
   result = await betting.connect(signers[2]).fundBettor({
     value: 20n*eths,
   });
   receipt = await result.wait();
-  console.log(`fundbettor`);
+  console.log(`fundbettor2`);
 
-  result = await betting.connect(signers[1]).bet(0, 1, 1000);
+  result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
       console.log(`bet01`);
   //    hash1100 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(0, 0, 1100);
+      result = await betting.connect(signers[2]).bet(0, 0, 10000);
       receipt = await result.wait();
  //     hash1201 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[1]).bet(1, 0, 1200);
+      result = await betting.connect(signers[1]).bet(1, 0, 10000);
       receipt = await result.wait();
    //   hash1110 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(1, 1, 1300);
+      result = await betting.connect(signers[2]).bet(1, 1, 10000);
       receipt = await result.wait();
       //hash4 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[1]).bet(3, 1, 1400);
+      result = await betting.connect(signers[1]).bet(3, 1, 10000);
       receipt = await result.wait();
    //   hash1131 = receipt.events[0].args.contractHash;
      // hash5 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(3, 0, 1500);
+      result = await betting.connect(signers[2]).bet(3, 0, 10000);
       receipt = await result.wait();
   //    hash1230 = receipt.events[0].args.contractHash;
 
       result = await oracle.settlePost([
-        1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
@@ -210,11 +216,13 @@ async function main() {
       // await new Promise((resolve) => setTimeout(resolve, 50000));
       const rs = await oracle.reviewStatus();
       console.log(`revStatusPre ${rs}`);
-      result = await oracle.settleProcess();
+      result = await oracle.processVote();
       receipt = result.wait();
-      console.log(`settleprocess`);
+      console.log(`processVote`);
       const rsa = await oracle.reviewStatus();
       console.log(`revStatusafter ${rsa}`);
+      const fee1 = await oracle.feeData(1);
+      console.log(`fee1 ${fee1}`);
       // const vote0 = await oracle.votes(0);
       // console.log(`vote0 ${vote0}`);
       // const vote1 = await oracle.votes(1);
@@ -223,7 +231,7 @@ async function main() {
       // console.log(`ethdiv ${ethdiv}`);
       // const ethbal1 = await ethers.provider.getBalance(betting.address);
       // console.log(`ethbal1 ${ethbal1}`);
-      nextStart = 1691263539;
+      nextStart = 1691946019;
       // await new Promise((resolve) => setTimeout(resolve, 50000));
 
       result = await oracle.initPost(
@@ -296,7 +304,7 @@ async function main() {
           nextStart,
         ],
         [
-          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
+          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
           730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
           760, 919, 720, 672, 800,
         ]
@@ -305,19 +313,20 @@ async function main() {
       console.log(`initpost`);
       // await new Promise((resolve) => setTimeout(resolve, 50000));
      
-      result = await oracle.initProcess();
+      result = await oracle.processVote();
       receipt = result.wait();
-      console.log(`initprocess`);
+      console.log(`processVote`);
+      //result = await oracle.connect(signers[1]).tokenReward();
       // await new Promise((resolve) => setTimeout(resolve, 50000));
 
-      result = await betting.connect(signers[1]).bet(0, 1, 1300);
+      result = await betting.connect(signers[1]).bet(0, 1, 13000);
       receipt = await result.wait();
       console.log(`bet process`);
-      result = await betting.connect(signers[2]).bet(0, 0, 1400);
+      result = await betting.connect(signers[2]).bet(0, 0, 14000);
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).bet(1, 0, 1500);
+      result = await betting.connect(signers[1]).bet(1, 0, 15000);
       receipt = await result.wait();
-      result = await betting.connect(signers[2]).bet(1, 1, 1600);
+      result = await betting.connect(signers[2]).bet(1, 1, 16000);
       receipt = await result.wait();
  
 
