@@ -8,7 +8,7 @@ var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 
 //var finney = "1000000000000000"
 const finneys = BigInt('10000000000000');
-const eths = BigInt('1000000000000000000');
+const eths = BigInt('100000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(

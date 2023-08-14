@@ -56,7 +56,7 @@ async function main() {
   result = await oracle.depositTokens(500n*million);
   await result.wait();
   console.log(`got here2`);
-
+/*
   result = await token.transfer(accounts[1], 250n * million);
   await result.wait();
   result = await oracle.connect(signers[1]).depositTokens(250n*million);
@@ -66,96 +66,123 @@ async function main() {
     await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
     ).timestamp;
     console.log(`time is ${_timestamp0}`);
-  
+  */
   result = await oracle.initPost(
     [
-      "NFL:ARI:LAC",
-      "NFL:ATL:LAR",
-      "NFL:BAL:MIA",
-      "NFL:BUF:MIN",
-      "NFL:CAR:NE",
-      "NFL:CHI:NO",
-      "NFL:CIN:NYG",
-      "NFL:CLE:NYJ",
-      "NFL:DAL:OAK",
-      "NFL:DEN:PHI",
-      "NFL:DET:PIT",
-      "NFL:GB:SEA",
-      "NFL:HOU:SF",
-      "NFL:IND:TB",
-      "NFL:JAX:TEN",
-      "NFL:KC:WSH",
-      "UFC:Holloway:Kattar",
-      "UFC:Ponzinibbio:Li",
-      "UFC:Kelleher:Simon",
-      "UFC:Hernandez:Vieria",
-      "UFC:Akhemedov:Breese",
-      "UFC:Memphis:Brooklyn",
-      "UFC:Boston:Charlotte",
-      "UFC:Milwaukee:Dallas",
-      "UFC:miami:LALakers",
-      "UFC:Atlanta:SanAntonia",
-      "NHL:Colorado:Washington",
-      "NHL:Vegas:StLouis",
-      "NHL:TampaBay:Dallas",
-      "NHL:Boston:Carolina",
-      "NHL:Philadelphia:Edmonton",
-      "NHL:Pittsburgh:NYIslanders",
-    ],
-    [
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-      nextStart,
-    ],
-    [999,500,600,999,999,999,999,739,620,960,650,688,970,730,699,884,520,901,620,764,851,820,770,790,730,690,970,760,919,720,672,800]
+      "NFL:Abc:Atlanta",
+      "NFL:Iowa:Cincin",
+      "NFL:Mexico:Indian",
+      "NFL:TampaBay:Minnesota",
+      "NFL:Tennessee:NewOrlns",
+      "NFL:Pittsburgh:SanFrancisco",
+      "NFL:Washington:Arizona",
+      "NFL:Baltimore:Houston",
+      "NFL:Chicago:GreenBay",
+      "NFL:Denver:LasVegas",
+      "NFL:NewEngland:Philadelphia",
+      "NFL:LosAngelesChargers:Miami",
+      "NFL:Seattle:LosAngelesRams",
+      "NFL:NewYorkGiants:Dallas",
+      "CFL:FresnoState:EasternWashington",
+      "CFL:UtahState:IdahoState",
+      "CFL:WakeForest:Vanderbilt",
+      "CFL:Army:DelawareState",
+      "CFL:Nebraska:Colorado",
+      "CFL:Georgia:BallState",
+      "CFL:YoungstownState:OhioState",
+      "CFL:Delaware:PennState",
+      "CFL:Purdue:VirginiaTech",
+      "CFL:Utah:Baylor",
+      "CFL:NotreDame:NCState",
+      "MMA:Adensanya:Strickland",
+      "MMA:Tuivasa:Volkov",
+      "MMA:Kara-France:Kape",
+      "0",
+      "0",
+      "0",
+      "0"],
+      [
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1694300400,
+      1694300400,
+      1694300400,
+      0,
+      0,
+      0,
+      0],
+      [
+      500,
+      600,
+      700,
+      800,
+      900,
+      999,
+      693,
+      572,
+      485,
+      419,
+      367,
+      326,
+      292,
+      263,
+      239,
+      218,
+      200,
+      184,
+      229,
+      374,
+      918,
+      676,
+      537,
+      723,
+      371,
+      177,
+      126,
+      956,
+      126,
+      126,
+      126,
+      126]
   );
   await result.wait();
- 
+  await new Promise((resolve) => setTimeout(resolve, 30000));
 
   
   result = await oracle.processVote();
   await result.wait();
-  result = await betting.params(3);
-  console.log(`start ${result}`);
-  const _timestamp = (
-  await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-  ).timestamp;
-  console.log(`time is ${_timestamp}`);
+  await new Promise((resolve) => setTimeout(resolve, 30000));
+
   
 
    result = await betting.fundBook({
     value: 10n*eths,
   });
   await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 30000));
 
   const ownershares0 = (await betting.lpStruct(accounts[0])).shares;
       console.log(`acct0 shares ${ownershares0}`);
@@ -166,228 +193,290 @@ async function main() {
     value: 20n*eths,
   });
   await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   console.log(`fundbettor ${margin00}`);
 
   result = await betting.connect(signers[2]).fundBettor({
     value: 20n*eths,
   });
   await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   console.log(`fundbettor2 ${margin00}`);
 
   result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      
-      console.log(`bet01 ${margin00}`);
-      hash1100 = receipt.events[0].args.contractHash;
       result = await betting.connect(signers[2]).bet(0, 0, 11000);
       receipt = await result.wait();
-      console.log(`bet02 ${margin00}`);
-      hash1100 = receipt.events[0].args.contractHash;
-      hash1201 = receipt.events[0].args.contractHash;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // console.log(`bet02 ${margin00}`);
+      // hash1100 = receipt.events[0].args.contractHash;
+      // hash1201 = receipt.events[0].args.contractHash;
       
-      result = await betting.connect(signers[1]).bet(1, 0, 12000);
-      receipt = await result.wait();
-      hash1110 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(1, 1, 13000);
-      receipt = await result.wait();
-      result = await betting.connect(signers[1]).bet(3, 1, 14000);
-      receipt = await result.wait();
-      hash1131 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(3, 0, 15000);
-      receipt = await result.wait();
-      hash1230 = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[1]).bet(1, 0, 12000);
+      // receipt = await result.wait();
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      // hash1110 = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[2]).bet(1, 1, 13000);
+      // receipt = await result.wait();
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      // result = await betting.connect(signers[1]).bet(3, 1, 14000);
+      // receipt = await result.wait();
+      // hash1131 = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[2]).bet(3, 0, 15000);
+      // receipt = await result.wait();
+      // hash1230 = receipt.events[0].args.contractHash;
 
       result = await oracle.settlePost([
         1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
-      await helper.advanceTimeAndBlock(48 * secondsInHour);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+  
       result = await oracle.processVote();
+      
       receipt = result.wait();
-      nextStart = nextStart + 7 * 24 * secondsInHour;
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+    // nextStart = nextStart + 7 * 24 * secondsInHour;
       result = await oracle.initPost(
         [
-          "NFL:ARI:LAC",
-          "UFC:Holloway:Kattar",
-          "NFL:BAL:MIA",
-          "NFL:BUF:MIN",
-          "NFL:CAR:NE",
-          "NFL:CHI:NO",
-          "NFL:CIN:NYG",
-          "NFL:CLE:NYJ",
-          "NFL:DAL:OAK",
-          "NFL:DEN:PHI",
-          "NFL:DET:PIT",
-          "NFL:GB:SEA",
-          "NFL:HOU:SF",
-          "NFL:IND:TB",
-          "NFL:JAX:TEN",
-          "NFL:KC:WSH",
-          "UFC:Holloway:Kattar",
-          "UFC:Ponzinibbio:Li",
-          "UFC:Kelleher:Simon",
-          "UFC:Hernandez:Vieria",
-          "UFC:Akhemedov:Breese",
-          "CFL: Mich: OhioState",
-          "CFL: Minn : Illinois",
-          "CFL: MiamiU: Florida",
-          "CFL: USC: UCLA",
-          "CFL: Alabama: Auburn",
-          "CFL: ArizonaSt: UofAriz",
-          "CFL: Georgia: Clemson",
-          "CFL: PennState: Indiana",
-          "CFL: Texas: TexasA&M",
-          "CFL: Utah: BYU",
-          "CFL: Rutgers: VirgTech",
-        ],
-        [
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-        ],
-        [
-          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
-          760, 919, 720, 672, 800,
-        ]
+          "NFL:Abc:Atlanta",
+          "NFL:Iowa:Cincin",
+          "NFL:Mexico:Indian",
+          "NFL:TampaBay:Minnesota",
+          "NFL:Tennessee:NewOrlns",
+          "NFL:Pittsburgh:SanFrancisco",
+          "NFL:Washington:Arizona",
+          "NFL:Baltimore:Houston",
+          "NFL:Chicago:GreenBay",
+          "NFL:Denver:LasVegas",
+          "NFL:NewEngland:Philadelphia",
+          "NFL:LosAngelesChargers:Miami",
+          "NFL:Seattle:LosAngelesRams",
+          "NFL:NewYorkGiants:Dallas",
+          "CFL:FresnoState:EasternWashington",
+          "CFL:UtahState:IdahoState",
+          "CFL:WakeForest:Vanderbilt",
+          "CFL:Army:DelawareState",
+          "CFL:Nebraska:Colorado",
+          "CFL:Georgia:BallState",
+          "CFL:YoungstownState:OhioState",
+          "CFL:Delaware:PennState",
+          "CFL:Purdue:VirginiaTech",
+          "CFL:Utah:Baylor",
+          "CFL:NotreDame:NCState",
+          "MMA:Adensanya:Strickland",
+          "MMA:Tuivasa:Volkov",
+          "MMA:Kara-France:Kape",
+          "0",
+          "0",
+          "0",
+          "0"],
+          [
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1694300400,
+          1694300400,
+          1694300400,
+          0,
+          0,
+          0,
+          0],
+          [
+          500,
+          600,
+          700,
+          800,
+          900,
+          999,
+          693,
+          572,
+          485,
+          419,
+          367,
+          326,
+          292,
+          263,
+          239,
+          218,
+          200,
+          184,
+          229,
+          374,
+          918,
+          676,
+          537,
+          723,
+          371,
+          177,
+          126,
+          956,
+          126,
+          126,
+          126,
+          126]
       );
       receipt = result.wait();
      
       result = await oracle.processVote();
       receipt = result.wait();
 
-      result = await betting.connect(signers[1]).bet(0, 1, 13000);
-      receipt = await result.wait();
-      let hash101 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(0, 0, 14000);
-      receipt = await result.wait();
-      let hash200 = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[1]).bet(0, 1, 13000);
+      // receipt = await result.wait();
+      // let hash101 = receipt.events[0].args.contractHash;
+      // result = await betting.connect(signers[2]).bet(0, 0, 14000);
+      // receipt = await result.wait();
+
       result = await betting.connect(signers[1]).bet(1, 0, 15000);
       receipt = await result.wait();
-      let hash110 = receipt.events[0].args.contractHash;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       result = await betting.connect(signers[2]).bet(1, 1, 16000);
       receipt = await result.wait();
-      let hash211 = receipt.events[0].args.contractHash;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
  
       result = await oracle.settlePost([
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
-      await helper.advanceTimeAndBlock(48 * secondsInHour);
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+
       result = await oracle.processVote();
       receipt = result.wait();
-      
+      await new Promise((resolve) => setTimeout(resolve, 15000));
       
       result = await oracle.initPost(
         [
-          "NFL:ARI:LAC",
-          "UFC:Holloway:Kattar",
-          "NFL:BAL:MIA",
-          "NFL:BUF:MIN",
-          "NFL:CAR:NE",
-          "NFL:CHI:NO",
-          "NFL:CIN:NYG",
-          "NFL:CLE:NYJ",
-          "NFL:DAL:OAK",
-          "NFL:DEN:PHI",
-          "NFL:DET:PIT",
-          "NFL:GB:SEA",
-          "NFL:HOU:SF",
-          "NFL:IND:TB",
-          "NFL:JAX:TEN",
-          "NFL:KC:WSH",
-          "UFC:Holloway:Kattar",
-          "UFC:Ponzinibbio:Li",
-          "UFC:Kelleher:Simon",
-          "UFC:Hernandez:Vieria",
-          "UFC:Akhemedov:Breese",
-          "CFL: Mich: OhioState",
-          "CFL: Minn : Illinois",
-          "CFL: MiamiU: Florida",
-          "CFL: USC: UCLA",
-          "CFL: Alabama: Auburn",
-          "CFL: ArizonaSt: UofAriz",
-          "CFL: Georgia: Clemson",
-          "CFL: PennState: Indiana",
-          "CFL: Texas: TexasA&M",
-          "CFL: Utah: BYU",
-          "CFL: Rutgers: VirgTech",
-        ],
-        [
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-        ],
-        [
-          999, 10500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-          730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970,
-          760, 919, 720, 672, 800,
-        ]
+          "NFL:Abc:Atlanta",
+          "NFL:Iowa:Cincin",
+          "NFL:Mexico:Indian",
+          "NFL:TampaBay:Minnesota",
+          "NFL:Tennessee:NewOrlns",
+          "NFL:Pittsburgh:SanFrancisco",
+          "NFL:Washington:Arizona",
+          "NFL:Baltimore:Houston",
+          "NFL:Chicago:GreenBay",
+          "NFL:Denver:LasVegas",
+          "NFL:NewEngland:Philadelphia",
+          "NFL:LosAngelesChargers:Miami",
+          "NFL:Seattle:LosAngelesRams",
+          "NFL:NewYorkGiants:Dallas",
+          "CFL:FresnoState:EasternWashington",
+          "CFL:UtahState:IdahoState",
+          "CFL:WakeForest:Vanderbilt",
+          "CFL:Army:DelawareState",
+          "CFL:Nebraska:Colorado",
+          "CFL:Georgia:BallState",
+          "CFL:YoungstownState:OhioState",
+          "CFL:Delaware:PennState",
+          "CFL:Purdue:VirginiaTech",
+          "CFL:Utah:Baylor",
+          "CFL:NotreDame:NCState",
+          "MMA:Adensanya:Strickland",
+          "MMA:Tuivasa:Volkov",
+          "MMA:Kara-France:Kape",
+          "0",
+          "0",
+          "0",
+          "0"],
+          [
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692461441,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692465041,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1692551441,
+          1694300400,
+          1694300400,
+          1694300400,
+          0,
+          0,
+          0,
+          0],
+          [
+          500,
+          600,
+          700,
+          800,
+          900,
+          999,
+          693,
+          572,
+          485,
+          419,
+          367,
+          326,
+          292,
+          263,
+          239,
+          218,
+          200,
+          184,
+          229,
+          374,
+          918,
+          676,
+          537,
+          723,
+          371,
+          177,
+          126,
+          956,
+          126,
+          126,
+          126,
+          126]
       );
       receipt = await result.wait();
+      await new Promise((resolve) => setTimeout(resolve, 15000));
       result = await oracle.processVote();
       receipt = await result.wait();
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+      /*
 
       const userBalanceAcct1 = (await betting.userStruct(accounts[1])).userBalance;
       const userBalanceAcct2 = (await betting.userStruct(accounts[2])).userBalance;
@@ -417,7 +506,7 @@ async function main() {
         919, 720, 672, 800,
       ]);
       receipt = await result.wait();
-      
+      */
       // ***************************************
 
   const chainId = (await ethers.provider.getNetwork()).chainId;

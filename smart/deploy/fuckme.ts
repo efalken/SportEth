@@ -70,9 +70,9 @@ async function main() {
   
   result = await oracle.initPost(
     [
-      "NFL:aaa:Atlanta",
-      "NFL:bbb:Cincin",
-      "NFL:ccc:Indian",
+      "NFL:Abc:Atlanta",
+      "NFL:Iowa:Cincin",
+      "NFL:Mexico:Indian",
       "NFL:TampaBay:Minnesota",
       "NFL:Tennessee:NewOrlns",
       "NFL:Pittsburgh:SanFrancisco",
@@ -103,31 +103,31 @@ async function main() {
       "0",
       "0"],
       [
-      1694365200,
-      1694365200,
-      1694365200,
-      1694365200,
-      1694365200,
-      1694365200,
-      1694365200,
-      1694365200,
-      1694377500,
-      1694377500,
-      1694377500,
-      1694377500,
-      1694377500,
-      1694391600,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
-      1694278800,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692461441,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692465041,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
+      1692551441,
       1694300400,
       1694300400,
       1694300400,
@@ -136,11 +136,11 @@ async function main() {
       0,
       0],
       [
-      999,
       500,
-      500,
-      999,
-      999,
+      600,
+      700,
+      800,
+      900,
       999,
       693,
       572,
@@ -170,13 +170,13 @@ async function main() {
       126]
   );
   receipt = await result.wait();
- // await new Promise((resolve) => setTimeout(resolve, 50000));
+  await new Promise((resolve) => setTimeout(resolve, 15000));
   const revstat = await oracle.reviewStatus();
   console.log(`revStatus0 ${revstat}`);
 
   
   result = await oracle.processVote();
- // await new Promise((resolve) => setTimeout(resolve, 50000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   receipt = await result.wait();
   await result.wait();
   result = await betting.params(3);
@@ -188,7 +188,7 @@ async function main() {
   
 
    result = await betting.fundBook({
-    value: 3n*eths,
+    value: 30n*eths,
   });
   await result.wait();
 
@@ -196,7 +196,7 @@ async function main() {
   //   value: 10n*eths,
   // });
   // await result.wait();
-  // await new Promise((resolve) => setTimeout(resolve, 50000));
+   await new Promise((resolve) => setTimeout(resolve, 5000));
  // result = await oracle.connect(signers[1]).tokenReward();
 
   const ownershares0 = (await betting.lpStruct(accounts[0])).shares;
@@ -205,15 +205,15 @@ async function main() {
       console.log(`margin04 ${margin00}`);
   //    await new Promise((resolve) => setTimeout(resolve, 50000));
   result = await betting.connect(signers[1]).fundBettor({
-    value: 20n*eths,
+    value: 30n*eths,
   });
   receipt = await result.wait();
 
-  //await new Promise((resolve) => setTimeout(resolve, 50000));
-  result = await betting.connect(signers[2]).fundBettor({
-    value: 20n*eths,
-  });
-  receipt = await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // result = await betting.connect(signers[2]).fundBettor({
+  //   value: 20n*eths,
+  // });
+  // receipt = await result.wait();
 
  // await new Promise((resolve) => setTimeout(resolve, 50000));
   // result = await betting.connect(signers[1]).bet(0, 1, 7010);
@@ -222,7 +222,8 @@ async function main() {
       result = await betting.connect(signers[1]).bet(0, 0, 1000);
       receipt = await result.wait();
       console.log(`fundbettor2`);
-      result = await betting.connect(signers[1]).bet(0, 1, 2000);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      result = await betting.connect(signers[1]).bet(1, 1, 2000);
       receipt = await result.wait();
       console.log(`fundbettor3`);
       // result = await betting.connect(signers[1]).bet(0, 1, 7010);
