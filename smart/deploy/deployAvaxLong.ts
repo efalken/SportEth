@@ -475,7 +475,7 @@ async function main() {
       await new Promise((resolve) => setTimeout(resolve, 15000));
       result = await oracle.processVote();
       receipt = await result.wait();
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      //await new Promise((resolve) => setTimeout(resolve, 15000));
       /*
 
       const userBalanceAcct1 = (await betting.userStruct(accounts[1])).userBalance;
