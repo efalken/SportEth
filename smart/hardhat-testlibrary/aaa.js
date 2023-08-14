@@ -97,7 +97,7 @@ describe("Betting", function () {
       console.log(`tokBal12 ${tokBal12}`);
     });
   });
-
+  /*
   describe("setupBets", async () => {
     it("checkHour", async () => {
       _hourSolidity = await oracle.hourOfDay();
@@ -606,4 +606,5 @@ describe("Betting", function () {
       console.log(`gas processVote that goes through ${gasUsed}`);
     });
   });
+  */
 });

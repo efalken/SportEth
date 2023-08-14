@@ -1,14 +1,14 @@
 import { ethers } from "hardhat";
 const helper = require("../hardhat-helpers");
 import fs from "fs";
-var nextStart = 1691856847;
+var nextStart = 1692461441;
 const secondsInHour = 3600;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 
 
 //var finney = "1000000000000000"
 const finneys = BigInt('10000000000000');
-const eths = BigInt('100000000000000');
+const eths = BigInt('1000000000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(
@@ -52,9 +52,13 @@ async function main() {
   await result.wait();
   result = await token.setAdmin(oracle.address);
   await result.wait();
-  result = await oracle.depositTokens(560n*million);
+  result = await oracle.depositTokens(500n*million);
   await result.wait();
   console.log(`got here2`);
+  result = await token.transfer(accounts[1], 440n*million);
+  await result.wait();
+  result = await oracle.connect(signers[1]).depositTokens(250n*million);
+  await result.wait();
   const tokens = await token.balanceOf(accounts[0]);
   await result.wait();
   console.log(`tokens in eoa ${tokens}`);
@@ -167,7 +171,7 @@ async function main() {
     value: 10n*eths,
   });
   await result.wait();
-  result = await oracle.connect(signers[1]).tokenReward();
+  //result = await oracle.connect(signers[1]).tokenReward();
 
   const ownershares0 = (await betting.lpStruct(accounts[0])).shares;
       console.log(`acct0 shares ${ownershares0}`);
@@ -217,10 +221,14 @@ async function main() {
       // await new Promise((resolve) => setTimeout(resolve, 50000));
       const rs = await oracle.reviewStatus();
       console.log(`revStatusPre ${rs}`);
+
+      
       result = await oracle.processVote();
       receipt = result.wait();
       console.log(`processVote`);
       const rsa = await oracle.reviewStatus();
+
+      /*
       console.log(`revStatusafter ${rsa}`);
       const fee1 = await oracle.feeData(1);
       console.log(`fee1 ${fee1}`);
@@ -232,7 +240,7 @@ async function main() {
       // console.log(`ethdiv ${ethdiv}`);
       // const ethbal1 = await ethers.provider.getBalance(betting.address);
       // console.log(`ethbal1 ${ethbal1}`);
-      nextStart = 1691946019;
+      nextStart = 1692461441;
       // await new Promise((resolve) => setTimeout(resolve, 50000));
 
       result = await oracle.initPost(
@@ -346,7 +354,6 @@ async function main() {
       console.log(`processVote`);
       //result = await oracle.connect(signers[1]).tokenReward();
       await new Promise((resolve) => setTimeout(resolve, 50000));
-
       result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
       console.log(`bet process`);
@@ -356,7 +363,7 @@ async function main() {
       receipt = await result.wait();
       result = await betting.connect(signers[2]).bet(1, 1, 10000);
       receipt = await result.wait();
- 
+ */
 
       // ***************************************
 

@@ -333,10 +333,6 @@ contract Oracle {
         success = token.burn(BURN_AMT);
     }
 
-    function showOdds() external view returns (uint16[32] memory _propOdds) {
-        _propOdds = propOdds;
-    }
-
     function showStarts()
         external
         view

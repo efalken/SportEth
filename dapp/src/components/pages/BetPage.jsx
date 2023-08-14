@@ -21,6 +21,8 @@ function BetPage() {
   //const provider = useAuthContext.provider;
 
   const [betAmount, setBetAmount] = useState("");
+  const [maxBet, setMaxBet] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [fundAmount, setFundAmount] = useState("");
   const [wdAmount, setWdAmount] = useState("");
   const [teamPick, setTeamPick] = useState(null);
@@ -28,7 +30,7 @@ function BetPage() {
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
   const [betHistory, setBetHistory] = useState([{}]);
-  //const [bettorHashes, setBetHashes] = useState([]);
+ // const [moose, setMoose] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
@@ -43,6 +45,7 @@ function BetPage() {
   const [startTime, setStartTime] = useState([]);
   const [eoaBalance, setEoaBalance] = useState("0");
   const [counter, setCounter] = useState(0);
+  const [txnHash, setHash] = useState();
   const [odds0, setOdds0] = useState([
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
@@ -67,7 +70,8 @@ function BetPage() {
 
   document.title = "Betting Page";
 
-  console.log(oddsVector, "odds");
+  ///console.log(oddsVector, "odds");
+  //console.log(moose, "moose");
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
@@ -106,11 +110,13 @@ function BetPage() {
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
       if (betData) xdecode256 = unpack256(betData[ii]);
-      if (oddsVector) odds999 = Number(oddsVector[ii]);
-      odds0[ii] = odds999 || 0;
-      odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45) || 0;
-      netLiab[0][ii] = (xdecode256[2] - xdecode256[1]) / 10;
-      netLiab[1][ii] = (xdecode256[3] - xdecode256[0]) / 10;
+      if (oddsVector) odds999 = Number(oddsVector[ii]) || 1000;
+      odds0[ii] = odds999;
+      odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45);
+      netLiab[0][ii] =  Number(xdecode256[2]) - Number(xdecode256[1]);
+      netLiab[1][ii] =  Number(xdecode256[3]) - Number(xdecode256[0]);
+      // netLiab[0][ii] =   (xdecode256[2] - xdecode256[1]) ;
+      // netLiab[1][ii] =   (xdecode256[3] - xdecode256[0]) ;
     }
     setOdds0(odds0);
     setOdds1(odds1);
@@ -143,10 +149,21 @@ function BetPage() {
       betAmount * 10000
     );
     const receipt0 = await tx.wait(0);
-    const receipt1 = await tx.wait(1);
-    console.log(receipt0, "receipt0");
-    console.log(receipt1, "receipt1");
-    console.log(tx, "tx");
+    console.log(tx.hash, "txhash");
+
+    // setHash(
+    //   <div>
+    //     <p>See txn here: </p>
+    //     <div onClick={() => setLoading(false)}>
+    //       <Link href={`https://testnet.snowtrace.io/tx/${tx.hash}`}>
+    //         <a target="_blank">
+    //           {tx.hash}
+    //         </a>
+    //       </Link>
+    //     </div>
+    //   </div>
+    // );
+
   }
 
   async function redeemBet() {
@@ -192,6 +209,8 @@ function BetPage() {
     setCounter(_counter);
   }
 
+  
+
   async function findValuesOnce() {
     let _eoaBalance = (await provider.getBalance(account)) || "0";
     setEoaBalance(_eoaBalance);
@@ -204,12 +223,15 @@ function BetPage() {
     let _unusedCapital = Number((await bettingContract.margin(0)) || "0");
     setUnusedCapital(_unusedCapital);
 
+    // let _moosev = Number((await bettingContract.moosev(0)) || 0);
+    // setMoose(_moosev);
+
     let _startTimes = (await bettingContract.showStartTime()) || [];
     setStartTime(_startTimes);
 
     let _oddsvector = (await bettingContract.showOdds()) || [];
     setOddsVector(_oddsvector);
-    console.log(oddsVector, "odds");
+   
 
     let _usedCapital = Number((await bettingContract.margin(1)) || "0");
     setUsedCapital(_usedCapital);
@@ -225,13 +247,19 @@ function BetPage() {
      
   }
 
-  function getMaxSize(unused0, used0, climit0, long0) {
-    let maxSize = (unused0 + used0) / climit0 - (isNaN(long0) ? 0 : long0);
-    let maxSize2 = unused0 - used0;
-    if (maxSize2 < maxSize) {
-      maxSize = maxSize2;
+  function getMaxSize(liabPick, oddsPick) {
+    liabPick = isNaN(liabPick) ? 0 : Number(liabPick);
+    oddsPick = isNaN(oddsPick) ? 1000 : Number(oddsPick);
+    let _maxSize = unusedCapital / concentrationLimit - liabPick;
+    _maxSize =  _maxSize * 1000 / oddsPick;
+    let _maxSize2 = unusedCapital - usedCapital;
+    if (_maxSize2 < _maxSize) {
+      _maxSize = _maxSize2;
     }
-    return maxSize;
+    _maxSize = _maxSize / 10000;
+    //setMaxBet(_maxSize);
+    //console.log(_maxSize, "maxSize");
+    return _maxSize;
   }
 
   function unpack256(src) {
@@ -376,10 +404,7 @@ function BetPage() {
                 Your free capital on contract:{" "}
                 {(Number(userBalance) / 1e4).toFixed(3)} AVAX
               </Text>
-              <br />
-              <Text size="14px" className="style">
-                AVAX in your Wallet: {(Number(eoaBalance) / 1e18).toFixed(3).toLocaleString()}
-              </Text>
+
             </Box>
             <Box>
               <Flex
@@ -806,38 +831,32 @@ function BetPage() {
           ></Flex>
         </Box>
 
+
         <Flex
           style={{
             //  color: "#000",
             fontSize: "14px",
           }}
-        >
+          >
+        
           {teamPick != null ? (
             <Text size="14px" weight="400" color="white">
-              pick: {teamSplit[matchPick][teamPick + 1]}
-              {"  "}
-              Odds:{" "}
-              {((0.95 * oddsTot[teamPick][matchPick]) / 1000 + 1).toFixed(3)}
-              {" (MoneyLine "}
-              {getMoneyLine(0.95 * oddsTot[teamPick][matchPick])}
-              {"),  "}
-              MaxBet:{" "}
+               MaxBet:{" "}
               {Number(
                 getMaxSize(
-                  unusedCapital,
-                  usedCapital,
-                  concentrationLimit,
-                  Number(netLiab[teamPick][matchPick])) / 1e3
-              ).toFixed(2)}
+                  Number(netLiab[teamPick][matchPick]),
+                  Number(oddsTot[teamPick][matchPick]),
+              )).toFixed(2)}
               {"  "}
-              opponent: {teamSplit[matchPick][2 - teamPick]}
+			  {" "}
+        <br/>
+              pick: {teamSplit[matchPick][teamPick + 1]}
               {"  "}
-              Odds:{" "}
-              {((0.95 * oddsTot[1 - teamPick][matchPick]) / 1000 + 1).toFixed(
-                3
-              )}
+              Decimal Odds:{" "}
+              {((0.95 * oddsTot[teamPick][matchPick]) / 1000 + 1).toFixed(3)}
+              {";  "} MoneyLine Odds: {" "}
+              {getMoneyLine(0.95 * oddsTot[teamPick][matchPick])}
               {"  "}
-              MoneyLine: {getMoneyLine(0.95 * oddsTot[1 - teamPick][matchPick])}
             </Text>
           ) : null}
         </Flex>

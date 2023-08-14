@@ -1,14 +1,15 @@
 import { ethers } from "hardhat";
 const helper = require("../hardhat-helpers");
 import fs from "fs";
-var nextStart = 1691856847;
+var nextStart = 1692476615;
+var margin0, margin1;
 const secondsInHour = 3600;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 
 
 //var finney = "1000000000000000"
 const finneys = BigInt('10000000000000');
-const eths = BigInt('100000000000000');
+const eths = BigInt('1000000000000000000');
 const million = BigInt('1000000');
 
 function saveABIFile(
@@ -69,11 +70,11 @@ async function main() {
   
   result = await oracle.initPost(
     [
-      "NFL:Carolina:Atlanta",
-      "NFL:Cleveland:Cincinnati",
-      "NFL:Jacksonville:Indianapolis",
+      "NFL:aaa:Atlanta",
+      "NFL:bbb:Cincin",
+      "NFL:ccc:Indian",
       "NFL:TampaBay:Minnesota",
-      "NFL:Tennessee:NewOrleans",
+      "NFL:Tennessee:NewOrlns",
       "NFL:Pittsburgh:SanFrancisco",
       "NFL:Washington:Arizona",
       "NFL:Baltimore:Houston",
@@ -135,12 +136,12 @@ async function main() {
       0,
       0],
       [
-      177,
-      948,
-      635,
-      841,
-      955,
-      907,
+      999,
+      500,
+      500,
+      999,
+      999,
+      999,
       693,
       572,
       485,
@@ -169,60 +170,76 @@ async function main() {
       126]
   );
   receipt = await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 50000));
+ // await new Promise((resolve) => setTimeout(resolve, 50000));
   const revstat = await oracle.reviewStatus();
-  console.log(`revStatus ${revstat}`);
+  console.log(`revStatus0 ${revstat}`);
 
   
   result = await oracle.processVote();
-  await new Promise((resolve) => setTimeout(resolve, 50000));
+ // await new Promise((resolve) => setTimeout(resolve, 50000));
   receipt = await result.wait();
   await result.wait();
   result = await betting.params(3);
-  console.log(`start ${result}`);
+  console.log(`start1 ${result}`);
   const _timestamp = (
   await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
   ).timestamp;
-  console.log(`time is ${_timestamp}`);
+  console.log(`time is2 ${_timestamp}`);
   
 
    result = await betting.fundBook({
-    value: 20n*eths,
+    value: 3n*eths,
   });
   await result.wait();
 
-  result = await betting.connect(signers[1]).fundBook({
-    value: 10n*eths,
-  });
-  await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 50000));
-  result = await oracle.connect(signers[1]).tokenReward();
+  // result = await betting.connect(signers[1]).fundBook({
+  //   value: 10n*eths,
+  // });
+  // await result.wait();
+  // await new Promise((resolve) => setTimeout(resolve, 50000));
+ // result = await oracle.connect(signers[1]).tokenReward();
 
   const ownershares0 = (await betting.lpStruct(accounts[0])).shares;
-      console.log(`acct0 shares ${ownershares0}`);
+      console.log(`acct0 shares3 ${ownershares0}`);
       const margin00 = await betting.margin(0);
-      console.log(`margin0 ${margin00}`);
-      await new Promise((resolve) => setTimeout(resolve, 50000));
+      console.log(`margin04 ${margin00}`);
+  //    await new Promise((resolve) => setTimeout(resolve, 50000));
   result = await betting.connect(signers[1]).fundBettor({
     value: 20n*eths,
   });
   receipt = await result.wait();
-  console.log(`fundbettor1`);
-  await new Promise((resolve) => setTimeout(resolve, 50000));
+
+  //await new Promise((resolve) => setTimeout(resolve, 50000));
   result = await betting.connect(signers[2]).fundBettor({
     value: 20n*eths,
   });
   receipt = await result.wait();
-  console.log(`fundbettor2`);
-  await new Promise((resolve) => setTimeout(resolve, 50000));
-  result = await betting.connect(signers[1]).bet(0, 1, 10000);
+
+ // await new Promise((resolve) => setTimeout(resolve, 50000));
+  // result = await betting.connect(signers[1]).bet(0, 1, 7010);
+  //     receipt = await result.wait();
+  //     console.log(`fundbettor1`);
+      result = await betting.connect(signers[1]).bet(0, 0, 1000);
       receipt = await result.wait();
-      await new Promise((resolve) => setTimeout(resolve, 50000));
-      console.log(`bet01`);
+      console.log(`fundbettor2`);
+      result = await betting.connect(signers[1]).bet(0, 1, 2000);
+      receipt = await result.wait();
+      console.log(`fundbettor3`);
+      // result = await betting.connect(signers[1]).bet(0, 1, 7010);
+      // receipt = await result.wait();
+      // console.log(`fundbettor4`);
+      // result = await betting.connect(signers[1]).bet(0, 1, 7005);
+      // receipt = await result.wait();
+      // console.log(`fundbettor5`);
   //    hash1100 = receipt.events[0].args.contractHash;
-      result = await betting.connect(signers[2]).bet(0, 0, 10000);
-      receipt = await result.wait();
-      
+      // result = await betting.connect(signers[2]).bet(0, 0, 10000);
+      // receipt = await result.wait();
+
+      margin0 = await betting.margin(0);
+      margin1 = await betting.margin(1);
+      console.log(`margin0: ${margin0} margin1: ${margin1}`);
+
+
  
 
       // ***************************************

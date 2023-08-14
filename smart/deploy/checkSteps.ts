@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 const helper = require("../hardhat-helpers");
 import fs from "fs";
-var nextStart = 1691856847;
+var nextStart = 1692456112;
 const secondsInHour = 3600;
 var receipt, hash, _hourSolidity, hourOffset, result, betData0;
 
@@ -54,8 +54,8 @@ async function main() {
   await result.wait();
   result = await oracle.depositTokens(560n*million);
   await result.wait();
-  await token.transfer(accounts[1], 250n * million);
-  await oracle.connect(signers[1]).depositTokens(250n * million);
+  await token.transfer(accounts[1], 400n * million);
+  //await oracle.connect(signers[1]).depositTokens(400n * million);
   console.log(`got here2`);
   const tokens = await token.balanceOf(accounts[0]);
   await result.wait();
@@ -143,7 +143,7 @@ async function main() {
   );
   receipt = await result.wait();
   const revstat = await oracle.reviewStatus();
-  result = await oracle.connect(signers[1]).vote(true);
+  //result = await oracle.connect(signers[1]).vote(true);
   console.log(`revStatus ${revstat}`);
 
   
@@ -156,8 +156,6 @@ async function main() {
   await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
   ).timestamp;
   console.log(`time is ${_timestamp}`);
-  
-
    result = await betting.fundBook({
     value: 10n*eths,
   });

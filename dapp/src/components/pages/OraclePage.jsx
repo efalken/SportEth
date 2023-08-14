@@ -10,6 +10,7 @@ import VBackgroundCom from "../basics/VBackgroundCom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import TeamTable from "../blocks/TeamTable2";
 import { Link } from "react-router-dom";
+import { ethers } from "ethers";
 
 function OraclePage() {
   const { oracleContract, bettingContract, tokenContract, account } = useAuthContext();
@@ -42,6 +43,7 @@ function OraclePage() {
   const [tokens, setTokens] = useState(0);
   const [totalVotes, setTotalVotes] = useState(0);
   const [initFeePool, setInitFeePool] = useState(0);
+  const [feeData0, setFeeData0] = useState(0);
   const [feeData1, setFeeData1] = useState(0);
     const [tokenRewardsLeft, setTokenRewardsLeft] = useState(0);
     const [depositAmount, setDepositAmount] = useState(0);
@@ -57,25 +59,6 @@ function OraclePage() {
     };
   }, [bettingContract, oracleContract]);
 
-  async function depositTokens() {
-    try {
-      await oracleContract.depositTokens({
-        value: depositAmount,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async function withdrawTokens() {
-    try {
-      await oracleContract.depositTokens({
-        value: withdrawAmount,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }
 
   let [odds0, setOdds0] = useState([
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
@@ -96,7 +79,7 @@ function OraclePage() {
     for (let ii = 0; ii < 32; ii++) {
       if (oddsVector) odds999 = Number(oddsVector[ii]);
       odds0[ii] = odds999 || 0;
-      odds1[ii] = Math.floor(1000000 / (odds999 + 50) - 1) || 0;
+      odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45) || 0;
     }
     setOdds0(odds0);
     setOdds1(odds1);
@@ -116,6 +99,14 @@ function OraclePage() {
   async function voteYesfn() {
     let vote99 = true;
     await oracleContract.vote(vote99);
+  }
+
+  async function depositTokens() {
+      await oracleContract.depositTokens(depositAmount);
+  }
+
+  async function withdrawTokens() {
+      await oracleContract.withdrawTokens(withdrawAmount);
   }
 
   async function findValues() {
@@ -157,6 +148,9 @@ function OraclePage() {
 
     let _feeData1 = Number(await oracleContract.feeData(1)) || 0;
     setFeeData1(_feeData1);
+
+    let _feeData0 = Number(await oracleContract.feeData(0)) || 0;
+    setFeeData0(_feeData0);
 
     let _proposer = (await oracleContract.proposer()) || "0x123";
     setProposer(_proposer);
@@ -213,6 +207,9 @@ function OraclePage() {
   return coeff;
 }
 
+console.log(feeData0, "feeData0");
+console.log(feeData1, "feeData1");
+/*
 console.log(currW4, "currEpoch");
 console.log(baseEpoch, "baseepoch");
 console.log(tokens, "tokens");
@@ -222,7 +219,7 @@ console.log(reviewStatus, "reviewStatus");
   console.log(voteTracker, "voteTracker");
   console.log(feeData1, "feeData1");
   console.log(initFeePool, "initFeePool");
-
+*/
 
 
   function switchOdds() {
@@ -399,6 +396,26 @@ console.log(reviewStatus, "reviewStatus");
                   Active Epoch: {currW4}
                 </Text>
               </Flex>
+              <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                base Epoch: {baseEpoch}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                Your Active Vote Count: {Number(totalVotes).toLocaleString()}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                Your Tokens in Contract: {Number(tokens).toLocaleString()}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                ethValue of your tokens: {Number(ethToClaim()).toLocaleString()}
+              </Text>
+            </Box>
               <Flex
                 mt="10px"
                 flexDirection="row"
@@ -499,26 +516,7 @@ console.log(reviewStatus, "reviewStatus");
                 Tokens in EOA: {Number(eoaTokens).toString()}
               </Text>
             </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                base Epoch: {baseEpoch}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                VotesSinceLastClaim: {Number(totalVotes).toLocaleString()}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                Your Tokens in Contract: {Number(tokens).toLocaleString()}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                ethValue of your tokens: {Number(ethToClaim()).toLocaleString()}
-              </Text>
-            </Box>
+            
             <Box>
               <Form
                 onChange={setDepositAmount}
@@ -527,7 +525,7 @@ console.log(reviewStatus, "reviewStatus");
                 mb="20px"
                 justifyContent="flex-start"
                 padding="4px"
-                placeholder="# avax"
+                placeholder="# oracle tokens"
                 buttonLabel="Deposit"
               />
             </Box>
@@ -539,7 +537,7 @@ console.log(reviewStatus, "reviewStatus");
                 mb="20px"
                 justifyContent="flex-start"
                 padding="4px"
-                placeholder="# avax"
+                placeholder="# oracle tokens"
                 buttonLabel="WithDraw"
               />
             </Box>

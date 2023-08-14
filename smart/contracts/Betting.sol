@@ -131,7 +131,7 @@ contract Betting {
         int64 netPosTeamBet = int64(_betData[2 + _team0or1]) -
             int64(_betData[1 - _team0or1]);
         require(
-            int64(betPayoff + netPosTeamBet) <
+            int64(betPayoff + netPosTeamBet) <=
                 int64(margin[0] / uint64(params[1])),
             "betsize over global book limit"
         );
