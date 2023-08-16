@@ -87,7 +87,7 @@ module.exports = {
         passphrase: "",
       },
       gasLimit: 0,
-      gasPrice: 5e10,
+      gasPrice: 25e9,
       gas: "auto",
       timeout: 60000,
     },

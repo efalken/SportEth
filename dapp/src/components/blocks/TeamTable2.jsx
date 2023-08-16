@@ -75,6 +75,7 @@ export default function TeamTable2({
         </tr>
 
         {[...Array(32)].map((_value, i) => (
+            Number(startTimeColumn[i]) > 1691011720 ? (
           <tr
             className={(i + 1) % borderCells === 0 ? "border-row" : ""}
             key={i}
@@ -96,7 +97,7 @@ export default function TeamTable2({
                 : getMoneyLine((95 * oddsTot[1][i]) / 100)}
             </td>
             <td>{moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}</td>
-          </tr>
+          </tr> ) : null
         ))}
       </tbody>
     </table>

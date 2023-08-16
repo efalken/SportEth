@@ -73,6 +73,11 @@ color: #D3D3D3;
 transition: transform .2s;
 }
 
+.header-logo-img {
+    display: inline;
+    margin-top: 7px;
+  }
+
 .border-row td{
   padding:1px;
   border-bottom: 1px solid gray;
@@ -89,6 +94,13 @@ cursor: pointer;
 .style{
   color: #fff;
   font-family: Arial;
+}
+
+.style2{
+  color: #fff;
+  font-family: Arial;
+  font-size: 20px;
+  font-style: Italic;
 }
 
 .btn{

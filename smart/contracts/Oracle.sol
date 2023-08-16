@@ -69,7 +69,7 @@ contract Oracle {
 
     event ParamsPosted(uint32 concLimit);
 
-    event PausePosted(uint8[2] pausedMatches);
+    event PausePosted(uint8 pausedMatch0, uint8 pausedMatch1);
 
     event StartTimesPosted(uint16 epoch, uint16 propnum, uint32[32] starttimes);
 
@@ -97,10 +97,10 @@ contract Oracle {
     }
 
     function vote(bool _vote) external {
-        // voter must have votes to allocate
-        require(adminStruct[msg.sender].tokens > 0);
-        // can only vote if there is a proposal
-        require(reviewStatus >= 10);
+        // voter must have votes to allocate 
+        require(adminStruct[msg.sender].tokens > 0); 
+        // can only vote if there is a proposal 
+        require(reviewStatus >= 10); 
         // voter must not have voted on this proposal
         require(adminStruct[msg.sender].voteTracker != propNumber);
         // this prevents this account from voting again on this data proposal
@@ -112,7 +112,9 @@ contract Oracle {
         } else {
             votes[1] += _tokens;
         }
-        adminStruct[msg.sender].totalVotes += _tokens;
+        if (reviewStatus == STATUS_PROC_SETTLE) {
+        adminStruct[msg.sender].totalVotes++;
+        }
     }
 
     receive() external payable {}
@@ -163,6 +165,7 @@ contract Oracle {
         require(reviewStatus == STATUS_POST_2, "wrong sequence");
         //require(block.timestamp > (gameStart + 2 * 86400), "only when weekend over");
         post();
+        adminStruct[msg.sender].totalVotes++;
         propResults = _resultVector;
         emit ResultsPosted(betEpochOracle, propNumber, _resultVector);
         reviewStatus = STATUS_PROC_SETTLE;
@@ -227,11 +230,11 @@ contract Oracle {
         return true;
     }
 
-    function pauseMatches(uint8[2] memory _matches) external {
+    function pauseMatches(uint8 _match0, uint8 _match1) external {
         // submitter must have at least 10% of outstanding tokens for this emergency function
         require(adminStruct[msg.sender].tokens >= minSubmit);
-        bettingContract.pauseMatch(_matches);
-        emit PausePosted(_matches);
+        bettingContract.pauseMatch(_match0, _match1);
+        emit PausePosted(_match0, _match1);
     }
 
     function showSchedString() external view returns (string[32] memory) {
@@ -262,7 +265,7 @@ contract Oracle {
         adminStruct[msg.sender].totalVotes = 0;
         bool success = token.transferSpecial(msg.sender, _amt);
         require(success, "token transfer failed");
-        emit Funding(_amt, (_ethOut2), msg.sender, true);
+        emit Funding(_amt, _ethOut2, msg.sender, false);
     }
 
     function withdrawTokens(uint32 _amt) external {
@@ -277,7 +280,7 @@ contract Oracle {
         adminStruct[msg.sender].totalVotes = 0;
         bool success = token.transfer(msg.sender, _amt);
         require(success, "token transfer failed");
-        emit Funding(_amt, (_ethOut1), msg.sender, true);
+        emit Funding(_amt, _ethOut1, msg.sender, true);
     }
 
     function tokenReward() external {
@@ -295,9 +298,7 @@ contract Oracle {
             _amt = uint32((uint256(lpShares) * EPOCH_AMOUNT) / totShares);
             rewardTokensLeft -= _amt;
             feeData[0] += _amt;
-            if (adminStruct[msg.sender].tokens > 0) {
-                _ethOut3 = ethClaim(msg.sender);
-            }
+            _ethOut3 = ethClaim(msg.sender);
             adminStruct[msg.sender].initFeePool = feeData[1];
             adminStruct[msg.sender].tokens += _amt;
             adminStruct[msg.sender].baseEpoch = betEpochOracle;
@@ -315,7 +316,7 @@ contract Oracle {
         proposer = msg.sender;
         // this prevents proposer from voting again with his tokens on this submission
         adminStruct[msg.sender].voteTracker = propNumber;
-        adminStruct[msg.sender].totalVotes += _tokens;
+       
     }
 
     function reset() internal {
@@ -350,18 +351,13 @@ contract Oracle {
     }
 
     function ethClaim(address msgsender) internal returns (uint256 _ethOut0) {
-        uint256 votesPerEpoch = uint256(
-            adminStruct[msgsender].totalVotes /
-                (betEpochOracle - adminStruct[msgsender].baseEpoch) /
-                2
+        uint256 votePercentx10000 = uint256(
+            adminStruct[msgsender].totalVotes * 10000 /
+                (betEpochOracle - adminStruct[msgsender].baseEpoch) 
         );
-        uint256 userTokens = adminStruct[msgsender].tokens;
-        if (votesPerEpoch > userTokens)  votesPerEpoch = userTokens;
-        uint256 ethTot = uint256(
-            userTokens *
-                uint256(feeData[1] - adminStruct[msgsender].initFeePool)
-        );
-        _ethOut0 = (votesPerEpoch * ethTot) / userTokens;
+        uint256 ethTot = uint256(adminStruct[msgsender].tokens) * uint256(feeData[1] - adminStruct[msgsender].initFeePool);
+
+        _ethOut0 = (votePercentx10000 * ethTot) / 10000;
         uint256 ploughBack = ethTot - _ethOut0;
         feeData[1] += uint64(ploughBack / uint256(feeData[0]));
         payable(msg.sender).transfer(_ethOut0);

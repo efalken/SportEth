@@ -54,7 +54,8 @@ export default function TeamTable({
           <th style={{ textAlign: "left" }}>Start</th>
         </tr>
         {[...Array(32)].map((_value, i) => (
-          <tr
+          Number(startTimeColumn[i]) > 1691011720 ? (
+            <tr
             className={(i + 1) % borderCells === 0 ? "border-row" : ""}
             key={i}
             style={{ width: "60%", textAlign: "left" }}
@@ -101,6 +102,7 @@ export default function TeamTable({
             </td>
             <td>{moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}</td>
           </tr>
+          ) : null
         ))}
       </tbody>
     </table>

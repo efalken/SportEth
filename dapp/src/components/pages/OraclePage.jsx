@@ -198,16 +198,17 @@ function OraclePage() {
   function ethToClaim() {
     let coeff = 0;
     if (currW4 > baseEpoch) {
-    coeff = totalVotes / 2 / (currW4 - baseEpoch)/1000000
+    coeff = totalVotes / 2 / (currW4 - baseEpoch)
     }
     if (coeff > tokens) {coeff = tokens};
     let x = (feeData1 - initFeePool)/1000000
-    coeff = coeff * x / 1000000;
+    coeff = coeff * x / 100000000;
   // coeff = totalVotes;
+  console.log(coeff, "coeff");
   return coeff;
 }
 
-console.log(feeData0, "feeData0");
+console.log(reviewStatus, "reviewStatus");
 console.log(feeData1, "feeData1");
 /*
 console.log(currW4, "currEpoch");
@@ -390,32 +391,54 @@ console.log(reviewStatus, "reviewStatus");
                 flexDirection="row"
                 justifyContent="space-between"
               ></Flex>
+               <Box>
+              <Form
+                onChange={setDepositAmount}
+                value={depositAmount}
+                onSubmit={depositTokens}
+                mb="20px"
+                justifyContent="flex-start"
+                padding="4px"
+                placeholder="# oracle tokens"
+                buttonLabel="Deposit"
+              />
+            </Box>
+            <Box>
+              <Form
+                onChange={setWithdrawAmount}
+                value={withdrawAmount}
+                onSubmit={withdrawTokens}
+                mb="20px"
+                justifyContent="flex-start"
+                padding="4px"
+                placeholder="# oracle tokens"
+                buttonLabel="WithDraw"
+              />
+            </Box>
 
               <Flex justifyContent="left">
+              <Box mb="10px" mt="10px">
                 <Text size="14px" color="#ffffff">
                   Active Epoch: {currW4}
-                </Text>
+                </Text><br/>
+                <Text size="14px" className="style">
+                Your Tokens in Contract: {Number(tokens).toLocaleString()}
+              </Text></Box>
               </Flex>
-              <Box mb="10px" mt="10px">
+              <Flex justifyContent="left">
+              {(tokens > 0) ? (
+                <Box>
               <Text size="14px" className="style">
                 base Epoch: {baseEpoch}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
+              </Text><br/>
               <Text size="14px" className="style">
-                Your Active Vote Count: {Number(totalVotes).toLocaleString()}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
+                Your Voting %: {Number(Number(totalVotes) * 100 / (currW4 - baseEpoch)).toFixed(0) + " %"}
+              </Text><br/>
               <Text size="14px" className="style">
-                Your Tokens in Contract: {Number(tokens).toLocaleString()}
+                Avax Value of your tokens: {Number(ethToClaim()).toLocaleString()}
               </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                ethValue of your tokens: {Number(ethToClaim()).toLocaleString()}
-              </Text>
-            </Box>
+            </Box>) : null}
+            </Flex>
               <Flex
                 mt="10px"
                 flexDirection="row"
@@ -465,15 +488,7 @@ console.log(reviewStatus, "reviewStatus");
                   >
                     Vote Yes
                   </button>
-                </Box>
-              ) : (
-                <Text size="14px" className="style">
-                  {" "}
-                  You Can't Vote
-                </Text>
-              )}
-            </Flex>
-            <Box mb="10px" mt="10px">
+                  <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
                 No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
                 {Number(voteYes).toLocaleString()}
@@ -491,56 +506,37 @@ console.log(reviewStatus, "reviewStatus");
               />
               </Text>
             </Box>
+                </Box>
+              ) : (
+                <Text size="14px" className="style">
+                  {" "}
+                </Text>
+              )}
+            </Flex>
+            
+           
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-                ConcentrationLimit: {concentrationLimit} minSubmit: {Number(minSubmit).toLocaleString()}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
+                ConcentrationLimit: {concentrationLimit} 
+                </Text> <br/>
+                <Text size="14px" className="style">
+                minSubmit: {Math.floor(minSubmit/1e7).toFixed(1) +"%"}
+              </Text><br/>
               <Text size="14px" className="style">
-                PausedBets: {pause0} , {pause1}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
+                Paused Matches: {pause0}; {pause1}
+              </Text><br/>
               <Text size="14px" className="style">
                 current Submission #: {propNumber}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
+              </Text><br/>
               <Text size="14px" className="style">
                 Last Proposal Vote: {voteTracker}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
+              </Text><br/>
               <Text size="14px" className="style">
                 Tokens in EOA: {Number(eoaTokens).toString()}
               </Text>
             </Box>
             
-            <Box>
-              <Form
-                onChange={setDepositAmount}
-                value={depositAmount}
-                onSubmit={depositTokens}
-                mb="20px"
-                justifyContent="flex-start"
-                padding="4px"
-                placeholder="# oracle tokens"
-                buttonLabel="Deposit"
-              />
-            </Box>
-            <Box>
-              <Form
-                onChange={setWithdrawAmount}
-                value={withdrawAmount}
-                onSubmit={withdrawTokens}
-                mb="20px"
-                justifyContent="flex-start"
-                padding="4px"
-                placeholder="# oracle tokens"
-                buttonLabel="WithDraw"
-              />
-            </Box>
+           
           </Box>
         }
       >

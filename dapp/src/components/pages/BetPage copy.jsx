@@ -23,8 +23,7 @@ function BetPage() {
 
   const [betAmount, setBetAmount] = useState("");
   const [maxBet, setMaxBet] = useState(0);
-  const [activeStart, setGameStart] = useState(0);
-  const [currTime, setCurrTime] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [fundAmount, setFundAmount] = useState("");
   const [wdAmount, setWdAmount] = useState("");
   const [teamPick, setTeamPick] = useState(null);
@@ -160,7 +159,8 @@ function BetPage() {
       setHash(
         <div>
           <div onClick={() => setHash(null)}>
-          <a target="_blank" style={{ color: 'yellow', font: 'Arial', fontStyle: 'Italic'}} href={`https://testnet.snowtrace.io/tx/${tx.hash}`}>
+            
+              <a target="_blank" style={{ color: 'yellow', font: 'Arial', fontStyle: 'Italic'}} href={`https://testnet.snowtrace.io/tx/${tx.hash}`}>
               See txn on blockchain: https://testnet.snowtrace.io/tx/0x...
               </a>
           </div>
@@ -228,18 +228,16 @@ function BetPage() {
     let _unusedCapital = Number((await bettingContract.margin(0)) || "0");
     setUnusedCapital(_unusedCapital);
 
-     let _gameStart = Number((await bettingContract.params(3)) || 0);
-     setGameStart(_gameStart);
+    // let _moosev = Number((await bettingContract.moosev(0)) || 0);
+    // setMoose(_moosev);
 
     let _startTimes = (await bettingContract.showStartTime()) || [];
     setStartTime(_startTimes);
 
     let _oddsvector = (await bettingContract.showOdds()) || [];
     setOddsVector(_oddsvector);
-
-    let _currTime = Number(Math.floor((new Date()).getTime() / 1000)) || 0;
-    setCurrTime(_currTime);
    
+
     let _usedCapital = Number((await bettingContract.margin(1)) || "0");
     setUsedCapital(_usedCapital);
 
@@ -265,7 +263,7 @@ function BetPage() {
     }
     _maxSize = _maxSize / 10000;
     //setMaxBet(_maxSize);
-    console.log(_maxSize, "maxSize");
+    //console.log(_maxSize, "maxSize");
     return _maxSize;
   }
 
@@ -761,18 +759,16 @@ function BetPage() {
           </Text>
         </Flex>
         <Box mt="14px" mx="30px">
-          <Flex width="100%" justifyContent="center">
-        {activeStart + 2 * 86400 < currTime ? (
-          <Text size="14px" weight="300" className="style">
-          betting closed, waiting for next weekend's schedule ...
-          </Text>
-        ) : 
-        <Text size="14px" weight="300" className="style">
-        Fund at left. Once funded, toggle radio button on the team/player you want to bet on to win, and enter desired avax bet in the box (eg, 1.123). You redeem all bets at once, and only when you have no active bets. Redemption sends any winning back to your free capital balance, which is available for withdrawal or new bets. If you have 16 unredeemed active and closed bets, you cannot bet until you redeem them. Scroll down to see all of the
-        week's contests.
-        </Text>
-      }
-         </Flex>
+          <Flex width="100%" justifyContent="marginLeft">
+            <Text size="14px" weight="300" className="style">
+              {" "}
+              Toggle radio button on the team/player you want to bet on to win.
+              Enter desired avax bet in the box (eg, 1.123). Prior wins, tie, or
+              cancelled bets are redeemable on the left panel. This sends avax
+              directly to your avax address. Scroll down to see all of the
+              week's contests.
+            </Text>
+          </Flex>
         </Box>
 
         <Box mt="14px" mx="30px"></Box>

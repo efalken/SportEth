@@ -9,8 +9,8 @@ import "./Token.sol";
 import "./ConstantsBetting.sol";
 
 contract Betting {
-    // for emergency to instantly stop new bets on a match
     uint8[2] public paused;
+    // for emergency to instantly stop new bets on a match
     uint16[32] public odds;
     //0 betEpoch, 1 concentration Limit, 2 nonce, 3 first Start Time
     uint32[4] public params;
@@ -34,6 +34,7 @@ contract Betting {
     mapping(address => LPStruct) public lpStruct;
     /// this struct holds a user's ETH balance
     mapping(address => UserStruct) public userStruct;
+    // for emergency to instantly stop new bets on a match
 
     struct Subcontract {
         uint32 epoch;
@@ -117,7 +118,7 @@ contract Betting {
             "over capital balance"
         );
         require(_betAmt >= MIN_BET, "bets must be ge 1 avax");
-        require(_matchNumber != paused[0] && _matchNumber != paused[1]);
+        require(paused[0] != _matchNumber && paused[1] != _matchNumber, "match is paused");
         uint64[4] memory _betData = decodeNumber(_matchNumber);
         int64 betPayoff = int64(uint64(odds[_matchNumber]));
         require(startTime[_matchNumber] > block.timestamp, "game started");
@@ -363,13 +364,13 @@ contract Betting {
 
     /** @dev this allows   token holders to freeze contests that have bad odds
      * it takes a day to input new odds, so if they are really off this can limit the damage
-     * @param _badmatches is the first of two potential paused matches
+     * @param _badmatch0 is the first of two potential paused matches
+     * @param _badmatch1 is the first of two potential paused matches
      */
-    function pauseMatch(uint8[2] calldata _badmatches) external onlyAdmin {
-        require(_badmatches[0] >31 && _badmatches[1] > 31, "once per day");
-        paused = _badmatches;
+    function pauseMatch(uint8 _badmatch0, uint8 _badmatch1) external onlyAdmin {
+        paused[0] = _badmatch0;
+        paused[1] = _badmatch1;
     }
-
 
     function showBetData() external view returns (uint256[32] memory _betData) {
         _betData = betData;
