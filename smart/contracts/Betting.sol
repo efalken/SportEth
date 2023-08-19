@@ -23,6 +23,7 @@ contract Betting {
     uint256[32] public betData;
     address payable public oracleAdmin;
     /// for transacting with the external stablecoin
+    uint256 public moose;
     Token public token;
     // individual bet contracts
     mapping(bytes32 => Subcontract) public betContracts;
@@ -68,7 +69,7 @@ contract Betting {
 
     event Funding(
         address indexed bettor,
-        uint64 moveAmount,
+          uint64 moveAmount,
         uint32 epoch,
         uint32 action
     );
@@ -121,7 +122,7 @@ contract Betting {
         require(paused[0] != _matchNumber && paused[1] != _matchNumber, "match is paused");
         uint64[4] memory _betData = decodeNumber(_matchNumber);
         int64 betPayoff = int64(uint64(odds[_matchNumber]));
-        require(startTime[_matchNumber] > block.timestamp, "game started");
+        // require(startTime[_matchNumber] > block.timestamp, "game started");
         if (_team0or1 == 0) {
             betPayoff = (_betAmt * betPayoff) / 1000;
         } else {
@@ -192,7 +193,7 @@ contract Betting {
     function settle(uint8[32] memory _winner)
         external
         onlyAdmin
-        returns (uint32, uint256)
+        returns (bool, uint32, uint256)
     {
         uint64 redemptionPot;
         uint64 payoffPot;
@@ -222,7 +223,7 @@ contract Betting {
         delete betData;
         params[3] = FUTURE_START;
         payable(oracleAdmin).transfer(oracleDiv);
-        return (params[0], oracleDiv);
+        return (true, params[0], oracleDiv);
     }
 
     /// @dev bettor funds account for bets
@@ -261,11 +262,12 @@ contract Betting {
      */
     function redeem() external {
         uint256 numberBets = userStruct[msg.sender].counter;
-        require(numberBets > 0);
+        require(numberBets > 0, "no bets");
         uint64 payout;
         for (uint256 i = 0; i < numberBets; i++) {
             bytes32 _subkId = userStruct[msg.sender].lastTransaction[i];
-            if (betContracts[_subkId].epoch == params[3]) revert("bets active");
+            if (betContracts[_subkId].epoch == params[0]) revert("bets active");
+            moose++;
             // creates epoch~matchnumber~pick number via concatenation
             uint32 epochMatch = betContracts[_subkId].epoch *
                 1000 +
@@ -282,6 +284,7 @@ contract Betting {
                 }
             }
         }
+         
         userStruct[msg.sender].counter = 0;
         // credit principle + payout to redeemer's balance
         userStruct[msg.sender].userBalance += payout;

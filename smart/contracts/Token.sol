@@ -23,9 +23,9 @@ contract Token {
   constructor() {
     balanceOf[msg.sender] = MINT_AMT;
     totalSupply = MINT_AMT;
-    name = "SportBetWeekly";
+    name = "AvaxSportsBook";
     decimals = 0;
-    symbol = "SBW";
+    symbol = "ASB";
   }
 
   function approve(

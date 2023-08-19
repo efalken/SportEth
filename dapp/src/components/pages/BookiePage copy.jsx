@@ -22,8 +22,8 @@ function BookiePage() {
   const [fundAmount, setFundAmount] = useState("");
   const [sharesToSell, setSharesToSell] = useState("");
   const [currentWeek, setCurrentWeek] = useState("");
-  const [unusedCapital, setUnusedCapital] = useState(0);
-  const [usedCapital, setUsedCapital] = useState(0);
+  const [totalLpCapital, setUnlockedLpCapital] = useState(0);
+  const [lockedLpCapital, setUsedCapital] = useState(0);
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
   const [betData, setBetData] = useState([]);
@@ -71,12 +71,12 @@ function BookiePage() {
 
   async function findValues() {
  // const findValues = useCallback(() => {
-    let _unusedCapital =
+    let _totalLpCapital =
       Number((await bettingContract.margin(0)) || "0") / 10000;
-    setUnusedCapital(_unusedCapital);
+    setUnlockedLpCapital(_totalLpCapital);
 
-    let _usedCapital = Number((await bettingContract.margin(1)) || "0") / 10000;
-    setUsedCapital(_usedCapital);
+    let _lockedLpCapital = Number((await bettingContract.margin(1)) || "0") / 10000;
+    setUsedCapital(_lockedLpCapital);
     //console.log(tokenAmount, "tokens");
 
     let _betCapital = Number((await bettingContract.margin(2)) || "0") / 10000;
@@ -125,7 +125,7 @@ function BookiePage() {
   }
 
   let ethBookie =
-    (Number(bookieShares) * Number(unusedCapital)) /
+    (Number(bookieShares) * Number(totalLpCapital)) /
     Number(totalShares);
 
   let [bets0, setBets0] = useState([
@@ -349,7 +349,7 @@ function BookiePage() {
                         color="#00ff00"
                         label="Total LP Capital (avax)"
                         size="14px"
-                        text={Number(unusedCapital).toFixed(3)}
+                        text={Number(totalLpCapital).toFixed(3)}
                         spacing="4px"
                       />
                     </Box>
@@ -359,7 +359,7 @@ function BookiePage() {
                       <LabeledText
                         color="red"
                         label="Locked LP Capital"
-                        text={Number(usedCapital).toFixed(3)}
+                        text={Number(lockedLpCapital).toFixed(3)}
                         spacing="1px"
                       />
                     </Box>

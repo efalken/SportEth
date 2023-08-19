@@ -1,5 +1,5 @@
 import React from 'react'
-import Icon from '../../images/footballCircle.png'
+import Icon from '../../images/football6.png'
 
 // eslint-disable-next-line
 export default function () {

@@ -56,16 +56,18 @@ async function main() {
   await token.setAdmin(oracle.address);
   await new Promise((resolve) => setTimeout(resolve, 20000));
 
-  result = await oracle.depositTokens(500n*million);
+  result = await oracle.depositTokens(150n*million);
   await result.wait();
   console.log(`got here2`);
   await new Promise((resolve) => setTimeout(resolve, 20000));
-/*
+
+
   result = await token.transfer(accounts[1], 250n * million);
   await result.wait();
-  result = await oracle.connect(signers[1]).depositTokens(250n*million);
-  await result.wait();
-
+  await new Promise((resolve) => setTimeout(resolve, 20000));
+  // result = await oracle.connect(signers[1]).depositTokens(250n*million);
+  // await result.wait();
+/*
   const _timestamp0 = (
     await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
     ).timestamp;
@@ -73,7 +75,7 @@ async function main() {
   */
   result = await oracle.initPost(
     [
-      "NFL:Abc:Atlanta",
+      "NFL:one:Atlanta",
       "NFL:Iowa:Cincin",
       "NFL:Mexico:Indian",
       "NFL:TampaBay:Minnesota",
@@ -107,31 +109,31 @@ async function main() {
       "MMA:Kara-France:Kape",
     ],
       [
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
-      1692481837,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
+      1693086637,
       1694300400,
       1694300400,
       1694300400,
@@ -176,16 +178,16 @@ async function main() {
   );
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 50000));
-
+  console.log(`line 170`);
   
   result = await oracle.processVote();
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 50000));
-
+  console.log(`line 184`);
   
 
    result = await betting.fundBook({
-    value: 10n*eths,
+    value: 20n*eths,
   });
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
@@ -211,10 +213,12 @@ async function main() {
 
   result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
+      console.log(`line 214`);
       await new Promise((resolve) => setTimeout(resolve, 20000));
 
       result = await betting.connect(signers[2]).bet(0, 0, 11000);
       receipt = await result.wait();
+      console.log(`line 219`);
       await new Promise((resolve) => setTimeout(resolve, 20000));
       // console.log(`bet02 ${margin00}`);
       // hash1100 = receipt.events[0].args.contractHash;
@@ -239,16 +243,18 @@ async function main() {
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
+      console.log(`line 244`);
       await new Promise((resolve) => setTimeout(resolve, 25000));
   
       result = await oracle.processVote();
       
       receipt = result.wait();
+      console.log(`line 250`);
       await new Promise((resolve) => setTimeout(resolve, 25000));
     // nextStart = nextStart + 7 * 24 * secondsInHour;
       result = await oracle.initPost(
         [
-          "NFL:Abc:Atlanta",
+          "NFL:two:Atlanta",
           "NFL:Iowa:Cincin",
           "NFL:Mexico:Indian",
           "NFL:TampaBay:Minnesota",
@@ -281,31 +287,31 @@ async function main() {
           "0",
           "0"],
           [
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
+          1693086637,
           1694300400,
           1694300400,
           1694300400,
@@ -348,10 +354,12 @@ async function main() {
           126]
       );
       receipt = result.wait();
+      console.log(`line 355`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
      
       result = await oracle.processVote();
       receipt = result.wait();
+      console.log(`line 360`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
       // result = await betting.connect(signers[1]).bet(0, 1, 13000);
       // receipt = await result.wait();
@@ -361,9 +369,11 @@ async function main() {
 
       result = await betting.connect(signers[1]).bet(1, 0, 15000);
       receipt = await result.wait();
+      console.log(`line 370`);
       await new Promise((resolve) => setTimeout(resolve, 20000));
       result = await betting.connect(signers[2]).bet(1, 1, 16000);
       receipt = await result.wait();
+      console.log(`line 374`);
       await new Promise((resolve) => setTimeout(resolve, 20000));
  
       result = await oracle.settlePost([
@@ -371,26 +381,27 @@ async function main() {
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = result.wait();
+      console.log(`line 382`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
 
       result = await oracle.processVote();
       receipt = result.wait();
+      console.log(`line 387`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
       
       result = await oracle.initPost(
         [
-          "NFL:Abc:Atlanta",
-          "NFL:Iowa:Cincin",
-          "NFL:Mexico:Indian",
+          "NFL:LAChargers:Atlanta",
+          "NFL:KansasCity:Cincinnati",
+          "NFL:LasVegas:Indianapolis",
           "NFL:TampaBay:Minnesota",
           "NFL:Tennessee:NewOrlns",
           "NFL:Pittsburgh:SanFrancisco",
           "NFL:Washington:Arizona",
           "NFL:Baltimore:Houston",
           "NFL:Chicago:GreenBay",
-          "NFL:Denver:LasVegas",
           "NFL:NewEngland:Philadelphia",
-          "NFL:LosAngelesChargers:Miami",
+          "NFL:Denver:Miami",
           "NFL:Seattle:LosAngelesRams",
           "NFL:NewYorkGiants:Dallas",
           "CFL:FresnoState:EasternWashington",
@@ -403,43 +414,44 @@ async function main() {
           "CFL:Delaware:PennState",
           "CFL:Purdue:VirginiaTech",
           "CFL:Utah:Baylor",
-          "CFL:NotreDame:NCState",
+          "MMA:Khabib:McGregor",
           "MMA:Adensanya:Strickland",
           "MMA:Tuivasa:Volkov",
-          "MMA:Kara-France:Kape",
+          "MMA:Jones: Stipe",
+          "0",
           "0",
           "0",
           "0",
           "0"],
           [
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1692481837,
-          1694300400,
-          1694300400,
-          1694300400,
+            1691859600,
+            1691859600,
+            1691859600,
+            1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1672531307,
+          1672531307,
+          1672531307,
           0,
           0,
           0,
@@ -479,31 +491,34 @@ async function main() {
           126]
       );
       receipt = await result.wait();
+      console.log(`line 492`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
       result = await oracle.processVote();
       receipt = await result.wait();
-      //await new Promise((resolve) => setTimeout(resolve, 15000));
-      /*
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+      
 
-      const userBalanceAcct1 = (await betting.userStruct(accounts[1])).userBalance;
-      const userBalanceAcct2 = (await betting.userStruct(accounts[2])).userBalance;
-      const ownershares = (await betting.lpStruct(accounts[0])).shares;
-      console.log(`acct1 balance ${userBalanceAcct1}`);
-      console.log(`acct2 balance ${userBalanceAcct2}`);
-      console.log(`acct0 shares ${ownershares}`);
-      const margin0 = await betting.margin(0);
-      console.log(`margin0 ${margin0}`);
-      const cf0 = await betting.params(1);
-      console.log(`concFactor ${cf0}`);
+
 
       result = await betting.connect(signers[1]).bet(0, 0, 16000);
       receipt = await result.wait();
+      console.log(`line 502`);
       let hash100 = receipt.events[0].args.contractHash;
-      const margin0b = await betting.margin(0);
-      console.log(`margin0b ${margin0b}`);
+      const moose = await betting.moose();
+      console.log(`moose ${moose}`);
+      const betepoch = await betting.params(0);
+      console.log(`betepoch ${betepoch}`);
       receipt = await result.wait();
-      result = await betting.connect(signers[1]).bet(2, 0, 30000);
+      result = await betting.connect(signers[1]).bet(2, 0, 20000);
+      /*receipt = await result.wait();
+      console.log(`bet ${betepoch}`);
+      const bet2epoch = (await betting.userStruct(accounts[1]))
+      .lastTransaction(1);
       receipt = await result.wait();
+      console.log(`betepochArray ${bet2epoch}`);
+      console.log(`betepoch2 ${bet2epoch[3]}`);*/
+
+      /*
       const moose = await betting.moose();
       console.log(`moose ${moose}`);
 

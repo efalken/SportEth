@@ -130,8 +130,8 @@ contract Oracle {
                 _decimalOdds[i] < MAX_DEC_ODDS_INIT &&
                     _decimalOdds[i] > MIN_DEC_ODDS_INIT, "odds outside range"
             );
-        }
         // require((_starts[0] - block.timestamp) < 604800 && (_starts[0] - block.timestamp) > 86400);
+        }
         propOdds = _decimalOdds;
         propStartTimes = _starts;
         matchSchedule = _teamsched;
@@ -177,39 +177,35 @@ contract Oracle {
         require(reviewStatus >= 10, "not time");
         bool successBool;
         if (reviewStatus == STATUS_PROC_INIT) {
+            reviewStatus = STATUS_POST_0;
             if (votes[0] > votes[1]) {
-                bettingContract.transmitInit(propOdds, propStartTimes);
+                successBool = bettingContract.transmitInit(propOdds, propStartTimes);
                 gameStart =
                     propStartTimes[0] -
                     ((propStartTimes[0] - 1687564800) % 604800);
-                reviewStatus = STATUS_POST_2;
-                successBool = true;
+                if (successBool) reviewStatus = STATUS_POST_2;
             } else {
                 burn();
-                reviewStatus = STATUS_POST_0;
             }
         } else if (reviewStatus == STATUS_PROC_UPDATE) {
+            reviewStatus = STATUS_POST_2;
             if (votes[0] > votes[1]) {
                 bettingContract.transmitUpdate(propOdds);
-                successBool = true;
             } else {
                 burn();
             }
-            reviewStatus = STATUS_POST_2;
         } else {
+            reviewStatus = STATUS_POST_2;
             if (votes[0] > votes[1]) {
-                (uint32 _betEpochOracle, uint256 ethDividend) = bettingContract
+                (bool successBool2, uint32 _betEpochOracle, uint256 ethDividend) = bettingContract
                     .settle(propResults);
                 betEpochOracle = uint16(_betEpochOracle);
                 feeData[1] += uint64(ethDividend / uint256(feeData[0]));
-                reviewStatus = STATUS_POST_0;
-                successBool = true;
+                if (successBool2) reviewStatus = STATUS_POST_0;
             } else {
                 burn();
-                reviewStatus = STATUS_POST_2;
             }
         }
-        reset();
         emit VoteOutcome(
             successBool,
             betEpochOracle,
@@ -217,6 +213,7 @@ contract Oracle {
             votes[0],
             votes[1]
         );
+        reset();
     }
 
     function adjParams(uint32 _concentrationLim, uint32 _minSubmit)
@@ -356,7 +353,6 @@ contract Oracle {
                 (betEpochOracle - adminStruct[msgsender].baseEpoch) 
         );
         uint256 ethTot = uint256(adminStruct[msgsender].tokens) * uint256(feeData[1] - adminStruct[msgsender].initFeePool);
-
         _ethOut0 = (votePercentx10000 * ethTot) / 10000;
         uint256 ploughBack = ethTot - _ethOut0;
         feeData[1] += uint64(ploughBack / uint256(feeData[0]));

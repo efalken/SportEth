@@ -19,12 +19,11 @@ function BookiePage() {
   const { oracleContract, bettingContract, tokenContract, account } =
     useAuthContext();
 
-
   const [fundAmount, setFundAmount] = useState("");
   const [sharesToSell, setSharesToSell] = useState("");
   const [currentWeek, setCurrentWeek] = useState("");
-  const [unusedCapital, setUnusedCapital] = useState(0);
-  const [usedCapital, setUsedCapital] = useState(0);
+  const [totalLpCapital, setUnlockedLpCapital] = useState(0);
+  const [lockedLpCapital, setUsedCapital] = useState(0);
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
   const [betData, setBetData] = useState([]);
@@ -36,7 +35,7 @@ function BookiePage() {
   // const [tokenAmount, setTokenAmount] = useState("0");
   // const [eoaTokens, setEoaTokens] = useState("0");
   const [tokensInK, setTokensInK] = useState("0");
-
+  const [txnHash, setHash] = useState();
 
   document.title = "LP Page";
   useEffect(() => {
@@ -51,39 +50,136 @@ function BookiePage() {
   }, [bettingContract, oracleContract, tokenContract]);
 
   async function wdBook() {
-    await bettingContract.withdrawBook(sharesToSell); 
+    const stackId = await bettingContract.withdrawBook(sharesToSell);
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
+        </div>
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
   }
 
   async function claimRewards() {
-    const tx = await oracleContract.tokenReward();
+    const stackId = await oracleContract.tokenReward();
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
+        </div>
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
     //const receipt = await tx.wait(1);
   }
 
-
   async function fundBook(x) {
+    console.log(fundAmount, "fundAmount");
     try {
-      await bettingContract.fundBook({
+      const stackId = await bettingContract.fundBook({
         value: ethers.parseEther(fundAmount),
       });
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
+        </div>
+      );
     } catch (err) {
       console.log(err);
     }
   }
 
   async function findValues() {
- // const findValues = useCallback(() => {
-    let _unusedCapital =
+    // const findValues = useCallback(() => {
+    let _totalLpCapital =
       Number((await bettingContract.margin(0)) || "0") / 10000;
-    setUnusedCapital(_unusedCapital);
+    setUnlockedLpCapital(_totalLpCapital);
 
-    let _usedCapital = Number((await bettingContract.margin(1)) || "0") / 10000;
-    setUsedCapital(_usedCapital);
+    let _lockedLpCapital =
+      Number((await bettingContract.margin(1)) || "0") / 10000;
+    setUsedCapital(_lockedLpCapital);
     //console.log(tokenAmount, "tokens");
 
     let _betCapital = Number((await bettingContract.margin(2)) || "0") / 10000;
     setBetCapital(_betCapital);
 
-    let _tokenInK = await oracleContract.rewardTokensLeft() || "0";
+    let _tokenInK = (await oracleContract.rewardTokensLeft()) || "0";
     setTokensInK(_tokenInK);
 
     // let _eoaTokens =
@@ -110,11 +206,10 @@ function BookiePage() {
 
     let _bookieEpoch = bs ? bs.outEpoch.toString() : "0";
     setBookieEpoch(_bookieEpoch);
-
   }
 
   function unpack256(src) {
-    if (!src) return [0,0,0,0];
+    if (!src) return [0, 0, 0, 0];
     //const str = bn.toString(16);
     const str = src.toString(16).padStart(64, "0");
     const pieces = str
@@ -126,8 +221,7 @@ function BookiePage() {
   }
 
   let ethBookie =
-    (Number(bookieShares) * Number(unusedCapital)) /
-    Number(totalShares);
+    (Number(bookieShares) * Number(totalLpCapital)) / Number(totalShares);
 
   let [bets0, setBets0] = useState([
     100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
@@ -155,7 +249,6 @@ function BookiePage() {
 
   let [xdecode256, setXdecode] = useState([0, 1, 2, 3]);
 
-
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
       if (betData) xdecode256 = unpack256(betData[ii]);
@@ -181,15 +274,19 @@ function BookiePage() {
 
   for (let i = 0; i < 32; i++) {
     allMatches.push(
-      <tr key={i} style={{ width: "25%", textAlign: "left" }}>
-        <td>{i}</td>
-        <td>{teamSplit[i][1]}</td>
-        <td>{teamSplit[i][2]}</td>
-        <td>{(bets0[i] / 10000).toFixed(1)}</td>
-        <td>{(bets1[i] / 10000).toFixed(1)}</td>
-        <td>{(payoff0[i] / 10000 - bets1[i] / 10000).toFixed(1)}</td>
-        <td>{(payoff1[i] / 10000 - bets0[i] / 10000).toFixed(1)}</td>
-      </tr>
+      teamSplit[i][1] !== "0" ? (
+        <tr key={i} style={{ width: "25%", textAlign: "left" }}>
+          <td>{i}</td>
+          <td>{teamSplit[i][1]}</td>
+          <td>{teamSplit[i][2]}</td>
+          <td>{(bets0[i] / 10000).toFixed(1)}</td>
+          <td>{(bets1[i] / 10000).toFixed(1)}</td>
+          <td>{(payoff0[i] / 10000 - bets1[i] / 10000).toFixed(1)}</td>
+          <td>{(payoff1[i] / 10000 - bets0[i] / 10000).toFixed(1)}</td>
+        </tr>
+      ) : (
+        ""
+      )
     );
   }
 
@@ -305,19 +402,20 @@ function BookiePage() {
               />
             </Box>
             <Box>
-            <Text size="14px" color={cwhite}>
-                {"Your:"}
-                  </Text>
-                  <br/>
-              {" "}
               <Text size="14px" color={cwhite}>
-                {"LP shares: " +
-                  Number(bookieShares).toLocaleString() }
-                  </Text>
-                  <br/>
-                   <Text size="14px" color={cwhite}>
-                 {"LP percent: " +
-                Math.floor(Number(bookieShares) * 100 /Number(totalShares)).toFixed(1) + "%"}
+                {"Your:"}
+              </Text>
+              <br />{" "}
+              <Text size="14px" color={cwhite}>
+                {"LP shares: " + Number(bookieShares).toLocaleString()}
+              </Text>
+              <br />
+              <Text size="14px" color={cwhite}>
+                {"LP percent: " +
+                  Math.floor(
+                    (Number(bookieShares) * 100) / Number(totalShares)
+                  ).toFixed(1) +
+                  "%"}
               </Text>
             </Box>
 
@@ -327,50 +425,52 @@ function BookiePage() {
                 {"share value: " + Number(ethBookie).toFixed(1) + " avax "}
               </Text>
               <Box>
-            <Box>
-              <Flex>
-                <Flex width="100%" flexDirection="column">
+                <Box>
+                  <Flex>
+                    <Flex width="100%" flexDirection="column">
+                      <Flex
+                        mt="10px"
+                        pt="10px"
+                        alignItems="center"
+                        style={{
+                          borderTop: `thin solid ${G}`,
+                        }}
+                      ></Flex>
+                      <Flex pt="10px" justifyContent="left">
+                        <Box>
+                          {" "}
+                          <Text size="14px" color={cwhite}>
+                            {"Total LP Capital : " +
+                              Number(totalLpCapital).toFixed(4) +
+                              " avax"}
+                          </Text>
+                          <br />
+                          <Text size="14px" color={cwhite}>
+                            {"% Locked : " +
+                              (
+                                (Number(lockedLpCapital) * 100) /
+                                Number(totalLpCapital)
+                              ).toFixed(1) +
+                              "%"}
+                          </Text>
+                          <br />
+                          <Text size="14px" color={cwhite}>
+                            {"GrossBets : " +
+                              Number(betCapital).toFixed(1) +
+                              " avax"}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+                </Box>
+                <Box>
                   <Flex
                     mt="10px"
                     pt="10px"
-                    alignItems="center"
-                    style={{
-                      borderTop: `thin solid ${G}`,
-                    }}
+                    style={{ borderTop: `thin solid ${G}` }}
                   ></Flex>
-                  <Flex pt="10px" justifyContent="left">
-                    <Box>
-                    {" "}
-              <Text size="14px" color={cwhite}>
-                {"Total LP Capital : " +
-                  Number(unusedCapital).toFixed(1) + " avax" }
-                  </Text>
-                  <br/>
-                  <Text size="14px" color={cwhite}>
-                {"% Locked : " +
-                  (Number(usedCapital) * 100 / Number(unusedCapital)).toFixed(1) + "%"}
-                  </Text>
-                  <br/>
-                  <Text size="14px" color={cwhite}>
-                {"GrossBets : " +
-                  Number(betCapital).toFixed(1) + " avax"}
-                  </Text>
-
-                    </Box>
-                  </Flex>
-                  
-                </Flex>
-              </Flex>
-            </Box>
-
-            <Box>
-              <Flex
-                mt="10px"
-                pt="10px"
-                style={{ borderTop: `thin solid ${G}` }}
-              ></Flex>
-            </Box>
-                {" "}
+                </Box>{" "}
                 <Text size="14px" color={cwhite}>
                   Current Epoch: {currentWeek}{" "}
                 </Text>
@@ -383,59 +483,55 @@ function BookiePage() {
             <Box>
               {Number(bookieShares) > 0 ? (
                 <Flex>
-                <Box>
-                <Form
-                  onChange={setSharesToSell}
-                  value={sharesToSell}
-                  onSubmit={wdBook}
-                  mb="20px"
-                  justifyContent="flex-start"
-                  buttonWidth="95px"
-                  inputWidth="100px"
-                  placeholder="# shares"
-                  buttonLabel="Withdraw"
-                />
-                </Box>
-              </Flex>
-             ) : null}
-             </Box>
-             <Box>
+                  <Box>
+                    <Form
+                      onChange={setSharesToSell}
+                      value={sharesToSell}
+                      onSubmit={wdBook}
+                      mb="20px"
+                      justifyContent="flex-start"
+                      buttonWidth="95px"
+                      inputWidth="100px"
+                      placeholder="# shares"
+                      buttonLabel="Withdraw"
+                    />
+                  </Box>
+                </Flex>
+              ) : null}
+            </Box>
+            <Box>
               {Number(tokensInK) > 0 ? (
                 <Flex>
-                <Box>
-                      <LabeledText
-                        big
-                        label="Token Rewards Remaining"
-                        text={Number(tokensInK).toLocaleString()}
-                        spacing="1px"
-                      />
-
-                  {" "}
-                  <br/>
-                <button
-                style={{
-                  backgroundColor: "black",
-                  borderRadius: "10px",
-                  padding: "4px",
-                  //borderRadius: "1px",
-                  cursor: "pointer",
-                  color: "yellow",
-                  border: "1px solid #ffff00",
-                }}
-                value={0}
-                onClick={(e) => {
-                  e.preventDefault();
-                  claimRewards();
-                }}
-              >
-                Claim Reward
-              </button>
-              </Box>
-              </Flex>
-             ) : null}
-             </Box>
-        
-
+                  <Box>
+                    <LabeledText
+                      big
+                      label="Token Rewards Remaining"
+                      text={Number(tokensInK).toLocaleString()}
+                      spacing="1px"
+                    />{" "}
+                    <br />
+                    <button
+                      style={{
+                        backgroundColor: "black",
+                        borderRadius: "10px",
+                        padding: "4px",
+                        //borderRadius: "1px",
+                        cursor: "pointer",
+                        color: "yellow",
+                        border: "1px solid #ffff00",
+                      }}
+                      value={0}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        claimRewards();
+                      }}
+                    >
+                      Claim Reward
+                    </button>
+                  </Box>
+                </Flex>
+              ) : null}
+            </Box>
 
             <Box>
               <Flex
@@ -454,7 +550,7 @@ function BookiePage() {
               Liquidity Provider Page
             </Text>
           </Flex>
-
+          <Box> {txnHash}</Box>
           <Box mt="14px" mx="30px">
             <Flex width="100%" justifyContent="marginLeft">
               <Text size="14px" weight="300" color="#ffffff">

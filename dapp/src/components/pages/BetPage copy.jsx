@@ -37,8 +37,8 @@ function BetPage() {
   );
   const [betData, setBetData] = useState([]);
   const [userBalance, setUserBalance] = useState(0);
-  const [unusedCapital, setUnusedCapital] = useState(0);
-   const [usedCapital, setUsedCapital] = useState(0);
+  const [totalLpCapital, setUnlockedLpCapital] = useState(0);
+   const [lockedLpCapital, setUsedCapital] = useState(0);
   const [currW4, setCurrW4] = useState(0);
   const [concentrationLimit, setConcentrationLimit] = useState(0);
   const [teamSplit, setTeamSplit] = useState([]);
@@ -166,10 +166,87 @@ function BetPage() {
           </div>
         </div>
       );
+      setHash(
+        <div>
+          <div onClick={() => setHash()}>
+          <a target="_blank" style={{ color: 'yellow', font: 'Arial', fontStyle: 'Italic'}} href={`https://testnet.snowtrace.io/tx/${tx.hash}`}>
+              click here to txn on blockchain
+              </a>
+          </div>
+          <Text style = {{color: 'white'}}>or</Text>
+          <div onClick={() => setHash()}>
+          <a target="_blank" style={{ color: 'yellow', font: 'Arial', fontStyle: 'Italic'}} href="#">
+              click here to dismiss
+              </a>
+          </div>
+        </div>
+      );
     }
-    
-
   }
+
+  async function takeBet() {
+    setHash(null)
+    if (betAmount > Number(
+      getMaxSize(
+        Number(netLiab[teamPick][matchPick]),
+        Number(oddsTot[teamPick][matchPick]),
+    ))) {
+      alert("value is greater than max bet")
+      return;
+    } else {
+      const tx = await bettingContract.bet(
+        matchPick,
+        teamPick,
+        betAmount * 10000
+      );
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+          <a target="_blank" style={{ color: 'yellow', font: 'Arial', fontStyle: 'Italic'}} href={`https://testnet.snowtrace.io/tx/${tx.hash}`}>
+              See txn on blockchain: https://testnet.snowtrace.io/tx/0x...
+              </a>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  async function takeBet() {
+    setHash(null)
+    if (betAmount > Number(
+      getMaxSize(
+        Number(netLiab[1 - teamPick][matchPick]),
+        Number(netLiab[teamPick][matchPick]),
+        Number(oddsTot[teamPick][matchPick]),
+    ))) {
+      alert("value is greater than max bet")
+      return;
+    } else {
+      const tx = await bettingContract.bet(
+        matchPick,
+        teamPick,
+        betAmount * 10000
+      );
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+          <a target="_blank" style={{ color: 'yellow', font: 'Arial', fontStyle: 'Italic'}} href={`https://testnet.snowtrace.io/tx/${tx.hash}`}>
+              click here to txn on blockchain
+              </a>
+          </div>
+          <Text style = {{color: 'white'}}>or</Text>
+          <div onClick={() => setHash(null)}>
+          <a style={{ color: 'yellow', font: 'Arial', fontStyle: 'Italic'}} href="">
+              click here to dismiss
+              </a>
+          </div>
+        </div>
+      );
+    }
+      }
+
+
+
 
   async function redeemBet() {
     const tx = await bettingContract.redeem();
@@ -225,8 +302,8 @@ function BetPage() {
     let _userBalance = us ? Number(us.userBalance) : 0;
     setUserBalance(_userBalance);
 
-    let _unusedCapital = Number((await bettingContract.margin(0)) || "0");
-    setUnusedCapital(_unusedCapital);
+    let _totalLpCapital = Number((await bettingContract.margin(0)) || "0");
+    setUnlockedLpCapital(_totalLpCapital);
 
     // let _moosev = Number((await bettingContract.moosev(0)) || 0);
     // setMoose(_moosev);
@@ -238,8 +315,8 @@ function BetPage() {
     setOddsVector(_oddsvector);
    
 
-    let _usedCapital = Number((await bettingContract.margin(1)) || "0");
-    setUsedCapital(_usedCapital);
+    let _lockedLpCapital = Number((await bettingContract.margin(1)) || "0");
+    setUsedCapital(_lockedLpCapital);
 
     let _currW4 = Number((await bettingContract.params(0)) || "0");
     setCurrW4(_currW4);
@@ -255,9 +332,9 @@ function BetPage() {
   function getMaxSize(liabPick, oddsPick) {
     liabPick = isNaN(liabPick) ? 0 : Number(liabPick);
     oddsPick = isNaN(oddsPick) ? 1000 : Number(oddsPick);
-    let _maxSize = unusedCapital / concentrationLimit - liabPick;
+    let _maxSize = totalLpCapital / concentrationLimit - liabPick;
     _maxSize =  _maxSize * 1000 / oddsPick;
-    let _maxSize2 = unusedCapital - usedCapital;
+    let _maxSize2 = totalLpCapital - lockedLpCapital;
     if (_maxSize2 < _maxSize) {
       _maxSize = _maxSize2;
     }
