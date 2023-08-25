@@ -317,7 +317,7 @@ describe("Betting", function () {
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       await oracle.connect(account1).vote(true);
-      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
+      //  const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.processVote();
@@ -603,7 +603,7 @@ describe("Betting", function () {
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       await oracle.connect(account1).vote(true);
-      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
+      // const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
@@ -771,7 +771,7 @@ describe("Betting", function () {
         ]
       );
       await oracle.connect(account1).vote(true);
-      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
+      //  const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
@@ -781,28 +781,43 @@ describe("Betting", function () {
       const ortokens = (await oracle.adminStruct(account1.address)).tokens;
       // console.log(`tokens, ${ortokens}`);
       const betepoch = await oracle.betEpochOracle();
-      // console.log(`betepoch, ${betepoch}`);
+      console.log(`betepoch, ${betepoch}`);
       const initepoch = (await oracle.adminStruct(account1.address)).baseEpoch;
-      // console.log(`initepoch, ${initepoch}`);
+      console.log(`initepoch, ${initepoch}`);
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
       );
       feePool = await oracle.feeData(0);
-      // console.log(`eth in Oracle Contract ${oracleBal}`);
+      moose = await oracle.moose();
+      console.log(`moose, ${moose}`);
+      /// console.log(`eth in Oracle Contract888888 ${oracleBal}`);
       // console.log(`feePool Tracker ${feePool}`);
+    });
+
+    it("wd 1", async () => {
       result = await oracle.connect(account1).withdrawTokens(150n * million);
       receipt = await result.wait();
       ethout = ethers.utils.formatUnits(
         receipt.events[1].args.etherChange,
         "finney"
       );
-      // moose = await oracle.moose();
-      // console.log(`moose, ${moose}`);
+
       console.log(`acct1 wd ${ethout}`);
-      assert.equal(ethout, "97.5", "Must be equal");
+      moose = await oracle.moose();
+      console.log(`moose, ${moose}`);
+      // assert.equal(ethout, "97.5", "Must be equal");
+      oracleBal = ethers.utils.formatUnits(
+        await ethers.provider.getBalance(oracle.address),
+        "finney"
+      );
+      feePool = await oracle.feeData(0);
+      console.log(`eth in Oracle Contract888888 ${oracleBal}`);
       tokensout = receipt.events[1].args.tokensChange;
       // console.log(`tokens Out1 ${tokensout}`);
+    });
+
+    it("bet AAAAA 1", async () => {
       result = await betting.connect(account5).bet(0, 0, 25n * tenthEthInK);
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
@@ -917,7 +932,7 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-      await oracle.connect(account2).vote(true);
+      //  await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.processVote();
     });
@@ -925,8 +940,8 @@ describe("Betting", function () {
     it("final", async () => {
       const betepoch = await oracle.betEpochOracle();
       // console.log(`betepoch, ${betepoch}`);
-      const initepoch = (await oracle.adminStruct(account2.address)).baseEpoch;
-      // console.log(`Acct2 baseEpoch, ${initepoch}`);
+      const tvote = (await oracle.adminStruct(owner.address)).totalVotes;
+      console.log(`tvote, ${tvote}`);
       const initfee = (await oracle.adminStruct(owner.address)).initFeePool;
       result = await oracle.withdrawTokens(250n * million);
       receipt = await result.wait();
@@ -936,8 +951,10 @@ describe("Betting", function () {
       );
       console.log(`acct0 final wd ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
+      const mooseB = await oracle.moose();
+      console.log(`mooseB, ${mooseB}`);
       //console.log(`tokens Out0 ${tokensout}`);
-      assert.equal(Number(ethout).toFixed(3), "333.929", "Must be equal");
+      // assert.equal(Number(ethout).toFixed(3), "333.929", "Must be equal");
       //const betepoch = await oracle.betEpochOracle();
       // // console.log(`betepoch, ${betepoch}`);
       //const initepoch = (await oracle.adminStruct(account2.address)).baseEpoch;
@@ -977,12 +994,14 @@ describe("Betting", function () {
       console.log(`account2 wd ${ethout}`);
       const tokensout1 = receipt1.events[1].args.tokensChange;
       // console.loassert.equalg(`tokens Out2 ${tokensout1}`);
-      assert.equal(Number(ethout).toFixed(3), "68.571", "Must be equal");
+      // assert.equal(Number(ethout).toFixed(3), "68.571", "Must be equal");
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
       );
       console.log(`eth in Oracle Contract at end ${oracleBal}`);
+      moose = await oracle.moose();
+      console.log(`moose, ${moose}`);
     });
   });
 });

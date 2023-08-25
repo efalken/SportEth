@@ -65,6 +65,9 @@ async function main() {
   result = await token.transfer(accounts[1], 250n * million);
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
+  result = await token.transfer(accounts[2], 250n * million);
+  await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   // result = await oracle.connect(signers[1]).depositTokens(250n*million);
   // await result.wait();
 /*
@@ -192,24 +195,25 @@ async function main() {
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
 
-  const ownershares0 = (await betting.lpStruct(accounts[0])).shares;
-      console.log(`acct0 shares ${ownershares0}`);
-      const margin00 = await betting.margin(0);
-      console.log(`margin0 ${margin00}`);
+  result = await oracle.tokenReward();
+  await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 20000));
+
+
 
   result = await betting.connect(signers[1]).fundBettor({
     value: 20n*eths,
   });
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
-  console.log(`fundbettor ${margin00}`);
+
 
   result = await betting.connect(signers[2]).fundBettor({
     value: 20n*eths,
   });
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
-  console.log(`fundbettor2 ${margin00}`);
+
 
   result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
@@ -287,12 +291,12 @@ async function main() {
           "0",
           "0"],
           [
-          1693086637,
-          1693086637,
-          1693086637,
-          1693086637,
-          1693086637,
-          1693086637,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
+          1691859600,
           1693086637,
           1693086637,
           1693086637,
@@ -375,7 +379,6 @@ async function main() {
       receipt = await result.wait();
       console.log(`line 374`);
       await new Promise((resolve) => setTimeout(resolve, 20000));
- 
       result = await oracle.settlePost([
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
@@ -386,6 +389,8 @@ async function main() {
 
       result = await oracle.processVote();
       receipt = result.wait();
+
+
       console.log(`line 387`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
       
@@ -424,31 +429,31 @@ async function main() {
           "0",
           "0"],
           [
-            1691859600,
-            1691859600,
-            1691859600,
-            1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
+          1692464400,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
+          1692468000,
           1672531307,
           1672531307,
           1672531307,
@@ -494,6 +499,7 @@ async function main() {
       console.log(`line 492`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
       result = await oracle.processVote();
+      /*
       receipt = await result.wait();
       await new Promise((resolve) => setTimeout(resolve, 15000));
       
@@ -510,7 +516,7 @@ async function main() {
       console.log(`betepoch ${betepoch}`);
       receipt = await result.wait();
       result = await betting.connect(signers[1]).bet(2, 0, 20000);
-      /*receipt = await result.wait();
+      receipt = await result.wait();
       console.log(`bet ${betepoch}`);
       const bet2epoch = (await betting.userStruct(accounts[1]))
       .lastTransaction(1);

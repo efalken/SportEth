@@ -17,6 +17,7 @@ import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
 
 function BetPage() {
+  document.title = "Betting Page";
   const { oracleContract, bettingContract, account, provider } =
     useAuthContext();
   //const provider = useAuthContext.provider;
@@ -71,9 +72,8 @@ function BetPage() {
   ]);
   let netLiab = [liab0, liab1];
 
-  document.title = "Betting Page";
-  console.log(counter, "counter");
-  console.log(moose, "moose");
+  // console.log(counter, "counter");
+  // console.log(moose, "moose");
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
     const interval1 = setInterval(() => {
@@ -115,8 +115,6 @@ function BetPage() {
       odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45);
       netLiab[0][ii] = Number(xdecode256[2]) - Number(xdecode256[1]);
       netLiab[1][ii] = Number(xdecode256[3]) - Number(xdecode256[0]);
-      // netLiab[0][ii] =   (xdecode256[2] - xdecode256[1]) ;
-      // netLiab[1][ii] =   (xdecode256[3] - xdecode256[0]) ;
     }
     setOdds0(odds0);
     setOdds1(odds1);
@@ -130,11 +128,54 @@ function BetPage() {
   }, [scheduleString]);
 
   async function fundBettor() {
-    let x = fundAmount;
+    let x = (Number(fundAmount) / 10000).toString();
+    // not for PRODUCTION!!!!!!!!!!!!!!!!!!!!!!!
+    console.log(fundAmount, "fundamount");
     try {
       const stackId = await bettingContract.fundBettor({
         value: ethers.parseEther(x),
       });
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              Invalid entry, click here to dismiss
+            </a>
+          </div>
+        </div>
+      );
+    } catch {
+      alert("invalid amount");
+      return;
+    }
+  }
+
+  async function withdrawBettor() {
+    try {
+      const stackId = await bettingContract.withdrawBettor(wdAmount * 10000);
       setHash(
         <div>
           <div onClick={() => setHash(null)}>
@@ -167,60 +208,15 @@ function BetPage() {
           </div>
         </div>
       );
-    } catch (error) {}
-  }
-
-  async function withdrawBettor(x) {
-    const stackId = await bettingContract.withdrawBettor(wdAmount * 10000);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+    } catch {
+      alert("invalid amount");
+      return;
+    }
   }
 
   async function takeBet() {
     setHash(null);
-    if (
-      betAmount >
-      Number(
-        getMaxSize(
-          Number(netLiab[1 - teamPick][matchPick]),
-          Number(netLiab[teamPick][matchPick]),
-          Number(oddsTot[teamPick][matchPick])
-        )
-      )
-    ) {
-      alert("value is greater than max bet");
-      return;
-    } else {
+    try {
       const tx = await bettingContract.bet(
         matchPick,
         teamPick,
@@ -253,7 +249,6 @@ function BetPage() {
               ...or...
             </Text>
           </div>
-
           <div onClick={() => setHash(null)}>
             <a
               style={{
@@ -269,46 +264,51 @@ function BetPage() {
           </div>
         </div>
       );
+    } catch {
+      alert("invalid amount");
+      return;
     }
   }
 
   async function redeemBet() {
-    const stackId = await bettingContract.redeem();
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await bettingContract.redeem();
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
-    //const receipt = await tx.wait(1);
-    // await syncEvents(receipt.hash);
-    //setTimeout(updateBetRecord, 5000, )
+      );
+    } catch {
+      alert("need only resolved bets");
+      return;
+    }
   }
 
   async function addBetRecord(contractHash) {
@@ -543,7 +543,7 @@ function BetPage() {
               />
               <Text size="14px" className="style">
                 Your free capital on contract:{" "}
-                {(Number(userBalance) / 1e4).toFixed(3)} AVAX
+                {(Number(userBalance) / 1e4).toFixed(4)} AVAX
               </Text>
             </Box>
             <Box>
@@ -646,7 +646,7 @@ function BetPage() {
                   <div key={id} style={{ width: "100%", float: "left" }}>
                     <Text className="style" color="#ffffff" size="14px">
                       {" "}
-                      Your active bets
+                      Active bets
                     </Text>
                     <br />
                     <table
@@ -740,7 +740,7 @@ function BetPage() {
 
                     <Text className="style" size="14px">
                       {" "}
-                      resolved bets to be processed via redeem
+                      Resolved bets not redeemed
                     </Text>
                     <br />
                     <table
@@ -755,8 +755,7 @@ function BetPage() {
                         <tr style={{ width: "33%", color: "#ffffff" }}>
                           <td>Epoch</td>
                           <td>Pick</td>
-                          <td>Your Payout</td>
-                          <td>Win?</td>
+                          <td>Payout</td>
                         </tr>
                         {Object.values(betHistory[id]).map(
                           (event, index) =>
@@ -775,9 +774,10 @@ function BetPage() {
                                   }
                                 </td>
                                 <td>
-                                  {(event.Payoff + event.BetSize).toFixed(3)}
+                                  {event.Result9
+                                    ? (event.Payoff + event.BetSize).toFixed(3)
+                                    : 0}
                                 </td>
-                                <td>{event.Result9 ? "yes" : "no"}</td>
                               </tr>
                             )
                         )}

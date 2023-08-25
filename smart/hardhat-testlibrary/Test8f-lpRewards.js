@@ -816,10 +816,10 @@ describe("Betting", function () {
       );
       const epoch2 = await betting.params(0);
       console.log(`Account4 epoch ${epoch2} eth ${ethout}`);
-      //assert.equal(Number(ethout).toFixed(2), "18.56", "Must be equal");
+      assert.equal(Number(ethout).toFixed(2), "25.53", "Must be equal");
     });
   });
-  /*
+
   describe("sixth epoch with 2 oracles", async () => {
     it("post init", async () => {
       _hourSolidity = await oracle.hourOfDay();
@@ -923,7 +923,7 @@ describe("Betting", function () {
         "finney"
       );
       console.log(`acct0 final wd epoch ${epoch0} eth ${ethout}`);
-      assert.equal(Number(ethout).toFixed(2), "308.25", "Must be equal");
+      assert.equal(Number(ethout).toFixed(2), "298.35", "Must be equal");
       tokensout = receipt.events[1].args.tokensChange;
       const result1 = await oracle.connect(account2).withdrawTokens(99999999);
       const receipt1 = await result1.wait();
@@ -932,7 +932,7 @@ describe("Betting", function () {
         "finney"
       );
       console.log(`account2 final epoch ${epoch0} eth ${ethout}`);
-      assert.equal(Number(ethout).toFixed(2), "59.5", "Must be equal");
+      assert.equal(Number(ethout).toFixed(2), "56.08", "Must be equal");
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
@@ -941,5 +941,4 @@ describe("Betting", function () {
       feePool = await oracle.feeData(0);
     });
   });
-*/
 });

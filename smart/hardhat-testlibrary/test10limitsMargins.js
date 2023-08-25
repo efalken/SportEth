@@ -238,28 +238,28 @@ describe("Betting", function () {
       margin0 = await betting.margin(0);
       margin1 = await betting.margin(1);
       console.log(`margin0: ${margin0} margin1: ${margin1}`);
-      const betPayoff0 = await betting.moosev(0);
-      const netPosTeamBet0 = await betting.moosev(1);
-      const marginChange0 = await betting.moosev(2);
-      const netPosTeamOpp0 = await betting.moosev(3);
-      console.log(`betPayoff: ${betPayoff0} netPosTeamBet: ${netPosTeamBet0}`);
-      console.log(
-        `marginChange: ${marginChange0} netPosTeamOpp: ${netPosTeamOpp0}`
-      );
+      // const betPayoff0 = await betting.moosev(0);
+      // const netPosTeamBet0 = await betting.moosev(1);
+      // const marginChange0 = await betting.moosev(2);
+      // const netPosTeamOpp0 = await betting.moosev(3);
+      // console.log(`betPayoff: ${betPayoff0} netPosTeamBet: ${netPosTeamBet0}`);
+      // console.log(
+      //   `marginChange: ${marginChange0} netPosTeamOpp: ${netPosTeamOpp0}`
+      // );
 
       result = await betting.connect(account3).bet(0, 1, "10000");
       receipt = await result.wait();
       margin0 = await betting.margin(0);
       margin1 = await betting.margin(1);
       console.log(`margin0: ${margin0} margin1: ${margin1}`);
-      const betPayoff = await betting.moosev(0);
-      const netPosTeamBet = await betting.moosev(1);
-      const marginChange = await betting.moosev(2);
-      const netPosTeamOpp = await betting.moosev(3);
-      console.log(`betPayoff: ${betPayoff} netPosTeamBet: ${netPosTeamBet}`);
-      console.log(
-        `marginChange: ${marginChange} netPosTeamOpp: ${netPosTeamOpp}`
-      );
+      // const betPayoff = await betting.moosev(0);
+      // const netPosTeamBet = await betting.moosev(1);
+      // const marginChange = await betting.moosev(2);
+      // const netPosTeamOpp = await betting.moosev(3);
+      // console.log(`betPayoff: ${betPayoff} netPosTeamBet: ${netPosTeamBet}`);
+      // console.log(
+      //   `marginChange: ${marginChange} netPosTeamOpp: ${netPosTeamOpp}`
+      // );
     });
   });
 });

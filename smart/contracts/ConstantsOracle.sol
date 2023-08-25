@@ -1,18 +1,16 @@
 pragma solidity ^0.8.0;
 
 //SPDX-License-Identifier: BUSL-1.1
-    
-// hour of day in GMT one can post new data for voting
-uint32 constant HOUR_POST = 12; // 12 in prod
-// hour of day in GMT after whic one can submit a data proposal for processing
 
+// hour of day in GMT one can post new data for voting
+uint32 constant HOUR_POST = 12;
+// hour of day in GMT after whic one can submit a data proposal for processing
 // minimum token requirement for data submissions
-uint32 constant BURN_AMT = 1e7;
-uint32 constant ONE_MILLION = 1e6;
+uint32 constant BURN_AMT = 2e6;
 // max for initial favorite
 uint16 constant MAX_DEC_ODDS_INIT = 1000;
-uint16 constant MIN_DEC_ODDS_INIT = 125;
-uint16 constant MAX_DEC_ODDS_UPDATE = 1500;
+uint16 constant MIN_DEC_ODDS_INIT = 110; // 150 in production
+uint16 constant MAX_DEC_ODDS_UPDATE = 1250;
 uint16 constant MIN_DEC_ODDS_UPDATE = 110;
 // param to check if contract is voting on initial schedule & odds
 uint8 constant STATUS_PROC_INIT = 10;
