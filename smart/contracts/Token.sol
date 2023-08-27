@@ -17,7 +17,7 @@ contract Token {
 
   event Transfer(address _from, address _to, uint64 _value);
   event Burn(address _from, uint64 _value);
-  // event Mint(address _from, uint64 _value);
+  event Mint(address _from, uint64 _value);
   event Approval(address _owner, address _spender, uint64 _value);
 
   constructor() {
@@ -82,9 +82,9 @@ contract Token {
     require(senderBalance >= _value);
     unchecked {
       balanceOf[_from] = senderBalance - _value;
-      balanceOf[oracleAdmin] += _value;
+     balanceOf[oracleAdmin] += _value;
     }
-    emit Transfer(_from, oracleAdmin, _value);
+   emit Transfer(_from, oracleAdmin, _value);
     return true;
   }
 

@@ -101,8 +101,6 @@ const ChainSwitch = ({ redirectURL }) => {
           }}
           onClick={switchChain}
         >
-          Install browser wallet extensions MetaMask or Core
-          <br />
           switch to {networkConfig.chainName} Network and Enter
         </button>
       </Box>

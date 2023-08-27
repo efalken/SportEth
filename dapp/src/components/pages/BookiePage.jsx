@@ -16,7 +16,6 @@ import { Link } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 
 function BookiePage() {
-  document.title = "LP Page";
   const { oracleContract, bettingContract, tokenContract, account } =
     useAuthContext();
 
@@ -38,6 +37,7 @@ function BookiePage() {
   const [tokensInK, setTokensInK] = useState("0");
   const [txnHash, setHash] = useState();
 
+  document.title = "LP Page";
   useEffect(() => {
     if (!bettingContract || !oracleContract || !tokenContract) return;
 
@@ -50,94 +50,83 @@ function BookiePage() {
   }, [bettingContract, oracleContract, tokenContract]);
 
   async function wdBook() {
-    try {
-      const stackId = await bettingContract.withdrawBook(sharesToSell);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+    const stackId = await bettingContract.withdrawBook(sharesToSell);
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch {
-      alert("invalid amount");
-      return;
-    }
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
   }
 
   async function claimRewards() {
-    try {
-      const stackId = await oracleContract.tokenReward();
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+    const stackId = await oracleContract.tokenReward();
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch {
-      alert("cannot claim");
-      return;
-    }
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
     //const receipt = await tx.wait(1);
   }
 
-  async function fundBook() {
-    let x = (Math.round(Number(fundAmount) * 1e4) / 100000000).toString();
-    console.log("x", x);
+  async function fundBook(x) {
+    console.log(fundAmount, "fundAmount");
     try {
       const stackId = await bettingContract.fundBook({
-        value: ethers.parseEther(x),
+        value: ethers.parseEther(fundAmount),
       });
       setHash(
         <div>
@@ -172,8 +161,7 @@ function BookiePage() {
         </div>
       );
     } catch (err) {
-      alert("invalid amount or wrong timing");
-      return;
+      console.log(err);
     }
   }
 
@@ -487,11 +475,9 @@ function BookiePage() {
                   Current Epoch: {currentWeek}{" "}
                 </Text>
                 <br></br>
-                {bookieEpoch > 0 > 0 ? (
-                  <Text size="14px" color={cwhite}>
-                    you can withdraw after epoch {bookieEpoch}
-                  </Text>
-                ) : null}
+                <Text size="14px" color={cwhite}>
+                  you can withdraw after epoch {bookieEpoch}
+                </Text>
               </Box>
             </Box>
             <Box>
@@ -524,26 +510,24 @@ function BookiePage() {
                       spacing="1px"
                     />{" "}
                     <br />
-                    {ethBookie > 0 && tokensInK > 0 ? (
-                      <button
-                        style={{
-                          backgroundColor: "black",
-                          borderRadius: "10px",
-                          padding: "4px",
-                          //borderRadius: "1px",
-                          cursor: "pointer",
-                          color: "yellow",
-                          border: "1px solid #ffff00",
-                        }}
-                        value={0}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          claimRewards();
-                        }}
-                      >
-                        Claim Reward
-                      </button>
-                    ) : null}
+                    <button
+                      style={{
+                        backgroundColor: "black",
+                        borderRadius: "10px",
+                        padding: "4px",
+                        //borderRadius: "1px",
+                        cursor: "pointer",
+                        color: "yellow",
+                        border: "1px solid #ffff00",
+                      }}
+                      value={0}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        claimRewards();
+                      }}
+                    >
+                      Claim Reward
+                    </button>
                   </Box>
                 </Flex>
               ) : null}

@@ -13,10 +13,11 @@ import { Link } from "react-router-dom";
 import { ethers } from "ethers";
 
 function OraclePage() {
-  document.title = "Oracle Page";
   const { oracleContract, bettingContract, tokenContract, account } =
     useAuthContext();
 
+  document.title = "Oracle Page";
+  //
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -91,208 +92,184 @@ function OraclePage() {
   }, [scheduleString]);
 
   async function voteNofn() {
-    try {
-      const stackId = await oracleContract.vote(false);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+    console.log(voteNo, "voteNo");
+    const stackId = await oracleContract.vote(false);
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch {
-      alert("can't vote");
-      return;
-    }
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
   }
 
   async function voteYesfn() {
-    try {
-      const stackId = await oracleContract.vote(true);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+    const stackId = await oracleContract.vote(true);
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch {
-      alert("can't vote");
-      return;
-    }
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
   }
 
   async function processVote() {
-    try {
-      const stackId = await oracleContract.processVote();
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+    const stackId = await oracleContract.processVote();
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch {
-      alert("invalid transaction");
-      return;
-    }
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
   }
 
   async function depositTokens() {
-    try {
-      const stackId = await oracleContract.depositTokens(depositAmount);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+    const stackId = await oracleContract.depositTokens(depositAmount);
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch {
-      alert("invalid amount");
-      return;
-    }
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
   }
 
   async function withdrawTokens() {
-    try {
-      const stackId = await oracleContract.withdrawTokens(withdrawAmount);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+    const stackId = await oracleContract.withdrawTokens(withdrawAmount);
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch {
-      alert("wrong timing or amount");
-      return;
-    }
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div onClick={() => setHash(null)}>
+          <a
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href="javascript:void(0)"
+          >
+            click here to dismiss
+          </a>
+        </div>
+      </div>
+    );
   }
 
   async function findValues() {
@@ -384,17 +361,18 @@ function OraclePage() {
     if (currW4 > baseEpoch) {
       coeff = totalVotes / 2 / (currW4 - baseEpoch);
     }
-    coeff = coeff > 1 ? 1 : coeff;
-    let x = (tokens * (feeData1 - initFeePool)) / 1000000;
-    coeff = (coeff * x) / 10000;
+    if (coeff > tokens) {
+      coeff = tokens;
+    }
+    let x = (feeData1 - initFeePool) / 1000000;
+    coeff = (coeff * x) / 100000000;
     // coeff = totalVotes;
     console.log(coeff, "coeff");
-    coeff = parseInt(coeff);
     return coeff;
   }
 
-  // console.log(reviewStatus, "reviewStatus");
-  //  console.log(feeData1, "feeData1");
+  console.log(reviewStatus, "reviewStatus");
+  console.log(feeData1, "feeData1");
   /*
 console.log(currW4, "currEpoch");
 console.log(baseEpoch, "baseepoch");
@@ -414,7 +392,7 @@ console.log(reviewStatus, "reviewStatus");
   function getOutcome(outcomei) {
     let outx = "lose";
     let outnum = Number(outcomei);
-    if (outnum === 0) {
+    if (outnum === 1) {
       outx = "win";
     } else if (outnum === 2) {
       outx = "tie";
@@ -425,15 +403,15 @@ console.log(reviewStatus, "reviewStatus");
   function reviewStatusWord(revStatusi) {
     let statusWord = "na";
     if (revStatusi === 0) {
-      statusWord = "Post settle, waiting for new slate";
+      statusWord = "init";
     } else if (revStatusi === 10) {
-      statusWord = "voting on new slate";
+      statusWord = "process Initial";
     } else if (revStatusi === 20) {
-      statusWord = "voting on updated odds";
+      statusWord = "process update";
     } else if (revStatusi === 30) {
-      statusWord = "voting on outcome post";
+      statusWord = "process Settle";
     } else if (revStatusi === 2) {
-      statusWord = "Waiting for update or settlement";
+      statusWord = "waiting for update or settlement post";
     }
     return statusWord;
   }
@@ -618,9 +596,10 @@ console.log(reviewStatus, "reviewStatus");
                 <Box mb="10px" mt="10px">
                   <Text size="14px" color="#ffffff">
                     Active Epoch: {currW4}
-                    <br />
-                    Total Tokens in Contract:{" "}
-                    {Number(feeData0).toLocaleString()}
+                  </Text>
+                  <br />
+                  <Text size="14px" className="style">
+                    Your Tokens in Contract: {Number(tokens).toLocaleString()}
                   </Text>
                 </Box>
               </Flex>
@@ -632,13 +611,14 @@ console.log(reviewStatus, "reviewStatus");
                     </Text>
                     <br />
                     <Text size="14px" className="style">
-                      Your Votes: {totalVotes} over {currW4 - baseEpoch} epochs
-                      <br />
-                      Your Tokens in Contract: {Number(tokens).toLocaleString()}
+                      Your Voting %:{" "}
+                      {Number(
+                        (Number(totalVotes) * 100) / (currW4 - baseEpoch)
+                      ).toFixed(0) + " %"}
                     </Text>
                     <br />
                     <Text size="14px" className="style">
-                      USD value of your accrued Avax:{" "}
+                      Avax Value of your tokens:{" "}
                       {Number(ethToClaim()).toLocaleString()}
                     </Text>
                   </Box>
@@ -649,24 +629,6 @@ console.log(reviewStatus, "reviewStatus");
                 flexDirection="row"
                 justifyContent="space-between"
               ></Flex>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
-                {Number(voteYes).toLocaleString()}
-              </Text>
-            </Box>
-            <Box mb="10px" mt="10px">
-              <Text size="14px" className="style">
-                Proposer:
-                <TruncatedAddress
-                  addr={proposer}
-                  start="8"
-                  end="0"
-                  transform="uppercase"
-                  spacing="1px"
-                />
-              </Text>
             </Box>
             <Flex
               mt="5px"
@@ -711,6 +673,24 @@ console.log(reviewStatus, "reviewStatus");
                   >
                     Vote Yes
                   </button>
+                  <Box mb="10px" mt="10px">
+                    <Text size="14px" className="style">
+                      No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
+                      {Number(voteYes).toLocaleString()}
+                    </Text>
+                  </Box>
+                  <Box mb="10px" mt="10px">
+                    <Text size="14px" className="style">
+                      Proposer:
+                      <TruncatedAddress
+                        addr={proposer}
+                        start="8"
+                        end="0"
+                        transform="uppercase"
+                        spacing="1px"
+                      />
+                    </Text>
+                  </Box>
                 </Box>
               ) : (
                 <Text size="14px" className="style">
