@@ -10,14 +10,12 @@ import VBackgroundCom from "../basics/VBackgroundCom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import TeamTable from "../blocks/TeamTable2";
 import { Link } from "react-router-dom";
-import { ethers } from "ethers";
 
 function OraclePage() {
-  const { oracleContract, bettingContract, tokenContract, account } =
-    useAuthContext();
+  const { oracleContract, bettingContract, tokenContract, account } = useAuthContext();
 
   document.title = "Oracle Page";
-  //
+//  
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -25,7 +23,7 @@ function OraclePage() {
   const [outcomes, setOutcomes] = useState([]);
   const [voteNo, setVoteNo] = useState(0);
   const [voteYes, setVoteYes] = useState(0);
-
+ 
   const [propNumber, setPropNumber] = useState(0);
   const [reviewStatus, setReviewStatus] = useState(0);
   const [currW4, setCurrW4] = useState(0);
@@ -37,18 +35,17 @@ function OraclePage() {
   const [proposer, setProposer] = useState("0x123");
   const [startTime, setStartTime] = useState([]);
   const [teamSplit, setTeamSplit] = useState([]);
-
+  
   const [eoaTokens, setEoaTokens] = useState(0);
   const [baseEpoch, setBaseEpoch] = useState(0);
   const [voteTracker, setVoteTracker] = useState(0);
   const [tokens, setTokens] = useState(0);
   const [totalVotes, setTotalVotes] = useState(0);
   const [initFeePool, setInitFeePool] = useState(0);
-  const [feeData0, setFeeData0] = useState(0);
   const [feeData1, setFeeData1] = useState(0);
-  const [depositAmount, setDepositAmount] = useState(0);
-  const [withdrawAmount, setWithdrawAmount] = useState(0);
-  const [txnHash, setHash] = useState();
+    const [tokenRewardsLeft, setTokenRewardsLeft] = useState(0);
+    const [depositAmount, setDepositAmount] = useState(0);
+    const [withdrawAmount, setWithdrawAmount] = useState(0);
 
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
@@ -59,6 +56,26 @@ function OraclePage() {
       clearInterval(interval1);
     };
   }, [bettingContract, oracleContract]);
+
+  async function depositTokens() {
+    try {
+      await oracleContract.depositTokens({
+        value: depositAmount,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function withdrawTokens() {
+    try {
+      await oracleContract.depositTokens({
+        value: withdrawAmount,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   let [odds0, setOdds0] = useState([
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
@@ -79,7 +96,7 @@ function OraclePage() {
     for (let ii = 0; ii < 32; ii++) {
       if (oddsVector) odds999 = Number(oddsVector[ii]);
       odds0[ii] = odds999 || 0;
-      odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45) || 0;
+      odds1[ii] = Math.floor(1000000 / (odds999 + 50) - 1) || 0;
     }
     setOdds0(odds0);
     setOdds1(odds1);
@@ -92,183 +109,13 @@ function OraclePage() {
 
   async function voteNofn() {
     console.log(voteNo, "voteNo");
-    const stackId = await oracleContract.vote(false);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+    let vote99 = false;
+    await oracleContract.vote(vote99);
   }
 
   async function voteYesfn() {
-    const stackId = await oracleContract.vote(true);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  async function processVote() {
-    const stackId = await oracleContract.processVote();
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  async function depositTokens() {
-    const stackId = await oracleContract.depositTokens(depositAmount);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  async function withdrawTokens() {
-    const stackId = await oracleContract.withdrawTokens(withdrawAmount);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+    let vote99 = true;
+    await oracleContract.vote(vote99);
   }
 
   async function findValues() {
@@ -289,7 +136,7 @@ function OraclePage() {
 
     let _oddsvector = (await oracleContract.showPropOdds()) || [];
     setOddsVector(_oddsvector);
-
+    
     let _outcomes = (await oracleContract.showPropResults()) || [];
     setOutcomes(_outcomes);
 
@@ -311,30 +158,34 @@ function OraclePage() {
     let _feeData1 = Number(await oracleContract.feeData(1)) || 0;
     setFeeData1(_feeData1);
 
-    let _feeData0 = Number(await oracleContract.feeData(0)) || 0;
-    setFeeData0(_feeData0);
-
     let _proposer = (await oracleContract.proposer()) || "0x123";
     setProposer(_proposer);
 
     let oc = await oracleContract.adminStruct(account);
     let _voteTracker = oc ? Number(oc.voteTracker) : 0;
     setVoteTracker(_voteTracker);
-    let _tokens = oc ? Number(oc.tokens) : 0;
+    let _tokens = oc ?  Number(oc.tokens) : 0;
     setTokens(_tokens);
-    let _baseEpoch = oc ? Number(oc.baseEpoch) : 0;
+    let _baseEpoch =  oc ? Number(oc.baseEpoch) : 0;
     setBaseEpoch(_baseEpoch);
-    let _totalVotes = oc ? Number(oc.totalVotes) : 0;
+    let _totalVotes =  oc ? Number(oc.totalVotes) : 0;
     setTotalVotes(_totalVotes);
-    let _initFeePool = oc ? Number(oc.initFeePool) : 0;
+    let _initFeePool =  oc ? Number(oc.initFeePool) : 0;
     setInitFeePool(_initFeePool);
 
-    let _eoaTokens = Number((await tokenContract.balanceOf(account)) || 0);
-    setEoaTokens(_eoaTokens);
+    let _eoaTokens =
+    Number((await tokenContract.balanceOf(account)) || 0);
+     setEoaTokens(_eoaTokens);
 
+  let _tokenRewardsLeft = Number(await oracleContract.rewardTokensLeft() || 0);
+  setTokenRewardsLeft(_tokenRewardsLeft);
+  
     let sctring = await oracleContract.showSchedString();
     setScheduleString(sctring);
   }
+
+  
+
 
   function getMoneyLine(decOddsi) {
     let moneyline = 1;
@@ -353,21 +204,15 @@ function OraclePage() {
   function ethToClaim() {
     let coeff = 0;
     if (currW4 > baseEpoch) {
-      coeff = totalVotes / 2 / (currW4 - baseEpoch);
+    coeff = totalVotes / 2 / (currW4 - baseEpoch)/1000000
     }
-    if (coeff > tokens) {
-      coeff = tokens;
-    }
-    let x = (feeData1 - initFeePool) / 1000000;
-    coeff = (coeff * x) / 100000000;
-    // coeff = totalVotes;
-    console.log(coeff, "coeff");
-    return coeff;
-  }
+    if (coeff > tokens) {coeff = tokens};
+    let x = (feeData1 - initFeePool)/1000000
+    coeff = coeff * x / 1000000;
+  // coeff = totalVotes;
+  return coeff;
+}
 
-  console.log(reviewStatus, "reviewStatus");
-  console.log(feeData1, "feeData1");
-  /*
 console.log(currW4, "currEpoch");
 console.log(baseEpoch, "baseepoch");
 console.log(tokens, "tokens");
@@ -377,7 +222,8 @@ console.log(reviewStatus, "reviewStatus");
   console.log(voteTracker, "voteTracker");
   console.log(feeData1, "feeData1");
   console.log(initFeePool, "initFeePool");
-*/
+
+
 
   function switchOdds() {
     setShowDecimalOdds(!showDecimalOdds);
@@ -403,7 +249,7 @@ console.log(reviewStatus, "reviewStatus");
     } else if (revStatusi === 20) {
       statusWord = "process update";
     } else if (revStatusi === 30) {
-      statusWord = "voting on outcomes";
+      statusWord = "process Settle";
     } else if (revStatusi === 2) {
       statusWord = "waiting for update or settlement post";
     }
@@ -412,29 +258,9 @@ console.log(reviewStatus, "reviewStatus");
 
   function needToVote() {
     let needtovote = true;
-    if (
-      Number(voteTracker) === Number(propNumber) ||
-      Number(tokens) === 0 ||
-      reviewStatus < 9
-    ) {
+    if (Number(voteTracker) === Number(propNumber) || Number(tokens) === 0 || reviewStatus < 9) {
       needtovote = false;
-    }
-    return needtovote;
-  }
-
-  function Voted() {
-    let voted = true;
-    if (Number(voteTracker) === Number(propNumber) && Number(tokens) > 0) {
-      voted = true;
-    }
-    return voted;
-  }
-
-  function needToProcess() {
-    let needtovote = true;
-    if (reviewStatus < 9) {
-      needtovote = false;
-    }
+      }
     return needtovote;
   }
 
@@ -567,73 +393,11 @@ console.log(reviewStatus, "reviewStatus");
                 flexDirection="row"
                 justifyContent="space-between"
               ></Flex>
-              <Box>
-                <Form
-                  onChange={setDepositAmount}
-                  value={depositAmount}
-                  onSubmit={depositTokens}
-                  mb="20px"
-                  justifyContent="flex-start"
-                  padding="4px"
-                  placeholder="# oracle tokens"
-                  buttonLabel="Deposit"
-                  buttonWidth="70px"
-                />
-              </Box>
-              <Box>
-                <Form
-                  onChange={setWithdrawAmount}
-                  value={withdrawAmount}
-                  onSubmit={withdrawTokens}
-                  mb="20px"
-                  justifyContent="flex-start"
-                  padding="4px"
-                  placeholder="# oracle tokens"
-                  buttonLabel="WithDraw"
-                  buttonWidth="70px"
-                />
-              </Box>
 
               <Flex justifyContent="left">
-                <Box mb="10px" mt="10px">
-                  <Text size="14px" color="#ffffff">
-                    Active Epoch: {currW4}
-                  </Text>
-                  <br />
-                  <Text size="14px" className="style">
-                    Your Tokens in Contract: {Number(tokens).toLocaleString()}
-                  </Text>
-                </Box>
-              </Flex>
-              <Flex justifyContent="left">
-                {tokens > 0 ? (
-                  <Box>
-                    {Number(voteTracker) === Number(propNumber) ? (
-                      <Text size="14px" className="style" color="#0fff00">
-                        you voted!
-                        <br />
-                      </Text>
-                    ) : null}
-                    <Text size="14px" className="style">
-                      Your Tokens in Contract: {Number(tokens).toLocaleString()}
-                      <br />
-                      your base Epoch: {baseEpoch}
-                    </Text>
-                    <br />
-                    <Text size="14px" className="style">
-                      Your Votes: {totalVotes} over {currW4 - baseEpoch} epochs
-                      Your Voting %:{" "}
-                      {Number(
-                        (Number(totalVotes) * 100) / (currW4 - baseEpoch)
-                      ).toFixed(0) + " %"}
-                    </Text>
-                    <br />
-                    <Text size="14px" className="style">
-                      Avax Value of your tokens:{" "}
-                      {Number(ethToClaim()).toLocaleString()}
-                    </Text>
-                  </Box>
-                ) : null}
+                <Text size="14px" color="#ffffff">
+                  Active Epoch: {currW4}
+                </Text>
               </Flex>
               <Flex
                 mt="10px"
@@ -684,97 +448,109 @@ console.log(reviewStatus, "reviewStatus");
                   >
                     Vote Yes
                   </button>
-                  <Box mb="10px" mt="10px">
-                    <Text size="14px" className="style">
-                      No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
-                      {Number(voteYes).toLocaleString()}
-                    </Text>
-                  </Box>
-                  <Box mb="10px" mt="10px">
-                    <Text size="14px" className="style">
-                      Proposer:
-                      <TruncatedAddress
-                        addr={proposer}
-                        start="8"
-                        end="0"
-                        transform="uppercase"
-                        spacing="1px"
-                      />
-                    </Text>
-                  </Box>
                 </Box>
               ) : (
                 <Text size="14px" className="style">
                   {" "}
-                </Text>
-              )}
-            </Flex>
-            <Flex
-              mt="5px"
-              flexDirection="row"
-              justifyContent="flex-start"
-              alignItems="center"
-            >
-              {needToProcess() ? (
-                <Box>
-                  <button
-                    style={{
-                      backgroundColor: "black",
-                      borderRadius: "5px",
-                      padding: "4px",
-                      //borderRadius: "1px",
-                      cursor: "pointer",
-                      color: "yellow",
-                      border: "1px solid #ffff00",
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      processVote();
-                    }}
-                  >
-                    Process Vote
-                  </button>
-                </Box>
-              ) : (
-                <Text size="14px" className="style">
-                  {" "}
+                  You Can't Vote
                 </Text>
               )}
             </Flex>
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-                ConcentrationLimit: {concentrationLimit}
-              </Text>{" "}
-              <br />
-              <Text size="14px" className="style">
-                minSubmit: {Math.floor(minSubmit / 1e7).toFixed(1) + "%"}
+                No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
+                {Number(voteYes).toLocaleString()}
               </Text>
-              <br />
+            </Box>
+            <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-                Paused Matches: {pause0}; {pause1}
+                Proposer:
+              <TruncatedAddress
+                addr={proposer}
+                start="8"
+                end="0"
+                transform="uppercase"
+                spacing="1px"
+              />
               </Text>
-              <br />
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                ConcentrationLimit: {concentrationLimit} minSubmit: {Number(minSubmit).toLocaleString()}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                PausedBets: {pause0} , {pause1}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
                 current Submission #: {propNumber}
               </Text>
-              <br />
+            </Box>
+            <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
                 Last Proposal Vote: {voteTracker}
               </Text>
-              <br />
+            </Box>
+            <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
-                Tokens in EOA: {Number(eoaTokens).toLocaleString()}
+                Tokens in EOA: {Number(eoaTokens).toString()}
               </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                base Epoch: {baseEpoch}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                VotesSinceLastClaim: {Number(totalVotes).toLocaleString()}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                Your Tokens in Contract: {Number(tokens).toLocaleString()}
+              </Text>
+            </Box>
+            <Box mb="10px" mt="10px">
+              <Text size="14px" className="style">
+                ethValue of your tokens: {Number(ethToClaim()).toLocaleString()}
+              </Text>
+            </Box>
+            <Box>
+              <Form
+                onChange={setDepositAmount}
+                value={depositAmount}
+                onSubmit={depositTokens}
+                mb="20px"
+                justifyContent="flex-start"
+                padding="4px"
+                placeholder="# avax"
+                buttonLabel="Deposit"
+              />
+            </Box>
+            <Box>
+              <Form
+                onChange={setWithdrawAmount}
+                value={withdrawAmount}
+                onSubmit={withdrawTokens}
+                mb="20px"
+                justifyContent="flex-start"
+                padding="4px"
+                placeholder="# avax"
+                buttonLabel="WithDraw"
+              />
             </Box>
           </Box>
         }
       >
         <Flex justifyContent="center">
           <Text size="25px" className="style">
-            Oracle/Admin Page{" "}
+           Oracle/Admin Page{" "}
           </Text>
         </Flex>
-        <Box> {txnHash}</Box>
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifyContent="marginLeft">
             <Text size="14px" weight="300" className="style">
@@ -795,15 +571,9 @@ console.log(reviewStatus, "reviewStatus");
           }}
         ></Flex>
         <Box mb="10px" mt="10px">
-          {reviewStatus < 10 ? (
-            <Text size="14px" className="style">
-              ReviewStatus: {reviewStatusWord(reviewStatus)}
-            </Text>
-          ) : (
-            <Text size="14px" className="style" color="#00ff00">
-              ReviewStatus: {reviewStatusWord(reviewStatus)}
-            </Text>
-          )}
+          <Text size="14px" className="style">
+            ReviewStatus: {reviewStatusWord(reviewStatus)}
+          </Text>
         </Box>
 
         <Box>
