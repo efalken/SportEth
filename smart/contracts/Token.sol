@@ -6,14 +6,14 @@ SPDX-License-Identifier: WTFPL
 */
 
 contract Token {
-  uint64 public decimals;
-  uint64 public totalSupply;
+  uint8 public _decimals;
+  uint64 public _totalSupply;
   uint64 public constant MINT_AMT = 1e9;
   address public oracleAdmin;
-  mapping(address => uint64) public balanceOf;
-  mapping(address => mapping(address => uint64)) public allowance;
-  string public name;
-  string public symbol;
+  mapping(address => uint64) public _balances;
+  mapping(address => mapping(address => uint64)) public _allowances;
+  string public _name;
+  string public _symbol;
 
   event Transfer(address _from, address _to, uint64 _value);
   event Burn(address _from, uint64 _value);
@@ -21,18 +21,18 @@ contract Token {
   event Approval(address _owner, address _spender, uint64 _value);
 
   constructor() {
-    balanceOf[msg.sender] = MINT_AMT;
-    totalSupply = MINT_AMT;
-    name = "AvaxSportsBook";
-    decimals = 0;
-    symbol = "ASB";
+    _balances[msg.sender] = MINT_AMT;
+    _totalSupply = MINT_AMT;
+    _name = "AvaxSportsBook";
+    _decimals = 0;
+    _symbol = "ASB";
   }
 
   function approve(
     address _spender,
     uint64 _value
   ) external returns (bool success) {
-    allowance[msg.sender][_spender] = _value;
+    _allowances[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
     return true;
   }
@@ -41,18 +41,18 @@ contract Token {
   //   address _spender,
   //   uint64 _value
   // ) external onlyAdmin returns (bool success) {
-  //   totalSupply += _value;
-  //   balanceOf[_spender] += _value;
+  //   _totalSupply += _value;
+  //   _balances[_spender] += _value;
   //   emit Mint(_spender, _value);
   //   return true;
   // }
 
   function transfer(address _recipient, uint64 _value) external returns (bool) {
-    uint64 senderBalance = balanceOf[msg.sender];
-    require(balanceOf[msg.sender] >= _value, "nsf");
+    uint64 senderBalance = _balances[msg.sender];
+    require(_balances[msg.sender] >= _value, "nsf");
     unchecked {
-      balanceOf[msg.sender] = senderBalance - _value;
-      balanceOf[_recipient] += _value;
+      _balances[msg.sender] = senderBalance - _value;
+      _balances[_recipient] += _value;
     }
     emit Transfer(msg.sender, _recipient, _value);
     return true;
@@ -63,12 +63,14 @@ contract Token {
     address _recipient,
     uint64 _value
   ) external returns (bool) {
-    uint64 senderBalance = balanceOf[_from];
-    require(senderBalance >= _value && allowance[_from][msg.sender] >= _value);
+    uint64 senderBalance = _balances[_from];
+    require(
+      senderBalance >= _value && _allowances[_from][msg.sender] >= _value
+    );
     unchecked {
-      balanceOf[_from] = senderBalance - _value;
-      balanceOf[_recipient] += _value;
-      allowance[_from][msg.sender] -= _value;
+      _balances[_from] = senderBalance - _value;
+      _balances[_recipient] += _value;
+      _allowances[_from][msg.sender] -= _value;
     }
     emit Transfer(_from, _recipient, _value);
     return true;
@@ -78,11 +80,16 @@ contract Token {
     address _from,
     uint64 _value
   ) external onlyAdmin returns (bool) {
-    uint64 senderBalance = balanceOf[_from];
+    uint64 senderBalance = _balances[_from];
     require(senderBalance >= _value);
     unchecked {
+<<<<<<< HEAD
+      _balances[_from] = senderBalance - _value;
+      _balances[oracleAdmin] += _value;
+=======
       balanceOf[_from] = senderBalance - _value;
      balanceOf[oracleAdmin] += _value;
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
     }
    emit Transfer(_from, oracleAdmin, _value);
     return true;
@@ -99,13 +106,55 @@ contract Token {
   }
 
   function burn(uint64 _value) external returns (bool) {
-    uint64 senderBalance = balanceOf[msg.sender];
-    require(balanceOf[msg.sender] >= _value, "nsf");
+    uint64 senderBalance = _balances[msg.sender];
+    require(_balances[msg.sender] >= _value, "nsf");
     unchecked {
-      balanceOf[msg.sender] = senderBalance - _value;
-      totalSupply -= _value;
+      _balances[msg.sender] = senderBalance - _value;
+      _totalSupply -= _value;
     }
     emit Burn(msg.sender, _value);
     return true;
+  }
+
+  /**
+   * @dev Returns the name of the token.
+   */
+  function name() public view virtual returns (string memory) {
+    return _name;
+  }
+
+  /**
+   * @dev Returns the symbol of the token
+   */
+  function symbol() public view virtual returns (string memory) {
+    return _symbol;
+  }
+
+  /**
+   * @dev Returns the number of _decimals used to get its user representation.
+   */
+  function decimals() public view virtual returns (uint8) {
+    return _decimals;
+  }
+
+  /**
+   * @dev See {IERC20-_totalSupply}.
+   */
+  function totalSupply() public view virtual returns (uint64) {
+    return _totalSupply;
+  }
+
+  /**
+   * @dev See {IERC20-balanceOf}.
+   */
+  function balanceOf(address account) public view virtual returns (uint64) {
+    return _balances[account];
+  }
+
+  function allowance(
+    address owner,
+    address spender
+  ) public view virtual returns (uint64) {
+    return _allowances[owner][spender];
   }
 }

@@ -32,7 +32,6 @@ function BetPage() {
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
   const [betHistory, setBetHistory] = useState([{}]);
-  // const [moose, setMoose] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
@@ -45,10 +44,10 @@ function BetPage() {
   const [teamSplit, setTeamSplit] = useState([]);
   const [oddsVector, setOddsVector] = useState([]);
   const [startTime, setStartTime] = useState([]);
+  //const [tokenRewardsLeft, setTokenRewardsLeft] = useState(0);
   //const [eoaBalance, setEoaBalance] = useState("0");
   const [counter, setCounter] = useState(0);
   const [txnHash, setHash] = useState();
-  const [moose, setMoose] = useState("0");
   const [odds0, setOdds0] = useState([
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
@@ -71,9 +70,12 @@ function BetPage() {
   ]);
   let netLiab = [liab0, liab1];
 
+<<<<<<< HEAD
+=======
   document.title = "Betting Page";
   console.log(counter, "counter");
   console.log(moose, "moose");
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
     const interval1 = setInterval(() => {
@@ -359,6 +361,13 @@ function BetPage() {
     let _totalLpCapital = Number((await bettingContract.margin(0)) || "0");
     setUnlockedLpCapital(_totalLpCapital);
 
+    // let _tokenRewardsLeft = Number(
+    //   (await tokenContract.balanceOf(
+    //     "0xBe638524D4bCA056c2B2D3A75546bA3c4cF0E392"
+    //   )) || 0
+    // );
+    // setTokenRewardsLeft(_tokenRewardsLeft);
+
     let _gameStart = Number((await bettingContract.params(3)) || 0);
     setGameStart(_gameStart);
 
@@ -371,8 +380,8 @@ function BetPage() {
     let _currTime = Number(Math.floor(new Date().getTime() / 1000)) || 0;
     setCurrTime(_currTime);
 
-    let _moose = Number((await bettingContract.moose()) || "0");
-    setMoose(_moose);
+    // let _moose = Number((await bettingContract.moose()) || "0");
+    // setMoose(_moose);
 
     let _lockedLpCapital = Number((await bettingContract.margin(1)) || "0");
     setUsedCapital(_lockedLpCapital);

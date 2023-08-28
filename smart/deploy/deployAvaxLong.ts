@@ -56,15 +56,22 @@ async function main() {
   await token.setAdmin(oracle.address);
   await new Promise((resolve) => setTimeout(resolve, 20000));
 
-  result = await oracle.depositTokens(150n*million);
+  result = await oracle.depositTokens(175n*million);
   await result.wait();
   console.log(`got here2`);
   await new Promise((resolve) => setTimeout(resolve, 20000));
 
 
-  result = await token.transfer(accounts[1], 250n * million);
+  result = await token.transfer(accounts[1], 100n * million);
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
+<<<<<<< HEAD
+  result = await token.transfer(accounts[2], 125n * million);
+  await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await token.transfer(betting.address, 600n * million);
+=======
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
   // result = await oracle.connect(signers[1]).depositTokens(250n*million);
   // await result.wait();
 /*
@@ -192,10 +199,18 @@ async function main() {
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
 
+<<<<<<< HEAD
+  result = await betting.tokenReward();
+  await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 20000));
+
+
+=======
   const ownershares0 = (await betting.lpStruct(accounts[0])).shares;
       console.log(`acct0 shares ${ownershares0}`);
       const margin00 = await betting.margin(0);
       console.log(`margin0 ${margin00}`);
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
 
   result = await betting.connect(signers[1]).fundBettor({
     value: 20n*eths,
@@ -251,6 +266,9 @@ async function main() {
       receipt = result.wait();
       console.log(`line 250`);
       await new Promise((resolve) => setTimeout(resolve, 25000));
+      result = await betting.tokenReward();
+      await result.wait();
+      await new Promise((resolve) => setTimeout(resolve, 20000));
     // nextStart = nextStart + 7 * 24 * secondsInHour;
       result = await oracle.initPost(
         [
@@ -388,6 +406,9 @@ async function main() {
       receipt = result.wait();
       console.log(`line 387`);
       await new Promise((resolve) => setTimeout(resolve, 50000));
+      result = await betting.tokenReward();
+      await result.wait();
+      await new Promise((resolve) => setTimeout(resolve, 20000));
       
       result = await oracle.initPost(
         [

@@ -46,7 +46,6 @@ function OraclePage() {
   const [initFeePool, setInitFeePool] = useState(0);
   const [feeData0, setFeeData0] = useState(0);
   const [feeData1, setFeeData1] = useState(0);
-  const [tokenRewardsLeft, setTokenRewardsLeft] = useState(0);
   const [depositAmount, setDepositAmount] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState(0);
   const [txnHash, setHash] = useState();
@@ -333,11 +332,6 @@ function OraclePage() {
     let _eoaTokens = Number((await tokenContract.balanceOf(account)) || 0);
     setEoaTokens(_eoaTokens);
 
-    let _tokenRewardsLeft = Number(
-      (await oracleContract.rewardTokensLeft()) || 0
-    );
-    setTokenRewardsLeft(_tokenRewardsLeft);
-
     let sctring = await oracleContract.showSchedString();
     setScheduleString(sctring);
   }
@@ -409,7 +403,11 @@ console.log(reviewStatus, "reviewStatus");
     } else if (revStatusi === 20) {
       statusWord = "process update";
     } else if (revStatusi === 30) {
+<<<<<<< HEAD
+      statusWord = "voting on outcomes";
+=======
       statusWord = "process Settle";
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
     } else if (revStatusi === 2) {
       statusWord = "waiting for update or settlement post";
     }
@@ -426,6 +424,14 @@ console.log(reviewStatus, "reviewStatus");
       needtovote = false;
     }
     return needtovote;
+  }
+
+  function Voted() {
+    let voted = true;
+    if (Number(voteTracker) === Number(propNumber) && Number(tokens) > 0) {
+      voted = true;
+    }
+    return voted;
   }
 
   function needToProcess() {
@@ -606,15 +612,27 @@ console.log(reviewStatus, "reviewStatus");
               <Flex justifyContent="left">
                 {tokens > 0 ? (
                   <Box>
+                    {Number(voteTracker) === Number(propNumber) ? (
+                      <Text size="14px" className="style" color="#0fff00">
+                        you voted!
+                        <br />
+                      </Text>
+                    ) : null}
                     <Text size="14px" className="style">
-                      base Epoch: {baseEpoch}
+                      Your Tokens in Contract: {Number(tokens).toLocaleString()}
+                      <br />
+                      your base Epoch: {baseEpoch}
                     </Text>
                     <br />
                     <Text size="14px" className="style">
+<<<<<<< HEAD
+                      Your Votes: {totalVotes} over {currW4 - baseEpoch} epochs
+=======
                       Your Voting %:{" "}
                       {Number(
                         (Number(totalVotes) * 100) / (currW4 - baseEpoch)
                       ).toFixed(0) + " %"}
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
                     </Text>
                     <br />
                     <Text size="14px" className="style">
@@ -784,11 +802,15 @@ console.log(reviewStatus, "reviewStatus");
           }}
         ></Flex>
         <Box mb="10px" mt="10px">
-          <Text size="14px" className="style">
-            ReviewStatus: {reviewStatusWord(reviewStatus)}
-            <br />
-            {reviewStatus}
-          </Text>
+          {reviewStatus < 10 ? (
+            <Text size="14px" className="style">
+              ReviewStatus: {reviewStatusWord(reviewStatus)}
+            </Text>
+          ) : (
+            <Text size="14px" className="style" color="#00ff00">
+              ReviewStatus: {reviewStatusWord(reviewStatus)}
+            </Text>
+          )}
         </Box>
 
         <Box>

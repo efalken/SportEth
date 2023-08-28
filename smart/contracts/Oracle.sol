@@ -2,10 +2,16 @@
 SPDX-License-Identifier: WTFPL
 @author Eric Falkenstein
 settle() timestamp > weekOver
+<<<<<<< HEAD
+basePropNumber set to epoch at deposit/reward/withdrawal 
+post() hourOfDay disabled on testnet
+amounts adjusted by 1e4 on testnet
+=======
 baseEpoch set to epoch at deposit/reward/withdrawal 
 voteEpoch: 2 votes per week
 post() hourOfDay
 HOUR_PROCESS set to 12 in production
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
 */
 pragma solidity ^0.8.0;
 
@@ -14,6 +20,101 @@ import "./Betting.sol";
 import "./ConstantsOracle.sol";
 
 contract Oracle {
+<<<<<<< HEAD
+  // results are 0 for team 0   winning, 1 for team 1 winning, 2 for a tie or no contest
+  uint8[32] public propResults;
+  uint8 public reviewStatus;
+  // slots are 0 for the initial favorite, 1 for initial underdog
+  uint16[32] public propOdds;
+  uint16 public betEpochOracle;
+  uint16 public propNumber;
+  // 0 yes votes, 1 no votes
+  uint32[2] public votes;
+  uint32 public gameStart;
+  uint32 public minSubmit;
+  //   0 total equity Tokens in Oracle, 1 feesPerLiqTracker
+  uint64[2] public feeData;
+  // start times in GMT UTC
+  uint32[32] public propStartTimes;
+  // keeps track of  who supplied data proposal, will be fined if data submission voted down
+  address public proposer;
+  /** the schedule is a record of "sport:home:away", such as "NFL:NYG:SF" for us football
+   */
+  string[32] public matchSchedule;
+  // track token holders: ownership metric, whether they voted, their basis for the token fees
+  mapping(address => AdminStruct) public adminStruct;
+  // this allows the contract to send the tokens
+  Token public token;
+  // link to communicate with the betting contract
+  Betting public bettingContract;
+
+  struct AdminStruct {
+    uint16 basePropNumber; // for rewards
+    uint16 baseEpoch; // for rewards
+    uint16 voteTracker; // propNumber
+    uint16 totalVotes; // numberVotes since last check
+    uint32 tokens;
+    uint64 initFeePool;
+  }
+
+  event ResultsPosted(uint16 epoch, uint16 propnum, uint8[32] winner);
+
+  event DecOddsPosted(uint16 epoch, uint16 propnum, uint16[32] decOdds);
+
+  event VoteOutcome(
+    bool voteResult,
+    uint16 propnum,
+    uint16 epoch,
+    uint32 yesvotes,
+    uint32 novotes
+  );
+
+  event BetDataPosted(uint16 epoch, uint16 propnum, uint32[32] oddsStart);
+
+  event ParamsPosted(uint32 concLimit);
+
+  event PausePosted(uint8 pausedMatch0, uint8 pausedMatch1);
+
+  event StartTimesPosted(uint16 epoch, uint16 propnum, uint32[32] starttimes);
+
+  event SchedulePosted(uint16 epoch, uint16 propnum, string[32] sched);
+
+  event Funding(
+    uint32 tokensChange,
+    uint256 etherChange,
+    address transactor,
+    bool withdrawal
+  );
+
+  event TokenReward(address liqprovider, uint64 tokens, uint64 epoch);
+
+  constructor(address payable bettingk, address payable _token) {
+    bettingContract = Betting(bettingk);
+    token = Token(_token);
+    // set initial bet epoch to 1
+    betEpochOracle = 1;
+    // sets initial proposal nonce to 1
+    propNumber = 1;
+    reviewStatus = STATUS_POST_0;
+    minSubmit = 1e8;
+  }
+
+  function vote(bool _vote) external {
+    // voter must have votes to allocate
+    require(adminStruct[msg.sender].tokens > 0);
+    // can only vote if there is a proposal
+    require(reviewStatus >= 10);
+    // voter must not have voted on this proposal
+    require(adminStruct[msg.sender].voteTracker != propNumber);
+    // this prevents this account from voting again on this data proposal
+    adminStruct[msg.sender].voteTracker = propNumber;
+    // votes are simply one's entire token balance in this oracle contract
+    uint32 _tokens = adminStruct[msg.sender].tokens;
+    if (_vote) {
+      votes[0] += _tokens;
+    } else {
+      votes[1] += _tokens;
+=======
     // results are 0 for team 0   winning, 1 for team 1 winning, 2 for a tie or no contest
     uint8[32] public propResults;
     uint8 public reviewStatus;
@@ -51,6 +152,7 @@ contract Oracle {
         uint32 tokens;
         uint32 totalVotes; // tokens x numberVotes
         uint64 initFeePool;
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
     }
 
     event ResultsPosted(uint16 epoch, uint16 propnum, uint8[32] winner);
@@ -75,6 +177,86 @@ contract Oracle {
 
     event SchedulePosted(uint16 epoch, uint16 propnum, string[32] sched);
 
+<<<<<<< HEAD
+  function showPropStartTimes() external view returns (uint32[32] memory) {
+    return propStartTimes;
+  }
+
+  function depositTokens(uint32 _amt) external {
+    require(
+      _amt > MIN_DEPOSIT || adminStruct[msg.sender].tokens > MIN_DEPOSIT,
+      "need 40 million, join a vault"
+    );
+    bool success = token.transferSpecial(msg.sender, _amt);
+    require(success, "token transfer failed");
+    uint256 _ethOut2;
+    feeData[0] += _amt;
+    if (
+      adminStruct[msg.sender].tokens > 0 &&
+      betEpochOracle > adminStruct[msg.sender].baseEpoch
+    ) {
+      _ethOut2 = ethClaim();
+    }
+    adminStruct[msg.sender].initFeePool = feeData[1];
+    adminStruct[msg.sender].tokens += _amt;
+    adminStruct[msg.sender].baseEpoch = betEpochOracle;
+    adminStruct[msg.sender].basePropNumber = propNumber;
+    adminStruct[msg.sender].totalVotes = 0;
+    emit Funding(_amt, _ethOut2, msg.sender, false);
+  }
+
+  function withdrawTokens(uint32 _amt) external {
+    require(_amt <= adminStruct[msg.sender].tokens, "nsf tokens");
+    require(betEpochOracle <= adminStruct[msg.sender].baseEpoch, "nsf tokens");
+    require(reviewStatus < 10, "no wd during vote");
+    feeData[0] -= _amt;
+    uint256 _ethOut1 = ethClaim();
+    adminStruct[msg.sender].initFeePool = feeData[1];
+    adminStruct[msg.sender].tokens -= _amt;
+    adminStruct[msg.sender].baseEpoch = betEpochOracle;
+    adminStruct[msg.sender].basePropNumber = propNumber;
+    adminStruct[msg.sender].totalVotes = 0;
+    bool success = token.transfer(msg.sender, _amt);
+    require(success, "token transfer failed");
+    emit Funding(_amt, _ethOut1, msg.sender, true);
+  }
+
+  // function tokenReward() external {
+  //   require(rewardTokensLeft > 0, "no token rewards left");
+  //   (uint256 lpShares, ) = bettingContract.lpStruct(msg.sender);
+  //   require(lpShares > 0, "only for liq providers");
+  //   uint32 lpepoch = adminStruct[msg.sender].baseEpoch;
+  //   uint32 _amt;
+  //   uint256 _ethOut3;
+  //   if (lpepoch == 0) {
+  //     adminStruct[msg.sender].baseEpoch = betEpochOracle;
+  //     adminStruct[msg.sender].initFeePool = 0;
+  //   } else if (lpepoch < betEpochOracle) {
+  //     uint256 totShares = uint256(bettingContract.margin(3));
+  //     _amt = uint32((uint256(lpShares) * EPOCH_AMOUNT) / totShares);
+  //     rewardTokensLeft -= _amt;
+  //     feeData[0] += _amt;
+  //     _ethOut3 = ethClaim();
+  //     adminStruct[msg.sender].initFeePool = feeData[1];
+  //     adminStruct[msg.sender].tokens += _amt;
+  //     adminStruct[msg.sender].baseEpoch = betEpochOracle;
+  //     adminStruct[msg.sender].totalVotes = 0;
+  //   }
+  //   emit Funding(_amt, _ethOut3, msg.sender, true);
+  // }
+
+  function post() internal {
+    // ********* TAKE OUT IN PRODUCTION *****************************
+    // require(hourOfDay() == HOUR_POST, "wrong hour");
+    uint32 _tokens = adminStruct[msg.sender].tokens;
+    require(_tokens >= minSubmit, "Need minimum submit of tokens");
+    votes[0] = _tokens;
+    proposer = msg.sender;
+    adminStruct[msg.sender].totalVotes++;
+    // this prevents proposer from voting again with his tokens on this submission
+    adminStruct[msg.sender].voteTracker = propNumber;
+  }
+=======
     event Funding(
         uint32 tokensChange,
         uint256 etherChange,
@@ -116,6 +298,7 @@ contract Oracle {
         adminStruct[msg.sender].totalVotes++;
         }
     }
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
 
     receive() external payable {}
 
@@ -172,6 +355,19 @@ contract Oracle {
         return true;
     }
 
+<<<<<<< HEAD
+  function ethClaim() internal returns (uint256 _ethOut0) {
+    uint256 votePercentx10000 = (uint256(adminStruct[msg.sender].totalVotes) *
+      10000) / uint256(propNumber - adminStruct[msg.sender].basePropNumber);
+    if (votePercentx10000 > 10000) votePercentx10000 = 10000;
+    uint256 ethTot = uint256(adminStruct[msg.sender].tokens) *
+      uint256(feeData[1] - adminStruct[msg.sender].initFeePool);
+    _ethOut0 = (votePercentx10000 * ethTot) / 10000;
+    uint256 ploughBack = ethTot - _ethOut0;
+    feeData[1] += uint64(ploughBack / uint256(feeData[0]));
+    payable(msg.sender).transfer(_ethOut0);
+  }
+=======
     function processVote() external {
         //require(hourOfDay() < HOUR_POST, "too soon");
         require(reviewStatus >= 10, "not time");
@@ -215,6 +411,7 @@ contract Oracle {
         );
         reset();
     }
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
 
     function adjParams(uint32 _concentrationLim, uint32 _minSubmit)
         external

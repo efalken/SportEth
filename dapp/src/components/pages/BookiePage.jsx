@@ -32,8 +32,9 @@ function BookiePage() {
   );
   const [bookieShares, setBookieShares] = useState("0");
   const [bookieEpoch, setBookieEpoch] = useState("0");
+  const [claimEpoch, setClaimEpoch] = useState("0");
   // const [tokenAmount, setTokenAmount] = useState("0");
-  // const [eoaTokens, setEoaTokens] = useState("0");
+  const [eoaTokens, setEoaTokens] = useState("0");
   const [tokensInK, setTokensInK] = useState("0");
   const [txnHash, setHash] = useState();
 
@@ -86,6 +87,40 @@ function BookiePage() {
   }
 
   async function claimRewards() {
+<<<<<<< HEAD
+    try {
+      const stackId = await bettingContract.tokenReward();
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
+=======
     const stackId = await oracleContract.tokenReward();
     setHash(
       <div>
@@ -102,6 +137,7 @@ function BookiePage() {
           >
             click here to txn on the blockchain
           </a>
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
         </div>
         <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
         <div onClick={() => setHash(null)}>
@@ -174,17 +210,19 @@ function BookiePage() {
     let _lockedLpCapital =
       Number((await bettingContract.margin(1)) || "0") / 10000;
     setUsedCapital(_lockedLpCapital);
-    //console.log(tokenAmount, "tokens");
+    // console.log(bettingContract, "address");
 
     let _betCapital = Number((await bettingContract.margin(2)) || "0") / 10000;
     setBetCapital(_betCapital);
 
-    let _tokenInK = (await oracleContract.rewardTokensLeft()) || "0";
+    let _tokenInK =
+      (await tokenContract.balanceOf(
+        "0xBe638524D4bCA056c2B2D3A75546bA3c4cF0E392"
+      )) || "0";
     setTokensInK(_tokenInK);
 
-    // let _eoaTokens =
-    // (await tokenContract.balanceOf(account)) || "0";
-    // setEoaTokens(_eoaTokens);
+    let _eoaTokens = (await tokenContract.balanceOf(account)) || "0";
+    setEoaTokens(_eoaTokens);
 
     let _currentWeek = Number(await bettingContract.params(0));
     setCurrentWeek(_currentWeek);
@@ -206,6 +244,9 @@ function BookiePage() {
 
     let _bookieEpoch = bs ? bs.outEpoch.toString() : "0";
     setBookieEpoch(_bookieEpoch);
+
+    let _claimEpoch = bs ? bs.claimEpoch.toString() : "0";
+    setBookieEpoch(_claimEpoch);
   }
 
   function unpack256(src) {
@@ -475,8 +516,19 @@ function BookiePage() {
                   Current Epoch: {currentWeek}{" "}
                 </Text>
                 <br></br>
+<<<<<<< HEAD
+                {bookieEpoch > 0 ? (
+                  <Text size="14px" color={cwhite}>
+                    you can withdraw after epoch {bookieEpoch}
+                  </Text>
+                ) : null}
+                <br></br>
+                <Text size="14px" color={cwhite}>
+                  you can withdraw after epoch {claimEpoch}
+=======
                 <Text size="14px" color={cwhite}>
                   you can withdraw after epoch {bookieEpoch}
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
                 </Text>
               </Box>
             </Box>
@@ -503,6 +555,11 @@ function BookiePage() {
               {Number(tokensInK) > 0 ? (
                 <Flex>
                   <Box>
+                    {eoaTokens > 0 ? (
+                      <Text size="14px" color={cwhite}>
+                        oracle tokens in your Wallet {eoaTokens}
+                      </Text>
+                    ) : null}
                     <LabeledText
                       big
                       label="Token Rewards Remaining"
@@ -510,6 +567,30 @@ function BookiePage() {
                       spacing="1px"
                     />{" "}
                     <br />
+<<<<<<< HEAD
+                    {ethBookie > 0 &&
+                    tokensInK > 0 &&
+                    claimEpoch < currentWeek ? (
+                      <button
+                        style={{
+                          backgroundColor: "black",
+                          borderRadius: "10px",
+                          padding: "4px",
+                          //borderRadius: "1px",
+                          cursor: "pointer",
+                          color: "yellow",
+                          border: "1px solid #ffff00",
+                        }}
+                        value={0}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          claimRewards();
+                        }}
+                      >
+                        Claim Reward
+                      </button>
+                    ) : null}
+=======
                     <button
                       style={{
                         backgroundColor: "black",
@@ -528,6 +609,7 @@ function BookiePage() {
                     >
                       Claim Reward
                     </button>
+>>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
                   </Box>
                 </Flex>
               ) : null}

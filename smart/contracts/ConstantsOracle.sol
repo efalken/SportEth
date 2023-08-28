@@ -25,4 +25,4 @@ uint8 constant STATUS_POST_2 = 2;
 // keeps track of  who supplied data proposal, will be fined if data submission voted down
 uint8 constant STATUS_POST_0 = 0;
 // keeps track of  who supplied data proposal, will be fined if data submission voted down
-uint256 constant EPOCH_AMOUNT = 3e7;
+uint32 constant MIN_DEPOSIT = 4e7;
