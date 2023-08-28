@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import Logo from "../basics/Logo";
 import { Flex, Box } from "rebass";
 import Text from "../basics/Text";
@@ -9,8 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { networkConfig } from "../../config";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { useChainId } from "../../helpers/switchAvalanche";
-// import wppdf from "../whitepaper/SportEth.pdf";
-// import excelSheet from "../whitepaper/sportEthData.xlsx";
+// ending of pk b5674343024bf75034d166cb26b90f0d179
 
 export default function Splash() {
   const [contracts, setContracts] = useState([{ asset: "NFL", id: 0 }]);
