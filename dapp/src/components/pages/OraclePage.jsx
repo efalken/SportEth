@@ -37,7 +37,7 @@ function OraclePage() {
   const [proposer, setProposer] = useState("0x123");
   const [startTime, setStartTime] = useState([]);
   const [teamSplit, setTeamSplit] = useState([]);
-
+  const [basePropNumber, setBasePropNumber] = useState(0);
   const [eoaTokens, setEoaTokens] = useState(0);
   const [baseEpoch, setBaseEpoch] = useState(0);
   const [voteTracker, setVoteTracker] = useState(0);
@@ -328,6 +328,8 @@ function OraclePage() {
     setTotalVotes(_totalVotes);
     let _initFeePool = oc ? Number(oc.initFeePool) : 0;
     setInitFeePool(_initFeePool);
+    let _basePropNumber = oc ? Number(oc.basePropNumber) : 0;
+    setInitFeePool(_basePropNumber);
 
     let _eoaTokens = Number((await tokenContract.balanceOf(account)) || 0);
     setEoaTokens(_eoaTokens);
@@ -624,7 +626,8 @@ console.log(reviewStatus, "reviewStatus");
                       Your Votes: {totalVotes} over {currW4 - baseEpoch} epochs
                       Your Voting %:{" "}
                       {Number(
-                        (Number(totalVotes) * 100) / (currW4 - baseEpoch)
+                        (Number(totalVotes) * 100) /
+                          (propNumber - -basePropNumber)
                       ).toFixed(0) + " %"}
                     </Text>
                     <br />

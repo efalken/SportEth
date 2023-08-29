@@ -173,30 +173,6 @@ contract Oracle {
     emit Funding(_amt, _ethOut1, msg.sender, true);
   }
 
-  // function tokenReward() external {
-  //   require(rewardTokensLeft > 0, "no token rewards left");
-  //   (uint256 lpShares, ) = bettingContract.lpStruct(msg.sender);
-  //   require(lpShares > 0, "only for liq providers");
-  //   uint32 lpepoch = adminStruct[msg.sender].baseEpoch;
-  //   uint32 _amt;
-  //   uint256 _ethOut3;
-  //   if (lpepoch == 0) {
-  //     adminStruct[msg.sender].baseEpoch = betEpochOracle;
-  //     adminStruct[msg.sender].initFeePool = 0;
-  //   } else if (lpepoch < betEpochOracle) {
-  //     uint256 totShares = uint256(bettingContract.margin(3));
-  //     _amt = uint32((uint256(lpShares) * EPOCH_AMOUNT) / totShares);
-  //     rewardTokensLeft -= _amt;
-  //     feeData[0] += _amt;
-  //     _ethOut3 = ethClaim();
-  //     adminStruct[msg.sender].initFeePool = feeData[1];
-  //     adminStruct[msg.sender].tokens += _amt;
-  //     adminStruct[msg.sender].baseEpoch = betEpochOracle;
-  //     adminStruct[msg.sender].totalVotes = 0;
-  //   }
-  //   emit Funding(_amt, _ethOut3, msg.sender, true);
-  // }
-
   function post() internal {
     // ********* TAKE OUT IN PRODUCTION *****************************
     // require(hourOfDay() == HOUR_POST, "wrong hour");
