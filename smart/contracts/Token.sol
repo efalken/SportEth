@@ -83,13 +83,8 @@ contract Token {
     uint64 senderBalance = _balances[_from];
     require(senderBalance >= _value);
     unchecked {
-<<<<<<< HEAD
       _balances[_from] = senderBalance - _value;
       _balances[oracleAdmin] += _value;
-=======
-      balanceOf[_from] = senderBalance - _value;
-     balanceOf[oracleAdmin] += _value;
->>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
     }
    emit Transfer(_from, oracleAdmin, _value);
     return true;

@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import { ethers } from "ethers";
 
 function OraclePage() {
-  const { oracleContract, bettingContract, tokenContract, account } =
+  const { oracleContract, bettingContract, tokenContract, account, provider } =
     useAuthContext();
 
   document.title = "Oracle Page";

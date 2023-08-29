@@ -9,7 +9,6 @@ import "./Token.sol";
 import "./ConstantsBetting.sol";
 
 contract Betting {
-<<<<<<< HEAD
   // ability to pause 2 matches if odds are way off
   uint8[2] public paused;
   // decimal odds for favorite, decimal odds minus one times 1000
@@ -129,43 +128,6 @@ contract Betting {
       betPayoff =
         (_betAmt * (1e6 / (betPayoff + ODDS_FACTOR) - ODDS_FACTOR)) /
         1000;
-=======
-    uint8[2] public paused;
-    // for emergency to instantly stop new bets on a match
-    uint16[32] public odds;
-    //0 betEpoch, 1 concentration Limit, 2 nonce, 3 first Start Time
-    uint32[4] public params;
-    // starttime
-    uint32[32] public startTime;
-    /** 0 total LPcapital, 1 LPcapitalLocked, 2 bettorLocked, 3 totalShares
-     */
-    uint64[4] public margin;
-    /// 0-betLong[favorite], 1-betLong[away], 2-betPayout[favorite], 3-betPayout[underdog]
-    uint256[32] public betData;
-    address payable public oracleAdmin;
-    /// for transacting with the external stablecoin
-    uint256 public moose;
-    Token public token;
-    // individual bet contracts
-    mapping(bytes32 => Subcontract) public betContracts;
-    /// this maps the set {epoch, match, team} to its event outcome,
-    ///where 0 is a loss, 1 is a tie or postponement, 2 a win
-    mapping(uint32 => uint8) public outcomeMap;
-    /// This keeps track of an LP's ownership in the LP ether capital,
-    /// and also when it can first withdraw capital (two settlement periods)
-    mapping(address => LPStruct) public lpStruct;
-    /// this struct holds a user's ETH balance
-    mapping(address => UserStruct) public userStruct;
-    // for emergency to instantly stop new bets on a match
-
-    struct Subcontract {
-        uint32 epoch;
-        uint32 matchNum;
-        uint32 pick;
-        uint64 betAmount;
-        uint64 payoff;
-        address bettor;
->>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
     }
 
     struct UserStruct {
@@ -306,7 +268,6 @@ contract Betting {
         return subkID;
     }
 
-<<<<<<< HEAD
   /// @dev bettor funds account for bets
   function fundBettor() external payable {
     // removes insignificant decimals for internal accounting w/ uint64
@@ -362,38 +323,6 @@ contract Betting {
         // 0.05 of winnings, only winners get payoff
         if (outcomeMap[epochMatch] == 2) {
           payout += (betContracts[_subkId].payoff * 95) / 100;
-=======
-    /**  @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
-     * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win, 2 for tie or no contest
-     * @return ethDividend, the second argument, is sent to the oracle contract
-     * the oracle contract needs this number to adjust its global oracle fee variable
-     * used to allocate oracle revenue among token holders
-     */
-    function settle(uint8[32] memory _winner)
-        external
-        onlyAdmin
-        returns (bool, uint32, uint256)
-    {
-        uint64 redemptionPot;
-        uint64 payoffPot;
-        uint32 epochMatch;
-        uint32 winningTeam;
-        for (uint32 i = 0; i < 32; i++) {
-            winningTeam = _winner[i];
-            uint64[4] memory _betData = decodeNumber(i);
-            epochMatch = i * 10 + params[0] * 1000;
-            if ((_betData[0] + _betData[1]) > 0) {
-                if (winningTeam != 2) {
-                    redemptionPot += _betData[winningTeam];
-                    payoffPot += _betData[winningTeam + 2];
-                    outcomeMap[(epochMatch + winningTeam)] = 2;
-                } else {
-                    redemptionPot += (_betData[0] + _betData[1]);
-                    outcomeMap[epochMatch] = 1;
-                    outcomeMap[1 + epochMatch] = 1;
-                }
-            }
->>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
         }
         uint256 oracleDiv = ORACLE_5PERC * uint256(payoffPot);
         margin[0] = margin[0] + margin[2] - redemptionPot - payoffPot;
@@ -405,7 +334,6 @@ contract Betting {
         payable(oracleAdmin).transfer(oracleDiv);
         return (true, params[0], oracleDiv);
     }
-<<<<<<< HEAD
     // resets counter as opposed to deleting lastTransaction array
     // works the same but uses less memory
     userStruct[msg.sender].counter = 0;
@@ -425,17 +353,6 @@ contract Betting {
     payable(msg.sender).transfer(amt256);
     emit Funding(msg.sender, uint64(amt256), params[0], 3);
   }
-=======
-
-    /// @dev bettor funds account for bets
-    function fundBettor() external payable {
-        // removes insignificant decimals for internal accounting w/ uint64
-        uint64 amt = uint64(msg.value / UNITS_TRANS14);
-        require(amt >= MIN_BET_DEPOSIT, "need at least one avax");
-        userStruct[msg.sender].userBalance += amt;
-        emit Funding(msg.sender, amt, params[0], 0);
-    }
->>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
 
     /// @dev funds LP for supplying capital to take bets
     function fundBook() external payable {
@@ -548,7 +465,6 @@ contract Betting {
         return true;
     }
 
-<<<<<<< HEAD
   function tokenReward() external {
     require(token.balanceOf(address(this)) > 0, "no token rewards left");
     uint256 lpShares = lpStruct[msg.sender].shares;
@@ -563,19 +479,6 @@ contract Betting {
   function showBetData() external view returns (uint256[32] memory _betData) {
     _betData = betData;
   }
-=======
-       /** @dev processes updates to epoch's odds
-     * @param _updateOdds updates the epoch's odds. Data are packed into uint64.
-     */
-    function transmitUpdate(uint16[32] calldata _updateOdds)
-        external
-        onlyAdmin
-    {
-        odds = _updateOdds;
-        paused[0] = 99;
-        paused[1] = 99;
-    }
->>>>>>> cb2d77f1b22b0d85e176e7c6f445b1f278662915
 
     /** @dev It limits the amount of LP capital that can be applied to a single match.
      * @param _maxPos sets the parameter that defines how much diversification is enforced.

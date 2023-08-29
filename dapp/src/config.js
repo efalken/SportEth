@@ -13,7 +13,7 @@
 // };
 
 export const networkConfig = {
-  chainId: "0xa869", // Testnet Avalanche Chain ID 43113
+  chainId: 43113, //"0xa869", // Testnet Avalanche Chain ID 43113
   chainName: "Avalanche Fuji Testnet",
   nativeCurrency: {
     name: "AVAX",

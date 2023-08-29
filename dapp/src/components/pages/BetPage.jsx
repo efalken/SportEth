@@ -45,7 +45,7 @@ function BetPage() {
   const [oddsVector, setOddsVector] = useState([]);
   const [startTime, setStartTime] = useState([]);
   //const [tokenRewardsLeft, setTokenRewardsLeft] = useState(0);
-  //const [eoaBalance, setEoaBalance] = useState("0");
+  const [eoaBalance, setEoaBalance] = useState("0");
   const [counter, setCounter] = useState(0);
   const [txnHash, setHash] = useState();
   const [odds0, setOdds0] = useState([
@@ -344,8 +344,8 @@ function BetPage() {
   }
 
   async function findValuesOnce() {
-    // let _eoaBalance = (await provider.getBalance(account)) || "0";
-    // setEoaBalance(_eoaBalance);
+    let _eoaBalance = (await provider.getBalance(account)) || "0";
+    setEoaBalance(_eoaBalance);
     let _betData = (await bettingContract.showBetData()) || [];
     setBetData(_betData);
     let us = await bettingContract.userStruct(account);

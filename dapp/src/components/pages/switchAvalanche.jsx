@@ -1,4 +1,3 @@
-
 import React from "react";
 //import "./App.css";
 
@@ -25,8 +24,8 @@ export async function switchToAvalanche() {
     throw new Error("This wallet provider does not support request method");
   const parsedChainId = 43113;
   //const parsedChainId = 1337;
-  const rpcUrl = "https://api.avax-test.network/ext/bc/C/rpc";
-  //const rpcUrl = "http://127.0.0.1:8545/";
+  //const rpcUrl = "https://api.avax-test.network/ext/bc/C/rpc";
+  const rpcUrl = "http://127.0.0.1:8545/";
   const chainId = "0x" + parsedChainId.toString(16);
   try {
     await ethereum.request({
