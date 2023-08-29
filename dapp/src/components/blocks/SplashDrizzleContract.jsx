@@ -1,10 +1,10 @@
 import React from "react";
 import { Box, Flex } from "@rebass/grid";
 import { Radius } from "../basics/Style";
-import { useChainId } from "../../helpers/switchAvalanche.js";
+import { switchChain, useChainId } from "../../helpers/switchAvalanche.js";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { networkConfig } from "../../config";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function SplashDrizzleContract({ showActions, redirectURL }) {
   return (
@@ -43,26 +43,6 @@ const ChainSwitch = ({ redirectURL }) => {
   const { provider, connect } = useAuthContext();
 
   const navigate = useNavigate();
-
-  async function switchChain() {
-    if (!provider) return;
-    try {
-      await provider.send("wallet_switchEthereumChain", [
-        { chainId: networkConfig.chainId },
-      ]);
-    } catch (switchError) {
-      // This error code indicates that the chain has not been added to MetaMask.
-      if (switchError.code === 4902) {
-        const params = [networkConfig];
-        try {
-          await provider.send("wallet_addEthereumChain", params);
-        } catch (addError) {
-          alert("Could not add chain to MetaMask: " + addError.message);
-        }
-      }
-      alert(switchError);
-    }
-  }
 
   const chainid = useChainId();
   console.log("chainid", chainid);

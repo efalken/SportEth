@@ -20,7 +20,7 @@ export function useChainId() {
   return chainId;
 }
 
-export async function switchToAvalanche() {
+export async function switchChain() {
   const { ethereum } = window;
 
   if (!ethereum.request)
@@ -32,17 +32,15 @@ export async function switchToAvalanche() {
     });
   } catch (switchError) {
     // This error code indicates that the chain has not been added to MetaMask.
-    if (switchError.code === 4902) {
-      const params = [networkConfig];
-      try {
-        await ethereum.request({
-          method: "wallet_addEthereumChain",
-          params,
-        });
-      } catch (addError) {
-        throw new Error("Could not add chain to MetaMask: " + addError.message);
-      }
+    console.log(switchError);
+    const params = [networkConfig];
+    try {
+      await ethereum.request({
+        method: "wallet_addEthereumChain",
+        params,
+      });
+    } catch (addError) {
+      throw new Error("Could not add chain to MetaMask: " + addError.message);
     }
-    throw switchError;
   }
 }
