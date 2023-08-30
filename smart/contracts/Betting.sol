@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 /**
 SPDX-License-Identifier: WTFPL
 @author Eric Falkenstein
+good bye cruel world
 */
 
 import "./Token.sol";
