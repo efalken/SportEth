@@ -228,6 +228,7 @@ async function main() {
       // console.log(`bet02 ${margin00}`);
       // hash1100 = receipt.events[0].args.contractHash;
       // hash1201 = receipt.events[0].args.contractHash;
+      // adding comments for a change
       
       // result = await betting.connect(signers[1]).bet(1, 0, 12000);
       // receipt = await result.wait();
