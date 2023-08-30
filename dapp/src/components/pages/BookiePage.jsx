@@ -126,11 +126,12 @@ function BookiePage() {
     }
   }
 
-  async function fundBook(x) {
+  async function fundBook() {
     console.log(fundAmount, "fundAmount");
+    let x = Number(fundAmount / 10000);
     try {
       const stackId = await bettingContract.fundBook({
-        value: ethers.parseEther(fundAmount),
+        value: ethers.parseEther(x),
       });
       setHash(
         <div>

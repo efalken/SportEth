@@ -126,7 +126,7 @@ function BetPage() {
   }, [scheduleString]);
 
   async function fundBettor() {
-    let x = fundAmount;
+    let x = Number(fundAmount / 10000);
     try {
       const stackId = await bettingContract.fundBettor({
         value: ethers.parseEther(x),

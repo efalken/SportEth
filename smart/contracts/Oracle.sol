@@ -166,7 +166,7 @@ contract Oracle {
   }
 
   function processVote() external {
-    require(hourOfDay() < HOUR_POST, "too soon");
+    // require(hourOfDay() < HOUR_POST, "too soon");
     require(reviewStatus >= 10, "not time");
     bool successBool;
     if (reviewStatus == STATUS_PROC_INIT) {
@@ -278,7 +278,7 @@ contract Oracle {
 
   function post() internal {
     // ********* TAKE OUT IN PRODUCTION *****************************
-    require(hourOfDay() == HOUR_POST, "wrong hour");
+    // require(hourOfDay() == HOUR_POST, "wrong hour");
     uint32 _tokens = adminStruct[msg.sender].tokens;
     require(_tokens >= minSubmit, "Need 10% of tokens");
     votes[0] = _tokens;
