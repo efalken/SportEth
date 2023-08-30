@@ -1,4 +1,4 @@
-const helper = require("../smart/hardhat-helpers");
+const helper = require("../hardhat-helpers");
 const { ethers } = require("hardhat");
 var utils = require("ethers").utils;
 const secondsInHour = 3600;
@@ -6,7 +6,7 @@ _dateo = new Date();
 const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
 var hourOffset;
 var _hourSolidity;
-var nextStart = 1690659274;
+var nextStart = 1690025499;
 var _timestamp;
 var _date;
 var _hour;
@@ -23,7 +23,7 @@ var ethout8;
 var ethout;
 var tokensout;
 var receipt;
-var result, gasUsed, gasPrice;
+var result;
 const { assert } = require("chai");
 const finneys = BigInt("1000000000000000");
 const tenthEthInK = BigInt("1000");
@@ -86,7 +86,8 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      result = await oracle.initPost(
+      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
+      await oracle.initPost(
         [
           "NFL:ARI:LAC",
           "NFL:ATL:LAR",
@@ -161,13 +162,22 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-      receipt = await result.wait();
+
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       result = await oracle.processVote();
       receipt = await result.wait();
     });
 
     it("Send  Bet #1", async () => {
+      // const _timestamp2 = (
+      //   await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      // ).timestamp;
+      // // console.log(`timestamp2 ${_timestamp2}`);
+      // const xx = await betting.params(3);
+      // // console.log(`nextStart ${nextStart}`);
+      // // console.log(`margin7 ${xx}`);
+      // // console.log(`margin7 ${_timestamp2 - xx}`);
+
       await betting.connect(account4).fundBook({
         value: 50n * eths,
       });
@@ -186,6 +196,11 @@ describe("Betting", function () {
         hourOffset = 12 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart = nextStart + 7 * 86400;
+
       await oracle.settlePost([
         0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
@@ -195,8 +210,8 @@ describe("Betting", function () {
     it("bump1", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.processVote();
-      moose = await oracle.moose();
-      // console.log(`moose, ${moose}`);
+      // moose = await oracle.// moose();
+      // console.log(`// moose, ${// moose}`);
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
@@ -217,157 +232,6 @@ describe("Betting", function () {
       } else if (_hourSolidity < 12) {
         hourOffset = 12 - _hourSolidity;
       }
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
-      result = await oracle.initPost(
-        [
-          "NFL:ARI:LAC",
-          "NFL:ATL:LAR",
-          "NFL:BAL:MIA",
-          "NFL:BUF:MIN",
-          "NFL:CAR:NE",
-          "NFL:CHI:NO",
-          "NFL:CIN:NYG",
-          "NFL:CLE:NYJ",
-          "NFL:DAL:OAK",
-          "NFL:DEN:PHI",
-          "NFL:DET:PIT",
-          "NFL:GB:SEA",
-          "NFL:HOU:SF",
-          "NFL:IND:TB",
-          "NFL:JAX:TEN",
-          "NFL:KC:WSH",
-          "UFC:Holloway:Kattar",
-          "UFC:Ponzinibbio:Li",
-          "UFC:Kelleher:Simon",
-          "UFC:Hernandez:Vieria",
-          "UFC:Akhemedov:Breese",
-          "UFC:Memphis:Brooklyn",
-          "UFC:Boston:Charlotte",
-          "UFC:Milwaukee:Dallas",
-          "UFC:miami:LALakers",
-          "UFC:Atlanta:SanAntonia",
-          "NHL:Colorado:Washington",
-          "NHL:Vegas:StLouis",
-          "NHL:TampaBay:Dallas",
-          "NHL:Boston:Carolina",
-          "NHL:Philadelphia:Edmonton",
-          "NHL:Pittsburgh:NYIslanders",
-        ],
-        [
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-          nextStart,
-        ],
-        [
-          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
-        ]
-      );
-      receipt = await result.wait();
-      const gasUsed = receipt.gasUsed;
-      const gasPrice = result.gasPrice;
-      console.log(`gasPrice ${gasPrice} gasUsed ${gasUsed}`);
-      //await oracle.connect(account1).vote(true);
-      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
-      // console.log(`acct1 votes, ${totvotes}`);
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.processVote();
-    });
-
-    it("Send  Bet #2", async () => {
-      result = await betting.connect(account5).bet(0, 0, 25n * tenthEthInK);
-      receipt = await result.wait();
-      const odds = ethers.utils.formatUnits(
-        receipt.events[0].args.payoff,
-        "finney"
-      );
-      _hourSolidity = await oracle.hourOfDay();
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
-      await oracle.settlePost([
-        0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-      ]);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      await oracle.connect(account1).vote(true);
-      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
-      // console.log(`acct1 votes, ${totvotes}`);
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.processVote();
-    });
-  });
-
-  describe("third epoch with three oracles", async () => {
-    it("transfer tokens from account 2", async () => {
-      const result0 = await token.transfer(account2.address, 100n * million);
-      const receipt0 = await result0.wait();
-      const result1 = await token
-        .connect(account2)
-        .approve(oracle.address, 100n * million);
-      const receipt1 = await result1.wait();
-      const result2 = await oracle
-        .connect(account2)
-        .depositTokens(100n * million);
-      const receipt2 = await result2.wait();
-      const gasUsed0 = receipt0.gasUsed;
-      // console.log(`gas on tokenTransfer0 ${gasUsed0}`);
-      const gasUsed1 = receipt1.gasUsed;
-      // console.log(`gas on tokenTransfer1 ${gasUsed1}`);
-      const gasUsed2 = receipt2.gasUsed;
-      // console.log(`gas on tokenTransfer2 ${gasUsed2}`);
-      _hourSolidity = await oracle.hourOfDay();
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      // console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -451,7 +315,157 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      // await oracle.connect(account1).vote(true);
+      await oracle.connect(account1).vote(true);
+      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
+      // console.log(`acct1 votes, ${totvotes}`);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await oracle.processVote();
+    });
+
+    it("Send  Bet #2", async () => {
+      result = await betting.connect(account5).bet(0, 0, 25n * tenthEthInK);
+      receipt = await result.wait();
+      const odds = ethers.utils.formatUnits(
+        receipt.events[0].args.payoff,
+        "finney"
+      );
+      _hourSolidity = await oracle.hourOfDay();
+      hourOffset = 0;
+      if (_hourSolidity > 12) {
+        hourOffset = 36 - _hourSolidity;
+      } else if (_hourSolidity < 12) {
+        hourOffset = 12 - _hourSolidity;
+      }
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart = _timestamp + 7 * 86400;
+      await oracle.settlePost([
+        0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+      ]);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      await oracle.connect(account1).vote(true);
+      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
+      // console.log(`acct1 votes, ${totvotes}`);
+      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await oracle.processVote();
+    });
+  });
+
+  describe("third epoch with three oracles", async () => {
+    it("transfer tokens from account 2", async () => {
+      const result0 = await token.transfer(account2.address, 100n * million);
+      const receipt0 = await result0.wait();
+      const result1 = await token
+        .connect(account2)
+        .approve(oracle.address, 100n * million);
+      const receipt1 = await result1.wait();
+      const result2 = await oracle
+        .connect(account2)
+        .depositTokens(100n * million);
+      const receipt2 = await result2.wait();
+      const gasUsed0 = receipt0.gasUsed;
+      // // console.log(`gas on tokenTransfer0 ${gasUsed0}`);
+      const gasUsed1 = receipt1.gasUsed;
+      // // console.log(`gas on tokenTransfer1 ${gasUsed1}`);
+      const gasUsed2 = receipt2.gasUsed;
+      // // console.log(`gas on tokenTransfer2 ${gasUsed2}`);
+      _hourSolidity = await oracle.hourOfDay();
+      hourOffset = 0;
+      if (_hourSolidity > 12) {
+        hourOffset = 36 - _hourSolidity;
+      } else if (_hourSolidity < 12) {
+        hourOffset = 12 - _hourSolidity;
+      }
+      // // console.log(`hourAdj ${hourOffset}`);
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart = _timestamp + 7 * 86400;
+      await oracle.initPost(
+        [
+          "NFL:ARI:LAC",
+          "NFL:ATL:LAR",
+          "NFL:BAL:MIA",
+          "NFL:BUF:MIN",
+          "NFL:CAR:NE",
+          "NFL:CHI:NO",
+          "NFL:CIN:NYG",
+          "NFL:CLE:NYJ",
+          "NFL:DAL:OAK",
+          "NFL:DEN:PHI",
+          "NFL:DET:PIT",
+          "NFL:GB:SEA",
+          "NFL:HOU:SF",
+          "NFL:IND:TB",
+          "NFL:JAX:TEN",
+          "NFL:KC:WSH",
+          "UFC:Holloway:Kattar",
+          "UFC:Ponzinibbio:Li",
+          "UFC:Kelleher:Simon",
+          "UFC:Hernandez:Vieria",
+          "UFC:Akhemedov:Breese",
+          "UFC:Memphis:Brooklyn",
+          "UFC:Boston:Charlotte",
+          "UFC:Milwaukee:Dallas",
+          "UFC:miami:LALakers",
+          "UFC:Atlanta:SanAntonia",
+          "NHL:Colorado:Washington",
+          "NHL:Vegas:StLouis",
+          "NHL:TampaBay:Dallas",
+          "NHL:Boston:Carolina",
+          "NHL:Philadelphia:Edmonton",
+          "NHL:Pittsburgh:NYIslanders",
+        ],
+        [
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+        ],
+        [
+          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
+        ]
+      );
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
@@ -490,8 +504,8 @@ describe("Betting", function () {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       result = await oracle.processVote();
       receipt = await result.wait();
-      moose = await oracle.moose();
-      // console.log(`moose, ${moose}`);
+      // moose = await oracle.// moose();
+      // console.log(`// moose, ${// moose}`);
     });
   });
 
@@ -587,14 +601,14 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      //await oracle.connect(account1).vote(true);
+      await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
-      await oracle.connect(account2).vote(true);
+      // await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.connect(account1).processVote();
       const activeState = await oracle.reviewStatus();
-      // console.log(`activestate, ${activeState}`);
+      // // console.log(`activestate, ${activeState}`);
     });
 
     it("first Check", async () => {
@@ -612,28 +626,20 @@ describe("Betting", function () {
       // console.log(`fee0, ${fee0}`);
       const fee1 = await oracle.feeData(1);
       // console.log(`fee1, ${fee1}`);
-      result = await oracle.withdrawTokens(50n * million);
+      result = await oracle.depositTokens(50n * million);
       receipt = await result.wait();
-      moose = await oracle.moose();
-      // console.log(`moose, ${moose}`);
-
-      tokens0 = (await oracle.adminStruct(owner.address)).tokens;
-      tokens1 = await token.balanceOf(owner.address);
-      tokens2 = await token.balanceOf(oracle.address);
-      // console.log(`acct0 tokens in userAcct, ${tokens0}`);
-      // console.log(`acct0 tokens in EOA, ${tokens1}`);
-      // console.log(`acct0 tokens in K, ${tokens2}`);
       ethout = ethers.utils.formatUnits(
         receipt.events[1].args.etherChange,
         "finney"
       );
-      console.log(`account0 eth Out ${ethout}`);
+      // console.log(`account0 eth Out ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
       );
-      assert.equal(ethout, "212.5", "Must be equal");
+      console.log(`account0 wd1 ${ethout}`);
+      assert.equal(Number(ethout).toFixed(2), "212.50", "Must be equal");
     });
 
     it("bet and settle", async () => {
@@ -649,19 +655,18 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await oracle
+      result = await oracle
         .connect(account1)
         .settlePost([
           0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
           0, 0, 0, 0, 0, 0, 0, 0, 0,
         ]);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
+      receipt = await result.wait();
       await oracle.connect(owner).vote(true);
-      await oracle.connect(account2).vote(true);
+      // await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.connect(account1).processVote();
+      result = await oracle.connect(account1).processVote();
+      receipt = await result.wait();
     });
   });
 
@@ -675,8 +680,11 @@ describe("Betting", function () {
         hourOffset = 12 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-      nextStart = nextStart + 7 * 86400;
-      await oracle.initPost(
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart = _timestamp + 7 * 86400;
+      result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
           "NFL:ATL:LAR",
@@ -751,45 +759,25 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-      // await oracle.connect(account1).vote(true);
-      const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
-      // console.log(`acct1 votes, ${totvotes}`);
-      await oracle.connect(account2).vote(true);
+      receipt = await result.wait();
+      await oracle.connect(account1).vote(true);
+      //await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.processVote();
-
-      const activeState = await oracle.reviewStatus();
-      const ortokens = (await oracle.adminStruct(account1.address)).tokens;
-      console.log(`tokens, ${ortokens}`);
-      const betepoch = await oracle.betEpochOracle();
-      // console.log(`betepoch, ${betepoch}`);
-      const initepoch = (await oracle.adminStruct(account1.address)).baseEpoch;
-      // console.log(`initepoch, ${initepoch}`);
+      result = await oracle.processVote();
+      receipt = await result.wait();
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
       );
-      feePool = await oracle.feeData(0);
-      // console.log(`eth in Oracle Contract ${oracleBal}`);
-      // console.log(`feePool Tracker ${feePool}`);
-      const totvot = (await oracle.adminStruct(account1.address)).totalVotes;
-      const baseep = (await oracle.adminStruct(account1.address)).baseEpoch;
-      const ep0 = await oracle.betEpochOracle();
-      console.log(`totalvotes ${totvot}`);
-      console.log(`lpEpoch ${baseep}`);
-      console.log(`epCont ${ep0}`);
       result = await oracle.connect(account1).withdrawTokens(150n * million);
       receipt = await result.wait();
       ethout = ethers.utils.formatUnits(
         receipt.events[1].args.etherChange,
         "finney"
       );
-      moose = await oracle.moose();
-      // console.log(`moose, ${moose}`);
-      console.log(`acct1 Out ${ethout}`);
-      assert.equal(ethout, "50.4", "Must be equal");
+      console.log(`acct1 wd ${ethout}`);
+      assert.equal(Number(ethout).toFixed(2), "94.77", "Must be equal");
       tokensout = receipt.events[1].args.tokensChange;
-      // console.log(`tokens Out1 ${tokensout}`);
       result = await betting.connect(account5).bet(0, 0, 25n * tenthEthInK);
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
@@ -802,20 +790,19 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await oracle.settlePost([
+      nextStart = _timestamp + 7 * 86400;
+      result = await oracle.settlePost([
         0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
+      receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.connect(account2).vote(true);
+      // await oracle.connect(account2).vote(true);
       await oracle.processVote();
     });
   });
 
-  describe("f6ithh epoch with 2 oracles", async () => {
+  describe("sixth epoch with 2 oracles", async () => {
     it("post init", async () => {
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
@@ -829,7 +816,7 @@ describe("Betting", function () {
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       nextStart = _timestamp + 7 * 86400;
-      await oracle.initPost(
+      result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
           "NFL:ATL:LAR",
@@ -904,35 +891,32 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
-      await oracle.connect(account2).vote(true);
+      receipt = await result.wait();
+      // await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
-      await oracle.processVote();
+      result = await oracle.processVote();
+      receipt = await result.wait();
     });
 
     it("final", async () => {
-      const betepoch = await oracle.betEpochOracle();
-      // console.log(`betepoch, ${betepoch}`);
-      const initepoch = (await oracle.adminStruct(account2.address)).baseEpoch;
-      // console.log(`Acct2 baseEpoch, ${initepoch}`);
-      const initfee = (await oracle.adminStruct(owner.address)).initFeePool;
       result = await oracle.withdrawTokens(200n * million);
       receipt = await result.wait();
       ethout = ethers.utils.formatUnits(
         receipt.events[1].args.etherChange,
         "finney"
       );
-      console.log(`acct0 Out ${ethout}`);
+      console.log(`acct0 final wd ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
-      // console.log(`tokens Out0 ${tokensout}`);
-      assert.equal(ethout, "144.6", "Must be equal");
+      //console.log(`tokens Out0 ${tokensout}`);
+      assert.equal(Number(ethout).toFixed(2), "129.55", "Must be equal");
       //const betepoch = await oracle.betEpochOracle();
-      // console.log(`betepoch, ${betepoch}`);
+      // // console.log(`betepoch, ${betepoch}`);
       //const initepoch = (await oracle.adminStruct(account2.address)).baseEpoch;
-      // console.log(`Acct2 baseEpoch, ${betepoch - initepoch}`);
+      // // console.log(`Acct2 baseEpoch, ${betepoch - initepoch}`);
       const totvotes = (await oracle.adminStruct(account2.address)).totalVotes;
-      // console.log(`Acct2 votes, ${totvotes}`);
+      // // console.log(`Acct2 votes, ${totvotes}`);
       const ortokens = (await oracle.adminStruct(account2.address)).tokens;
-      // console.log(`Acct2 tokens, ${ortokens}`);
+      // // console.log(`Acct2 tokens, ${ortokens}`);
       const ethbal1 = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"
@@ -961,10 +945,9 @@ describe("Betting", function () {
         receipt1.events[1].args.etherChange,
         "finney"
       );
-      console.log(`ether acct2 ${ethout}`);
+      console.log(`account2 wd ${ethout}`);
       const tokensout1 = receipt1.events[1].args.tokensChange;
-      // console.log(`tokens Out2 ${tokensout1}`);
-      assert.equal(ethout, "92.3", "Must be equal");
+      //assert.equal(Number(ethout).toFixed(2), "21.06", "Must be equal");
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"

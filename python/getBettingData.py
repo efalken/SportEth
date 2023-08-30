@@ -41,6 +41,11 @@ def getUserBetData():
     return tx_odds
 
 
+def showUserBetData():
+    tx_odds = contract.functions.showUserBetData().call()
+    return tx_odds
+
+
 if __name__ == "__main__":
     tx_odds = getOdds()
     print(tx_odds)

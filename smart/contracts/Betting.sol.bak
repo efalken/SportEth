@@ -46,7 +46,7 @@ contract Betting {
   struct UserStruct {
     uint32 counter;
     uint64 userBalance;
-    mapping(uint => bytes32) trades;
+    bytes32[16] lastTransaction;
   }
 
   struct LPStruct {
@@ -165,7 +165,9 @@ contract Betting {
     encoded |= uint256(_betData[3]);
     betData[_matchNumber] = uint256(encoded);
     params[2]++;
-    userStruct[msg.sender].trades[userStruct[msg.sender].counter] = subkID;
+    userStruct[msg.sender].lastTransaction[
+      userStruct[msg.sender].counter
+    ] = subkID;
     userStruct[msg.sender].counter++;
     emit BetRecord(
       msg.sender,
@@ -295,7 +297,7 @@ contract Betting {
     require(numberBets > 0, "no bets");
     uint64 payout;
     for (uint256 i = 0; i < numberBets; i++) {
-      bytes32 _subkId = userStruct[msg.sender].trades[i];
+      bytes32 _subkId = userStruct[msg.sender].lastTransaction[i];
       if (betContracts[_subkId].epoch == params[0]) revert("bets active");
       // creates epoch~matchnumber~pick number via concatenation
       uint32 epochMatch = betContracts[_subkId].epoch *
@@ -332,6 +334,7 @@ contract Betting {
     uint32 ts = uint32(block.timestamp);
     params[3] = ts - ((ts - 1687564800) % 604800) + 604800;
     // sets start of games at Sat 12AM GMT time
+    params[3] = _starts[0] - ((_starts[0] - 1687564800) % 604800);
     // resets the paused matches (99 will never be relevant)
     paused[0] = 99;
     paused[1] = 99;
@@ -396,10 +399,7 @@ contract Betting {
     view
     returns (bytes32[16] memory _betDataUser)
   {
-    uint256 top = uint256(userStruct[msg.sender].counter);
-    for (uint256 i = 0; i < top; i++) {
-      _betDataUser[i] = userStruct[msg.sender].trades[i];
-    }
+    _betDataUser = userStruct[msg.sender].lastTransaction;
   }
 
   function checkRedeem(bytes32 _subkID) external view returns (bool) {

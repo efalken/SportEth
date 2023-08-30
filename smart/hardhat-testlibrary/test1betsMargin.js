@@ -166,7 +166,6 @@ describe("Betting", function () {
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       console.log(`gas on secondSend = ${gasUsed}`);
-
       const bookpool = await betting.margin(0);
       console.log(`startTime is ${bookpool}`);
     });
@@ -177,19 +176,19 @@ describe("Betting", function () {
       ).timestamp;
       console.log(`currTime is ${_timestamp}`);
       result = await betting.connect(owner).fundBook({
-        value: 3n * eths,
+        value: 30n * eths,
       });
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       console.log(`gas ${gasUsed}`);
 
       result = await betting.connect(account2).fundBettor({
-        value: 1n * eths,
+        value: 10n * eths,
       });
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       result = await betting.connect(account3).fundBettor({
-        value: 1n * eths,
+        value: 10n * eths,
       });
       const excessCapital = await betting.margin(0);
       console.log(`margin0 is ${excessCapital} szabo`);
@@ -197,66 +196,66 @@ describe("Betting", function () {
     });
 
     it("bets", async () => {
-      result = await betting.connect(account2).bet(0, 0, "1000");
+      result = await betting.connect(account2).bet(0, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash1 = receipt.events[0].args.contractHash;
       // receipt = await result.wait();
       gas0 = receipt.gasUsed;
 
-      result = await betting.connect(account3).bet(0, 1, "2000");
+      result = await betting.connect(account3).bet(0, 1, "20000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       // receipt = await result.wait();
       gas1 = receipt.gasUsed;
 
-      result = await betting.connect(account2).bet(0, 0, "1000");
+      result = await betting.connect(account2).bet(0, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash3 = receipt.events[0].args.contractHash;
 
-      result = await betting.connect(account2).bet(1, 0, "1000");
+      result = await betting.connect(account2).bet(1, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash4 = receipt.events[0].args.contractHash;
       //  receipt = await result.wait();
       gas2 = receipt.gasUsed;
 
-      result = await betting.connect(account3).bet(1, 1, "2000");
+      result = await betting.connect(account3).bet(1, 1, "20000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash5 = receipt.events[0].args.contractHash;
       // receipt = await result.wait();
       gas3 = receipt.gasUsed;
 
-      result = await betting.connect(account2).bet(1, 0, "1000");
+      result = await betting.connect(account2).bet(1, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash6 = receipt.events[0].args.contractHash;
 
-      result = await betting.connect(account2).bet(2, 0, "1000");
+      result = await betting.connect(account2).bet(2, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash7 = receipt.events[0].args.contractHash;
 
-      result = await betting.connect(account3).bet(2, 1, "2000");
+      result = await betting.connect(account3).bet(2, 1, "20000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash8 = receipt.events[0].args.contractHash;
 
-      result = await betting.connect(account2).bet(2, 0, "1000");
+      result = await betting.connect(account2).bet(2, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash9 = receipt.events[0].args.contractHash;
-      result = await betting.connect(account2).bet(3, 0, "1000");
+      result = await betting.connect(account2).bet(3, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash10 = receipt.events[0].args.contractHash;
-      result = await betting.connect(account2).bet(3, 0, "1000");
+      result = await betting.connect(account2).bet(3, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash11 = receipt.events[0].args.contractHash;
-      result = await betting.connect(account3).bet(3, 1, "1000");
+      result = await betting.connect(account3).bet(3, 1, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash12 = receipt.events[0].args.contractHash;
@@ -338,19 +337,19 @@ describe("Betting", function () {
       console.log(`acct2 Bal ${userBalanceAcct2}`);
       console.log(`acct3 Bal ${userBalanceAcct3}`);
 
-      assert.equal(Number(bookiePool).toFixed(3), "2.960", "mustBe equal");
+      assert.equal(Number(bookiePool).toFixed(2), "29.60", "mustBe equal");
       assert.equal(bettorLocked, "0", "Must be equal");
       assert.equal(bookieLocked, "0", "Must be equal");
-      assert.equal(Number(oracleBal).toFixed(3), "0.032", "Must be equal");
-      assert.equal(Number(ethbal).toFixed(3), "4.968", "Must be equal");
+      assert.equal(Number(oracleBal).toFixed(2), "0.32", "Must be equal");
+      assert.equal(Number(ethbal).toFixed(2), "49.68", "Must be equal");
       assert.equal(
-        Number(userBalanceAcct2).toFixed(3),
-        "0.695",
+        Number(userBalanceAcct2).toFixed(2),
+        "6.95",
         "Must be equal"
       );
       assert.equal(
-        Number(userBalanceAcct3).toFixed(3),
-        "1.313",
+        Number(userBalanceAcct3).toFixed(2),
+        "13.13",
         "Must be equal"
       );
 

@@ -91,184 +91,192 @@ function OraclePage() {
   }, [scheduleString]);
 
   async function voteNofn() {
-    console.log(voteNo, "voteNo");
-    const stackId = await oracleContract.vote(false);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await oracleContract.vote(false);
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } catch (error) {}
   }
 
   async function voteYesfn() {
-    const stackId = await oracleContract.vote(true);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await oracleContract.vote(true);
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } catch (error) {}
   }
 
   async function processVote() {
-    const stackId = await oracleContract.processVote();
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await oracleContract.processVote();
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } catch (error) {}
   }
 
   async function depositTokens() {
-    const stackId = await oracleContract.depositTokens(depositAmount);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await oracleContract.depositTokens(depositAmount);
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } catch (error) {}
   }
 
   async function withdrawTokens() {
-    const stackId = await oracleContract.withdrawTokens(withdrawAmount);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await oracleContract.withdrawTokens(withdrawAmount);
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } catch (error) {}
   }
 
   async function findValues() {
@@ -442,7 +450,7 @@ console.log(reviewStatus, "reviewStatus");
     <div>
       <VBackgroundCom />
       <Split
-        page={"betpage"}
+        page={"oraclepage"}
         side={
           <Box mt="30px" ml="25px" mr="30px">
             <Logo />

@@ -70,6 +70,8 @@ function BetPage() {
   ]);
   let netLiab = [liab0, liab1];
 
+  document.title = "Betting Page";
+
   useEffect(() => {
     if (!bettingContract || !oracleContract) return;
     const interval1 = setInterval(() => {
@@ -126,8 +128,9 @@ function BetPage() {
   }, [scheduleString]);
 
   async function fundBettor() {
-    let x = Number(fundAmount / 10000);
     try {
+      let x = Number(fundAmount / 1000);
+      console.log(x, "x");
       const stackId = await bettingContract.fundBettor({
         value: ethers.parseEther(x),
       });
@@ -167,39 +170,41 @@ function BetPage() {
   }
 
   async function withdrawBettor(x) {
-    const stackId = await bettingContract.withdrawBettor(wdAmount * 10000);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await bettingContract.withdrawBettor(wdAmount * 10000);
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } catch (error) {}
   }
 
   async function takeBet() {
@@ -217,11 +222,62 @@ function BetPage() {
       alert("value is greater than max bet");
       return;
     } else {
-      const tx = await bettingContract.bet(
-        matchPick,
-        teamPick,
-        betAmount * 10000
-      );
+      try {
+        const tx = await bettingContract.bet(
+          matchPick,
+          teamPick,
+          betAmount * 10000
+        );
+        setHash(
+          <div>
+            <div onClick={() => setHash(null)}>
+              <a
+                target="_blank"
+                style={{
+                  color: "yellow",
+                  font: "Arial",
+                  fontStyle: "Italic",
+                  fontSize: "14px",
+                }}
+                href={`https://testnet.snowtrace.io/tx/${tx.hash}`}
+              >
+                click here to txn on the blockchain
+              </a>
+              <Text
+                style={{
+                  color: "white",
+                  font: "Arial",
+                  fontStyle: "Italic",
+                  fontSize: "14px",
+                }}
+              >
+                {" "}
+                ...or...
+              </Text>
+            </div>
+
+            <div onClick={() => setHash(null)}>
+              <a
+                style={{
+                  color: "yellow",
+                  font: "Arial",
+                  fontStyle: "Italic",
+                  fontSize: "14px",
+                }}
+                href="javascript:void(0)"
+              >
+                click here to dismiss
+              </a>
+            </div>
+          </div>
+        );
+      } catch (error) {}
+    }
+  }
+
+  async function redeemBet() {
+    try {
+      const stackId = await bettingContract.redeem();
       setHash(
         <div>
           <div onClick={() => setHash(null)}>
@@ -233,23 +289,12 @@ function BetPage() {
                 fontStyle: "Italic",
                 fontSize: "14px",
               }}
-              href={`https://testnet.snowtrace.io/tx/${tx.hash}`}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
             >
               click here to txn on the blockchain
             </a>
-            <Text
-              style={{
-                color: "white",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-            >
-              {" "}
-              ...or...
-            </Text>
           </div>
-
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
           <div onClick={() => setHash(null)}>
             <a
               style={{
@@ -265,43 +310,7 @@ function BetPage() {
           </div>
         </div>
       );
-    }
-  }
-
-  async function redeemBet() {
-    const stackId = await bettingContract.redeem();
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+    } catch (error) {}
     //const receipt = await tx.wait(1);
     // await syncEvents(receipt.hash);
     //setTimeout(updateBetRecord, 5000, )
@@ -337,11 +346,7 @@ function BetPage() {
     }
   }
   //
-  async function findCounter() {
-    let us = await bettingContract.userStruct(account);
-    let _counter = us ? Number(us.counter) : 0;
-    setCounter(_counter);
-  }
+  async function findCounter() {}
 
   async function findValuesOnce() {
     let _eoaBalance = (await provider.getBalance(account)) || "0";
@@ -351,6 +356,8 @@ function BetPage() {
     let us = await bettingContract.userStruct(account);
     let _userBalance = us ? Number(us.userBalance) : 0;
     setUserBalance(_userBalance);
+    let _counter = us ? Number(us.counter) : 0;
+    setCounter(_counter);
 
     let _totalLpCapital = Number((await bettingContract.margin(0)) || "0");
     setUnlockedLpCapital(_totalLpCapital);
@@ -631,7 +638,6 @@ function BetPage() {
                     inputWidth="100px"
                     borderRadius="1px"
                     placeholder="# avax"
-                    //backgroundColor = "#fff"
                     buttonLabel="Fund"
                   />
                 </Box>

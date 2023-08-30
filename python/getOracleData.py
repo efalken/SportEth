@@ -31,6 +31,11 @@ def getScheduleString():
     return tx_scheduleString
 
 
+def getAdminStruct(x):
+    tx_adminstruct = contract.functions.adminStruct(x).call()
+    return tx_adminstruct
+
+
 if __name__ == "__main__":
     tx_odds = getOdds()
     print(tx_odds)
@@ -38,5 +43,14 @@ if __name__ == "__main__":
     print(tx_odds)
     tx_odds = getScheduleString()
     print(tx_odds)
-    tx_odds = getStartTimes()
-    print(tx_odds)
+    # tx_odds = getStartTimes()
+    # print(tx_odds)
+    (
+        propnum,
+        epoch,
+        votelast,
+        totvote,
+        tokens,
+    ) = getAdminStruct("0x2572eE2A871fCC586722C3E57d43831d78E7219c")
+    print(propnum)
+    print(tokens)

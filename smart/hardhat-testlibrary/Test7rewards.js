@@ -56,8 +56,7 @@ describe("test rewards 0", function () {
   describe("week0", async () => {
     it("initial", async () => {
       await oracle.depositTokens(510n * million);
-      await token.approve(oracle.address, 490n * million);
-      await token.transfer(oracle.address, 490n * million);
+      await token.transfer(betting.address, 490n * million);
       var tt = await oracle.rewardTokensLeft();
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
@@ -182,7 +181,7 @@ describe("test rewards 0", function () {
       await betting.connect(owner).fundBook({
         value: 60n * eths,
       });
-      result = await oracle.tokenReward();
+      result = await betting.tokenReward();
       receipt = await result.wait();
       await betting.connect(account1).fundBook({
         value: 40n * eths,
@@ -266,7 +265,7 @@ describe("test rewards 0", function () {
       console.log(
         `Oracle K3: tokens ${tokensInOracle} eth ${ethInOracle} eth/token ${ethPerToken}`
       );
-      result = await oracle.tokenReward();
+      result = await betting.tokenReward();
       receipt = await result.wait();
       result = await oracle.connect(account1).tokenReward();
       receipt = await result.wait();
@@ -426,7 +425,7 @@ describe("test rewards 0", function () {
     });
 
     it("state 3", async () => {
-      result = await oracle.tokenReward();
+      result = await betting.tokenReward();
       receipt = await result.wait();
       result = await oracle.connect(account1).tokenReward();
       receipt = await result.wait();
@@ -613,7 +612,7 @@ describe("test rewards 0", function () {
     });
 
     it("state 4", async () => {
-      result = await oracle.tokenReward();
+      result = await betting.tokenReward();
       receipt = await result.wait();
       result = await oracle.connect(account1).tokenReward();
       receipt = await result.wait();
@@ -818,7 +817,7 @@ describe("test rewards 0", function () {
     });
 
     it("state 5", async () => {
-      // result = await oracle.tokenReward();
+      // result = await betting.tokenReward();
       //  receipt = await result.wait();
       result = await oracle.connect(account1).tokenReward();
       receipt = await result.wait();
@@ -1006,7 +1005,7 @@ describe("test rewards 0", function () {
       console.log(`betting k eth1 ${Number(eoa1).toFixed(3)}`);
       console.log(`betting k eth2 ${Number(eoa2).toFixed(3)}`);
 
-      result = await oracle.tokenReward();
+      result = await betting.tokenReward();
       receipt = await result.wait();
       result = await oracle.connect(account1).tokenReward();
       receipt = await result.wait();
