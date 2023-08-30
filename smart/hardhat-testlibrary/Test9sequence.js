@@ -54,25 +54,25 @@ describe("Betting", function () {
       await oracle.depositTokens(400n * million);
       await oracle.connect(account1).depositTokens(450n * million);
       result = await betting.connect(owner).fundBook({
-        value: 3n * eths,
+        value: 30n * eths,
       });
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas initBookFund ${gasUsed}`);
       result = await betting.connect(account1).fundBook({
-        value: 3n * eths,
+        value: 30n * eths,
       });
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas initBokFund2 ${gasUsed}`);
       result = await betting.connect(account1).fundBettor({
-        value: 1n * eths,
+        value: 20n * eths,
       });
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas initBettorFund ${gasUsed}`);
       result = await betting.connect(account2).fundBettor({
-        value: 1n * eths,
+        value: 20n * eths,
       });
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
@@ -499,19 +499,19 @@ describe("Betting", function () {
     });
 
     it("set bets", async () => {
-      result = await betting.connect(account1).bet(2, 1, "2000");
+      result = await betting.connect(account1).bet(2, 1, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet21 ${gasUsed}`);
-      result = await betting.connect(account2).bet(2, 0, "2000");
+      result = await betting.connect(account2).bet(2, 0, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet20 ${gasUsed}`);
-      result = await betting.connect(account1).bet(3, 1, "2000");
+      result = await betting.connect(account1).bet(3, 1, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet31 ${gasUsed}`);
-      result = await betting.connect(account2).bet(3, 0, "2000");
+      result = await betting.connect(account2).bet(3, 0, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet30 ${gasUsed}`);
@@ -779,19 +779,19 @@ describe("Betting", function () {
     });
 
     it("set bets222", async () => {
-      result = await betting.connect(account1).bet(2, 1, "2000");
+      result = await betting.connect(account1).bet(2, 1, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet21 ${gasUsed}`);
-      result = await betting.connect(account2).bet(2, 0, "2000");
+      result = await betting.connect(account2).bet(2, 0, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet20 ${gasUsed}`);
-      result = await betting.connect(account1).bet(3, 1, "2000");
+      result = await betting.connect(account1).bet(3, 1, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet31 ${gasUsed}`);
-      result = await betting.connect(account2).bet(3, 0, "2000");
+      result = await betting.connect(account2).bet(3, 0, "20000");
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas on bet30 ${gasUsed}`);

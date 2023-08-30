@@ -329,11 +329,9 @@ function OraclePage() {
     let _initFeePool = oc ? Number(oc.initFeePool) : 0;
     setInitFeePool(_initFeePool);
     let _basePropNumber = oc ? Number(oc.basePropNumber) : 0;
-    setInitFeePool(_basePropNumber);
-
+    setBasePropNumber(_basePropNumber);
     let _eoaTokens = Number((await tokenContract.balanceOf(account)) || 0);
     setEoaTokens(_eoaTokens);
-
     let sctring = await oracleContract.showSchedString();
     setScheduleString(sctring);
   }
@@ -619,15 +617,15 @@ console.log(reviewStatus, "reviewStatus");
                     <Text size="14px" className="style">
                       Your Tokens in Contract: {Number(tokens).toLocaleString()}
                       <br />
-                      your base Epoch: {baseEpoch}
+                      your base Epoch: {baseEpoch}, {propNumber},{" "}
+                      {basePropNumber}
                     </Text>
                     <br />
                     <Text size="14px" className="style">
                       Your Votes: {totalVotes} over {currW4 - baseEpoch} epochs
                       Your Voting %:{" "}
                       {Number(
-                        (Number(totalVotes) * 100) /
-                          (propNumber - -basePropNumber)
+                        (totalVotes * 100) / (propNumber - basePropNumber)
                       ).toFixed(0) + " %"}
                     </Text>
                     <br />

@@ -318,7 +318,7 @@ describe("Betting", function () {
       ).timestamp;
       await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
-      // console.log(`acct1 votes, ${totvotes}`);
+      console.log(`acct1 votes, ${totvotes}`);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
       await oracle.processVote();
     });
@@ -770,11 +770,13 @@ describe("Betting", function () {
           919, 720, 672, 800,
         ]
       );
+      console.log("line 773");
       await oracle.connect(account1).vote(true);
       const totvotes = (await oracle.adminStruct(account1.address)).totalVotes;
       // console.log(`acct1 votes, ${totvotes}`);
       await oracle.connect(account2).vote(true);
       await helper.advanceTimeAndBlock(secondsInHour * 12);
+
       await oracle.processVote();
 
       const activeState = await oracle.reviewStatus();
@@ -791,12 +793,14 @@ describe("Betting", function () {
       feePool = await oracle.feeData(0);
       // console.log(`eth in Oracle Contract ${oracleBal}`);
       // console.log(`feePool Tracker ${feePool}`);
+      console.log("line 796");
       result = await oracle.connect(account1).withdrawTokens(150n * million);
       receipt = await result.wait();
       ethout = ethers.utils.formatUnits(
         receipt.events[1].args.etherChange,
         "finney"
       );
+      console.log("line 803");
       // moose = await oracle.moose();
       // console.log(`moose, ${moose}`);
       console.log(`acct1 wd ${ethout}`);
@@ -923,11 +927,12 @@ describe("Betting", function () {
     });
 
     it("final", async () => {
-      const betepoch = await oracle.betEpochOracle();
-      // console.log(`betepoch, ${betepoch}`);
-      const initepoch = (await oracle.adminStruct(account2.address)).baseEpoch;
-      // console.log(`Acct2 baseEpoch, ${initepoch}`);
-      const initfee = (await oracle.adminStruct(owner.address)).initFeePool;
+      const propNumber = await oracle.propNumber();
+      console.log(`propNumber, ${propNumber}`);
+      const baseprop = (await oracle.adminStruct(owner.address)).basePropNumber;
+      console.log(`Acct2 baseprop, ${baseprop}`);
+      const tvotes = (await oracle.adminStruct(owner.address)).totalVotes;
+      console.log(`Acct2 tvotes, ${tvotes}`);
       result = await oracle.withdrawTokens(250n * million);
       receipt = await result.wait();
       ethout = ethers.utils.formatUnits(
