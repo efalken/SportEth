@@ -386,12 +386,10 @@ contract Betting {
     _startTime = startTime;
   }
 
-  function showUserBetData()
-    external
-    view
-    returns (bytes32[16] memory _betDataUser)
-  {
-    _betDataUser = userStruct[msg.sender].lastTransaction;
+  function showUserBetData(
+    address userAddress
+  ) external view returns (bytes32[16] memory _betDataUser) {
+    _betDataUser = userStruct[userAddress].lastTransaction;
   }
 
   function checkRedeem(bytes32 _subkID) external view returns (bool) {
