@@ -3,8 +3,12 @@ pragma solidity ^0.8.0;
 /**
 SPDX-License-Identifier: WTFPL
 @author Eric Falkenstein
+<<<<<<< HEAD
 good bye cruel world
 I hate cats
+=======
+my dog is very naughty
+>>>>>>> 68f2f1a99d2c8a7d3252286fb1577f2feb564e2b
 */
 
 import "./Token.sol";
