@@ -4,7 +4,10 @@ pragma solidity ^0.8.0;
 SPDX-License-Identifier: WTFPL
 @author Eric Falkenstein
 good bye cruel world
+MaryAnn is a very nice woman!
+89gnhtnhtdntdbhnthbdn
 */
+
 
 import "./Token.sol";
 import "./ConstantsBetting.sol";
