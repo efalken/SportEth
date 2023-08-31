@@ -37,7 +37,6 @@ export default function TeamTable({
         borderCollapse: "collapse",
         fontSize: "14px",
       }}
-      
     >
       <tbody className="style">
         <tr style={{ width: "50%", textAlign: "left" }}>
@@ -53,57 +52,59 @@ export default function TeamTable({
           </th>
           <th style={{ textAlign: "left" }}>Start</th>
         </tr>
-        {[...Array(32)].map((_value, i) => (
+        {[...Array(32)].map((_value, i) =>
           Number(startTimeColumn[i]) > 1691011720 ? (
             <tr
-            className={(i + 1) % borderCells === 0 ? "border-row" : ""}
-            key={i}
-            style={{ width: "60%", textAlign: "left" }}
-          >
-            <td>{i}</td>
-            <td>{sport[i]}</td>
-            <td style={{ textAlign: "left", paddingLeft: "2px" }}>
-              {moment().unix() ==  moment().unix() ? (
-                <input
-                  type="radio"
-                  value={i}
-                  name={"teamRadio"}
-                  onChange={({ target: { value } }) => radioFavePick(value)}
-                  className="teamRadio"
-                />
-              ) : (
-                <span className="circle"></span>
-              )}{" "}
-              {faveSplit[i]}
-            </td>
-            <td>
-              {showDecimalOdds
-                ? (1 + (95 * oddsTot[0][i]) / 100000).toFixed(3)
-                : getMoneyLine((95 * oddsTot[0][i]) / 100)}
-            </td>
-            <td style={{ textAlign: "left", paddingLeft: "2px" }}>
-              {startTimeColumn[i] > moment().unix() ? (
-                <input
-                  type="radio"
-                  value={i}
-                  name={"teamRadio"}
-                  onChange={({ target: { value } }) => radioUnderPick(value)}
-                  className="teamRadio"
-                />
-              ) : (
-                <span className="circle"></span>
-              )}{" "}
-              {underSplit[i]}
-            </td>
-            <td>
-              {showDecimalOdds
-                ? (1 + (95 * oddsTot[1][i]) / 100000).toFixed(3)
-                : getMoneyLine((95 * oddsTot[1][i]) / 100)}
-            </td>
-            <td>{moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}</td>
-          </tr>
+              className={(i + 1) % borderCells === 0 ? "border-row" : ""}
+              key={i}
+              style={{ width: "60%", textAlign: "left" }}
+            >
+              <td>{i}</td>
+              <td>{sport[i]}</td>
+              <td style={{ textAlign: "left", paddingLeft: "2px" }}>
+                {startTimeColumn[i] < moment().unix() ? (
+                  <input
+                    type="radio"
+                    value={i}
+                    name={"teamRadio"}
+                    onChange={({ target: { value } }) => radioFavePick(value)}
+                    className="teamRadio"
+                  />
+                ) : (
+                  <span className="circle"></span>
+                )}{" "}
+                {faveSplit[i]}
+              </td>
+              <td>
+                {showDecimalOdds
+                  ? (1 + (95 * oddsTot[0][i]) / 100000).toFixed(3)
+                  : getMoneyLine((95 * oddsTot[0][i]) / 100)}
+              </td>
+              <td style={{ textAlign: "left", paddingLeft: "2px" }}>
+                {startTimeColumn[i] > moment().unix() ? (
+                  <input
+                    type="radio"
+                    value={i}
+                    name={"teamRadio"}
+                    onChange={({ target: { value } }) => radioUnderPick(value)}
+                    className="teamRadio"
+                  />
+                ) : (
+                  <span className="circle"></span>
+                )}{" "}
+                {underSplit[i]}
+              </td>
+              <td>
+                {showDecimalOdds
+                  ? (1 + (95 * oddsTot[1][i]) / 100000).toFixed(3)
+                  : getMoneyLine((95 * oddsTot[1][i]) / 100)}
+              </td>
+              <td>
+                {moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}
+              </td>
+            </tr>
           ) : null
-        ))}
+        )}
       </tbody>
     </table>
   );

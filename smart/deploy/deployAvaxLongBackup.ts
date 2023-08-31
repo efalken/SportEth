@@ -38,36 +38,36 @@ async function main() {
   const Token = await ethers.getContractFactory("Token");
   const token = await Token.deploy();
   await token.deployed();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   console.log(`Token contract was deployed to ${token.address}`);
 
   const Betting = await ethers.getContractFactory("Betting");
   const betting = await Betting.deploy(token.address);
   await betting.deployed();
   console.log(`Betting contract was deployed to ${betting.address}`);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   const Oracle = await ethers.getContractFactory("Oracle");
   const oracle = await Oracle.deploy(betting.address, token.address);
   await oracle.deployed();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   console.log(`Oracle contract was deployed to ${oracle.address}`);
   await betting.setOracleAddress(oracle.address);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   await token.setAdmin(oracle.address);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
 
   result = await oracle.depositTokens(175n*million);
   await result.wait();
   console.log(`got here2`);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
 
 
   result = await token.transfer(accounts[1], 100n * million);
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   result = await token.transfer(accounts[2], 125n * million);
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   await token.transfer(betting.address, 600n * million);
   // result = await oracle.connect(signers[1]).depositTokens(250n*million);
   // await result.wait();
@@ -181,12 +181,12 @@ async function main() {
       126,]
   );
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 50000));
   console.log(`line 170`);
   
   result = await oracle.processVote();
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 50000));
   console.log(`line 184`);
   
 
@@ -194,11 +194,11 @@ async function main() {
     value: 20n*eths,
   });
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
 
   result = await betting.tokenReward();
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
 
 
 
@@ -206,37 +206,36 @@ async function main() {
     value: 20n*eths,
   });
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   console.log(`fundbettor ${margin00}`);
 
   result = await betting.connect(signers[2]).fundBettor({
     value: 20n*eths,
   });
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
   console.log(`fundbettor2 ${margin00}`);
 
   result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
       console.log(`line 214`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
 
       result = await betting.connect(signers[2]).bet(0, 0, 11000);
       receipt = await result.wait();
       console.log(`line 219`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
       // console.log(`bet02 ${margin00}`);
       // hash1100 = receipt.events[0].args.contractHash;
       // hash1201 = receipt.events[0].args.contractHash;
-      // adding comments for a change
       
       // result = await betting.connect(signers[1]).bet(1, 0, 12000);
       // receipt = await result.wait();
-      // // await new Promise((resolve) => setTimeout(resolve, 2000));
+      // // await new Promise((resolve) => setTimeout(resolve, 20000));
       // hash1110 = receipt.events[0].args.contractHash;
       // result = await betting.connect(signers[2]).bet(1, 1, 13000);
       // receipt = await result.wait();
-      // // await new Promise((resolve) => setTimeout(resolve, 2000));
+      // // await new Promise((resolve) => setTimeout(resolve, 20000));
       // result = await betting.connect(signers[1]).bet(3, 1, 14000);
       // receipt = await result.wait();
       // hash1131 = receipt.events[0].args.contractHash;
@@ -250,16 +249,16 @@ async function main() {
       ]);
       receipt = result.wait();
       console.log(`line 244`);
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await new Promise((resolve) => setTimeout(resolve, 25000));
   
       result = await oracle.processVote();
       
       receipt = result.wait();
       console.log(`line 250`);
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      await new Promise((resolve) => setTimeout(resolve, 25000));
       result = await betting.tokenReward();
       await result.wait();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
     // nextStart = nextStart + 7 * 24 * secondsInHour;
       result = await oracle.initPost(
         [
@@ -364,12 +363,12 @@ async function main() {
       );
       receipt = result.wait();
       console.log(`line 355`);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 50000));
      
       result = await oracle.processVote();
       receipt = result.wait();
       console.log(`line 360`);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 50000));
       // result = await betting.connect(signers[1]).bet(0, 1, 13000);
       // receipt = await result.wait();
       // let hash101 = receipt.events[0].args.contractHash;
@@ -379,11 +378,11 @@ async function main() {
       result = await betting.connect(signers[1]).bet(1, 0, 15000);
       receipt = await result.wait();
       console.log(`line 370`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
       result = await betting.connect(signers[2]).bet(1, 1, 16000);
       receipt = await result.wait();
       console.log(`line 374`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
  
       result = await oracle.settlePost([
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -391,15 +390,15 @@ async function main() {
       ]);
       receipt = result.wait();
       console.log(`line 382`);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 50000));
 
       result = await oracle.processVote();
       receipt = result.wait();
       console.log(`line 387`);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 50000));
       result = await betting.tokenReward();
       await result.wait();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
       
       result = await oracle.initPost(
         [
@@ -504,10 +503,10 @@ async function main() {
       );
       receipt = await result.wait();
       console.log(`line 492`);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 50000));
       result = await oracle.processVote();
       receipt = await result.wait();
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 15000));
       
 
 

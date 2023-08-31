@@ -51,39 +51,41 @@ function BookiePage() {
   }, [bettingContract, oracleContract, tokenContract]);
 
   async function wdBook() {
-    const stackId = await bettingContract.withdrawBook(sharesToSell);
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
+    try {
+      const stackId = await bettingContract.withdrawBook(sharesToSell);
+      setHash(
+        <div>
+          <div onClick={() => setHash(null)}>
+            <a
+              target="_blank"
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
+            >
+              click here to txn on the blockchain
+            </a>
+          </div>
+          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+          <div onClick={() => setHash(null)}>
+            <a
+              style={{
+                color: "yellow",
+                font: "Arial",
+                fontStyle: "Italic",
+                fontSize: "14px",
+              }}
+              href="javascript:void(0)"
+            >
+              click here to dismiss
+            </a>
+          </div>
         </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div onClick={() => setHash(null)}>
-          <a
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href="javascript:void(0)"
-          >
-            click here to dismiss
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } catch (error) {}
   }
 
   async function claimRewards() {
@@ -128,10 +130,10 @@ function BookiePage() {
 
   async function fundBook() {
     console.log(fundAmount, "fundAmount");
-    let x = Number(fundAmount / 10000);
+    let x = Number(fundAmount * 1e14);
     try {
       const stackId = await bettingContract.fundBook({
-        value: ethers.parseEther(x),
+        value: x,
       });
       setHash(
         <div>
@@ -165,9 +167,7 @@ function BookiePage() {
           </div>
         </div>
       );
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) {}
   }
 
   async function findValues() {
@@ -304,7 +304,7 @@ function BookiePage() {
     <div>
       <VBackgroundCom />
       <Split
-        page={"bookie"}
+        page={"bookiepage"}
         side={
           <Box mt="30px" ml="25px" mr="35px">
             <Logo />
