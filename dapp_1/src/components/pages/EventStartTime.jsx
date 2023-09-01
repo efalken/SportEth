@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { Box, Flex } from "@rebass/grid";
 import { useWalletClient } from "wagmi";
+import {
+  abi as oracleContractABI,
+  address as oracleContractAddress,
+} from "../../abis/Oracle.json";
 
 export default function EventStartTime() {
   const { data: walletClient } = useWalletClient();
