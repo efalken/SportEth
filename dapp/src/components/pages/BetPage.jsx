@@ -10,19 +10,29 @@ import Input from "../basics/Input";
 import Button from "../basics/Button";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
-import { ethers } from "ethers";
-import { useAuthContext } from "../../contexts/AuthContext";
-import { networkConfig } from "../../config";
+import {
+  abi as bettingContractABI,
+  address as bettingContractAddress,
+} from "../../abis/Betting.json";
+import {
+  abi as oracleContractABI,
+  address as oracleContractAddress,
+} from "../../abis/Oracle.json";
 import TeamTable from "../blocks/TeamTable";
 import { Link } from "react-router-dom";
+import { useAccount, useContractReads, useWalletClient } from "wagmi";
+import { parseEther } from "viem";
+import { writeContract } from "viem/actions";
+import { defaultNetwork } from "../../config";
+import BetHistoryRow from "./components/BetHistoryRow";
+import ActiveBetRow from "./components/ActiveBetRow";
 
 function BetPage() {
-  const { oracleContract, bettingContract, account, provider } =
-    useAuthContext();
-  //const provider = useAuthContext.provider;
+  document.title = "Betting Page";
+  const { address } = useAccount();
+  const { data: walletClient, isError, isLoading } = useWalletClient();
 
   const [betAmount, setBetAmount] = useState("");
-  //const [maxBet, setMaxBet] = useState(0);
   const [activeStart, setGameStart] = useState(0);
   const [currTime, setCurrTime] = useState(0);
   const [fundAmount, setFundAmount] = useState("");
@@ -31,7 +41,6 @@ function BetPage() {
   const [matchPick, setMatchPick] = useState(null);
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [viewedTxs, setViewedTxs] = useState(0);
-  const [betHistory, setBetHistory] = useState([{}]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
@@ -44,10 +53,9 @@ function BetPage() {
   const [teamSplit, setTeamSplit] = useState([]);
   const [oddsVector, setOddsVector] = useState([]);
   const [startTime, setStartTime] = useState([]);
-  //const [tokenRewardsLeft, setTokenRewardsLeft] = useState(0);
-  const [eoaBalance, setEoaBalance] = useState("0");
   const [counter, setCounter] = useState(0);
   const [txnHash, setHash] = useState();
+  const [betHashes, setBetHashes] = useState([]);
   const [odds0, setOdds0] = useState([
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
@@ -70,41 +78,10 @@ function BetPage() {
   ]);
   let netLiab = [liab0, liab1];
 
-  document.title = "Betting Page";
-
-  useEffect(() => {
-    if (!bettingContract || !oracleContract) return;
-    const interval1 = setInterval(() => {
-      findValuesOnce();
-    }, 1000);
-    return () => {
-      clearInterval(interval1);
-    };
-  }, [bettingContract, oracleContract]);
-
-  useEffect(() => {
-    if (!bettingContract || !oracleContract) return;
-    const interval2 = setInterval(() => {
-      updateBetRecord();
-    }, 1000);
-    return () => {
-      clearInterval(interval2);
-    };
-  }, [counter]);
-
-  useEffect(() => {
-    if (!bettingContract) return;
-    const interval3 = setInterval(() => {
-      findCounter();
-    }, 1000);
-    return () => {
-      clearInterval(interval3);
-    };
-  }, [bettingContract, counter]);
-
   let xdecode256 = [0, 1, 2, 3];
   let odds999 = 0;
   let oddsTot = [odds0, odds1];
+
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
       if (betData) xdecode256 = unpack256(betData[ii]);
@@ -113,8 +90,6 @@ function BetPage() {
       odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45);
       netLiab[0][ii] = Number(xdecode256[2]) - Number(xdecode256[1]);
       netLiab[1][ii] = Number(xdecode256[3]) - Number(xdecode256[0]);
-      // netLiab[0][ii] =   (xdecode256[2] - xdecode256[1]) ;
-      // netLiab[1][ii] =   (xdecode256[3] - xdecode256[0]) ;
     }
     setOdds0(odds0);
     setOdds1(odds1);
@@ -127,275 +102,223 @@ function BetPage() {
     setTeamSplit(_teamSplit);
   }, [scheduleString]);
 
-  async function fundBettor() {
+  async function fundBettor(value) {
     try {
-      let x = Number(fundAmount / 1000);
-      console.log(x, "x");
-      const stackId = await bettingContract.fundBettor({
-        value: ethers.parseEther(x),
+      const txHash = await writeContract(walletClient, {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        value: parseEther(value),
+        functionName: "fundBettor",
       });
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
-    } catch (error) {}
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-  async function withdrawBettor(x) {
-    try {
-      const stackId = await bettingContract.withdrawBettor(wdAmount * 10000);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+  async function updateTransactionHashDialogBox(hash) {
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`${defaultNetwork.blockExplorers.default.url}/tx/${hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch (error) {}
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div
+          style={{
+            color: "yellow",
+            font: "Arial",
+            fontStyle: "Italic",
+            fontSize: "14px",
+          }}
+          onClick={() => setHash(null)}
+        >
+          click here to dismiss
+        </div>
+      </div>
+    );
+  }
+
+  async function withdrawBettor() {
+    try {
+      const txHash = await writeContract({
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "withdrawBettor",
+        args: [wdAmount * 10000],
+      });
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async function takeBet() {
     setHash(null);
-    if (
-      betAmount >
-      Number(
-        getMaxSize(
-          Number(netLiab[1 - teamPick][matchPick]),
-          Number(netLiab[teamPick][matchPick]),
-          Number(oddsTot[teamPick][matchPick])
-        )
-      )
-    ) {
-      alert("value is greater than max bet");
-      return;
-    } else {
-      try {
-        const tx = await bettingContract.bet(
-          matchPick,
-          teamPick,
-          betAmount * 10000
-        );
-        setHash(
-          <div>
-            <div onClick={() => setHash(null)}>
-              <a
-                target="_blank"
-                style={{
-                  color: "yellow",
-                  font: "Arial",
-                  fontStyle: "Italic",
-                  fontSize: "14px",
-                }}
-                href={`https://testnet.snowtrace.io/tx/${tx.hash}`}
-              >
-                click here to txn on the blockchain
-              </a>
-              <Text
-                style={{
-                  color: "white",
-                  font: "Arial",
-                  fontStyle: "Italic",
-                  fontSize: "14px",
-                }}
-              >
-                {" "}
-                ...or...
-              </Text>
-            </div>
+    try {
+      const txHash = await writeContract(walletClient, {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "bet",
+        args: [matchPick, teamPick, betAmount * 10000],
+      });
 
-            <div onClick={() => setHash(null)}>
-              <a
-                style={{
-                  color: "yellow",
-                  font: "Arial",
-                  fontStyle: "Italic",
-                  fontSize: "14px",
-                }}
-                href="javascript:void(0)"
-              >
-                click here to dismiss
-              </a>
-            </div>
-          </div>
-        );
-      } catch (error) {}
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
     }
   }
 
   async function redeemBet() {
     try {
-      const stackId = await bettingContract.redeem();
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
-    } catch (error) {}
-    //const receipt = await tx.wait(1);
-    // await syncEvents(receipt.hash);
-    //setTimeout(updateBetRecord, 5000, )
-  }
+      const txHash = await writeContract(walletClient, {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "redeem",
+      });
 
-  async function addBetRecord(contractHash) {
-    const { epoch, matchNum, pick, betAmount, payoff, bettor } =
-      await bettingContract.betContracts(contractHash);
-    betHistory[0][contractHash] = {
-      Hashoutput: contractHash,
-      BettorAddress: bettor,
-      Epoch: Number(epoch),
-      BetSize: Number(betAmount) / 10000,
-      LongPick: Number(pick),
-      MatchNum: Number(matchNum),
-      Payoff: (0.95 * Number(payoff)) / 10000,
-      Result9: await bettingContract.checkRedeem(contractHash),
-    };
-    setBetHistory(betHistory);
-  }
-
-  async function updateBetRecord() {
-    let us = await bettingContract.userStruct(account);
-    //let _counter = us ? us.counter.toString() : 0;  thdthd   //
-    let _counter = us ? Number(us.counter) : 0;
-    setCounter(_counter);
-    let _bettorHashes = (await bettingContract.showUserBetData()) || [];
-    //setBetHashes(_bettorHashes);
-    let _lastBetHash = Object.values(_bettorHashes).slice(0, counter);
-    for (const betHash of _lastBetHash) {
-      await addBetRecord(betHash);
-      setBetHistory(betHistory);
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
     }
   }
-  //
-  async function findCounter() {}
 
-  async function findValuesOnce() {
-    let _eoaBalance = (await provider.getBalance(account)) || "0";
-    setEoaBalance(_eoaBalance);
-    let _betData = (await bettingContract.showBetData()) || [];
-    setBetData(_betData);
-    let us = await bettingContract.userStruct(account);
-    let _userBalance = us ? Number(us.userBalance) : 0;
-    setUserBalance(_userBalance);
-    let _counter = us ? Number(us.counter) : 0;
+  const { data, refetch: refetchAll } = useContractReads({
+    contracts: [
+      {
+        address: bettingContractAddress,
+        abi: bettingContractABI,
+        functionName: "userStruct",
+        args: [address],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "showUserBetData",
+        account: walletClient?.account,
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "showBetData",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "margin",
+        args: [0],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "params",
+        args: [3],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "showStartTime",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "showOdds",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "margin",
+        args: [1],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "params",
+        args: [0],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "params",
+        args: [1],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showSchedString",
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (!data) return;
+
+    const [
+      { result: us },
+      { result: _bettorHashes },
+      { result: _betData },
+      { result: _totalLpCapital },
+      { result: _gameStart },
+      { result: _startTimes },
+      { result: _oddsvector },
+      { result: _lockedLpCapital },
+      { result: _currW4 },
+      { result: _concentrationLimit },
+      { result: sctring },
+    ] = data;
+
+    const _counter = us ? Number(us[0]) : 0;
     setCounter(_counter);
 
-    let _totalLpCapital = Number((await bettingContract.margin(0)) || "0");
-    setUnlockedLpCapital(_totalLpCapital);
+    let _userBalance = us ? Number(us[1]) : 0;
+    setUserBalance(_userBalance);
 
-    // let _tokenRewardsLeft = Number(
-    //   (await tokenContract.balanceOf(
-    //     "0xBe638524D4bCA056c2B2D3A75546bA3c4cF0E392"
-    //   )) || 0
-    // );
-    // setTokenRewardsLeft(_tokenRewardsLeft);
+    if (counter) {
+      let _lastBetHash = Object.values(_bettorHashes || []).slice(0, counter);
+      setBetHashes(_lastBetHash);
+    }
 
-    let _gameStart = Number((await bettingContract.params(3)) || 0);
-    setGameStart(_gameStart);
+    setBetData(_betData || []);
 
-    let _startTimes = (await bettingContract.showStartTime()) || [];
-    setStartTime(_startTimes);
+    setUnlockedLpCapital(Number(_totalLpCapital || 0n));
 
-    let _oddsvector = (await bettingContract.showOdds()) || [];
-    setOddsVector(_oddsvector);
+    setGameStart(Number(_gameStart || 0n));
 
-    let _currTime = Number(Math.floor(new Date().getTime() / 1000)) || 0;
-    setCurrTime(_currTime);
+    setStartTime(_startTimes || []);
 
-    // let _moose = Number((await bettingContract.moose()) || "0");
-    // setMoose(_moose);
+    setOddsVector(_oddsvector || []);
 
-    let _lockedLpCapital = Number((await bettingContract.margin(1)) || "0");
-    setUsedCapital(_lockedLpCapital);
+    setUsedCapital(Number(_lockedLpCapital || 0n));
 
-    let _currW4 = Number((await bettingContract.params(0)) || "0");
-    setCurrW4(_currW4);
+    setCurrW4(Number(_currW4 || 0n));
 
-    let _concentrationLimit = Number((await bettingContract.params(1)) || "0");
-    setConcentrationLimit(_concentrationLimit);
+    setConcentrationLimit(Number(_concentrationLimit || 0n));
 
-    let sctring = await oracleContract.showSchedString();
-    setScheduleString(sctring);
-  }
+    setScheduleString(sctring || Array(32).fill("check later...: n/a: n/a"));
+  }, [data, counter]);
+
+  useEffect(() => {
+    setInterval(() => {
+      let _currTime = Math.floor(new Date().getTime() / 1000);
+      setCurrTime(_currTime);
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    setInterval(() => {
+      refetchAll();
+    }, 1000);
+  }, []);
 
   function getMaxSize(liabOpponent, liabPick, oddsPick) {
     liabOpponent = isNaN(liabOpponent) ? 0 : Number(liabOpponent);
@@ -413,7 +336,6 @@ function BetPage() {
 
   function unpack256(src) {
     if (!src) return [];
-    //const str = bn.toString(16);
     const str = src.toString(16).padStart(64, "0");
     const pieces = str
       .toString(16)
@@ -442,9 +364,7 @@ function BetPage() {
   }
 
   function openEtherscan(txhash) {
-    const url = `${
-      networkConfig.blockExplorerUrls ? networkConfig.blockExplorerUrls[0] : ""
-    }tx/${txhash}`;
+    const url = `${defaultNetwork.blockExplorers.default.url}/tx/${txhash}`;
     window.open(url, "_blank");
     setViewedTxs(viewedTxs + 1);
   }
@@ -545,7 +465,7 @@ function BetPage() {
                 Connected Account Address
               </Text>
               <TruncatedAddress
-                addr={account}
+                addr={address}
                 start="8"
                 end="0"
                 transform="uppercase"
@@ -638,6 +558,7 @@ function BetPage() {
                     inputWidth="100px"
                     borderRadius="1px"
                     placeholder="# avax"
+                    //backgroundColor = "#fff"
                     buttonLabel="Fund"
                   />
                 </Box>
@@ -651,53 +572,40 @@ function BetPage() {
             </Box>
             <Box>
               <Flex>
-                {Object.keys(betHistory).map((id) => (
-                  <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text className="style" color="#ffffff" size="14px">
-                      {" "}
-                      Your active bets
-                    </Text>
-                    <br />
-                    <table
-                      style={{
-                        width: "100%",
-                        fontSize: "14px",
-                        fontFamily: "sans-serif",
-                        color: "#ffffff",
-                      }}
-                    >
-                      <tbody>
-                        <tr style={{ width: "33%", color: "#ffffff" }}>
-                          <td>Match</td>
-                          <td>Pick</td>
-                          <td>BetSize</td>
-                          <td>DecOdds</td>
-                        </tr>
-                        {Object.values(betHistory[id]).map(
-                          (event, index) =>
-                            event.Epoch === currW4 && (
-                              <tr key={index} style={{ width: "33%" }}>
-                                <td>{teamSplit[event.MatchNum][0]}</td>
-                                <td>
-                                  {
-                                    teamSplit[event.MatchNum][
-                                      event.LongPick + 1
-                                    ]
-                                  }
-                                </td>
-                                <td>{Number(event.BetSize).toFixed(3)}</td>
-                                <td>
-                                  {Number(
-                                    event.Payoff / event.BetSize + 1
-                                  ).toFixed(4)}
-                                </td>
-                              </tr>
-                            )
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
+                <div style={{ width: "100%", float: "left" }}>
+                  <Text className="style" color="#ffffff" size="14px">
+                    {" "}
+                    Your active bets
+                  </Text>
+                  <br />
+                  <table
+                    style={{
+                      width: "100%",
+                      fontSize: "14px",
+                      fontFamily: "sans-serif",
+                      color: "#ffffff",
+                    }}
+                  >
+                    <tbody>
+                      <tr style={{ width: "33%", color: "#ffffff" }}>
+                        <td>Match</td>
+                        <td>Pick</td>
+                        <td>BetSize</td>
+                        <td>DecOdds ${counter}</td>
+                      </tr>
+                      {Object.values(betHashes).map(
+                        (contractHash, index) =>
+                          index < counter && (
+                            <ActiveBetRow
+                              contractHash={contractHash}
+                              currW4={currW4}
+                              teamSplit={teamSplit}
+                            />
+                          )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </Flex>
             </Box>
             <Box>
@@ -740,60 +648,45 @@ function BetPage() {
             </Box>
             <Box>
               <Flex>
-                {Object.keys(betHistory).map((id) => (
-                  <div key={id} style={{ width: "100%", float: "left" }}>
-                    <Text size="14px" className="style">
-                      Bets in stack: {counter}
-                    </Text>
-                    <br />
+                <div style={{ width: "100%", float: "left" }}>
+                  <Text size="14px" className="style">
+                    Bets in stack: {counter}
+                  </Text>
+                  <br />
 
-                    <Text className="style" size="14px">
-                      {" "}
-                      resolved bets to be processed via redeem
-                    </Text>
-                    <br />
-                    <table
-                      style={{
-                        width: "100%",
-                        fontSize: "14px",
-                        float: "left",
-                        fontFamily: "sans-serif",
-                      }}
-                    >
-                      <tbody>
-                        <tr style={{ width: "33%", color: "#ffffff" }}>
-                          <td>Epoch</td>
-                          <td>Pick</td>
-                          <td>Your Payout</td>
-                          <td>Win?</td>
-                        </tr>
-                        {Object.values(betHistory[id]).map(
-                          (event, index) =>
-                            index < counter &&
-                            event.Epoch < Number(currW4) && (
-                              <tr
-                                key={index}
-                                style={{ width: "33%", color: "#ffffff" }}
-                              >
-                                <td>{event.Epoch}</td>
-                                <td>
-                                  {
-                                    teamSplit[event.MatchNum][
-                                      event.LongPick + 1
-                                    ]
-                                  }
-                                </td>
-                                <td>
-                                  {(event.Payoff + event.BetSize).toFixed(3)}
-                                </td>
-                                <td>{event.Result9 ? "yes" : "no"}</td>
-                              </tr>
-                            )
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
+                  <Text className="style" size="14px">
+                    {" "}
+                    resolved bets to be processed via redeem
+                  </Text>
+                  <br />
+                  <table
+                    style={{
+                      width: "100%",
+                      fontSize: "14px",
+                      float: "left",
+                      fontFamily: "sans-serif",
+                    }}
+                  >
+                    <tbody>
+                      <tr style={{ width: "33%", color: "#ffffff" }}>
+                        <td>Epoch</td>
+                        <td>Pick</td>
+                        <td>Your Payout</td>
+                        <td>Win?</td>
+                      </tr>
+                      {Object.values(betHashes).map(
+                        (contractHash, index) =>
+                          index < counter && (
+                            <BetHistoryRow
+                              contractHash={contractHash}
+                              currW4={currW4}
+                              teamSplit={teamSplit}
+                            />
+                          )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </Flex>
             </Box>
             <Box>
@@ -894,7 +787,7 @@ function BetPage() {
 
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifyContent="center">
-            {activeStart + 2 * 86400 < currTime ? (
+            {activeStart + 2 * 86400 > currTime ? (
               <Text size="14px" weight="300" className="style">
                 betting closed, waiting for next weekend's schedule ...
               </Text>

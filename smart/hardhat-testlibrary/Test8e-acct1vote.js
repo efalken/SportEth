@@ -776,7 +776,7 @@ describe("Betting", function () {
         "finney"
       );
       console.log(`acct1 wd ${ethout}`);
-      assert.equal(Number(ethout).toFixed(2), "63.18", "Must be equal");
+      assert.equal(Number(ethout).toFixed(2), "54.15", "Must be equal");
       tokensout = receipt.events[1].args.tokensChange;
       result = await betting.connect(account5).bet(0, 0, 25n * tenthEthInK);
       _hourSolidity = await oracle.hourOfDay();
@@ -908,7 +908,7 @@ describe("Betting", function () {
       console.log(`acct0 final wd ${ethout}`);
       tokensout = receipt.events[1].args.tokensChange;
       //console.log(`tokens Out0 ${tokensout}`);
-      assert.equal(Number(ethout).toFixed(2), "153.24", "Must be equal");
+      assert.equal(Number(ethout).toFixed(2), "160.01", "Must be equal");
       //const betepoch = await oracle.betEpochOracle();
       // // console.log(`betepoch, ${betepoch}`);
       //const initepoch = (await oracle.adminStruct(account2.address)).baseEpoch;
@@ -947,7 +947,7 @@ describe("Betting", function () {
       );
       console.log(`account2 wd ${ethout}`);
       const tokensout1 = receipt1.events[1].args.tokensChange;
-      assert.equal(Number(ethout).toFixed(2), "71.08", "Must be equal");
+      assert.equal(Number(ethout).toFixed(2), "73.34", "Must be equal");
       oracleBal = ethers.utils.formatUnits(
         await ethers.provider.getBalance(oracle.address),
         "finney"

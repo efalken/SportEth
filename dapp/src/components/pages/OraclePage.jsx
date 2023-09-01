@@ -7,17 +7,28 @@ import { G } from "../basics/Colors";
 import Form from "../basics/Form";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
-import { useAuthContext } from "../../contexts/AuthContext";
 import TeamTable from "../blocks/TeamTable2";
 import { Link } from "react-router-dom";
-import { ethers } from "ethers";
+import { useAccount, useContractReads, useWalletClient } from "wagmi";
+import {
+  abi as bettingContractABI,
+  address as bettingContractAddress,
+} from "../../abis/Betting.json";
+import {
+  abi as oracleContractABI,
+  address as oracleContractAddress,
+} from "../../abis/Oracle.json";
+import {
+  abi as tokenContractABI,
+  address as tokenContractAddress,
+} from "../../abis/Token.json";
+import { writeContract } from "viem/actions";
 
 function OraclePage() {
-  const { oracleContract, bettingContract, tokenContract, account, provider } =
-    useAuthContext();
+  const { address } = useAccount();
 
   document.title = "Oracle Page";
-  //
+
   const [showDecimalOdds, setShowDecimalOdds] = useState(false);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
@@ -51,14 +62,13 @@ function OraclePage() {
   const [txnHash, setHash] = useState();
 
   useEffect(() => {
-    if (!bettingContract || !oracleContract) return;
     const interval1 = setInterval(() => {
-      findValues();
+      refetchAll();
     }, 1000);
     return () => {
       clearInterval(interval1);
     };
-  }, [bettingContract, oracleContract]);
+  }, []);
 
   let [odds0, setOdds0] = useState([
     957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
@@ -90,259 +100,234 @@ function OraclePage() {
     setTeamSplit(_teamSplit);
   }, [scheduleString]);
 
-  async function voteNofn() {
-    try {
-      const stackId = await oracleContract.vote(false);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+  async function updateTransactionHashDialogBox(hash) {
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`${defaultNetwork.blockExplorers.default.url}/tx/${hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch (error) {}
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div
+          style={{
+            color: "yellow",
+            font: "Arial",
+            fontStyle: "Italic",
+            fontSize: "14px",
+          }}
+          onClick={() => setHash(null)}
+        >
+          click here to dismiss
+        </div>
+      </div>
+    );
   }
 
-  async function voteYesfn() {
-    try {
-      const stackId = await oracleContract.vote(true);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
-    } catch (error) {}
+  const { data: walletClient } = useWalletClient();
+
+  async function votefn(voteType) {
+    console.log(voteNo, "voteNo");
+    const txHash = await writeContract(walletClient, {
+      abi: oracleContractABI,
+      address: oracleContractAddress,
+      functionName: "vote",
+      args: [voteType],
+    });
+    updateTransactionHashDialogBox(txHash);
   }
 
   async function processVote() {
-    try {
-      const stackId = await oracleContract.processVote();
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
-    } catch (error) {}
+    const txHash = await writeContract(walletClient, {
+      abi: oracleContractABI,
+      address: oracleContractAddress,
+      functionName: "processVote",
+    });
+    updateTransactionHashDialogBox(txHash);
   }
 
   async function depositTokens() {
-    try {
-      const stackId = await oracleContract.depositTokens(depositAmount);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
-    } catch (error) {}
+    const txHash = await writeContract(walletClient, {
+      abi: oracleContractABI,
+      address: oracleContractAddress,
+      functionName: "depositTokens",
+      args: [depositAmount],
+    });
+    updateTransactionHashDialogBox(txHash);
   }
 
   async function withdrawTokens() {
-    try {
-      const stackId = await oracleContract.withdrawTokens(withdrawAmount);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
-    } catch (error) {}
+    const txHash = await writeContract(walletClient, {
+      abi: oracleContractABI,
+      address: oracleContractAddress,
+      functionName: "withdrawTokens",
+      args: [withdrawAmount],
+    });
+    updateTransactionHashDialogBox(txHash);
   }
 
-  async function findValues() {
-    let _yesVotes = Number(await oracleContract.votes(0)) || 0;
-    setVoteYes(_yesVotes);
+  const { data, refetch: refetchAll } = useContractReads({
+    contracts: [
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "votes",
+        args: [0],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "votes",
+        args: [1],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "propNumber",
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "reviewStatus",
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showPropStartTimes",
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showPropOdds",
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showPropResults",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "params",
+        args: [0],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "params",
+        args: [1],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "paused",
+        args: [0],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "paused",
+        args: [1],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "minSubmit",
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "feeData",
+        args: [0],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "feeData",
+        args: [1],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "proposer",
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "adminStruct",
+        args: [address],
+      },
+      {
+        abi: tokenContractABI,
+        address: tokenContractAddress,
+        functionName: "balanceOf",
+        args: [address],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showSchedString",
+      },
+    ],
+  });
 
-    let _noVotes = Number(await oracleContract.votes(1)) || 0;
-    setVoteNo(_noVotes);
+  useEffect(() => {
+    if (!data) return;
 
-    let _propNumber = Number(await oracleContract.propNumber()) || 0;
-    setPropNumber(_propNumber);
+    const [
+      { result: _votes0 },
+      { result: _votes1 },
+      { result: _propNumber },
+      { result: _reviewStatus },
+      { result: _startTimes },
+      { result: _oddsvector },
+      { result: _outcomes },
+      { result: _params0 },
+      { result: _params1 },
+      { result: _paused0 },
+      { result: _paused1 },
+      { result: _minSubmit },
+      { result: _feeData0 },
+      { result: _feeData1 },
+      { result: _proposer },
+      { result: _adminStruct },
+      { result: _balance },
+      { result: _sctring },
+    ] = data;
 
-    let _reviewStatus = Number(await oracleContract.reviewStatus()) || 0;
-    setReviewStatus(_reviewStatus);
-
-    let _startTimes = (await oracleContract.showPropStartTimes()) || [];
-    setStartTime(_startTimes);
-
-    let _oddsvector = (await oracleContract.showPropOdds()) || [];
-    setOddsVector(_oddsvector);
-
-    let _outcomes = (await oracleContract.showPropResults()) || [];
-    setOutcomes(_outcomes);
-
-    let _currW4 = Number((await bettingContract.params(0)) || 0);
-    setCurrW4(_currW4);
-
-    let _concentrationLimit = Number((await bettingContract.params(1)) || 0);
-    setConcentrationLimit(_concentrationLimit);
-
-    let _pause0 = Number((await bettingContract.paused(0)) || 0);
-    setPause0(_pause0);
-
-    let _pause1 = Number((await bettingContract.paused(1)) || 0);
-    setPause1(_pause1);
-
-    let _minSubmit = Number((await oracleContract.minSubmit()) || []);
-    setMinSubmit(_minSubmit);
-
-    let _feeData1 = Number(await oracleContract.feeData(1)) || 0;
-    setFeeData1(_feeData1);
-
-    let _feeData0 = Number(await oracleContract.feeData(0)) || 0;
-    setFeeData0(_feeData0);
-
-    let _proposer = (await oracleContract.proposer()) || "0x123";
-    setProposer(_proposer);
-
-    let oc = await oracleContract.adminStruct(account);
-    let _voteTracker = oc ? Number(oc.voteTracker) : 0;
-    setVoteTracker(_voteTracker);
-    let _tokens = oc ? Number(oc.tokens) : 0;
-    setTokens(_tokens);
-    let _baseEpoch = oc ? Number(oc.baseEpoch) : 0;
-    setBaseEpoch(_baseEpoch);
-    let _totalVotes = oc ? Number(oc.totalVotes) : 0;
-    setTotalVotes(_totalVotes);
-    let _initFeePool = oc ? Number(oc.initFeePool) : 0;
-    setInitFeePool(_initFeePool);
-    let _basePropNumber = oc ? Number(oc.basePropNumber) : 0;
-    setBasePropNumber(_basePropNumber);
-    let _eoaTokens = Number((await tokenContract.balanceOf(account)) || 0);
-    setEoaTokens(_eoaTokens);
-    let sctring = await oracleContract.showSchedString();
-    setScheduleString(sctring);
-  }
+    setVoteYes(Number(_votes0) || 0);
+    setVoteNo(Number(_votes1) || 0);
+    setPropNumber(Number(_propNumber) || 0);
+    setReviewStatus(Number(_reviewStatus) || 0);
+    setStartTime(_startTimes || []);
+    setOddsVector(_oddsvector || []);
+    setOutcomes(_outcomes || []);
+    setCurrW4(Number(_params0) || 0);
+    setConcentrationLimit(Number(_params1) || 0);
+    setPause0(Number(_params0) || 0);
+    setPause1(Number(_params1) || 0);
+    setMinSubmit(_minSubmit || []);
+    setFeeData0(Number(_feeData0) || 0);
+    setFeeData1(Number(_feeData1) || 0);
+    setProposer(_proposer || "0x123");
+    setBasePropNumber(_adminStruct[0] || 0);
+    setBaseEpoch(_adminStruct[1] || 0);
+    setVoteTracker(_adminStruct[2] || 0);
+    setTotalVotes(_adminStruct[3] || 0);
+    setTokens(_adminStruct[4] || 0);
+    setInitFeePool(_adminStruct[5] || 0);
+    setEoaTokens((_balance || 0n).toString());
+    setScheduleString(_sctring);
+  }, [data]);
 
   function getMoneyLine(decOddsi) {
     let moneyline = 1;
@@ -360,32 +345,14 @@ function OraclePage() {
 
   function ethToClaim() {
     let coeff = 0;
-    if (currW4 > baseEpoch) {
-      coeff = totalVotes / 2 / (currW4 - baseEpoch);
+    if (propNumber > basePropNumber) {
+      coeff = totalVotes / (propNumber - basePropNumber);
     }
-    if (coeff > tokens) {
-      coeff = tokens;
-    }
-    let x = (feeData1 - initFeePool) / 1000000;
-    coeff = (coeff * x) / 100000000;
-    // coeff = totalVotes;
-    console.log(coeff, "coeff");
+    coeff = coeff > 1 ? 1 : coeff;
+    let x = (tokens * (feeData1 - initFeePool)) / 1000000;
+    coeff = (coeff * x) / 10000;
     return coeff;
   }
-
-  console.log(reviewStatus, "reviewStatus");
-  console.log(feeData1, "feeData1");
-  /*
-console.log(currW4, "currEpoch");
-console.log(baseEpoch, "baseepoch");
-console.log(tokens, "tokens");
-console.log(totalVotes, "totvotes");
-console.log(reviewStatus, "reviewStatus");
-  console.log(propNumber, "propNumber");
-  console.log(voteTracker, "voteTracker");
-  console.log(feeData1, "feeData1");
-  console.log(initFeePool, "initFeePool");
-*/
 
   function switchOdds() {
     setShowDecimalOdds(!showDecimalOdds);
@@ -405,15 +372,15 @@ console.log(reviewStatus, "reviewStatus");
   function reviewStatusWord(revStatusi) {
     let statusWord = "na";
     if (revStatusi === 0) {
-      statusWord = "init";
+      statusWord = "Post settle, waiting for new slate";
     } else if (revStatusi === 10) {
-      statusWord = "process Initial";
+      statusWord = "voting on new slate";
     } else if (revStatusi === 20) {
-      statusWord = "process update";
+      statusWord = "voting on updated odds";
     } else if (revStatusi === 30) {
       statusWord = "voting on outcomes";
     } else if (revStatusi === 2) {
-      statusWord = "waiting for update or settlement post";
+      statusWord = "Waiting for update or settlement";
     }
     return statusWord;
   }
@@ -445,7 +412,36 @@ console.log(reviewStatus, "reviewStatus");
     }
     return needtovote;
   }
+  /* bla
+function needToVote() {
+    let needtovote = true;
+    if (
+      Number(voteTracker) === Number(propNumber) ||
+      Number(tokens) === 0 ||
+      reviewStatus < 9
+    ) {
+      needtovote = false;
+    }
+    return needtovote;
+  }
 
+  function Voted() {
+    let voted = true;
+    if (Number(voteTracker) === Number(propNumber) && Number(tokens) > 0) {
+      voted = true;
+    }
+    return voted;
+  }
+
+  function needToProcess() {
+    let needtovote = true;
+    if (reviewStatus < 9) {
+      needtovote = false;
+    }
+     needtovote = false;
+    return needtovote;
+  }
+  */
   return (
     <div>
       <VBackgroundCom />
@@ -534,7 +530,7 @@ console.log(reviewStatus, "reviewStatus");
                 Connected Account Address
               </Text>
               <TruncatedAddress
-                addr={account}
+                addr={address}
                 start="8"
                 end="0"
                 transform="uppercase"
@@ -625,15 +621,15 @@ console.log(reviewStatus, "reviewStatus");
                     <Text size="14px" className="style">
                       Your Tokens in Contract: {Number(tokens).toLocaleString()}
                       <br />
-                      your base Epoch: {baseEpoch}, {propNumber},{" "}
-                      {basePropNumber}
+                      your base Epoch: {baseEpoch}
                     </Text>
                     <br />
                     <Text size="14px" className="style">
                       Your Votes: {totalVotes} over {currW4 - baseEpoch} epochs
                       Your Voting %:{" "}
                       {Number(
-                        (totalVotes * 100) / (propNumber - basePropNumber)
+                        (Number(totalVotes) * 100) /
+                          (propNumber - -basePropNumber)
                       ).toFixed(0) + " %"}
                     </Text>
                     <br />
@@ -670,7 +666,7 @@ console.log(reviewStatus, "reviewStatus");
                     }}
                     onClick={(e) => {
                       e.preventDefault();
-                      voteNofn();
+                      votefn(false);
                     }}
                   >
                     Vote No
@@ -688,7 +684,7 @@ console.log(reviewStatus, "reviewStatus");
                     }}
                     onClick={(e) => {
                       e.preventDefault();
-                      voteYesfn();
+                      votefn(true);
                     }}
                   >
                     Vote Yes

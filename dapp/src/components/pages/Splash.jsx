@@ -2,32 +2,27 @@ import React, { useEffect, useState } from "react";
 import Logo from "../basics/Logo";
 import { Flex, Box } from "rebass";
 import Text from "../basics/Text";
-import VBackground from "../basics/VBackgroundFull";
+import VBackground from "../basics/VBackgroundCom";
 import SplashDrizzleContract from "../blocks/SplashDrizzleContract";
 import { useLocation, useNavigate } from "react-router-dom";
-import { networkConfig } from "../../config";
-import { useAuthContext } from "../../contexts/AuthContext";
-import { useChainId } from "../../helpers/switchAvalanche";
-// ending of pk b5674343024bf75034d166cb26b90f0d179
+import { useAccount, useNetwork } from "wagmi";
+import { defaultNetwork } from "../../config";
 
 export default function Splash() {
   const [contracts, setContracts] = useState([{ asset: "NFL", id: 0 }]);
-  const { provider, connect } = useAuthContext();
-  const chainid = useChainId();
 
   const location = useLocation();
   const navigate = useNavigate();
+  const { address } = useAccount();
+  const { chain } = useNetwork();
   const redirectURL =
     new URLSearchParams(location.search).get("redirect") || "/betpage";
 
   useEffect(() => {
-    if (!provider || chainid != parseInt(networkConfig.chainId)) return;
+    if (!address || !chain || chain.id !== defaultNetwork.id) return;
 
-    (async () => {
-      await connect();
-      navigate(redirectURL);
-    })();
-  }, [provider, chainid]);
+    navigate(redirectURL);
+  }, [address, chain]);
 
   function openWhitepaper() {
     console.log("Opened whitepaper");

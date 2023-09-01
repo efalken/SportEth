@@ -2,23 +2,31 @@ import React, { useState, useEffect } from "react";
 import Split from "../layout/Split";
 import { Box, Flex } from "@rebass/grid";
 import Logo from "../basics/Logo";
-import Icon from "../basics/Icon";
 import Text from "../basics/Text";
 import { G, cwhite } from "../basics/Colors";
 import LabeledText from "../basics/LabeledText";
 import Form from "../basics/Form";
-// import Button from "../basics/Button";
-// import { networkConfig } from "../../config";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
-import { ethers } from "ethers";
 import { Link } from "react-router-dom";
-import { useAuthContext } from "../../contexts/AuthContext";
+import { writeContract } from "viem/actions";
+import { useAccount, useContractReads, useWalletClient } from "wagmi";
+import {
+  abi as bettingContractABI,
+  address as bettingContractAddress,
+} from "../../abis/Betting.json";
+import {
+  abi as oracleContractABI,
+  address as oracleContractAddress,
+} from "../../abis/Oracle.json";
+import {
+  abi as tokenContractABI,
+  address as tokenContractAddress,
+} from "../../abis/Token.json";
+import { parseEther } from "viem";
 
 function BookiePage() {
-  const { oracleContract, bettingContract, tokenContract, account } =
-    useAuthContext();
-
+  const { address } = useAccount();
   const [fundAmount, setFundAmount] = useState("");
   const [sharesToSell, setSharesToSell] = useState("");
   const [currentWeek, setCurrentWeek] = useState("");
@@ -40,183 +48,193 @@ function BookiePage() {
 
   document.title = "LP Page";
   useEffect(() => {
-    if (!bettingContract || !oracleContract || !tokenContract) return;
-
     const interval1 = setInterval(() => {
-      findValues();
+      refetchAll();
     }, 1000);
     return () => {
       clearInterval(interval1);
     };
-  }, [bettingContract, oracleContract, tokenContract]);
+  }, []);
 
-  async function wdBook() {
-    try {
-      const stackId = await bettingContract.withdrawBook(sharesToSell);
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
+  const { data: walletClient } = useWalletClient();
+
+  async function updateTransactionHashDialogBox(hash) {
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`${defaultNetwork.blockExplorers.default.url}/tx/${hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
         </div>
-      );
-    } catch (error) {}
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div
+          style={{
+            color: "yellow",
+            font: "Arial",
+            fontStyle: "Italic",
+            fontSize: "14px",
+          }}
+          onClick={() => setHash(null)}
+        >
+          click here to dismiss
+        </div>
+      </div>
+    );
   }
 
-  async function claimRewards() {
+  async function fundBook() {
+    console.log(fundAmount, "fundAmount");
     try {
-      const stackId = await bettingContract.tokenReward();
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
+      const txHash = await writeContract(walletClient, {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "fundBook",
+        value: parseEther(fundAmount),
+      });
+
+      updateTransactionHashDialogBox(txHash);
     } catch (err) {
       console.log(err);
     }
   }
 
-  async function fundBook() {
-    console.log(fundAmount, "fundAmount");
-    let x = Number(fundAmount * 1e14);
+  async function wdBook() {
     try {
-      const stackId = await bettingContract.fundBook({
-        value: x,
+      const txHash = await writeContract(walletClient, {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "withdrawBook",
+        args: [sharesToSell],
       });
-      setHash(
-        <div>
-          <div onClick={() => setHash(null)}>
-            <a
-              target="_blank"
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href={`https://testnet.snowtrace.io/tx/${stackId.hash}`}
-            >
-              click here to txn on the blockchain
-            </a>
-          </div>
-          <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-          <div onClick={() => setHash(null)}>
-            <a
-              style={{
-                color: "yellow",
-                font: "Arial",
-                fontStyle: "Italic",
-                fontSize: "14px",
-              }}
-              href="javascript:void(0)"
-            >
-              click here to dismiss
-            </a>
-          </div>
-        </div>
-      );
-    } catch (err) {}
+
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-  async function findValues() {
-    // const findValues = useCallback(() => {
-    let _totalLpCapital =
-      Number((await bettingContract.margin(0)) || "0") / 10000;
-    setUnlockedLpCapital(_totalLpCapital);
+  async function claimRewards() {
+    try {
+      const txHash = await writeContract(walletClient, {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "tokenReward",
+      });
 
-    let _lockedLpCapital =
-      Number((await bettingContract.margin(1)) || "0") / 10000;
-    setUsedCapital(_lockedLpCapital);
-    // console.log(bettingContract, "address");
-
-    let _betCapital = Number((await bettingContract.margin(2)) || "0") / 10000;
-    setBetCapital(_betCapital);
-
-    let _tokenInK =
-      (await tokenContract.balanceOf(
-        "0xBe638524D4bCA056c2B2D3A75546bA3c4cF0E392"
-      )) || "0";
-    setTokensInK(_tokenInK);
-
-    let _eoaTokens = (await tokenContract.balanceOf(account)) || "0";
-    setEoaTokens(_eoaTokens);
-
-    let _currentWeek = Number(await bettingContract.params(0));
-    setCurrentWeek(_currentWeek);
-
-    let _totalShares = (await bettingContract.margin(3)) || "0";
-    setTotalShares(_totalShares);
-
-    let _betData = (await bettingContract.showBetData()) || [];
-    setBetData(_betData);
-
-    let sctring = await oracleContract.showSchedString();
-    if (sctring) {
-      setScheduleString(sctring);
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
     }
+  }
 
-    let bs = await bettingContract.lpStruct(account);
-    let _bookieShares = bs ? bs.shares.toString() : "0";
+  const { data, refetch: refetchAll } = useContractReads({
+    contracts: [
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "showBetData",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "margin",
+        args: [0],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "margin",
+        args: [1],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "margin",
+        args: [2],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "margin",
+        args: [3],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "params",
+        args: [0],
+      },
+      {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showSchedString",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "lpStruct",
+        args: [address],
+      },
+      {
+        abi: tokenContractABI,
+        address: tokenContractAddress,
+        functionName: "balanceOf",
+        args: [address],
+      },
+      {
+        abi: tokenContractABI,
+        address: tokenContractAddress,
+        functionName: "balanceOf",
+        args: [bettingContractAddress],
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (!data) return;
+    console.log(data);
+
+    const [
+      { result: _betData },
+      { result: _margin0 },
+      { result: _margin1 },
+      { result: _margin2 },
+      { result: _margin3 },
+      { result: _params0 },
+      { result: _schedString },
+      { result: _lpStruct },
+      { result: _balanceOfUser },
+      { result: _balanceOfContract },
+    ] = data;
+
+    setBetData(_betData || []);
+    setCurrentWeek(Number(_params0));
+    setUnlockedLpCapital(Number(_margin0 || 0n) / 10000);
+    setUsedCapital(Number(_margin1 || 0n) / 10000);
+    setBetCapital(Number(_margin2 || 0n) / 10000);
+    setTotalShares(_margin3 || 0n);
+    setEoaTokens(_balanceOfUser || 0n);
+    setTokensInK(_balanceOfContract || 0n);
+    if (_schedString) setScheduleString(_schedString);
+
+    const _bookieShares = _lpStruct[0].toString() || "0";
     setBookieShares(_bookieShares);
 
-    let _bookieEpoch = bs ? bs.outEpoch.toString() : "0";
+    const _bookieEpoch = _lpStruct[1] || "0";
     setBookieEpoch(_bookieEpoch);
 
-    let _claimEpoch = bs ? bs.claimEpoch.toString() : "0";
+    const _claimEpoch = _lpStruct[2] || "0";
     setBookieEpoch(_claimEpoch);
-  }
+  }, [data]);
 
   function unpack256(src) {
     if (!src) return [0, 0, 0, 0];
@@ -304,7 +322,7 @@ function BookiePage() {
     <div>
       <VBackgroundCom />
       <Split
-        page={"bookiepage"}
+        page={"bookie"}
         side={
           <Box mt="30px" ml="25px" mr="35px">
             <Logo />
@@ -382,7 +400,7 @@ function BookiePage() {
                 Connected Account Address
               </Text>
               <TruncatedAddress
-                addr={account}
+                addr={address}
                 start="8"
                 end="0"
                 transform="uppercase"

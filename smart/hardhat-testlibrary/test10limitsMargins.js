@@ -180,19 +180,19 @@ describe("Betting", function () {
       ).timestamp;
       console.log(`currTime is ${_timestamp}`);
       result = await betting.connect(owner).fundBook({
-        value: 3n * eths,
+        value: 30n * eths,
       });
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       console.log(`gas ${gasUsed}`);
 
       result = await betting.connect(account2).fundBettor({
-        value: 3n * eths,
+        value: 30n * eths,
       });
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       result = await betting.connect(account3).fundBettor({
-        value: 3n * eths,
+        value: 30n * eths,
       });
       margin0 = await betting.margin(0);
       margin1 = await betting.margin(1);
@@ -202,10 +202,10 @@ describe("Betting", function () {
     });
 
     it("bets", async () => {
-      await expect(betting.connect(account2).bet(0, 1, "7010")).to.be.reverted;
+      await expect(betting.connect(account2).bet(0, 1, "70100")).to.be.reverted;
       receipt = await result.wait();
 
-      result = await betting.connect(account2).bet(0, 0, "1000");
+      result = await betting.connect(account2).bet(0, 0, "10000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash1 = receipt.events[0].args.contractHash;
@@ -215,7 +215,7 @@ describe("Betting", function () {
       margin1 = await betting.margin(1);
       console.log(`margin0: ${margin0} margin1: ${margin1}`);
 
-      result = await betting.connect(account3).bet(0, 1, "2000");
+      result = await betting.connect(account3).bet(0, 1, "20000");
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       // receipt = await result.wait();
@@ -227,39 +227,23 @@ describe("Betting", function () {
       const acct2Bal = (await betting.userStruct(account2.address)).userBalance;
       console.log(`acct2: ${acct2Bal} `);
 
-      await expect(betting.connect(account2).bet(0, 0, "7010")).to.be.reverted;
+      await expect(betting.connect(account2).bet(0, 0, "70100")).to.be.reverted;
       receipt = await result.wait();
       margin0 = await betting.margin(0);
       margin1 = await betting.margin(1);
       console.log(`margin0: ${margin0} margin1: ${margin1}`);
 
-      result = await betting.connect(account2).bet(0, 0, "7005");
+      result = await betting.connect(account2).bet(0, 0, "70050");
       receipt = await result.wait();
       margin0 = await betting.margin(0);
       margin1 = await betting.margin(1);
       console.log(`margin0: ${margin0} margin1: ${margin1}`);
-      const betPayoff0 = await betting.moosev(0);
-      const netPosTeamBet0 = await betting.moosev(1);
-      const marginChange0 = await betting.moosev(2);
-      const netPosTeamOpp0 = await betting.moosev(3);
-      console.log(`betPayoff: ${betPayoff0} netPosTeamBet: ${netPosTeamBet0}`);
-      console.log(
-        `marginChange: ${marginChange0} netPosTeamOpp: ${netPosTeamOpp0}`
-      );
 
-      result = await betting.connect(account3).bet(0, 1, "10000");
+      result = await betting.connect(account3).bet(0, 1, "100000");
       receipt = await result.wait();
       margin0 = await betting.margin(0);
       margin1 = await betting.margin(1);
-      console.log(`margin0: ${margin0} margin1: ${margin1}`);
-      const betPayoff = await betting.moosev(0);
-      const netPosTeamBet = await betting.moosev(1);
-      const marginChange = await betting.moosev(2);
-      const netPosTeamOpp = await betting.moosev(3);
-      console.log(`betPayoff: ${betPayoff} netPosTeamBet: ${netPosTeamBet}`);
-      console.log(
-        `marginChange: ${marginChange} netPosTeamOpp: ${netPosTeamOpp}`
-      );
+      console.log(`margin0: ${margin0} margin1:${margin1}`);
     });
   });
 });

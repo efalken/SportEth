@@ -1,32 +1,39 @@
 import React, { useState, useEffect } from "react";
 import Text from "../basics/Text";
-import { useAuthContext } from "../../contexts/AuthContext";
+import { useWalletClient } from "wagmi";
+import { createContractEventFilter, getFilterLogs } from "viem/actions";
+import {
+  abi as oracleContractABI,
+  address as oracleContractAddress,
+} from "../../abis/Oracle.json";
 
 export default function EventGameoutcomes() {
-  const { oracleContractReadOnly } = useAuthContext();
+  const { data: walletClient } = useWalletClient();
   const [priceHistory, setPriceHistory] = useState([]);
 
   useEffect(() => {
-    if (!oracleContractReadOnly) return;
+    if (!walletClient) return;
 
     (async () => {
       const pricedata = [];
-      const ResultsPostedEvent = oracleContractReadOnly.filters.ResultsPosted();
-      const events = await oracleContractReadOnly.queryFilter(
-        ResultsPostedEvent
-      );
+      const filter = await createContractEventFilter(walletClient, {
+        address: oracleContractAddress,
+        abi: oracleContractABI,
+        eventName: "ResultsPosted",
+      });
+      const events = await getFilterLogs(walletClient, { filter });
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
           timestamp: blockNumber,
           outcome: Number(args.winner),
           Epoch: Number(args.epoch),
-          outcome: args.winner,
+          outcome2: args.winner,
         });
       }
       setPriceHistory(pricedata);
     })();
-  }, [oracleContractReadOnly]);
+  }, [walletClient]);
 
   if (priceHistory.length === 0)
     return (

@@ -1,22 +1,33 @@
 import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { Box, Flex } from "@rebass/grid";
-import { useAuthContext } from "../../contexts/AuthContext";
+import { useWalletClient } from "wagmi";
+import {
+  abi as oracleContractABI,
+  address as oracleContractAddress,
+} from "../../abis/Oracle.json";
+import { createContractEventFilter, getFilterLogs } from "viem/actions";
 
 export default function EventSchedule() {
-  const { oracleContractReadOnly } = useAuthContext();
   const [matchHistory, setMatchHistory] = useState([]);
+  const { data: walletClient } = useWalletClient();
 
   useEffect(() => {
-    if (!oracleContractReadOnly) return;
+    if (!walletClient) return;
 
     (async () => {
       const pricedata = [];
-      const SchedulePostedEvent =
-        oracleContractReadOnly.filters.SchedulePosted();
-      const events = await oracleContractReadOnly.queryFilter(
-        SchedulePostedEvent
-      );
+      const filter = await createContractEventFilter(walletClient, {
+        address: oracleContractAddress,
+        abi: oracleContractABI,
+        eventName: "SchedulePosted",
+      });
+      const events = await getFilterLogs(walletClient, { filter });
+      // const SchedulePostedEvent =
+      //   oracleContractReadOnly.filters.SchedulePosted();
+      // const events = await oracleContractReadOnly.queryFilter(
+      //   SchedulePostedEvent
+      // );
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
@@ -27,7 +38,7 @@ export default function EventSchedule() {
       }
       setMatchHistory(pricedata);
     })();
-  }, [oracleContractReadOnly]);
+  }, [walletClient]);
 
   if (Object.keys(matchHistory).length === 0)
     return (

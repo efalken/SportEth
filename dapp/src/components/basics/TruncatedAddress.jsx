@@ -1,31 +1,39 @@
-import React from 'react';
-import { C, cwhite, cyellow} from './Colors'
-import { Box } from '@rebass/grid'
-import Text from './Text'
+import React from "react";
+import { C, cwhite, cyellow } from "./Colors";
+import { Box } from "@rebass/grid";
+import Text from "./Text";
 
 // eslint-disable-next-line
-export default ({ label, addr, start, end, transform, spacing, big }) => <Box>
+export default ({ label, addr, start, end, transform, spacing, big }) => (
   <Box>
-    {/* <Text
+    <Box>
+      {/* <Text
     //  size={big ? "14px" : "13px"}
       size="18px"
       color = {cwhite}>
       {label}
     </Text> */}
+    </Box>
+    <Box mt="2px">
+      <Text
+        //size={big ? "14px" : "13px"}
+        color={cwhite}
+        size="14px"
+        style={{
+          textTransform: transform ? transform : "none",
+          letterSpacing: spacing ? spacing : 0,
+        }}
+      >
+        {addr
+          ? addr.substring(0, 2) +
+            addr.substring(2, start).toUpperCase() +
+            "..." +
+            addr.substring(addr.length - end, addr.length).toUpperCase()
+          : ""}
+      </Text>
+    </Box>
   </Box>
-  <Box mt="2px">
-    <Text
-      //size={big ? "14px" : "13px"}
-      color = {cwhite}
-      size="14px"
-      style={{
-        textTransform: transform ? transform : "none",
-        letterSpacing: spacing ? spacing : 0
-      }}>
-      {addr.substring(0, 2) + addr.substring(2, start).toUpperCase() + "..." + addr.substring(addr.length - end, addr.length).toUpperCase()}
-    </Text>
-  </Box>
-</Box>
+);
 
 /*class TruncatedAddress extends React.Component {
 

@@ -1,18 +1,21 @@
 import { useEffect } from "react";
-import { useAuthContext } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { useAccount, useNetwork } from "wagmi";
+import { defaultNetwork } from "../../config";
+
 export default function AuthRequired({ children }) {
-  const { signer } = useAuthContext();
+  const { address } = useAccount();
+  const { chain } = useNetwork();
 
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (signer) return;
+    if (chain && chain.id == defaultNetwork.id && address) return;
 
     navigate(`/?redirect=${location.pathname}`);
-  }, [signer]);
+  }, [chain, address]);
 
   return children;
 }

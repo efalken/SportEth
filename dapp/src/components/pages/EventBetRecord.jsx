@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import IndicatorD from "../basics/IndicatorD";
-import { useAuthContext } from "../../contexts/AuthContext";
+import { createContractEventFilter, getFilterLogs } from "viem/actions";
+import { useWalletClient } from "wagmi";
+import {
+  abi as bettingContractABI,
+  address as bettingContractAddress,
+} from "../../abis/Betting.json";
 
 export default function EventBetRecord() {
   const [priceHistory, setPriceHistory] = useState([]);
-  const { bettingContractReadOnly } = useAuthContext();
+  const { data: walletClient } = useWalletClient();
 
   useEffect(() => {
-    if (!bettingContractReadOnly) return;
+    if (!walletClient) return;
 
     (async () => {
       const pricedata = [];
-      const BetRecordEvent = bettingContractReadOnly.filters.BetRecord();
-      const events = await bettingContractReadOnly.queryFilter(BetRecordEvent);
+      console.log(walletClient);
+      const filter = await createContractEventFilter(walletClient, {
+        address: bettingContractAddress,
+        abi: bettingContractABI,
+        eventName: "BetRecord",
+      });
+      const events = await getFilterLogs(walletClient, { filter });
+      console.log(events);
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
@@ -33,7 +44,35 @@ export default function EventBetRecord() {
       }
       setPriceHistory(pricedata);
     })();
-  }, [bettingContractReadOnly]);
+  }, [walletClient]);
+
+  // useEffect(() => {
+  //   if (!bettingContractReadOnly) return;
+
+  //   (async () => {
+  //     const pricedata = [];
+  //     const BetRecordEvent = bettingContractReadOnly.filters.BetRecord();
+  //     const events = await bettingContractReadOnly.queryFilter(BetRecordEvent);
+  //     for (const event of events) {
+  //       const { args, blockNumber } = event;
+  //       pricedata.push({
+  //         blockNumber: Number(blockNumber),
+  //         Epoch: Number(args.epoch),
+  //         //Offer: Boolean(args.Offer).toString(),
+  //         //Offer: args.offer,
+  //         //BetSize: args.betAmount,
+  //         BetSize: Number(args.betAmount),
+  //         LongPick: Number(args.pick),
+  //         MatchNum: Number(args.matchNum),
+  //         //Payoff: args.payoff,
+  //         Payoff: Number(args.payoff),
+  //         Hashoutput: args.contractHash,
+  //         BettorAddress: args.bettor,
+  //       });
+  //     }
+  //     setPriceHistory(pricedata);
+  //   })();
+  // }, [bettingContractReadOnly]);
 
   function openEtherscan() {
     const url =
@@ -68,8 +107,8 @@ export default function EventBetRecord() {
           betHash
         </Text>{" "}
         <br />
-        {priceHistory.map((event) => (
-          <div>
+        {priceHistory.map((event, index) => (
+          <div key={index}>
             <Text size="12px" weight="200">
               {" "}
               {event.blockNumber},{event.Epoch}, {event.MatchNum},{" "}

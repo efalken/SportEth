@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
 import { Box, Flex } from "@rebass/grid";
-import { useAuthContext } from "../../contexts/AuthContext";
+import { useWalletClient } from "wagmi";
 
 export default function EventStartTime() {
-  const { oracleContractReadOnly } = useAuthContext();
+  const { data: walletClient } = useWalletClient();
   const [matchHistory, setMatchHistory] = useState([]);
 
   useEffect(() => {
-    if (!oracleContractReadOnly) return;
+    if (!walletClient) return;
 
     (async () => {
       const pricedata = [];
-      const StartTimesPostedEvent =
-        oracleContractReadOnly.filters.StartTimesPosted();
-      const events = await oracleContractReadOnly.queryFilter(
-        StartTimesPostedEvent
-      );
+      const filter = await createContractEventFilter(walletClient, {
+        address: oracleContractAddress,
+        abi: oracleContractABI,
+        eventName: "StartTimesPosted",
+      });
+      const events = await getFilterLogs(walletClient, { filter });
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
@@ -27,7 +28,7 @@ export default function EventStartTime() {
       }
       setMatchHistory(pricedata);
     })();
-  }, [oracleContractReadOnly]);
+  }, [walletClient]);
 
   if (Object.keys(matchHistory).length === 0)
     return (

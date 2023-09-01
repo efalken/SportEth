@@ -207,14 +207,14 @@ async function main() {
   });
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 2000));
-  console.log(`fundbettor ${margin00}`);
+  //console.log(`fundbettor ${margin00}`);
 
   result = await betting.connect(signers[2]).fundBettor({
     value: 20n*eths,
   });
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 2000));
-  console.log(`fundbettor2 ${margin00}`);
+  //console.log(`fundbettor2 ${margin00}`);
 
   result = await betting.connect(signers[1]).bet(0, 1, 10000);
       receipt = await result.wait();
@@ -436,31 +436,31 @@ async function main() {
           "0",
           "0"],
           [
-            1691859600,
-            1691859600,
-            1691859600,
-            1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
-          1691859600,
+            1694291511,
+            1694291511,
+            1694291511,
+            1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
+          1694291511,
           1672531307,
           1672531307,
           1672531307,
@@ -516,8 +516,8 @@ async function main() {
       receipt = await result.wait();
       console.log(`line 502`);
       let hash100 = receipt.events[0].args.contractHash;
-      const moose = await betting.moose();
-      console.log(`moose ${moose}`);
+      //const moose = await betting.moose();
+      //console.log(`moose ${moose}`);
       const betepoch = await betting.params(0);
       console.log(`betepoch ${betepoch}`);
       receipt = await result.wait();

@@ -1,21 +1,32 @@
 import React, { useEffect, useState } from "react";
 import Text from "../basics/Text";
-import { useAuthContext } from "../../contexts/AuthContext";
 import moment from "moment";
+import {
+  abi as oracleContractABI,
+  address as oracleContractAddress,
+} from "../../abis/Oracle.json";
+import { useWalletClient } from "wagmi";
+import { createContractEventFilter, getFilterLogs } from "viem/actions";
 
 export default function EventOdds() {
-  const { oracleContractReadOnly } = useAuthContext();
+  const { data: walletClient } = useWalletClient();
   const [priceHistory, setPriceHistory] = useState([]);
 
   useEffect(() => {
-    if (!oracleContractReadOnly) return;
+    if (!walletClient) return;
 
     (async () => {
       const pricedata = [];
-      const DecOddsPostedEvent = oracleContractReadOnly.filters.DecOddsPosted();
-      const events = await oracleContractReadOnly.queryFilter(
-        DecOddsPostedEvent
-      );
+      const filter = await createContractEventFilter(walletClient, {
+        address: oracleContractAddress,
+        abi: oracleContractABI,
+        eventName: "DecOddsPosted",
+      });
+      const events = await getFilterLogs(walletClient, { filter });
+      // const DecOddsPostedEvent = oracleContractReadOnly.filters.DecOddsPosted();
+      // const events = await oracleContractReadOnly.queryFilter(
+      //   DecOddsPostedEvent
+      // );
       for (const event of events) {
         const { args, blockNumber } = event;
         pricedata.push({
@@ -26,7 +37,7 @@ export default function EventOdds() {
       }
       setPriceHistory(pricedata);
     })();
-  }, [oracleContractReadOnly]);
+  }, [walletClient]);
 
   if (Object.keys(priceHistory).length === 0)
     return (

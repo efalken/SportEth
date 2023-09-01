@@ -57,7 +57,7 @@ describe("test rewards 0", function () {
     it("initial", async () => {
       await oracle.depositTokens(510n * million);
       await token.transfer(betting.address, 490n * million);
-      var tt = await oracle.rewardTokensLeft();
+      var tt = await token.balanceOf(betting.address);
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
       const ts = await betting.margin(3);
@@ -181,13 +181,10 @@ describe("test rewards 0", function () {
       await betting.connect(owner).fundBook({
         value: 60n * eths,
       });
-      result = await betting.tokenReward();
-      receipt = await result.wait();
+
       await betting.connect(account1).fundBook({
         value: 40n * eths,
       });
-      receipt = await result.wait();
-      result = await oracle.connect(account1).tokenReward();
       receipt = await result.wait();
       result = await betting.connect(account2).fundBettor({
         value: 50n * eths,
@@ -267,7 +264,7 @@ describe("test rewards 0", function () {
       );
       result = await betting.tokenReward();
       receipt = await result.wait();
-      result = await oracle.connect(account1).tokenReward();
+      result = await betting.connect(account1).tokenReward();
       receipt = await result.wait();
       token0Pre = token0;
       token1Pre = token1;
@@ -284,7 +281,7 @@ describe("test rewards 0", function () {
       const shares1 = (await betting.lpStruct(account1.address)).shares;
       console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
       console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
-      var tt = Number(await oracle.rewardTokensLeft());
+      var tt = Number(await token.balanceOf(betting.address));
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
       const ts = await betting.margin(3);
@@ -296,7 +293,23 @@ describe("test rewards 0", function () {
       console.log(
         `Epoch: owner ${epoch0} acct1 ${epoch1} kontract ${bkepoch} kontract ${okepoch}`
       );
+      const token00 = await token.balanceOf(owner.address);
+      const token10 = await token.balanceOf(account1.address);
+      const token20 = await token.balanceOf(account2.address);
+      const bkepoch0 = await betting.params(0);
+      console.log(`token0 ${token00}`);
+      console.log(`token1 ${token10}`);
+      console.log(`token2 ${token20}`);
+      console.log(`epoch ${bkepoch0}`);
     });
+    const token00 = await token.balanceOf(owner.address);
+    const token10 = await token.balanceOf(account1.address);
+    const token20 = await token.balanceOf(account2.address);
+    const bkepoch0 = await betting.params(0);
+    console.log(`token0 ${token00}`);
+    console.log(`token1 ${token10}`);
+    console.log(`token2 ${token20}`);
+    console.log(`epoch ${bkepoch0}`);
   });
 
   describe("Second Epoch", async () => {
@@ -427,7 +440,7 @@ describe("test rewards 0", function () {
     it("state 3", async () => {
       result = await betting.tokenReward();
       receipt = await result.wait();
-      result = await oracle.connect(account1).tokenReward();
+      result = await betting.connect(account1).tokenReward();
       receipt = await result.wait();
       token0Pre = token0;
       token1Pre = token1;
@@ -446,7 +459,7 @@ describe("test rewards 0", function () {
       const shares1 = (await betting.lpStruct(account1.address)).shares;
       console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
       console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
-      var tt = Number(await oracle.rewardTokensLeft());
+      var tt = Number(await token.balanceOf(betting.address));
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
       const ts = await betting.margin(3);
@@ -458,6 +471,14 @@ describe("test rewards 0", function () {
       console.log(
         `Epoch: owner ${epoch0} acct1 ${epoch1} kontract ${bkepoch} kontract ${okepoch}`
       );
+      const token00 = await token.balanceOf(owner.address);
+      const token10 = await token.balanceOf(account1.address);
+      const token20 = await token.balanceOf(account2.address);
+      const bkepoch0 = await betting.params(0);
+      console.log(`token0 ${token00}`);
+      console.log(`token1 ${token10}`);
+      console.log(`token2 ${token20}`);
+      console.log(`epoch ${bkepoch0}`);
     });
   });
 
@@ -586,10 +607,16 @@ describe("test rewards 0", function () {
 
       result = await betting.connect(account2).bet(0, 0, "50000");
       receipt = await result.wait();
+      const outEpoch = (await betting.lpStruct(owner.address)).outEpoch;
+      const betEpoch = await betting.params(0);
+      console.log(`Acct0: outEpoch ${outEpoch} betEpoch ${betEpoch}`);
+      console.log(`line 586`);
       result = await betting.withdrawBook(100000);
       receipt1 = await result.wait();
+      console.log(`line 589`);
       result = await betting.connect(account1).withdrawBook(50000);
       receipt1 = await result.wait();
+      console.log(`line 592`);
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
       if (_hourSolidity > 12) {
@@ -614,7 +641,7 @@ describe("test rewards 0", function () {
     it("state 4", async () => {
       result = await betting.tokenReward();
       receipt = await result.wait();
-      result = await oracle.connect(account1).tokenReward();
+      result = await betting.connect(account1).tokenReward();
       receipt = await result.wait();
       token0Pre = token0;
       token1Pre = token1;
@@ -633,7 +660,7 @@ describe("test rewards 0", function () {
       const shares1 = (await betting.lpStruct(account1.address)).shares;
       console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
       console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
-      var tt = Number(await oracle.rewardTokensLeft());
+      var tt = Number(await token.balanceOf(betting.address));
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
       const ts = await betting.margin(3);
@@ -645,6 +672,14 @@ describe("test rewards 0", function () {
       console.log(
         `Epoch: owner ${epoch0} acct1 ${epoch1} kontract ${bkepoch} kontract ${okepoch}`
       );
+      const token00 = await token.balanceOf(owner.address);
+      const token10 = await token.balanceOf(account1.address);
+      const token20 = await token.balanceOf(account2.address);
+      const bkepoch0 = await betting.params(0);
+      console.log(`token0 ${token00}`);
+      console.log(`token1 ${token10}`);
+      console.log(`token2 ${token20}`);
+      console.log(`epoch ${bkepoch0}`);
     });
   });
 
@@ -784,7 +819,7 @@ describe("test rewards 0", function () {
         value: 20n * eths,
       });
       receipt = await result.wait();
-      result = await oracle.connect(account2).tokenReward();
+      result = await betting.connect(account2).tokenReward();
       receipt = await result.wait();
       result = await betting.connect(account2).bet(0, 0, "50000");
       receipt = await result.wait();
@@ -819,9 +854,9 @@ describe("test rewards 0", function () {
     it("state 5", async () => {
       // result = await betting.tokenReward();
       //  receipt = await result.wait();
-      result = await oracle.connect(account1).tokenReward();
+      result = await betting.connect(account1).tokenReward();
       receipt = await result.wait();
-      result = await oracle.connect(account2).tokenReward();
+      result = await betting.connect(account2).tokenReward();
       receipt = await result.wait();
       token0Pre = token0;
       token1Pre = token1;
@@ -843,7 +878,7 @@ describe("test rewards 0", function () {
       console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
       console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
       console.log(`Acct2: Shares2 ${shares2} token2 ${token2}`);
-      var tt = Number(await oracle.rewardTokensLeft());
+      var tt = Number(await token.balanceOf(betting.address));
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
       const ts = await betting.margin(3);
@@ -855,6 +890,14 @@ describe("test rewards 0", function () {
       console.log(
         `Epoch: owner ${epoch0} acct1 ${epoch1} kontract ${bkepoch} kontract ${okepoch}`
       );
+      const token00 = await token.balanceOf(owner.address);
+      const token10 = await token.balanceOf(account1.address);
+      const token20 = await token.balanceOf(account2.address);
+      const bkepoch0 = await betting.params(0);
+      console.log(`token0 ${token00}`);
+      console.log(`token1 ${token10}`);
+      console.log(`token2 ${token20}`);
+      console.log(`epoch ${bkepoch0}`);
     });
   });
 
@@ -981,6 +1024,14 @@ describe("test rewards 0", function () {
       const ce2 = await betting.margin(0);
       const ts2 = await betting.margin(3);
       console.log(`BettingK5 : shares ${ts2} eth ${ce2}`);
+      const token00 = await token.balanceOf(owner.address);
+      const token10 = await token.balanceOf(account1.address);
+      const token20 = await token.balanceOf(account2.address);
+      const bkepoch0 = await betting.params(0);
+      console.log(`token0 ${token00}`);
+      console.log(`token1 ${token10}`);
+      console.log(`token2 ${token20}`);
+      console.log(`epoch ${bkepoch0}`);
     });
 
     it("state 5", async () => {
@@ -1007,12 +1058,12 @@ describe("test rewards 0", function () {
 
       result = await betting.tokenReward();
       receipt = await result.wait();
-      result = await oracle.connect(account1).tokenReward();
+      result = await betting.connect(account1).tokenReward();
       receipt = await result.wait();
       const gasPrice = result.gasPrice;
       console.log(`gasPrice ${gasPrice}`);
       gas4 = receipt.gasUsed;
-      result = await oracle.connect(account2).tokenReward();
+      result = await betting.connect(account2).tokenReward();
       receipt = await result.wait();
       gas4b = receipt.gasUsed;
       token0Pre = token0;
@@ -1036,7 +1087,7 @@ describe("test rewards 0", function () {
       console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
       console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
       console.log(`Acct2: Shares2 ${shares2} token2 ${token2}`);
-
+      console.log(`fin`);
       result = await betting.withdrawBook(500000);
       receipt1 = await result.wait();
       console.log(`here0`);
@@ -1046,7 +1097,7 @@ describe("test rewards 0", function () {
       result = await betting.connect(account2).withdrawBook(172588);
       receipt1 = await result.wait();
       console.log(`here2`);
-      var tt = Number(await oracle.rewardTokensLeft());
+      var tt = Number(await token.balanceOf(betting.address));
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
       const ts = await betting.margin(3);
@@ -1076,9 +1127,14 @@ describe("test rewards 0", function () {
       const shares00 = (await betting.lpStruct(owner.address)).shares;
       const shares10 = (await betting.lpStruct(account1.address)).shares;
       const shares20 = (await betting.lpStruct(account2.address)).shares;
-      const token00 = (await oracle.adminStruct(owner.address)).tokens;
-      const token10 = (await oracle.adminStruct(account1.address)).tokens;
-      const token20 = (await oracle.adminStruct(account2.address)).tokens;
+      const token00 = await token.balanceOf(owner.address);
+      const token10 = await token.balanceOf(account1.address);
+      const token20 = await token.balanceOf(account2.address);
+      const bkepoch0 = await betting.params(0);
+      console.log(`token0 ${token00}`);
+      console.log(`token1 ${token10}`);
+      console.log(`token2 ${token20}`);
+      console.log(`epoch ${bkepoch0}`);
       console.log(`betting k eth0 ${Number(eoa0b).toFixed(3)}`);
       console.log(`betting k eth1 ${Number(eoa1b).toFixed(3)}`);
       console.log(`betting k eth2 ${Number(eoa2b).toFixed(3)}`);
@@ -1099,7 +1155,7 @@ describe("test rewards 0", function () {
       console.log(`gas1 on processVote ${gas1} and  ${gas1b}`);
       console.log(`gas2 on settle ${gas2} and  ${gas2b}`);
       console.log(`gas3 on settle2 ${gas3} and  ${gas3b}`);
-      console.log(`gas3 on tokenRewards ${gas4} and  ${gas4b}`);
+      console.log(`gas4 on tokenRewards ${gas4} and  ${gas4b}`);
 
       const ethRev0 = eoa0b - eoa0;
       const ethRev1 = eoa1b - eoa1;
@@ -1107,16 +1163,13 @@ describe("test rewards 0", function () {
       console.log(`betting k eth0 ${Number(ethRev0).toFixed(3)}`);
       console.log(`betting k eth1 ${Number(ethRev1).toFixed(3)}`);
       console.log(`betting k eth2 ${Number(ethRev2).toFixed(3)}`);
-      console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
-      console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
-      console.log(`Acct2: Shares2 ${shares2} token2 ${token2}`);
 
       assert.equal(Number(ethRev0).toFixed(3), "62.831", "Must be equal");
       assert.equal(Number(ethRev1).toFixed(3), "43.981", "Must be equal");
       assert.equal(Number(ethRev2).toFixed(3), "21.688", "Must be equal");
-      assert.equal(Number(token0).toFixed(0), "578315722", "Must be equal");
-      assert.equal(Number(token1).toFixed(0), "56889069", "Must be equal");
-      assert.equal(Number(token2).toFixed(0), "10126540", "Must be equal");
+      assert.equal(Number(token00).toFixed(0), "68315722", "Must be equal");
+      assert.equal(Number(token10).toFixed(0), "56889069", "Must be equal");
+      assert.equal(Number(token20).toFixed(0), "15189810", "Must be equal");
     });
   });
 });

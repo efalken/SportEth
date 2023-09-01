@@ -1,37 +1,3 @@
-// export const networkConfig = {
-//   chainId: "0xa86a", // Mainnet Avalanche Chain ID
-//   chainName: "Avalanche Mainnet",
-//   nativeCurrency: {
-//     name: "AVAX",
-//     symbol: "AVAX",
-//     decimals: 18,
-//     gasPrice: 225000000000,
-//   },
-//   rpcUrls: ["https://api.avax.network/ext/bc/C/rpc"],
-//   blockExplorerUrls: ["https://snowtrace.io/"],
-// };
+import { avalanche, avalancheFuji, localhost } from "wagmi/chains";
 
-export const networkConfig = {
-  chainId: 43113, //"0xa869", // Testnet Avalanche Chain ID 43113
-  chainName: "Avalanche Fuji Testnet",
-  nativeCurrency: {
-    name: "AVAX",
-    symbol: "AVAX",
-    decimals: 18,
-  },
-  rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
-  blockExplorerUrls: ["https://testnet.snowtrace.io/"],
-};
-
-// export const networkConfig = {
-//   chainId: "0x539", // Hardhat Chain ID
-//   chainName: "Hardhat",
-//   nativeCurrency: {
-//     name: "ETH",
-//     symbol: "ETH",
-//     decimals: 18,
-//   },
-//   rpcUrls: ["http://127.0.0.1:8545"],
-// };
-
-export const indexerEndpoint = "http://localhost:8000";
+export const defaultNetwork = localhost;

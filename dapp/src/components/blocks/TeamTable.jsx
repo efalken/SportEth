@@ -62,7 +62,7 @@ export default function TeamTable({
               <td>{i}</td>
               <td>{sport[i]}</td>
               <td style={{ textAlign: "left", paddingLeft: "2px" }}>
-                {startTimeColumn[i] < moment().unix() ? (
+                {startTimeColumn[i] > moment().unix() ? (
                   <input
                     type="radio"
                     value={i}
