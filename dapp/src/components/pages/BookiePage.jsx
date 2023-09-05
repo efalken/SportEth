@@ -519,7 +519,7 @@ function BookiePage() {
                 <Flex>
                   <Box>
                     <Form
-                      onChange={setSharesToSell}
+                      onChange={(e) => setSharesToSell(Number(e.target.value))}
                       value={sharesToSell}
                       onSubmit={wdBook}
                       mb="20px"

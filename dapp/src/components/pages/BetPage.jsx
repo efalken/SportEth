@@ -151,12 +151,14 @@ function BetPage() {
 
   async function withdrawBettor() {
     try {
-      const txHash = await writeContract({
+      console.log(wdAmount);
+      const txHash = await writeContract(walletClient, {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "withdrawBettor",
         args: [wdAmount * 10000],
       });
+      console.log("A");
       updateTransactionHashDialogBox(txHash);
     } catch (err) {
       console.log(err);
@@ -526,7 +528,7 @@ function BetPage() {
               >
                 <Box>
                   <Form
-                    onChange={setWdAmount}
+                    onChange={(e) => setWdAmount(Number(e.target.value))}
                     value={wdAmount}
                     onSubmit={withdrawBettor}
                     mb="1px"
@@ -549,7 +551,7 @@ function BetPage() {
               >
                 <Box>
                   <Form
-                    onChange={setFundAmount}
+                    onChange={(e) => setFundAmount(Number(e.target.value))}
                     value={fundAmount}
                     onSubmit={fundBettor}
                     mb="10px"

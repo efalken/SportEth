@@ -573,7 +573,7 @@ function needToVote() {
               ></Flex>
               <Box>
                 <Form
-                  onChange={setDepositAmount}
+                  onChange={(e) => setDepositAmount(Number(e.target.value))}
                   value={depositAmount}
                   onSubmit={depositTokens}
                   mb="20px"
@@ -586,7 +586,7 @@ function needToVote() {
               </Box>
               <Box>
                 <Form
-                  onChange={setWithdrawAmount}
+                  onChange={(e) => setWithdrawAmount(Number(e.target.value))}
                   value={withdrawAmount}
                   onSubmit={withdrawTokens}
                   mb="20px"
