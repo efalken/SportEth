@@ -205,7 +205,7 @@ function BetPage() {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "showUserBetData",
-        account: walletClient?.account,
+        args: [address],
       },
       {
         abi: bettingContractABI,
@@ -283,8 +283,8 @@ function BetPage() {
     let _userBalance = us ? Number(us[1]) : 0;
     setUserBalance(_userBalance);
 
-    if (counter) {
-      let _lastBetHash = Object.values(_bettorHashes || []).slice(0, counter);
+    if (_counter) {
+      let _lastBetHash = Object.values(_bettorHashes || []).slice(0, _counter);
       setBetHashes(_lastBetHash);
     }
 
