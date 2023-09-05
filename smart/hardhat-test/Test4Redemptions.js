@@ -329,7 +329,6 @@ describe("Betting", function () {
         "25.595",
         "Must be equal"
       );
-      // const ethChange = Math.floor(Acct2Increase * 1000) / 1000;
       assert.equal(Number(Acct2Increase).toFixed(3), "9.004", "Must be equal");
     });
   });

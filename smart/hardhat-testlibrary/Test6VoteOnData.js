@@ -13,7 +13,6 @@ var receipt;
 var gasUsed = 0;
 var nextStart;
 var gas0, gas1;
-
 const { assert } = require("chai");
 const finneys = BigInt("1000000000000000");
 const eths = BigInt("1000000000000000000");

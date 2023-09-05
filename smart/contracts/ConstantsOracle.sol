@@ -1,27 +1,35 @@
+/**
+SPDX-License-Identifier: MIT License
+@author Eric Falkenstein
+*/
 pragma solidity ^0.8.0;
 
-//SPDX-License-Identifier: BUSL-1.1
-
-// hour of day in GMT one can post new data for voting
-uint32 constant HOUR_POST = 12; // 12 in prod
-// hour of day in GMT after whic one can submit a data proposal for processing
-
-// minimum token requirement for data submissions
-uint32 constant BURN_AMT = 1e7;
-uint32 constant ONE_MILLION = 1e6;
-// max for initial favorite
+// hour of day in GMT one can post new data
+// also max hour for when data posts can be processed
+uint32 constant HOUR_POST = 12;
+// penalty for failed data submission
+uint32 constant BURN_AMT = 2e6;
+// min/max for initial favorite
 uint16 constant MAX_DEC_ODDS_INIT = 1000;
 uint16 constant MIN_DEC_ODDS_INIT = 125;
-uint16 constant MAX_DEC_ODDS_UPDATE = 1500;
-uint16 constant MIN_DEC_ODDS_UPDATE = 110;
-// param to check if contract is voting on initial schedule & odds
+// min/max for updates to favorite
+uint16 constant MAX_DEC_ODDS_UPDATE = 1200;
+uint16 constant MIN_DEC_ODDS_UPDATE = 75;
+// tells processVote() to process init post
 uint8 constant STATUS_PROC_INIT = 10;
-// param to check if contract is voting on an odds update
+// tells processVote() to process update post
 uint8 constant STATUS_PROC_UPDATE = 20;
-// param to check if contract is voting on settlement submission
+// tells processVote() to process settle
 uint8 constant STATUS_PROC_SETTLE = 30;
-// param to check if contract is post initial data submission, pre-settlement submission
+// only an odds update or settlement post allowed
 uint8 constant STATUS_POST_2 = 2;
-// only an initial slate post is possible
+// only an initial slate post possible
 uint8 constant STATUS_POST_0 = 0;
+/* this encourages token holders to join vaults, which make it
+ oracle depositors need at least 4% of tokens to deposit and claim revenue
+*/
 uint32 constant MIN_DEPOSIT = 4e7;
+// min amount for submitting data, 10% of supply
+uint32 constant MIN_SUBMIT = 1e8;
+//  prevents any oracle account from being greater than 14% of oracle
+uint32 constant MAX_DEPOSIT = 15e8;

@@ -24,7 +24,6 @@ import {
   address as tokenContractAddress,
 } from "../../abis/Token.json";
 import { parseEther } from "viem";
-import { defaultNetwork } from "../../config";
 
 function BookiePage() {
   const { address } = useAccount();
@@ -92,14 +91,14 @@ function BookiePage() {
     );
   }
 
-  async function fundBook(value) {
+  async function fundBook() {
     console.log(fundAmount, "fundAmount");
     try {
       const txHash = await writeContract(walletClient, {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "fundBook",
-        value: parseEther(value),
+        value: parseEther(fundAmount),
       });
 
       updateTransactionHashDialogBox(txHash);
@@ -234,7 +233,7 @@ function BookiePage() {
     setBookieEpoch(_bookieEpoch);
 
     const _claimEpoch = _lpStruct[2] || "0";
-    setClaimEpoch(_claimEpoch);
+    setBookieEpoch(_claimEpoch);
   }, [data]);
 
   function unpack256(src) {
@@ -420,7 +419,7 @@ function BookiePage() {
 
             <Box>
               <Form
-                onChange={(e) => setFundAmount(Number(e.target.value))}
+                onChange={setFundAmount}
                 value={fundAmount}
                 onSubmit={fundBook}
                 mb="20px"
@@ -509,6 +508,10 @@ function BookiePage() {
                     you can withdraw after epoch {bookieEpoch}
                   </Text>
                 ) : null}
+                <br></br>
+                <Text size="14px" color={cwhite}>
+                  you can withdraw after epoch {claimEpoch}
+                </Text>
               </Box>
             </Box>
             <Box>
@@ -516,7 +519,7 @@ function BookiePage() {
                 <Flex>
                   <Box>
                     <Form
-                      onChange={(e) => setSharesToSell(Number(e.target.value))}
+                      onChange={setSharesToSell}
                       value={sharesToSell}
                       onSubmit={wdBook}
                       mb="20px"
@@ -567,11 +570,7 @@ function BookiePage() {
                       >
                         Claim Reward
                       </button>
-                    ) : (
-                      <Text size="14px" color={cwhite}>
-                        you can claim rewards after epoch {claimEpoch}
-                      </Text>
-                    )}
+                    ) : null}
                   </Box>
                 </Flex>
               ) : null}

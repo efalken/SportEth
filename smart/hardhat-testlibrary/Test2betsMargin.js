@@ -290,16 +290,6 @@ describe("Betting", function () {
       console.log(`oracleBal ${oracleBal}`);
       console.log(`bettingk balance ${ethbal}`);
 
-      // const redeemCheck2 = await betting.checkRedeem(hash1);
-      // const redeemCheck3 = await betting.checkRedeem(hash2);
-      // console.log(`redeem should succeed ${redeemCheck2}`);
-      // console.log(`redeem should succeed ${redeemCheck3}`);
-
-      // let redeemCheck5 = await betting.outcomeMap(1001);
-      // console.log(` ${redeemCheck5}`);
-      // redeemCheck5 = await betting.outcomeMap(1000);
-      // console.log(` ${redeemCheck5}`);
-
       await betting.connect(account3).redeem();
       await betting.connect(account2).redeem();
 

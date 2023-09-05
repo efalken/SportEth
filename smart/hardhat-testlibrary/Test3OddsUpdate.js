@@ -38,11 +38,11 @@ describe("Betting", function () {
     });
 
     it("Authorize Oracle Token", async () => {
-      await token.approve(oracle.address, 560n * million);
+      await token.approve(oracle.address, 140n * million);
     });
 
     it("Deposit Tokens in Oracle Contract", async () => {
-      await oracle.connect(owner).depositTokens(560n * million);
+      await oracle.connect(owner).depositTokens(140n * million);
     });
   });
 
@@ -62,9 +62,9 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart =
-        _timestamp - ((_timestamp - 1690588800) % 604800) + 14 * 86400;
-      console.log(`time is ${nextStart}`);
+      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
+      console.log(`nextStart is ${nextStart}`);
+      console.log(`timestamp is ${_timestamp}`);
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -147,7 +147,7 @@ describe("Betting", function () {
       console.log(`nextStart is ${nextStart}`);
     });
 
-    it("fast forward 4 hours", async () => {
+    it("fast forward 12 hours", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 12);
     });
 
@@ -202,12 +202,6 @@ describe("Betting", function () {
       }
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-
-      // _timestamp = (
-      //   await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      // ).timestamp;
-      // nextStart = _timestamp + 7 * 86400;
-      // console.log(`time is ${nextStart}`);
       const odds0 = await betting.odds(0);
       console.log(`odds0 ${odds0}`);
     });
@@ -222,7 +216,7 @@ describe("Betting", function () {
       gas0 = receipt.gasUsed;
     });
 
-    it("fast forward 4 hours", async () => {
+    it("fast forward 12 hours", async () => {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
@@ -254,6 +248,7 @@ describe("Betting", function () {
       console.log(`betdata preSettle ${betdata0}`);
       const betdata1 = await betting.betData(1);
       console.log(`betdata preSettle ${betdata1}`);
+      await helper.advanceTimeAndBlock(24 * 7 * secondsInHour);
     });
 
     it("checkHour", async () => {

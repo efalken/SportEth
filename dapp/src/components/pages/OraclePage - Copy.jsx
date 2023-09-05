@@ -160,7 +160,7 @@ function OraclePage() {
       abi: oracleContractABI,
       address: oracleContractAddress,
       functionName: "depositTokens",
-      args: [Number(depositAmount)],
+      args: [depositAmount],
     });
     updateTransactionHashDialogBox(txHash);
   }
@@ -573,7 +573,7 @@ function needToVote() {
               ></Flex>
               <Box>
                 <Form
-                  onChange={(e) => setDepositAmount(Number(e.target.value))}
+                  onChange={setDepositAmount}
                   value={depositAmount}
                   onSubmit={depositTokens}
                   mb="20px"
@@ -586,7 +586,7 @@ function needToVote() {
               </Box>
               <Box>
                 <Form
-                  onChange={(e) => setWithdrawAmount(Number(e.target.value))}
+                  onChange={setWithdrawAmount}
                   value={withdrawAmount}
                   onSubmit={withdrawTokens}
                   mb="20px"
@@ -634,7 +634,8 @@ function needToVote() {
                     </Text>
                     <br />
                     <Text size="14px" className="style">
-                      Avax Value of your tokens: {ethToClaim()}
+                      Avax Value of your tokens:{" "}
+                      {Number(ethToClaim()).toLocaleString()}
                     </Text>
                   </Box>
                 ) : null}

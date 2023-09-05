@@ -51,8 +51,8 @@ describe("Betting", function () {
 
     it("transfer tokens to acct1", async () => {
       await token.transfer(account1.address, 450n * million);
-      await oracle.depositTokens(400n * million);
-      await oracle.connect(account1).depositTokens(450n * million);
+      await oracle.depositTokens(140n * million);
+      await oracle.connect(account1).depositTokens(140n * million);
       result = await betting.connect(owner).fundBook({
         value: 30n * eths,
       });
@@ -207,8 +207,6 @@ describe("Betting", function () {
       console.log(`gas processVote that works ${gasUsed}`);
       result = await oracle.reviewStatus();
       console.log(`reviewStatus after init fail ${result}`);
-      //const moose = await betting.moose();
-      // console.log(`admin ${moose}`);
     });
   });
 
@@ -319,8 +317,6 @@ describe("Betting", function () {
       console.log(`gas processVote that works ${gasUsed}`);
       result = await oracle.reviewStatus();
       console.log(`reviewStatus after processVote ${result}`);
-      //const moose = await betting.moose();
-      // console.log(`moose ${moose}`);
     });
 
     it("udatePost", async () => {
