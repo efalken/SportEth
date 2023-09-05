@@ -23,7 +23,7 @@ export default function BetHistoryRow({ contractHash, currW4, teamSplit }) {
   const [event, setEvent] = useState(null);
 
   useEffect(() => {
-    if (!betSubContract || !redeemable) return;
+    if (!betSubContract || !betSubContract.data || !redeemable) return;
 
     const [epoch, matchNum, pick, betAmount, payoff, bettor] =
       betSubContract.data;

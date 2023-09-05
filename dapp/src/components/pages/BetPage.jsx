@@ -599,6 +599,7 @@ function BetPage() {
                         (contractHash, index) =>
                           index < counter && (
                             <ActiveBetRow
+                              key={index}
                               contractHash={contractHash}
                               currW4={currW4}
                               teamSplit={teamSplit}
@@ -680,6 +681,7 @@ function BetPage() {
                         (contractHash, index) =>
                           index < counter && (
                             <BetHistoryRow
+                              key={index}
                               contractHash={contractHash}
                               currW4={currW4}
                               teamSplit={teamSplit}
