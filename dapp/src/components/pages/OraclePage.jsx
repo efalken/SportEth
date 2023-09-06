@@ -23,6 +23,7 @@ import {
   address as tokenContractAddress,
 } from "../../abis/Token.json";
 import { writeContract } from "viem/actions";
+import { formatEther, parseEther } from "viem";
 
 function OraclePage() {
   const { address } = useAccount();
@@ -156,11 +157,12 @@ function OraclePage() {
   }
 
   async function depositTokens() {
+    console.log(parseEther(depositAmount.toString()));
     const txHash = await writeContract(walletClient, {
       abi: oracleContractABI,
       address: oracleContractAddress,
       functionName: "depositTokens",
-      args: [Number(depositAmount)],
+      args: [parseEther(depositAmount.toString())],
     });
     updateTransactionHashDialogBox(txHash);
   }
@@ -170,7 +172,7 @@ function OraclePage() {
       abi: oracleContractABI,
       address: oracleContractAddress,
       functionName: "withdrawTokens",
-      args: [withdrawAmount],
+      args: [parseEther(withdrawAmount.toString())],
     });
     updateTransactionHashDialogBox(txHash);
   }
@@ -324,7 +326,7 @@ function OraclePage() {
     setVoteTracker(_adminStruct[2] || 0);
     setTotalVotes(_adminStruct[3] || 0);
     setTokens(_adminStruct[4] || 0);
-    setInitFeePool(_adminStruct[5] || 0);
+    setInitFeePool(Number(_adminStruct[5]) || 0);
     setEoaTokens((_balance || 0n).toString());
     setScheduleString(_sctring);
   }, [data]);
