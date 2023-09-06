@@ -24,6 +24,7 @@ import {
 } from "../../abis/Token.json";
 import { writeContract } from "viem/actions";
 import { formatEther, parseEther } from "viem";
+import { defaultNetwork } from "../../config";
 
 function OraclePage() {
   const { address } = useAccount();
@@ -157,12 +158,11 @@ function OraclePage() {
   }
 
   async function depositTokens() {
-    console.log(parseEther(depositAmount.toString()));
     const txHash = await writeContract(walletClient, {
       abi: oracleContractABI,
       address: oracleContractAddress,
       functionName: "depositTokens",
-      args: [parseEther(depositAmount.toString())],
+      args: [depositAmount.toString()],
     });
     updateTransactionHashDialogBox(txHash);
   }
@@ -172,7 +172,7 @@ function OraclePage() {
       abi: oracleContractABI,
       address: oracleContractAddress,
       functionName: "withdrawTokens",
-      args: [parseEther(withdrawAmount.toString())],
+      args: [withdrawAmount.toString()],
     });
     updateTransactionHashDialogBox(txHash);
   }
