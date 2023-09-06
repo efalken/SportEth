@@ -16,7 +16,7 @@ export default function ActiveBetRow({ contractHash, currW4, teamSplit }) {
   const [event, setEvent] = useState(null);
 
   useEffect(() => {
-    if (!betSubContract) return;
+    if (!betSubContract?.data) return;
 
     const [epoch, matchNum, pick, betAmount, payoff, bettor] =
       betSubContract.data;
