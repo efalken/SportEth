@@ -1,3 +1,3 @@
 import { avalanche, avalancheFuji, localhost } from "wagmi/chains";
 
-export const defaultNetwork = avalancheFuji;
+export const defaultNetwork = localhost;

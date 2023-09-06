@@ -9,10 +9,10 @@ import EventOdds from "./components/pages/EventOdds";
 import EventSchedule from "./components/pages/EventSchedule";
 import EventStartTime from "./components/pages/EventStartTime";
 import EventGameResults from "./components/pages/EventGameResults";
-import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 import AuthRequired from "./components/layout/AuthRequired";
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <Splash />,

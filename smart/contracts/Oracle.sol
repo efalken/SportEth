@@ -338,15 +338,19 @@ contract Oracle {
    * avax
    */
   function ethClaim() internal returns (uint256 _ethOut0) {
-    uint256 votePercentx10000 = (uint256(adminStruct[msg.sender].totalVotes) *
-      10000) / uint256(propNumber - adminStruct[msg.sender].basePropNumber);
-    if (votePercentx10000 > 10000) votePercentx10000 = 10000;
-    uint256 ethTot = uint256(adminStruct[msg.sender].tokens) *
-      uint256(feeData[1] - adminStruct[msg.sender].initFeePool);
-    _ethOut0 = (votePercentx10000 * ethTot) / 10000;
-    uint256 ploughBack = ethTot - _ethOut0;
-    feeData[1] += uint64(ploughBack / uint256(feeData[0]));
-    payable(msg.sender).transfer(_ethOut0);
+    if (propNumber > adminStruct[msg.sender].basePropNumber) {
+      uint256 votePercentx10000 = (uint256(adminStruct[msg.sender].totalVotes) *
+        10000) / uint256(propNumber - adminStruct[msg.sender].basePropNumber);
+      if (votePercentx10000 > 10000) votePercentx10000 = 10000;
+      uint256 ethTot = uint256(adminStruct[msg.sender].tokens) *
+        uint256(feeData[1] - adminStruct[msg.sender].initFeePool);
+      _ethOut0 = (votePercentx10000 * ethTot) / 10000;
+      uint256 ploughBack = ethTot - _ethOut0;
+      feeData[1] += uint64(ploughBack / uint256(feeData[0]));
+      payable(msg.sender).transfer(_ethOut0);
+    } else {
+      _ethOut0 = 0;
+    }
   }
 
   /**  @dev internal function that resets the account after a vote process
