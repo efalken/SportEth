@@ -293,7 +293,7 @@ contract Oracle {
   function withdrawTokens(uint32 _amt) external {
     require(_amt <= adminStruct[msg.sender].tokens, "nsf tokens");
     require(reviewStatus < 10, "no wd during vote");
-    require(adminStruct[msg.sender].baseEpoch < betEpochOracle, "too soon");
+    //require(adminStruct[msg.sender].baseEpoch < betEpochOracle, "too soon");
     feeData[0] -= _amt;
     uint256 _ethOut1 = ethClaim();
     adminStruct[msg.sender].initFeePool = feeData[1];

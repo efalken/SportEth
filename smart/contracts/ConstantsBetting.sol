@@ -16,8 +16,8 @@ int64 constant ODDS_FACTOR = 45;
 uint256 constant EPOCH_AMOUNT = 3e7;
 // 1e14 in production and hardhat tests, 1e10 for testnet to save on test avax
 // 1 eth = 1e18 to 1 eth = 1e4, allowing balances in uint64
-uint256 constant UNITS_TRANS14 = 1e10;
+uint256 constant UNITS_TRANS14 = 1e14;
 // adjusts eth sent to oracle number, 5e12 is 5% of 1e14
-uint256 constant ORACLE_5PERC = 5e8;
+uint256 constant ORACLE_5PERC = 5e12;
 // makes it so LPs cannot wd for 3 epochs
 uint32 constant MIN_LP_DURATION = 0;

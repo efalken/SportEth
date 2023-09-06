@@ -113,7 +113,7 @@ contract Betting {
     uint32 _team0or1,
     int64 _betAmt
   ) external returns (bytes32) {
-    require(userStruct[msg.sender].counter < 32, "betstack full, redeem bets");
+    require(userStruct[msg.sender].counter < 16, "betstack full, redeem bets");
     require(
       _betAmt <= int64(uint64(userStruct[msg.sender].userBalance)),
       "over capital balance"
@@ -268,9 +268,9 @@ contract Betting {
    * @param _sharesToSell is the LP's ownership stake withdrawn.
    */
   function withdrawBook(uint64 _sharesToSell) external {
-    require(block.timestamp < params[3], "only prior to first event");
+    //require(block.timestamp < params[3], "only prior to first event");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
-    require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
+    //require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
     uint64 ethWithdraw = (_sharesToSell * margin[0]) / margin[3];
     require(
       ethWithdraw <= (margin[0] - margin[1]),
