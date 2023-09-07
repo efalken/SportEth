@@ -2,7 +2,7 @@
 SPDX-License-Identifier: MIT License
 @author Eric Falkenstein
 */
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "./Token.sol";
 import "./ConstantsBetting.sol";
@@ -73,9 +73,9 @@ contract Betting {
 
   event Funding(
     address indexed bettor,
-    uint64 moveAmount,
     uint32 epoch,
-    uint32 action
+    uint256 cryptoMoved,
+    uint256 action
   );
 
   constructor(address payable _tokenAddress) {
@@ -123,7 +123,7 @@ contract Betting {
       paused[0] != _matchNumber && paused[1] != _matchNumber,
       "match is paused"
     );
-    //require(startTime[_matchNumber] > block.timestamp, "game started");
+    require(startTime[_matchNumber] > block.timestamp, "game started");
     uint64[4] memory _betData = decodeNumber(_matchNumber);
     int64 betPayoff = int64(uint64(odds[_matchNumber]));
     if (_team0or1 == 0) {
@@ -185,52 +185,12 @@ contract Betting {
     return subkID;
   }
 
-  /**  @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
-   * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win,
-   * 2 for tie or no contest
-   * @return first arg is success bool, second the new epoch,
-   * third the oracle fee in szabos (avax/1e12).
-   */
-  function settle(
-    uint8[32] memory _winner
-  ) external onlyAdmin returns (bool, uint32, uint256) {
-    uint64 redemptionPot;
-    uint64 payoffPot;
-    uint32 epochMatch;
-    uint32 winningTeam;
-    for (uint32 i = 0; i < 32; i++) {
-      winningTeam = _winner[i];
-      uint64[4] memory _betData = decodeNumber(i);
-      epochMatch = i * 10 + params[0] * 1000;
-      if ((_betData[0] + _betData[1]) > 0) {
-        if (winningTeam != 2) {
-          redemptionPot += _betData[winningTeam];
-          payoffPot += _betData[winningTeam + 2];
-          outcomeMap[(epochMatch + winningTeam)] = 2;
-        } else {
-          redemptionPot += (_betData[0] + _betData[1]);
-          outcomeMap[epochMatch] = 1;
-          outcomeMap[1 + epochMatch] = 1;
-        }
-      }
-    }
-    uint256 oracleDiv = ORACLE_5PERC * uint256(payoffPot);
-    margin[0] = margin[0] + margin[2] - redemptionPot - payoffPot;
-    margin[1] = 0;
-    margin[2] = 0;
-    params[0]++;
-    delete betData;
-    params[3] = FUTURE_START;
-    payable(oracleAdmin).transfer(oracleDiv);
-    return (true, params[0], oracleDiv);
-  }
-
   /// @dev bettor funds account for bets
   function fundBettor() external payable {
     uint64 amt = uint64(msg.value / UNITS_TRANS14);
     require(amt >= MIN_BET_DEPOSIT, "need at least one avax");
     userStruct[msg.sender].userBalance += amt;
-    emit Funding(msg.sender, amt, params[0], 0);
+    emit Funding(msg.sender, params[0], uint256(amt), 0);
   }
 
   /// @dev funds LP for supplying capital to take bets
@@ -250,7 +210,7 @@ contract Betting {
     lpStruct[msg.sender].outEpoch = params[0] + MIN_LP_DURATION;
     margin[3] += _shares;
     lpStruct[msg.sender].shares += _shares;
-    emit Funding(msg.sender, uint32(netinvestment), params[0], 1);
+    emit Funding(msg.sender, params[0], netinvestment, 1);
   }
 
   /** @dev bettor withdrawal
@@ -261,16 +221,16 @@ contract Betting {
     userStruct[msg.sender].userBalance -= _amt;
     uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     payable(msg.sender).transfer(amt256);
-    emit Funding(msg.sender, uint64(amt256), params[0], 3);
+    emit Funding(msg.sender, params[0], amt256, 2);
   }
 
   /** @dev processes withdrawal by LPs
    * @param _sharesToSell is the LP's ownership stake withdrawn.
    */
   function withdrawBook(uint64 _sharesToSell) external {
-    //require(block.timestamp < params[3], "only prior to first event");
+    require(block.timestamp < params[3], "only prior to first event");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
-    //require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
+    require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
     uint64 ethWithdraw = (_sharesToSell * margin[0]) / margin[3];
     require(
       ethWithdraw <= (margin[0] - margin[1]),
@@ -279,9 +239,9 @@ contract Betting {
     margin[3] -= _sharesToSell;
     lpStruct[msg.sender].shares -= _sharesToSell;
     margin[0] -= ethWithdraw;
-    uint256 ethWithdraw256 = uint256(ethWithdraw) * UNITS_TRANS14;
-    payable(msg.sender).transfer(ethWithdraw256);
-    emit Funding(msg.sender, ethWithdraw, params[0], 4);
+    uint256 ethWithdrawWei = uint256(ethWithdraw) * UNITS_TRANS14;
+    payable(msg.sender).transfer(ethWithdrawWei);
+    emit Funding(msg.sender, params[0], ethWithdrawWei, 3);
   }
 
   /** @dev redeems users bet stack of unredeemed bets
@@ -308,7 +268,7 @@ contract Betting {
     }
     userStruct[msg.sender].counter = 0;
     userStruct[msg.sender].userBalance += payout;
-    emit Funding(msg.sender, payout, params[0], 2);
+    emit Funding(msg.sender, params[0], uint256(payout), 4);
   }
 
   /** @dev processes initial odds and start times
@@ -323,7 +283,7 @@ contract Betting {
     startTime = _starts;
     odds = _odds;
     uint32 ts = uint32(block.timestamp);
-    params[3] = ts - ((ts - 1687561200) % 604800) + 604800;
+    params[3] = ts - ((ts - FRIDAY_22_GMT) % WEEK_IN_SECONDS) + WEEK_IN_SECONDS;
     paused[0] = 99;
     paused[1] = 99;
     return true;
@@ -332,10 +292,53 @@ contract Betting {
   /** @dev processes updates to epoch's odds
    * @param _updateOdds updates the epoch's odds
    */
-  function transmitUpdate(uint16[32] calldata _updateOdds) external onlyAdmin {
+  function transmitUpdate(
+    uint16[32] calldata _updateOdds
+  ) external onlyAdmin returns (bool) {
     odds = _updateOdds;
     paused[0] = 99;
     paused[1] = 99;
+    return true;
+  }
+
+  /**  @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
+   * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win,
+   * 2 for tie or no contest
+   * @return first arg is success bool, second the new epoch,
+   * third the oracle fee in szabos (avax/1e12).
+   */
+  function settle(
+    uint8[32] memory _winner
+  ) external onlyAdmin returns (uint32, uint256) {
+    uint64 betReturnPot;
+    uint64 winningsPot;
+    uint32 epochMatch;
+    uint32 winningTeam;
+    for (uint32 i = 0; i < 32; i++) {
+      winningTeam = _winner[i];
+      uint64[4] memory _betData = decodeNumber(i);
+      epochMatch = i * 10 + params[0] * 1000;
+      if ((_betData[0] + _betData[1]) > 0) {
+        if (winningTeam != 2) {
+          betReturnPot += _betData[winningTeam];
+          winningsPot += _betData[winningTeam + 2];
+          outcomeMap[(epochMatch + winningTeam)] = 2;
+        } else {
+          betReturnPot += (_betData[0] + _betData[1]);
+          outcomeMap[epochMatch] = 1;
+          outcomeMap[1 + epochMatch] = 1;
+        }
+      }
+    }
+    uint256 oracleDiv = ORACLE_5PERC * uint256(winningsPot);
+    margin[0] = margin[0] + margin[2] - betReturnPot - winningsPot;
+    margin[1] = 0;
+    margin[2] = 0;
+    params[0]++;
+    delete betData;
+    params[3] = FUTURE_START;
+    payable(oracleAdmin).transfer(oracleDiv);
+    return (params[0], oracleDiv);
   }
 
   /** @dev for distributing 60% of tokens to LPs. Once tokens are depleted 
@@ -345,11 +348,12 @@ contract Betting {
     require(token.balanceOf(address(this)) > 0, "no token rewards left");
     uint256 lpShares = uint256(lpStruct[msg.sender].shares);
     require(lpShares > 0, "only for liq providers");
+    //require(params[0] > 5, "starts in epoch 6!");
     require(lpStruct[msg.sender].claimEpoch < params[0], "one claim per epoch");
     lpStruct[msg.sender].claimEpoch = params[0];
     uint256 _amt = ((lpShares * EPOCH_AMOUNT) / uint256(margin[3]));
     token.transfer(msg.sender, _amt);
-    emit Funding(msg.sender, uint64(_amt), params[0], 5);
+    emit Funding(msg.sender, params[0], _amt, 5);
   }
 
   /** @dev limits the amount of LP capital that can be applied to a single match.

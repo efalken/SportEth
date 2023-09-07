@@ -52,12 +52,13 @@ async function main() {
   await result.wait();
   result = await token.setAdmin(oracle.address);
   await result.wait();
-  result = await oracle.depositTokens(560n*million);
+  result = await token.transfer(betting.address, 600n*million);
   await result.wait();
   console.log(`got here2`);
   const tokens = await token.balanceOf(accounts[0]);
+  const tokens2 = await token.balanceOf(betting.address);
   await result.wait();
-  console.log(`tokens in eoa ${tokens}`);
+  console.log(`tokens in eoa ${tokens} in betting ${tokens2}`);
   
  const tokensInK = (await oracle.adminStruct(accounts[0])).tokens;
  console.log(`tokens in k ${tokensInK}`);

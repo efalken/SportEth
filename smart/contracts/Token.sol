@@ -2,7 +2,7 @@
 SPDX-License-Identifier: MIT License
 @author Eric Falkenstein
 */
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 contract Token {
   uint8 public decimals;

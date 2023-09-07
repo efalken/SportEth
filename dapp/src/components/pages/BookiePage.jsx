@@ -337,8 +337,8 @@ function BookiePage() {
             <Box>
               <Flex
                 width="100%"
-                alignItems="center"
-                justifyContent="marginLeft"
+                alignitems="center"
+                justifycontent="marginLeft"
               >
                 <Text size="14px">
                   <Link
@@ -378,8 +378,8 @@ function BookiePage() {
             <Box>
               <Flex
                 width="100%"
-                alignItems="center"
-                justifyContent="marginLeft"
+                alignitems="center"
+                justifycontent="marginLeft"
               >
                 <Text size="14px">
                   <Link
@@ -413,7 +413,7 @@ function BookiePage() {
               <Flex
                 mt="10px"
                 pt="1px"
-                alignItems="center"
+                alignitems="center"
                 style={{ borderTop: `thin solid ${G}` }}
               ></Flex>
             </Box>
@@ -424,7 +424,7 @@ function BookiePage() {
                 value={fundAmount}
                 onSubmit={fundBook}
                 mb="20px"
-                justifyContent="flex-start"
+                justifycontent="flex-start"
                 padding="4px"
                 placeholder="# avax"
                 buttonLabel="Fund"
@@ -456,16 +456,16 @@ function BookiePage() {
               <Box>
                 <Box>
                   <Flex>
-                    <Flex width="100%" flexDirection="column">
+                    <Flex width="100%" flexdirection="column">
                       <Flex
                         mt="10px"
                         pt="10px"
-                        alignItems="center"
+                        alignitems="center"
                         style={{
                           borderTop: `thin solid ${G}`,
                         }}
                       ></Flex>
-                      <Flex pt="10px" justifyContent="left">
+                      <Flex pt="10px" justifycontent="left">
                         <Box>
                           {" "}
                           <Text size="14px" color={cwhite}>
@@ -520,7 +520,7 @@ function BookiePage() {
                       value={sharesToSell}
                       onSubmit={wdBook}
                       mb="20px"
-                      justifyContent="flex-start"
+                      justifycontent="flex-start"
                       buttonWidth="95px"
                       inputWidth="100px"
                       placeholder="# shares"
@@ -552,9 +552,9 @@ function BookiePage() {
                       <button
                         style={{
                           backgroundColor: "black",
-                          borderRadius: "10px",
+                          borderradius: "10px",
                           padding: "4px",
-                          //borderRadius: "1px",
+                          //borderradius: "1px",
                           cursor: "pointer",
                           color: "yellow",
                           border: "1px solid #ffff00",
@@ -589,14 +589,14 @@ function BookiePage() {
       >
         {/* <div className="bookie-page-wrapper" style={{ width: "100%" }}> */}
         <div style={{ width: "100%" }}>
-          <Flex justifyContent="center">
+          <Flex justifycontent="center">
             <Text size="25px" color="#ffffff">
               Liquidity Provider Page
             </Text>
           </Flex>
           <Box> {txnHash}</Box>
           <Box mt="14px" mx="30px">
-            <Flex width="100%" justifyContent="marginLeft">
+            <Flex width="100%" justifycontent="marginLeft">
               <Text size="14px" weight="300" color="#ffffff">
                 {" "}
                 This page helps LPs understand their netLiab exposure to this
@@ -610,19 +610,19 @@ function BookiePage() {
 
           <Box>
             <Flex>
-              <Flex width="100%" flexDirection="column">
-                <Flex pt="10px" justifyContent="space-between"></Flex>
+              <Flex width="100%" flexdirection="column">
+                <Flex pt="10px" justifycontent="space-between"></Flex>
               </Flex>
             </Flex>
           </Box>
 
           <Box>
             <Flex>
-              <Flex width="100%" flexDirection="column">
+              <Flex width="100%" flexdirection="column">
                 <Flex
                   mt="10px"
                   pt="10px"
-                  alignItems="center"
+                  alignitems="center"
                   style={{
                     borderTop: `thin solid ${G}`,
                   }}

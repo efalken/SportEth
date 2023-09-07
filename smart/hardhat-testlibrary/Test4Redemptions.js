@@ -43,7 +43,7 @@ describe("Betting", function () {
     });
 
     it("Deposit Tokens in Oracle Contract", async () => {
-      await oracle.connect(owner).depositTokens(560n * million);
+      await oracle.connect(owner).depositTokens(140n * million);
     });
   });
 

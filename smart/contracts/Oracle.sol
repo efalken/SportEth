@@ -2,11 +2,8 @@
 SPDX-License-Identifier: MIT License
 @author Eric Falkenstein
 */
-/*
-settle() timestamp > weekOver
-post() hourOfDay disabled on testnet
-*/
-pragma solidity ^0.8.0;
+
+pragma solidity 0.8.19;
 
 import "./Token.sol";
 import "./Betting.sol";
@@ -18,7 +15,7 @@ contract Oracle {
   uint8[32] public propResults;
   // prevents illogical sequences of transactions, such as sending an update after a settlement
   uint8 public reviewStatus;
-  // gross decimal odd, eg 909 --> 1.909
+  // gross decimal odd, eg even odds 957 => 1 + 0.95*957 => 1.909
   uint16[32] public propOdds;
   // incremented by one each settlement
   uint16 public betEpochOracle;
@@ -26,7 +23,7 @@ contract Oracle {
   uint16 public propNumber;
   // 0 yes votes, 1 no votes
   uint32[2] public votes;
-  // next Friday 8pm ET. No odds updates allowed after gameStart
+  // next Friday 6pm ET. No odds updates allowed after gameStart
   // no settlement submission for 2 days after gamestart
   uint32 public gameStart;
   //   0 total tokens in Oracle, 1 sum of avaxRevenue/tokens used tracking token accruals
@@ -41,7 +38,7 @@ contract Oracle {
   string[32] public matchSchedule;
   // track token holders: ownership metric, whether they voted, their basis for the token fees
   mapping(address => AdminStruct) public adminStruct;
-  // this allows the contract to send, receive and burn oracle tokens
+  // this allows the contract to send and receive
   Token public token;
   // link to communicate with the betting contract
   Betting public bettingContract;
@@ -127,17 +124,20 @@ contract Oracle {
   ) external {
     require(reviewStatus == STATUS_POST_0, "WRONG ORDER");
     uint32 _blocktime = uint32(block.timestamp);
-    gameStart = _blocktime - ((_blocktime - 1687561200) % 604800) + 604800;
+    gameStart =
+      _blocktime -
+      ((_blocktime - FRIDAY_22_GMT) % WEEK_IN_SECONDS) +
+      WEEK_IN_SECONDS;
     for (uint256 i = 0; i < 32; i++) {
       require(
         _decimalOdds[i] < MAX_DEC_ODDS_INIT &&
           _decimalOdds[i] > MIN_DEC_ODDS_INIT,
-        "odds outside range"
+        "bad odds"
       );
-      // require(
-      //   (_starts[i] - _blocktime) < 604800 && (_starts[i] > gameStart),
-      //   "starttime error"
-      // );
+      require(
+        ((_starts[i] >= gameStart) || (_starts[i] == 0)),
+        "start time error"
+      );
     }
     propOdds = _decimalOdds;
     propStartTimes = _starts;
@@ -154,7 +154,7 @@ contract Oracle {
    * described above
    */
   function updatePost(uint16[32] memory _decimalOdds) external {
-    // require(gameStart > block.timestamp, "too late");
+    require(gameStart > block.timestamp, "too late");
     for (uint256 i = 0; i < 32; i++) {
       require(
         _decimalOdds[i] < MAX_DEC_ODDS_UPDATE &&
@@ -175,10 +175,10 @@ contract Oracle {
    */
   function settlePost(uint8[32] memory _resultVector) external returns (bool) {
     require(reviewStatus == STATUS_POST_2, "wrong sequence");
-    // require(
-    //   block.timestamp > (gameStart + 2 * 86400),
-    //   "only when weekend over"
-    // );
+    require(
+      block.timestamp > (gameStart + 2 * 86400),
+      "only when weekend over"
+    );
     post();
     propResults = _resultVector;
     emit ResultsPosted(betEpochOracle, propNumber, _resultVector);
@@ -191,37 +191,35 @@ contract Oracle {
    * if the vote rejects, it does not affect the betting contract
    */
   function processVote() external {
-    //require(hourOfDay() < HOUR_POST, "too soon");
+    require(hourOfDay() < HOUR_POST && hourOfDay() > HOUR_PROCESS, "too soon");
     require(reviewStatus >= 10, "wrong sequence");
     bool successBool;
     if (reviewStatus == STATUS_PROC_INIT) {
-      reviewStatus = STATUS_POST_0;
       if (votes[0] > votes[1]) {
         successBool = bettingContract.transmitInit(propOdds, propStartTimes);
-        if (successBool) reviewStatus = STATUS_POST_2;
+        require(successBool, "transmit failed");
+        reviewStatus = STATUS_POST_2;
       } else {
-        burn();
+        reviewStatus = STATUS_POST_0;
       }
     } else if (reviewStatus == STATUS_PROC_UPDATE) {
       reviewStatus = STATUS_POST_2;
       if (votes[0] > votes[1]) {
-        bettingContract.transmitUpdate(propOdds);
-      } else {
-        burn();
+        successBool = bettingContract.transmitUpdate(propOdds);
+        require(successBool, "transmit failed");
       }
     } else {
       reviewStatus = STATUS_POST_2;
       if (votes[0] > votes[1]) {
-        (
-          bool successBool2,
-          uint32 _betEpochOracle,
-          uint256 ethDividend
-        ) = bettingContract.settle(propResults);
+        (uint32 _betEpochOracle, uint256 ethDividend) = bettingContract.settle(
+          propResults
+        );
         betEpochOracle = uint16(_betEpochOracle);
         feeData[1] += uint64(ethDividend / uint256(feeData[0]));
-        if (successBool2) reviewStatus = STATUS_POST_0;
+        require(_betEpochOracle > 0, "transmit failed");
+        reviewStatus = STATUS_POST_0;
       } else {
-        burn();
+        reviewStatus = STATUS_POST_2;
       }
     }
     emit VoteOutcome(
@@ -231,7 +229,9 @@ contract Oracle {
       votes[0],
       votes[1]
     );
-    reset();
+    propNumber++;
+    votes[0] = 0;
+    votes[1] = 0;
   }
 
   /**  @dev this parameter allows the oracle to adjust how much diversification
@@ -266,7 +266,7 @@ contract Oracle {
     require(
       (_amt + adminStruct[msg.sender].tokens) > MIN_DEPOSIT &&
         (_amt + adminStruct[msg.sender].tokens) < MAX_DEPOSIT,
-      "accounts restricted to between 40k and 140k"
+      "accounts restricted to between 50k and 150k"
     );
     bool success = token.tokenDeposit(msg.sender, uint256(_amt));
     require(success, "token transfer failed");
@@ -293,7 +293,12 @@ contract Oracle {
   function withdrawTokens(uint32 _amt) external {
     require(_amt <= adminStruct[msg.sender].tokens, "nsf tokens");
     require(reviewStatus < 10, "no wd during vote");
-    //require(adminStruct[msg.sender].baseEpoch < betEpochOracle, "too soon");
+    require(
+      (adminStruct[msg.sender].tokens - _amt > MIN_DEPOSIT) ||
+        (adminStruct[msg.sender].tokens == _amt),
+      "accounts restricted to min 50k"
+    );
+    require(adminStruct[msg.sender].baseEpoch < betEpochOracle, "too soon");
     feeData[0] -= _amt;
     uint256 _ethOut1 = ethClaim();
     adminStruct[msg.sender].initFeePool = feeData[1];
@@ -325,7 +330,8 @@ contract Oracle {
   /**  @dev internal function applying standard logic to all data posts
    */
   function post() internal {
-    //require(hourOfDay() == HOUR_POST, "wrong hour");
+    require(hourOfDay() == HOUR_POST, "wrong hour");
+    //require(msg.sender != proposer, "no consecutive acct posting");
     uint32 _tokens = adminStruct[msg.sender].tokens;
     require(_tokens >= MIN_SUBMIT, "Need 10% of tokens");
     votes[0] = _tokens;
@@ -338,41 +344,21 @@ contract Oracle {
    * avax
    */
   function ethClaim() internal returns (uint256 _ethOut0) {
-    if (propNumber > adminStruct[msg.sender].basePropNumber) {
-      uint256 votePercentx10000 = (uint256(adminStruct[msg.sender].totalVotes) *
-        10000) / uint256(propNumber - adminStruct[msg.sender].basePropNumber);
-      if (votePercentx10000 > 10000) votePercentx10000 = 10000;
-      uint256 ethTot = uint256(adminStruct[msg.sender].tokens) *
-        uint256(feeData[1] - adminStruct[msg.sender].initFeePool);
-      _ethOut0 = (votePercentx10000 * ethTot) / 10000;
-      uint256 ploughBack = ethTot - _ethOut0;
-      feeData[1] += uint64(ploughBack / uint256(feeData[0]));
-      payable(msg.sender).transfer(_ethOut0);
-    } else {
-      _ethOut0 = 0;
-    }
-  }
-
-  /**  @dev internal function that resets the account after a vote process
-   */
-  function reset() internal {
-    propNumber++;
-    votes[0] = 0;
-    votes[1] = 0;
-  }
-
-  /**  @dev internal function that punishes proposers for bad data
-   */
-  function burn() internal {
-    feeData[0] -= BURN_AMT;
-    adminStruct[proposer].tokens -= BURN_AMT;
-    token.transfer(address(0), uint256(BURN_AMT));
+    uint256 votePercentx10000 = (uint256(adminStruct[msg.sender].totalVotes) *
+      10000) / uint256(propNumber - adminStruct[msg.sender].basePropNumber);
+    if (votePercentx10000 > 10000) votePercentx10000 = 10000;
+    uint256 ethTot = uint256(adminStruct[msg.sender].tokens) *
+      uint256(feeData[1] - adminStruct[msg.sender].initFeePool);
+    _ethOut0 = (votePercentx10000 * ethTot) / 10000;
+    uint256 ploughBack = ethTot - _ethOut0;
+    feeData[1] += uint64(ploughBack / uint256(feeData[0]));
+    payable(msg.sender).transfer(_ethOut0);
   }
 
   /**  @dev internal function that calculates GMT hour
    * used to restrict timing of data submissions and votes
    */
   function hourOfDay() public view returns (uint256 hour) {
-    hour = (block.timestamp % 86400) / 3600;
+    hour = (block.timestamp % DAY_IN_SECONDS) / 3600;
   }
 }

@@ -394,16 +394,16 @@ function BetPage() {
             <Box>
               <Flex
                 mt="20px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
               <Flex style={{ borderTop: `thin solid ${G}` }}></Flex>
             </Box>
             <Box>
               <Flex
                 mt="20px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
             </Box>
             <Box>
@@ -444,8 +444,8 @@ function BetPage() {
             <Box>
               <Flex
                 width="100%"
-                alignItems="center"
-                justifyContent="marginLeft"
+                alignitems="center"
+                justifycontent="marginLeft"
               >
                 <Text size="14px">
                   <Link
@@ -481,8 +481,8 @@ function BetPage() {
             <Box>
               <Flex
                 mt="5px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
             </Box>
             <Flex>
@@ -490,7 +490,7 @@ function BetPage() {
                 <button
                   style={{
                     backgroundColor: "black",
-                    borderRadius: "5px",
+                    borderradius: "5px",
                     cursor: "pointer",
                     color: "yellow",
                     border: "1px solid #ffff00",
@@ -509,8 +509,8 @@ function BetPage() {
             <Box>
               <Flex
                 mt="10px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
 
               <Box>
@@ -522,9 +522,9 @@ function BetPage() {
               </Box>
               <Flex
                 mt="1px"
-                flexDirection="row"
-                justifyContent="flex-start"
-                alignItems="center"
+                flexdirection="row"
+                justifycontent="flex-start"
+                alignitems="center"
               >
                 <Box>
                   <Form
@@ -532,11 +532,11 @@ function BetPage() {
                     value={wdAmount}
                     onSubmit={withdrawBettor}
                     mb="1px"
-                    justifyContent="flex-start"
+                    justifycontent="flex-start"
                     buttonWidth="95px"
                     color="yellow"
                     inputWidth="100px"
-                    borderRadius="1px"
+                    borderradius="1px"
                     placeholder="# avax"
                     buttonLabel="WithDraw"
                     padding="4px"
@@ -545,9 +545,9 @@ function BetPage() {
               </Flex>
               <Flex
                 mt="1px"
-                flexDirection="row"
-                justifyContent="flex-start"
-                alignItems="center"
+                flexdirection="row"
+                justifycontent="flex-start"
+                alignitems="center"
               >
                 <Box>
                   <Form
@@ -555,10 +555,10 @@ function BetPage() {
                     value={fundAmount}
                     onSubmit={fundBettor}
                     mb="10px"
-                    justifyContent="flex-start"
+                    justifycontent="flex-start"
                     buttonWidth="95px"
                     inputWidth="100px"
-                    borderRadius="1px"
+                    borderradius="1px"
                     placeholder="# avax"
                     //backgroundColor = "#fff"
                     buttonLabel="Fund"
@@ -566,7 +566,7 @@ function BetPage() {
                 </Box>
               </Flex>
               <Flex mb="10px" style={{ borderTop: `thin solid ${G}` }}></Flex>
-              <Flex justifyContent="left">
+              <Flex justifycontent="left">
                 <Text size="14px" color="#ffffff">
                   Current Epoch: {currW4}
                 </Text>
@@ -614,8 +614,8 @@ function BetPage() {
             <Box>
               <Flex
                 mt="20px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
               <Flex
                 style={{
@@ -628,9 +628,9 @@ function BetPage() {
                 <button
                   style={{
                     backgroundColor: "black",
-                    borderRadius: "5px",
+                    borderradius: "5px",
                     padding: "4px",
-                    //borderRadius: "1px",
+                    //borderradius: "1px",
                     cursor: "pointer",
                     color: "yellow",
                     border: "1px solid #ffff00",
@@ -782,7 +782,7 @@ function BetPage() {
           </Box>
         }
       >
-        <Flex justifyContent="center">
+        <Flex justifycontent="center">
           <Text size="25px" className="style">
             Place Bets Here
           </Text>
@@ -790,7 +790,7 @@ function BetPage() {
         <Box> {txnHash}</Box>
 
         <Box mt="14px" mx="30px">
-          <Flex width="100%" justifyContent="center">
+          <Flex width="100%" justifycontent="center">
             {activeStart + 2 * 86400 > currTime ? (
               <Text size="14px" weight="300" className="style">
                 betting closed, waiting for next weekend's schedule ...
@@ -815,7 +815,7 @@ function BetPage() {
         <Flex
           mt="10px"
           pt="10px"
-          alignItems="center"
+          alignitems="center"
           style={{
             borderTop: `thin solid ${G}`,
           }}
@@ -823,9 +823,9 @@ function BetPage() {
         {teamPick != null ? (
           <Flex
             mt="5px"
-            flexDirection="row"
-            justifyContent="flex-start"
-            alignItems="center"
+            flexdirection="row"
+            justifycontent="flex-start"
+            alignitems="center"
           >
             <Text
               size="14px"
@@ -872,8 +872,8 @@ function BetPage() {
           {" "}
           <Flex
             mt="20px"
-            flexDirection="row"
-            justifyContent="space-between"
+            flexdirection="row"
+            justifycontent="space-between"
           ></Flex>
         </Box>
 
@@ -908,8 +908,8 @@ function BetPage() {
         <Box>
           <Flex
             mt="20px"
-            flexDirection="row"
-            justifyContent="space-between"
+            flexdirection="row"
+            justifycontent="space-between"
           ></Flex>
         </Box>
         <div>

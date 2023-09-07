@@ -15,7 +15,7 @@ module.exports = {
     artifacts: "./artifacts",
   },
   solidity: {
-    version: "0.8.0",
+    version: "0.8.19",
     settings: {
       optimizer: {
         runs: 2000,

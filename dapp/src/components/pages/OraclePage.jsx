@@ -41,9 +41,8 @@ function OraclePage() {
 
   const [propNumber, setPropNumber] = useState(0);
   const [reviewStatus, setReviewStatus] = useState(0);
-  const [currW4, setCurrW4] = useState(0);
+  const [currEpoch, setCurrEpoch] = useState(0);
   const [concentrationLimit, setConcentrationLimit] = useState(0);
-  const [minSubmit, setMinSubmit] = useState(0);
   const [pause0, setPause0] = useState(0);
   const [pause1, setPause1] = useState(0);
   const [oddsVector, setOddsVector] = useState([]);
@@ -243,11 +242,6 @@ function OraclePage() {
       {
         abi: oracleContractABI,
         address: oracleContractAddress,
-        functionName: "minSubmit",
-      },
-      {
-        abi: oracleContractABI,
-        address: oracleContractAddress,
         functionName: "feeData",
         args: [0],
       },
@@ -297,7 +291,6 @@ function OraclePage() {
       { result: _params1 },
       { result: _paused0 },
       { result: _paused1 },
-      { result: _minSubmit },
       { result: _feeData0 },
       { result: _feeData1 },
       { result: _proposer },
@@ -313,11 +306,10 @@ function OraclePage() {
     setStartTime(_startTimes || []);
     setOddsVector(_oddsvector || []);
     setOutcomes(_outcomes || []);
-    setCurrW4(Number(_params0) || 0);
+    setCurrEpoch(Number(_params0) || 0);
     setConcentrationLimit(Number(_params1) || 0);
-    setPause0(Number(_params0) || 0);
-    setPause1(Number(_params1) || 0);
-    setMinSubmit(_minSubmit || []);
+    setPause0(Number(_paused0) || 0);
+    setPause1(Number(_paused1) || 0);
     setFeeData0(Number(_feeData0) || 0);
     setFeeData1(Number(_feeData1) || 0);
     setProposer(_proposer || "0x123");
@@ -455,23 +447,23 @@ function needToVote() {
             <Box>
               <Flex
                 mt="20px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
               <Flex style={{ borderTop: `thin solid ${G}` }}></Flex>
             </Box>
             <Box>
               <Flex
                 mt="20px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
             </Box>
             <Box>
               <Flex
                 width="100%"
-                alignItems="center"
-                justifyContent="marginLeft"
+                alignitems="center"
+                justifycontent="marginLeft"
               >
                 <Text size="14px">
                   <Link
@@ -509,8 +501,8 @@ function needToVote() {
             <Box>
               <Flex
                 width="100%"
-                alignItems="center"
-                justifyContent="marginLeft"
+                alignitems="center"
+                justifycontent="marginLeft"
               >
                 <Text size="14px">
                   <Link
@@ -542,8 +534,8 @@ function needToVote() {
             <Box>
               <Flex
                 mt="5px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
             </Box>
             <Flex>
@@ -551,7 +543,7 @@ function needToVote() {
                 <button
                   style={{
                     backgroundColor: "black",
-                    borderRadius: "5px",
+                    borderradius: "5px",
                     cursor: "pointer",
                     color: "yellow",
                     border: "1px solid #ffff00",
@@ -570,8 +562,8 @@ function needToVote() {
             <Box>
               <Flex
                 mt="20px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
               <Box>
                 <Form
@@ -579,7 +571,7 @@ function needToVote() {
                   value={depositAmount}
                   onSubmit={depositTokens}
                   mb="20px"
-                  justifyContent="flex-start"
+                  justifycontent="flex-start"
                   padding="4px"
                   placeholder="# oracle tokens"
                   buttonLabel="Deposit"
@@ -592,7 +584,7 @@ function needToVote() {
                   value={withdrawAmount}
                   onSubmit={withdrawTokens}
                   mb="20px"
-                  justifyContent="flex-start"
+                  justifycontent="flex-start"
                   padding="4px"
                   placeholder="# oracle tokens"
                   buttonLabel="WithDraw"
@@ -600,10 +592,10 @@ function needToVote() {
                 />
               </Box>
 
-              <Flex justifyContent="left">
+              <Flex justifycontent="left">
                 <Box mb="10px" mt="10px">
                   <Text size="14px" color="#ffffff">
-                    Active Epoch: {currW4}
+                    Active Epoch: {currEpoch}
                   </Text>
                   <br />
                   <Text size="14px" className="style">
@@ -611,7 +603,7 @@ function needToVote() {
                   </Text>
                 </Box>
               </Flex>
-              <Flex justifyContent="left">
+              <Flex justifycontent="left">
                 {tokens > 0 ? (
                   <Box>
                     {Number(voteTracker) === Number(propNumber) ? (
@@ -621,17 +613,14 @@ function needToVote() {
                       </Text>
                     ) : null}
                     <Text size="14px" className="style">
-                      Your Tokens in Contract: {Number(tokens).toLocaleString()}
-                      <br />
                       your base Epoch: {baseEpoch}
                     </Text>
                     <br />
                     <Text size="14px" className="style">
-                      Your Votes: {totalVotes} over {currW4 - baseEpoch} epochs
                       Your Voting %:{" "}
                       {Number(
                         (Number(totalVotes) * 100) /
-                          (propNumber - -basePropNumber)
+                          (propNumber - basePropNumber)
                       ).toFixed(0) + " %"}
                     </Text>
                     <br />
@@ -643,24 +632,24 @@ function needToVote() {
               </Flex>
               <Flex
                 mt="10px"
-                flexDirection="row"
-                justifyContent="space-between"
+                flexdirection="row"
+                justifycontent="space-between"
               ></Flex>
             </Box>
             <Flex
               mt="5px"
-              flexDirection="row"
-              justifyContent="flex-start"
-              alignItems="center"
+              flexdirection="row"
+              justifycontent="flex-start"
+              alignitems="center"
             >
               {needToVote() ? (
                 <Box>
                   <button
                     style={{
                       backgroundColor: "black",
-                      borderRadius: "5px",
+                      borderradius: "5px",
                       padding: "4px",
-                      //borderRadius: "1px",
+                      //borderradius: "1px",
                       cursor: "pointer",
                       color: "yellow",
                       border: "1px solid #ffff00",
@@ -676,9 +665,9 @@ function needToVote() {
                   <button
                     style={{
                       backgroundColor: "black",
-                      borderRadius: "5px",
+                      borderradius: "5px",
                       padding: "4px",
-                      //borderRadius: "1px",
+                      //borderradius: "1px",
                       cursor: "pointer",
                       color: "yellow",
                       border: "1px solid #ffff00",
@@ -690,56 +679,6 @@ function needToVote() {
                   >
                     Vote Yes
                   </button>
-                  <Box mb="10px" mt="10px">
-                    <Text size="14px" className="style">
-                      No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
-                      {Number(voteYes).toLocaleString()}
-                    </Text>
-                  </Box>
-                  <Box mb="10px" mt="10px">
-                    <Text size="14px" className="style">
-                      Proposer:
-                      <TruncatedAddress
-                        addr={proposer}
-                        start="8"
-                        end="0"
-                        transform="uppercase"
-                        spacing="1px"
-                      />
-                    </Text>
-                  </Box>
-                </Box>
-              ) : (
-                <Text size="14px" className="style">
-                  {" "}
-                </Text>
-              )}
-            </Flex>
-            <Flex
-              mt="5px"
-              flexDirection="row"
-              justifyContent="flex-start"
-              alignItems="center"
-            >
-              {needToProcess() ? (
-                <Box>
-                  <button
-                    style={{
-                      backgroundColor: "black",
-                      borderRadius: "5px",
-                      padding: "4px",
-                      //borderRadius: "1px",
-                      cursor: "pointer",
-                      color: "yellow",
-                      border: "1px solid #ffff00",
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      processVote();
-                    }}
-                  >
-                    Process Vote
-                  </button>
                 </Box>
               ) : (
                 <Text size="14px" className="style">
@@ -749,19 +688,29 @@ function needToVote() {
             </Flex>
             <Box mb="10px" mt="10px">
               <Text size="14px" className="style">
+                last submitter:
+                <TruncatedAddress
+                  addr={proposer}
+                  start="8"
+                  end="0"
+                  transform="uppercase"
+                  spacing="1px"
+                />
+              </Text>
+              <Text size="14px" className="style">
                 ConcentrationLimit: {concentrationLimit}
               </Text>{" "}
               <br />
-              <Text size="14px" className="style">
-                minSubmit: {Math.floor(minSubmit / 1e7).toFixed(1) + "%"}
-              </Text>
+              {pause0 < 32 || pause1 < 32 ? (
+                <Text size="14px" className="style">
+                  Paused Matches: {pause0}; {pause1}
+                </Text>
+              ) : (
+                " "
+              )}
               <br />
               <Text size="14px" className="style">
-                Paused Matches: {pause0}; {pause1}
-              </Text>
-              <br />
-              <Text size="14px" className="style">
-                current Submission #: {propNumber}
+                current Submission Number: {propNumber}
               </Text>
               <br />
               <Text size="14px" className="style">
@@ -775,27 +724,19 @@ function needToVote() {
           </Box>
         }
       >
-        <Flex justifyContent="center">
+        <Flex justifycontent="center">
           <Text size="25px" className="style">
             Oracle/Admin Page{" "}
           </Text>
         </Flex>
         <Box> {txnHash}</Box>
-        <Box mt="14px" mx="30px">
-          <Flex width="100%" justifyContent="marginLeft">
-            <Text size="14px" weight="300" className="style">
-              {" "}
-              shows data submitted by oracle token holder for vote
-            </Text>
-          </Flex>
-        </Box>
 
         <Box mt="14px" mx="30px"></Box>
 
         <Flex
           mt="10px"
           pt="10px"
-          alignItems="center"
+          alignitems="center"
           style={{
             borderTop: `thin solid ${G}`,
           }}
@@ -808,6 +749,30 @@ function needToVote() {
           ) : (
             <Text size="14px" className="style" color="#00ff00">
               ReviewStatus: {reviewStatusWord(reviewStatus)}
+              <br />
+              <Text size="14px" className="style">
+                No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
+                {Number(voteYes).toLocaleString()}
+              </Text>
+              <Box>
+                <button
+                  style={{
+                    backgroundColor: "black",
+                    borderradius: "5px",
+                    padding: "4px",
+                    //borderradius: "1px",
+                    cursor: "pointer",
+                    color: "yellow",
+                    border: "1px solid #ffff00",
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    processVote();
+                  }}
+                >
+                  Process Vote
+                </button>
+              </Box>
             </Text>
           )}
         </Box>
@@ -816,16 +781,16 @@ function needToVote() {
           {" "}
           <Flex
             mt="20px"
-            flexDirection="row"
-            justifyContent="space-between"
+            flexdirection="row"
+            justifycontent="space-between"
           ></Flex>
         </Box>
 
         <Box>
           <Flex
             mt="20px"
-            flexDirection="row"
-            justifyContent="space-between"
+            flexdirection="row"
+            justifycontent="space-between"
           ></Flex>
         </Box>
         <div>

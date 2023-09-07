@@ -5,7 +5,7 @@ import json
 def callSettlePost():
     with open("results.json", "r") as f:
         args = json.load(f)
-    tx_hash = send_function("settlePost", args["_results"], gas=150000)
+    tx_hash = send_function("settlePost", args["_results"])
     return tx_hash
 
 

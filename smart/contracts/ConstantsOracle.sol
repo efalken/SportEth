@@ -2,13 +2,12 @@
 SPDX-License-Identifier: MIT License
 @author Eric Falkenstein
 */
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 // hour of day in GMT one can post new data
-// also max hour for when data posts can be processed
-uint32 constant HOUR_POST = 12;
-// penalty for failed data submission
-uint32 constant BURN_AMT = 2e6;
+uint32 constant HOUR_POST = 22;
+// this makes sure the post is processed 14 hours later
+uint32 constant HOUR_PROCESS = 12;
 // min/max for initial favorite
 uint16 constant MAX_DEC_ODDS_INIT = 1000;
 uint16 constant MIN_DEC_ODDS_INIT = 125;
@@ -25,11 +24,11 @@ uint8 constant STATUS_PROC_SETTLE = 30;
 uint8 constant STATUS_POST_2 = 2;
 // only an initial slate post possible
 uint8 constant STATUS_POST_0 = 0;
-/* this encourages token holders to join vaults, which make it
- oracle depositors need at least 4% of tokens to deposit and claim revenue
-*/
-uint32 constant MIN_DEPOSIT = 4e7;
+// this encourages token holders to join vaults,
+uint32 constant MIN_DEPOSIT = 5e7;
 // min amount for submitting data, 10% of supply
 uint32 constant MIN_SUBMIT = 1e8;
 //  prevents any oracle account from being greater than 14% of oracle
-uint32 constant MAX_DEPOSIT = 15e8;
+uint32 constant MAX_DEPOSIT = 15e7;
+// used to calculate next friday events start
+uint32 constant DAY_IN_SECONDS = 86400;

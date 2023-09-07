@@ -55,8 +55,12 @@ describe("test rewards 0", function () {
 
   describe("week0", async () => {
     it("initial", async () => {
-      await oracle.depositTokens(510n * million);
-      await token.transfer(betting.address, 490n * million);
+      await oracle.depositTokens(134n * million);
+      await token.transfer(betting.address, 600n * million);
+      await token.transfer(account1.address, 133n * million);
+      await oracle.connect(account1).depositTokens(133n * million);
+      await token.transfer(account2.address, 133n * million);
+      await oracle.connect(account2).depositTokens(133n * million);
       var tt = await token.balanceOf(betting.address);
       console.log("total tokens in k", tt);
       const ce = await betting.margin(0);
@@ -74,16 +78,17 @@ describe("test rewards 0", function () {
     it("send data", async () => {
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
+      nextStart =
+        _timestamp - ((_timestamp - 1687730400) % 604800) + 604800 + 86400;
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -164,17 +169,7 @@ describe("test rewards 0", function () {
     });
 
     it("process data", async () => {
-      const tokensInOracle0 = await oracle.feeData(0);
-      const ethPerToken0 = await oracle.feeData(1);
-      const ethInOracle0 = await ethers.provider.getBalance(oracle.address);
-      // const ethInOracle = ethers.utils.formatUnits(
-      //   await ethers.provider.getBalance(oracle.address),
-      //   "gwei"
-      // );
-      console.log(
-        `Oracle K: tokens ${tokensInOracle0} eth ${ethInOracle0} eth/token ${ethPerToken0}`
-      );
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
       gas1 = receipt.gasUsed;
@@ -198,10 +193,6 @@ describe("test rewards 0", function () {
       const tokensInOracle = await oracle.feeData(0);
       const ethPerToken = await oracle.feeData(1);
       const ethInOracle = await ethers.provider.getBalance(oracle.address);
-      // const ethInOracle = ethers.utils.formatUnits(
-      //   await ethers.provider.getBalance(oracle.address),
-      //   "gwei"
-      // );
       console.log(
         `Oracle K2: tokens ${tokensInOracle} eth ${ethInOracle} eth/token ${ethPerToken}`
       );
@@ -209,44 +200,21 @@ describe("test rewards 0", function () {
       const shares1 = (await betting.lpStruct(account1.address)).shares;
       console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
       console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
-      // const shares0 = (await betting.lpStruct(owner.address)).shares;
-      // const shares1 = (await betting.lpStruct(account1.address)).shares;
-      // console.log(`Acct0: Shares0 ${shares0} token0 ${token0}`);
-      // console.log(`Acct1: Shares1 ${shares1} token1 ${token1}`);
-      // var tt = Number(await oracle.rewardTokensLeft());
-      // console.log("total tokens in k", tt);
-      // const ce = await betting.margin(0);
-      // const ts = await betting.margin(3);
-      // console.log(`BettingK : shares ${ts} eth ${ce}`);
-      // const bkepoch = await betting.params(0);
-      // const okepoch = await oracle.betEpochOracle();
-      // const epoch0 = (await oracle.adminStruct(owner.address)).baseEpoch;
-      // const epoch1 = (await oracle.adminStruct(account1.address)).baseEpoch;
-      // console.log(
-      //   `Epoch: owner ${epoch0} acct1 ${epoch1} kontract ${bkepoch} kontract ${okepoch}`
-      // );
     });
 
     it("runWeek1", async () => {
-      _hourSolidity = await oracle.hourOfDay();
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      secAdvance = nextStart - _timestamp + 86400;
+      await helper.advanceTimeAndBlock(secAdvance);
       result = await oracle.settlePost([
         1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
       receipt = await result.wait();
       gas2 = receipt.gasUsed;
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
       gas3 = receipt.gasUsed;
@@ -316,16 +284,17 @@ describe("test rewards 0", function () {
     it("run week2", async () => {
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
+      nextStart =
+        _timestamp - ((_timestamp - 1687730400) % 604800) + 604800 + 86400;
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -408,29 +377,22 @@ describe("test rewards 0", function () {
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
       result = await betting.connect(account2).bet(0, 0, "50000");
       receipt = await result.wait();
-      _hourSolidity = await oracle.hourOfDay();
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      secAdvance = nextStart - _timestamp + 86400;
+      await helper.advanceTimeAndBlock(secAdvance);
       await oracle.settlePost([
         1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
 
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       await oracle.processVote();
       const ce2 = await betting.margin(0);
       const ts2 = await betting.margin(3);
@@ -486,10 +448,10 @@ describe("test rewards 0", function () {
     it("run week3", async () => {
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       //await helper.advanceTimeAndBlock(6 * 86400);
@@ -500,7 +462,8 @@ describe("test rewards 0", function () {
         await ethers.provider.getBlockNumber()
       )).timestamp;
       console.log(`timestamp0 ${_timestamp}`);
-      nextStart = _timestamp - ((_timestamp - 1687564800) % 604800) + 7 * 86400;
+      nextStart =
+        _timestamp - ((_timestamp - 1687730400) % 604800) + 604800 + 86400;
       diffNextStart = nextStart - _timestamp;
       console.log(`nextStartDiff ${diffNextStart}`);
       _timestamp0 = _timestamp;
@@ -593,7 +556,7 @@ describe("test rewards 0", function () {
       )).timestamp;
       console.log(`timestamp2 ${_timestamp}`);
       console.log(`nextStart2 ${nextStart}`);
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
       _timestamp0 = _timestamp;
@@ -618,20 +581,17 @@ describe("test rewards 0", function () {
       receipt1 = await result.wait();
       console.log(`line 592`);
       _hourSolidity = await oracle.hourOfDay();
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
-
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      secAdvance = nextStart - _timestamp + 86400;
+      await helper.advanceTimeAndBlock(secAdvance);
       await oracle.settlePost([
         1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
 
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       await oracle.processVote();
       const ce2 = await betting.margin(0);
       const ts2 = await betting.margin(3);
@@ -687,16 +647,17 @@ describe("test rewards 0", function () {
     it("run week4", async () => {
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
+      nextStart =
+        _timestamp - ((_timestamp - 1687730400) % 604800) + 604800 + 86400;
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -780,7 +741,7 @@ describe("test rewards 0", function () {
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
       gas1b = receipt.gasUsed;
@@ -823,18 +784,11 @@ describe("test rewards 0", function () {
       receipt = await result.wait();
       result = await betting.connect(account2).bet(0, 0, "50000");
       receipt = await result.wait();
-      _hourSolidity = await oracle.hourOfDay();
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      secAdvance = nextStart - _timestamp + 86400;
+      await helper.advanceTimeAndBlock(secAdvance);
       result = await oracle.settlePost([
         1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
@@ -842,7 +796,7 @@ describe("test rewards 0", function () {
       receipt = await result.wait();
       gas2b = receipt.gasUsed;
 
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
       gas3b = receipt.gasUsed;
@@ -905,16 +859,17 @@ describe("test rewards 0", function () {
     it("run week5", async () => {
       _hourSolidity = await oracle.hourOfDay();
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity;
       }
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      nextStart =
+        _timestamp - ((_timestamp - 1687730400) % 604800) + 604800 + 86400;
       result = await oracle.initPost(
         [
           "NFL:ARI:LAC",
@@ -997,29 +952,22 @@ describe("test rewards 0", function () {
       ).timestamp;
       _date = new Date(1000 * _timestamp + offset);
       _hour = _date.getHours();
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
       result = await betting.connect(account2).bet(0, 0, "50000");
       receipt = await result.wait();
-      _hourSolidity = await oracle.hourOfDay();
-      hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
-      }
-      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp + 7 * 86400;
+      secAdvance = nextStart - _timestamp + 86400;
+      await helper.advanceTimeAndBlock(secAdvance);
       await oracle.settlePost([
         1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
       ]);
 
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       await oracle.processVote();
       const ce2 = await betting.margin(0);
       const ts2 = await betting.margin(3);

@@ -43,6 +43,10 @@ describe("Betting", function () {
 
     it("Deposit Tokens in Oracle Contract", async () => {
       await oracle.connect(owner).depositTokens(140n * million);
+      await token.transfer(account1.address, 140n * million);
+      await oracle.connect(account1).depositTokens(140n * million);
+      await token.transfer(account2.address, 140n * million);
+      await oracle.connect(account2).depositTokens(140n * million);
     });
   });
 
@@ -51,10 +55,10 @@ describe("Betting", function () {
       _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity;
       }
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
@@ -62,7 +66,8 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      nextStart = _timestamp - ((_timestamp - 1690588800) % 604800) + 7 * 86400;
+      nextStart =
+        _timestamp - ((_timestamp - 1687730400) % 604800) + 604800 + 86400;
       console.log(`nextStart is ${nextStart}`);
       console.log(`timestamp is ${_timestamp}`);
       result = await oracle.initPost(
@@ -147,8 +152,8 @@ describe("Betting", function () {
       console.log(`nextStart is ${nextStart}`);
     });
 
-    it("fast forward 12 hours", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+    it("fast forward 13 hours", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
     });
 
     it("Send Initial Data", async () => {
@@ -195,10 +200,10 @@ describe("Betting", function () {
       _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity;
       }
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
@@ -207,11 +212,13 @@ describe("Betting", function () {
     });
 
     it("send updated odds data", async () => {
-      result = await oracle.updatePost([
-        800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-        699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-        919, 720, 672, 800,
-      ]);
+      result = await oracle
+        .connect(account1)
+        .updatePost([
+          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800,
+        ]);
       receipt = await result.wait();
       gas0 = receipt.gasUsed;
     });
@@ -220,7 +227,7 @@ describe("Betting", function () {
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
     });
 
     it("approve and send to betting contract", async () => {
@@ -255,10 +262,10 @@ describe("Betting", function () {
       _hourSolidity = await oracle.hourOfDay();
       console.log(`hour in EVM ${_hourSolidity}`);
       hourOffset = 0;
-      if (_hourSolidity > 12) {
-        hourOffset = 36 - _hourSolidity;
-      } else if (_hourSolidity < 12) {
-        hourOffset = 12 - _hourSolidity;
+      if (_hourSolidity > 22) {
+        hourOffset = 23;
+      } else if (_hourSolidity < 22) {
+        hourOffset = 22 - _hourSolidity + 48;
       }
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
@@ -277,7 +284,7 @@ describe("Betting", function () {
     });
 
     it("Approve results and send to betting contract", async () => {
-      await helper.advanceTimeAndBlock(secondsInHour * 12);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
       const betdata0 = await betting.betData(0);
       console.log(`betdata preSettle ${betdata0}`);
       const betdata1 = await betting.betData(1);
