@@ -167,12 +167,13 @@ function BetPage() {
 
   async function takeBet() {
     setHash(null);
+    let betAmount2 = Math.round(betAmount);
     try {
       const txHash = await writeContract(walletClient, {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "bet",
-        args: [matchPick, teamPick, betAmount * 10000],
+        args: [matchPick, teamPick, betAmount2 * 10000],
       });
 
       updateTransactionHashDialogBox(txHash);
@@ -445,7 +446,7 @@ function BetPage() {
               <Flex
                 width="100%"
                 alignitems="center"
-                justifycontent="marginLeft"
+                justifycontent="marginleft"
               >
                 <Text size="14px">
                   <Link
@@ -593,7 +594,7 @@ function BetPage() {
                         <td>Match</td>
                         <td>Pick</td>
                         <td>BetSize</td>
-                        <td>DecOdds ${counter}</td>
+                        <td>DecOdds</td>
                       </tr>
                       {Object.values(betHashes).map(
                         (contractHash, index) =>
@@ -791,20 +792,21 @@ function BetPage() {
 
         <Box mt="14px" mx="30px">
           <Flex width="100%" justifycontent="center">
-            {activeStart + 2 * 86400 > currTime ? (
+            {+3 * 86400 < 0 ? (
               <Text size="14px" weight="300" className="style">
                 betting closed, waiting for next weekend's schedule ...
               </Text>
             ) : (
               <Text size="14px" weight="300" className="style">
-                Fund at left. Once funded, toggle radio button on the
-                team/player you want to bet on to win, and enter desired avax
-                bet in the box (eg, 1.123). You redeem all bets at once, which
-                clears your array of unredeemed bets, but only when you have no
-                active bets. If you have 16 unredeemed active and closed bets,
-                you must clear your unredeemed bets to bet again. Redemption
-                sends any winning back to your free capital balance, which is
-                then available for withdrawal or new bets.
+                Fund account. Once funded, toggle radio button on the
+                team/player and enter desired avax bet in the box (eg, 1.123).
+                If they win, you get your bet back times the decimal odds. You
+                redeem all bets at once, which clears your array of unredeemed
+                bets, but only when you have no active bets. If you have 16
+                unredeemed active and closed bets, you must clear your
+                unredeemed bets to bet again. Redemption sends any winning back
+                to your free capital balance, which is then available for
+                withdrawal or new bets.
               </Text>
             )}
           </Flex>
@@ -842,7 +844,7 @@ function BetPage() {
               color="black"
               font="sans-serif"
               placeholder={"# avax"}
-              marginLeft="10px"
+              marginleft="10px"
               marginRignt="5px"
               // color="yellow"
               value={betAmount}
@@ -853,7 +855,7 @@ function BetPage() {
                   //height: "30px",
                   // width: "100px",
                   float: "right",
-                  marginLeft: "5px",
+                  marginleft: "5px",
                   border: "1px solid yellow",
                   padding: "4px",
                   // color: "black"

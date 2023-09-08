@@ -227,7 +227,7 @@ function BookiePage() {
     setTokensInK(_balanceOfContract || 0n);
     if (_schedString) setScheduleString(_schedString);
 
-    const _bookieShares = _lpStruct[0].toString() || "0";
+    const _bookieShares = _lpStruct[0] || "0";
     setBookieShares(_bookieShares);
 
     const _bookieEpoch = _lpStruct[1] || "0";

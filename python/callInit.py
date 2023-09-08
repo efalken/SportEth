@@ -10,7 +10,7 @@ def callInitPost():
         args["_teamsched"],
         args["_starts"],
         args["_decimalOdds"],
-        gas=600000,
+        gas=1600000,
     )
     return tx_hash
 

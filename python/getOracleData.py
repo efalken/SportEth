@@ -2,8 +2,8 @@ import json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-CONTRACT_ADDRESS = "0xB0340B2F8B2660F71dFEB139c171a9e4ED8b1250"
-RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
+CONTRACT_ADDRESS = "0xbB3A1a729a7888f204632fF69FFe130c950B970f"
+RPC_URL = "https://avalanche-mainnet.infura.io"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 with open("AbiOracle.json", "r") as f:

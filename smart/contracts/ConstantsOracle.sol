@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT License
 pragma solidity 0.8.19;
 
 // hour of day in GMT one can post new data
-uint32 constant HOUR_POST = 22;
+uint32 constant HOUR_POST = 23;
 // this makes sure the post is processed 14 hours later
 uint32 constant HOUR_PROCESS = 12;
 // min/max for initial favorite

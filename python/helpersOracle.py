@@ -4,13 +4,9 @@ from eth_account import Account
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-# CONTRACT_ADDRESS = "0x14D6cAD4747f6BFD57f3Dc5cC7E26d96E540C084"
-CONTRACT_ADDRESS = "0xa6F7E14516BCdb69d1FE7f4640D991d04c6A689a"
-RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
-# PRIVATE_KEY = "0xdc63c0436707975689036ad87b2dcbec81ac4ff488501115995ae84e7f9a1286"
-PRIVATE_KEY = "0x7db8d1b550d89152d93111ca132253f09ed30ac337a0a802c0c032ad3a97933f"
-# PRIVATE_KEY = "0x4765ce94f9ef7d4ea3f4023e9a1e2936f47fb2cbb8be104d3883b6ef721f5aa4"
-# 72 0x4765ce94f9ef7d4ea3f4023e9a1e2936f47fb2cbb8be104d3883b6ef721f5aa4"
+CONTRACT_ADDRESS = "0xbB3A1a729a7888f204632fF69FFe130c950B970f"
+RPC_URL = "https://avalanche-mainnet.infura.io"
+PRIVATE_KEY = "0xdc63c02dcbec81ac4ff488501436707975689036ad87b115995ae84e7f9a1286"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 account = Account.from_key(PRIVATE_KEY)
@@ -29,7 +25,7 @@ def send_transaction(data, gas):
         "to": CONTRACT_ADDRESS,
         "value": 0,
         "data": data,
-        "chainId": 43113,
+        "chainId": 43114,
     }
     signed_tx = w3.eth.account.sign_transaction(txn, PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)

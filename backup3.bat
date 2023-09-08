@@ -1,6 +1,6 @@
-robocopy python ..\avaxsportsbook\python /E
-robocopy docs ..\avaxsportsbook\docs /E 
-robocopy private ..\avaxsportsbook\private /E 
-robocopy dapp ..\avaxsportsbook\dapp /E /XD node_modules
-robocopy smart ..\avaxsportsbook\smart /E /XD node_modules
-robocopy backend ..\avaxsportsbook\backend /E /XD node_modules
+robocopy python ..\asbFuji\python /E
+robocopy docs ..\asbFuji\docs /E 
+robocopy private ..\asbFuji\private /E 
+robocopy dapp ..\asbFuji\dapp /E /XD node_modules
+robocopy smart ..\asbFuji\smart /E /XD node_modules
+robocopy backend ..\asbFuji\backend /E /XD node_modules

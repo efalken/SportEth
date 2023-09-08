@@ -80,7 +80,22 @@ module.exports = {
       avaxtest: true,
       chainId: 43113,
       accounts: {
-        mnemonic: `${process.env.GOERLI_WALLET_MNEMONIC}`,
+        mnemonic: `${process.env.temp1}`,
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+        passphrase: "",
+      },
+      gasLimit: 0,
+      gasPrice: 25e9,
+      gas: "auto",
+      timeout: 60000,
+    },
+    avaxmain: {
+      url: "https://avalanche-mainnet.infura.io",
+      chainId: 43114,
+      accounts: {
+        mnemonic: `${process.env.temp1}`,
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 20,

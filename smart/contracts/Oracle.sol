@@ -331,7 +331,7 @@ contract Oracle {
    */
   function post() internal {
     require(hourOfDay() == HOUR_POST, "wrong hour");
-    //require(msg.sender != proposer, "no consecutive acct posting");
+    require(msg.sender != proposer, "no consecutive acct posting");
     uint32 _tokens = adminStruct[msg.sender].tokens;
     require(_tokens >= MIN_SUBMIT, "Need 10% of tokens");
     votes[0] = _tokens;

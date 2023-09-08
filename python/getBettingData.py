@@ -10,15 +10,13 @@ import json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-CONTRACT_ADDRESS = "0xBe638524D4bCA056c2B2D3A75546bA3c4cF0E392"
-RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
+CONTRACT_ADDRESS = "0x59D7e7C2e9e33AC920d6Ee23C41B33463e399F11"
+RPC_URL = "https://avalanche-mainnet.infura.io"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 with open("AbiBetting.json", "r") as f:
     abi = json.load(f)
 contract = w3.eth.contract(address=w3.to_checksum_address(CONTRACT_ADDRESS), abi=abi)
-# PRIVATE_KEY = "0xdc63c0436707975689036ad87b2dcbec81ac4ff488501115995ae84e7f9a1286"
-# account = Account.from_key(PRIVATE_KEY)
 
 
 def getOdds():

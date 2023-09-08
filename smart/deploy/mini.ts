@@ -37,23 +37,33 @@ async function main() {
   const Token = await ethers.getContractFactory("Token");
   const token = await Token.deploy();
   await token.deployed();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   console.log(`Token contract was deployed to ${token.address}`);
+  console.log(`acct0  was deployed to ${accounts[0]}`);
 
   const Betting = await ethers.getContractFactory("Betting");
   const betting = await Betting.deploy(token.address);
   await betting.deployed();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   console.log(`Betting contract was deployed to ${betting.address}`);
 
   const Oracle = await ethers.getContractFactory("Oracle");
   const oracle = await Oracle.deploy(betting.address, token.address);
   await oracle.deployed();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   console.log(`Oracle contract was deployed to ${oracle.address}`);
   result = await betting.setOracleAddress(oracle.address);
   await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await token.setAdmin(oracle.address);
   await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await token.transfer(betting.address, 600n*million);
   await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  result = await oracle.depositTokens(140n * million);
+  await result.wait();
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   console.log(`got here2`);
   const tokens = await token.balanceOf(accounts[0]);
   const tokens2 = await token.balanceOf(betting.address);

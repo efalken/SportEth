@@ -348,7 +348,7 @@ contract Betting {
     require(token.balanceOf(address(this)) > 0, "no token rewards left");
     uint256 lpShares = uint256(lpStruct[msg.sender].shares);
     require(lpShares > 0, "only for liq providers");
-    //require(params[0] > 5, "starts in epoch 6!");
+    require(params[0] > 5, "starts in epoch 6!");
     require(lpStruct[msg.sender].claimEpoch < params[0], "one claim per epoch");
     lpStruct[msg.sender].claimEpoch = params[0];
     uint256 _amt = ((lpShares * EPOCH_AMOUNT) / uint256(margin[3]));
