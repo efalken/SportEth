@@ -9,6 +9,7 @@ export default function TeamTable({
   oddsTot,
   radioUnderPick,
   getMoneyLine,
+  haltedColumn,
 }) {
   let faveSplit = [];
   let underSplit = [];
@@ -53,7 +54,7 @@ export default function TeamTable({
           <th style={{ textAlign: "left" }}>Start</th>
         </tr>
         {[...Array(32)].map((_value, i) =>
-          Number(startTimeColumn[i]) > 1691011720 ? (
+          sport[i] !== "AAA" ? (
             <tr
               className={(i + 1) % borderCells === 0 ? "border-row" : ""}
               key={i}
@@ -62,7 +63,7 @@ export default function TeamTable({
               <td>{i}</td>
               <td>{sport[i]}</td>
               <td style={{ textAlign: "left", paddingLeft: "2px" }}>
-                {startTimeColumn[i] > moment().unix() ? (
+                {startTimeColumn[i] > moment().unix() && !haltedColumn[i] ? (
                   <input
                     type="radio"
                     value={i}
@@ -81,7 +82,7 @@ export default function TeamTable({
                   : getMoneyLine((95 * oddsTot[0][i]) / 100)}
               </td>
               <td style={{ textAlign: "left", paddingLeft: "2px" }}>
-                {startTimeColumn[i] > moment().unix() ? (
+                {startTimeColumn[i] > moment().unix() && !haltedColumn[i] ? (
                   <input
                     type="radio"
                     value={i}
@@ -100,7 +101,7 @@ export default function TeamTable({
                   : getMoneyLine((95 * oddsTot[1][i]) / 100)}
               </td>
               <td>
-                {moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}
+                {moment.unix(Number(startTimeColumn[i])).format("ddd h:mm a")}
               </td>
             </tr>
           ) : null

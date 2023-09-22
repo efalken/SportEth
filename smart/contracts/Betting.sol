@@ -1,6 +1,6 @@
 /**
 SPDX-License-Identifier: MIT License
-@author Eric Falkenstein
+@author Eric G Falkenstein
 */
 pragma solidity 0.8.19;
 
@@ -8,25 +8,29 @@ import "./Token.sol";
 import "./ConstantsBetting.sol";
 
 contract Betting {
-  /* ability to pause 2 matches if odds are extremely stale. 
-  setting them to any number greater than 31 makes this emergency 
-  parameter inactive */
-  uint8[2] public paused;
-  /* decimal odds for favorite, formatted as decimal odds minus one times 1000
-  The payout must be multiplied by 95/100 to accommodate the oracle fee */
+  // 0 post-settle/pre-init, 1 post-initial slate/pre-odds
+  // 2 post-odds/pre-settle
+  uint32 public bettingStatus;
+  // increments by one each settlement
+  uint32 public bettingEpoch;
+  // increments each bet
+  uint64 public nonce;
+  // adjustible factor for controlling concentration risk
+  uint64 public concFactor;
+  /* decimal odds for favorite, formatted as decimal odds minus one times 1000 */
   uint16[32] public odds;
-  //0 betEpoch, 1 concentration Limit, 2 nonce, 3 first Start Time
-  uint32[4] public params;
-  // UTC GMT aka Zulu time. In ISO 8601 it is presented with a Z suffix
+  // UTC GMT aka Zulu time. In ISO 8601 it is distinguished by the Z suffix
   uint32[32] public startTime;
-  // 0 total LPcapital, 1 LPcapitalLocked, 2 bettorLocked, 3 totalLPShares
-  uint64[4] public margin;
+  // 0 total LPcapital, 1 LPcapitalLocked, 2 bettorLocked
+  uint64[3] public margin;
+  // LpShares used to calculate LP revenue
+  uint64 public liqProvShares;
   /* 0-betLong[favorite], 1-betLong[away], 2-betPayout[favorite], 3-betPayout[underdog]
   These data are bitpacked for efficiency */
   uint256[32] public betData;
   // the oracle contract as exclusive access to several functions
   address payable public oracleAdmin;
-  /// for paying LP token Rewards
+  // for paying LP token Rewards
   Token public token;
   // individual bet contracts
   mapping(bytes32 => Subcontract) public betContracts;
@@ -34,7 +38,7 @@ contract Betting {
   via betTarget=epoch * 1000 + match * 10 + teamWinner. 
   For example, epoch 21, match 15, and team 0 wins, would be 21150 */
   mapping(uint32 => uint8) public outcomeMap;
-  /// This keeps track of an LP's data
+  // This keeps track of an LP's data
   mapping(address => LPStruct) public lpStruct;
   /* this struct holds a bettor's balance and unredeemed trades
   If an LP wants to bet, they will have an independent userStruct */
@@ -57,8 +61,7 @@ contract Betting {
 
   struct LPStruct {
     uint64 shares;
-    uint32 outEpoch;
-    uint32 claimEpoch;
+    uint32 lpEpoch;
   }
 
   event BetRecord(
@@ -66,26 +69,34 @@ contract Betting {
     uint32 indexed epoch,
     uint32 matchNum,
     uint32 pick,
-    uint64 betAmount,
-    uint64 payoff,
+    int64 betAmount,
+    int64 payoff,
     bytes32 contractHash
   );
 
   event Funding(
     address indexed bettor,
     uint32 epoch,
-    uint256 cryptoMoved,
-    uint256 action
+    uint64 avax,
+    uint32 action
   );
 
+  event Redemption(
+    address indexed bettor,
+    uint32 epoch,
+    uint64 payoff,
+    uint32 betsRedeemed
+  );
+
+  event Rewards(address indexed bettor, uint32 epoch, uint256 tokens);
+
   constructor(address payable _tokenAddress) {
-    params[1] = 5;
-    params[0] = 1;
-    params[3] = 2e9;
+    concFactor = 5;
+    bettingEpoch = 1;
     token = Token(_tokenAddress);
   }
 
-  /// @dev restricts data submissions to the Oracle contract
+  // @dev restricts data submissions to the Oracle contract
 
   modifier onlyAdmin() {
     require(oracleAdmin == msg.sender);
@@ -113,31 +124,28 @@ contract Betting {
     uint32 _team0or1,
     int64 _betAmt
   ) external returns (bytes32) {
+    int64 betPayoff = int64(uint64(odds[_matchNumber]));
+    require(betPayoff % 10 == 0, "match halted");
+    require(bettingStatus == 2, "odds not ready");
     require(userStruct[msg.sender].counter < 16, "betstack full, redeem bets");
     require(
-      _betAmt <= int64(uint64(userStruct[msg.sender].userBalance)),
-      "over capital balance"
+      (_betAmt <= int64(userStruct[msg.sender].userBalance) &&
+        _betAmt >= MIN_BET),
+      "too big or too small"
     );
-    require(_betAmt >= MIN_BET, "bets must be ge 1 avax");
-    require(
-      paused[0] != _matchNumber && paused[1] != _matchNumber,
-      "match is paused"
-    );
-    require(startTime[_matchNumber] > block.timestamp, "game started");
+    require(uint256(startTime[_matchNumber]) > block.timestamp, "game started");
     uint64[4] memory _betData = decodeNumber(_matchNumber);
-    int64 betPayoff = int64(uint64(odds[_matchNumber]));
     if (_team0or1 == 0) {
-      betPayoff = (_betAmt * betPayoff) / 1000;
+      betPayoff = (_betAmt * betPayoff) / 10000;
     } else {
       betPayoff =
-        (_betAmt * (1e6 / (betPayoff + ODDS_FACTOR) - ODDS_FACTOR)) /
-        1000;
+        (_betAmt * (ODDS_FACTOR1 / (betPayoff + ODDS_FACTOR2) - ODDS_FACTOR2)) /
+        10000;
     }
     int64 currLpBetExposure = int64(_betData[2 + _team0or1]) -
       int64(_betData[1 - _team0or1]);
     require(
-      int64(betPayoff + currLpBetExposure) <=
-        int64(margin[0] / uint64(params[1])),
+      (betPayoff + currLpBetExposure) <= int64(margin[0] / concFactor),
       "betsize over global book limit"
     );
     int64 currLpExposureOpp = int64(_betData[3 - _team0or1]) -
@@ -148,17 +156,17 @@ contract Betting {
     ) - maxZero(currLpBetExposure, currLpExposureOpp);
     require(
       marginChange < int64(margin[0] - margin[1]),
-      "betsize over available free capital"
+      "bet amount exceeds free capital"
     );
     userStruct[msg.sender].userBalance -= uint64(_betAmt);
-    bytes32 subkID = keccak256(abi.encodePacked(params[2], block.number));
+    bytes32 subkID = keccak256(abi.encodePacked(nonce, block.number));
     Subcontract memory order;
     order.bettor = msg.sender;
     order.betAmount = uint64(_betAmt);
     order.payoff = uint64(betPayoff);
     order.pick = _team0or1;
     order.matchNum = _matchNumber;
-    order.epoch = params[0];
+    order.epoch = bettingEpoch;
     betContracts[subkID] = order;
     margin[2] += uint64(_betAmt);
     margin[1] = uint64(int64(margin[1]) + marginChange);
@@ -170,16 +178,16 @@ contract Betting {
     encoded |= uint256(_betData[2]) << 64;
     encoded |= uint256(_betData[3]);
     betData[_matchNumber] = uint256(encoded);
-    params[2]++;
+    nonce++;
     userStruct[msg.sender].trades[userStruct[msg.sender].counter] = subkID;
     userStruct[msg.sender].counter++;
     emit BetRecord(
       msg.sender,
-      params[0],
+      bettingEpoch,
       _matchNumber,
       _team0or1,
-      uint32(int32(_betAmt)),
-      uint32(int32((betPayoff * 95) / 100)),
+      _betAmt,
+      ((betPayoff * 95) / 100),
       subkID
     );
     return subkID;
@@ -188,29 +196,29 @@ contract Betting {
   /// @dev bettor funds account for bets
   function fundBettor() external payable {
     uint64 amt = uint64(msg.value / UNITS_TRANS14);
-    require(amt >= MIN_BET_DEPOSIT, "need at least one avax");
+    require(amt >= MIN_DEPOSIT, "need at least one avax");
     userStruct[msg.sender].userBalance += amt;
-    emit Funding(msg.sender, params[0], uint256(amt), 0);
+    emit Funding(msg.sender, bettingEpoch, amt, 0);
   }
 
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
-    require(block.timestamp < params[3], "only prior to first event");
-    uint256 netinvestment = (msg.value / UNITS_TRANS14);
+    require(margin[2] == 0, "betting active");
+    uint64 netinvestment = uint64(msg.value / UNITS_TRANS14);
     uint64 _shares = 0;
-    require(netinvestment >= MIN_BET_DEPOSIT, "need at least one avax");
+    require(netinvestment >= uint256(MIN_DEPOSIT), "need at least one avax");
     if (margin[0] > 0) {
       _shares = uint64(
-        (netinvestment * uint256(margin[3])) / uint256(margin[0])
+        (uint256(netinvestment) * uint256(liqProvShares)) / uint256(margin[0])
       );
     } else {
-      _shares = uint64(netinvestment);
+      _shares = netinvestment;
     }
-    margin[0] = margin[0] + uint64(netinvestment);
-    lpStruct[msg.sender].outEpoch = params[0] + MIN_LP_DURATION;
-    margin[3] += _shares;
+    margin[0] += uint64(netinvestment);
+    lpStruct[msg.sender].lpEpoch = bettingEpoch;
+    liqProvShares += _shares;
     lpStruct[msg.sender].shares += _shares;
-    emit Funding(msg.sender, params[0], netinvestment, 1);
+    emit Funding(msg.sender, bettingEpoch, netinvestment, 1);
   }
 
   /** @dev bettor withdrawal
@@ -221,27 +229,29 @@ contract Betting {
     userStruct[msg.sender].userBalance -= _amt;
     uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     payable(msg.sender).transfer(amt256);
-    emit Funding(msg.sender, params[0], amt256, 2);
+    emit Funding(msg.sender, bettingEpoch, _amt, 2);
   }
 
   /** @dev processes withdrawal by LPs
    * @param _sharesToSell is the LP's ownership stake withdrawn.
    */
   function withdrawBook(uint64 _sharesToSell) external {
-    require(block.timestamp < params[3], "only prior to first event");
+    require(margin[2] == 0, "betting active");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
-    require(params[0] > lpStruct[msg.sender].outEpoch, "too soon");
-    uint64 ethWithdraw = (_sharesToSell * margin[0]) / margin[3];
+    require(bettingEpoch > lpStruct[msg.sender].lpEpoch, "no wd w/in epoch");
+    uint64 avaxWithdraw = uint64(
+      (uint256(_sharesToSell) * uint256(margin[0])) / uint256(liqProvShares)
+    );
     require(
-      ethWithdraw <= (margin[0] - margin[1]),
+      avaxWithdraw <= (margin[0] - margin[1]),
       "insufficient free capital"
     );
-    margin[3] -= _sharesToSell;
+    liqProvShares -= _sharesToSell;
     lpStruct[msg.sender].shares -= _sharesToSell;
-    margin[0] -= ethWithdraw;
-    uint256 ethWithdrawWei = uint256(ethWithdraw) * UNITS_TRANS14;
-    payable(msg.sender).transfer(ethWithdrawWei);
-    emit Funding(msg.sender, params[0], ethWithdrawWei, 3);
+    margin[0] -= avaxWithdraw;
+    uint256 avaxWithdraw256 = uint256(avaxWithdraw) * UNITS_TRANS14;
+    payable(msg.sender).transfer(avaxWithdraw256);
+    emit Funding(msg.sender, bettingEpoch, avaxWithdraw, 3);
   }
 
   /** @dev redeems users bet stack of unredeemed bets
@@ -250,10 +260,10 @@ contract Betting {
   function redeem() external {
     uint256 numberBets = userStruct[msg.sender].counter;
     require(numberBets > 0, "no bets");
-    uint64 payout;
+    uint64 payout = 0;
     for (uint256 i = 0; i < numberBets; i++) {
       bytes32 _subkId = userStruct[msg.sender].trades[i];
-      if (betContracts[_subkId].epoch == params[0]) revert("bets active");
+      if (betContracts[_subkId].epoch == bettingEpoch) revert("bets active");
       uint32 epochMatch = betContracts[_subkId].epoch *
         1000 +
         betContracts[_subkId].matchNum *
@@ -266,38 +276,35 @@ contract Betting {
         }
       }
     }
-    userStruct[msg.sender].counter = 0;
     userStruct[msg.sender].userBalance += payout;
-    emit Funding(msg.sender, params[0], uint256(payout), 4);
+    emit Redemption(
+      msg.sender,
+      bettingEpoch,
+      payout,
+      userStruct[msg.sender].counter
+    );
+    userStruct[msg.sender].counter = 0;
   }
 
-  /** @dev processes initial odds and start times
-   * @param _odds is the epoch's set of odds and start times for matches.
+  /** @dev processes initial start times
    * @param _starts are the start times
    */
   function transmitInit(
-    uint16[32] calldata _odds,
     uint32[32] calldata _starts
   ) external onlyAdmin returns (bool) {
-    require(margin[2] == 0, "wrong order");
     startTime = _starts;
-    odds = _odds;
-    uint32 ts = uint32(block.timestamp);
-    params[3] = ts - ((ts - FRIDAY_22_GMT) % WEEK_IN_SECONDS) + WEEK_IN_SECONDS;
-    paused[0] = 99;
-    paused[1] = 99;
+    bettingStatus = 1;
     return true;
   }
 
-  /** @dev processes updates to epoch's odds
-   * @param _updateOdds updates the epoch's odds
+  /** @dev processes odds
+   * @param _odds gross dec odds for favorite (team0)
    */
-  function transmitUpdate(
-    uint16[32] calldata _updateOdds
+  function transmitOdds(
+    uint16[32] calldata _odds
   ) external onlyAdmin returns (bool) {
-    odds = _updateOdds;
-    paused[0] = 99;
-    paused[1] = 99;
+    odds = _odds;
+    bettingStatus = 2;
     return true;
   }
 
@@ -315,10 +322,10 @@ contract Betting {
     uint32 epochMatch;
     uint32 winningTeam;
     for (uint32 i = 0; i < 32; i++) {
-      winningTeam = _winner[i];
+      winningTeam = uint32(_winner[i]);
       uint64[4] memory _betData = decodeNumber(i);
-      epochMatch = i * 10 + params[0] * 1000;
       if ((_betData[0] + _betData[1]) > 0) {
+        epochMatch = i * 10 + bettingEpoch * 1000;
         if (winningTeam != 2) {
           betReturnPot += _betData[winningTeam];
           winningsPot += _betData[winningTeam + 2];
@@ -334,43 +341,45 @@ contract Betting {
     margin[0] = margin[0] + margin[2] - betReturnPot - winningsPot;
     margin[1] = 0;
     margin[2] = 0;
-    params[0]++;
+    bettingEpoch++;
+    bettingStatus = 0;
     delete betData;
-    params[3] = FUTURE_START;
     payable(oracleAdmin).transfer(oracleDiv);
-    return (params[0], oracleDiv);
+    return (bettingEpoch, oracleDiv);
   }
 
   /** @dev for distributing 60% of tokens to LPs. Once tokens are depleted 
- this is irrelevant. Tokens go to LP's EOA
+ this is irrelevant. Tokens go to LP's external account address
    */
   function tokenReward() external {
-    require(token.balanceOf(address(this)) > 0, "no token rewards left");
+    uint256 tokensLeft = token.balanceOf(address(this));
+    require(tokensLeft > 0, "no token rewards left");
+    //require(bettingEpoch > 5, "starts in epoch 6!");
     uint256 lpShares = uint256(lpStruct[msg.sender].shares);
     require(lpShares > 0, "only for liq providers");
-    require(params[0] > 5, "starts in epoch 6!");
-    require(lpStruct[msg.sender].claimEpoch < params[0], "one claim per epoch");
-    lpStruct[msg.sender].claimEpoch = params[0];
-    uint256 _amt = ((lpShares * EPOCH_AMOUNT) / uint256(margin[3]));
+    require(bettingEpoch > lpStruct[msg.sender].lpEpoch, "one claim per epoch");
+    lpStruct[msg.sender].lpEpoch = bettingEpoch;
+    uint256 _amt = ((lpShares * EPOCH_AMOUNT) / uint256(liqProvShares));
+    if (_amt > tokensLeft) _amt = tokensLeft;
     token.transfer(msg.sender, _amt);
-    emit Funding(msg.sender, params[0], _amt, 5);
+    emit Rewards(msg.sender, bettingEpoch, _amt);
   }
 
   /** @dev limits the amount of LP capital that can be applied to a single match.
    * @param _concFactor sets the parameter that defines how much diversification is enforced.
    * eg, if 10, then the max position allowed by bettors is LPcapital/_concFactor
    */
-  function adjustConcentrationFactor(uint32 _concFactor) external onlyAdmin {
-    params[1] = _concFactor;
+  function adjustConcentrationFactor(uint64 _concFactor) external onlyAdmin {
+    concFactor = _concFactor;
   }
 
   /** @dev this allows oracle to prevent new bets on contests that have bad odds
-   * @param _badmatch0 is the first paused matches
-   * @param _badmatch1 is the second paused matches
+   * @param _match is the reset match
    */
-  function pauseMatch(uint8 _badmatch0, uint8 _badmatch1) external onlyAdmin {
-    paused[0] = _badmatch0;
-    paused[1] = _badmatch1;
+  function pauseMatch(uint256 _match) external onlyAdmin {
+    uint16 oddsi = odds[_match] % 10;
+    oddsi = (oddsi == 0) ? 1 : 0;
+    odds[_match] = (odds[_match] / 10) * 10 + oddsi;
   }
 
   function showBetData() external view returns (uint256[32] memory _betData) {
@@ -389,17 +398,23 @@ contract Betting {
     _startTime = startTime;
   }
 
+  /**  @dev this makes it easier for the front-end to present unredeemed bets
+   * @param _userAddress is the account who is betting
+   * @return _betDataUser is array of unredeemed bet bytes32 IDs
+   */
   function showUserBetData(
-    address userAddress
+    address _userAddress
   ) external view returns (bytes32[16] memory _betDataUser) {
-    uint256 top = uint256(userStruct[userAddress].counter);
+    uint256 top = uint256(userStruct[_userAddress].counter);
     for (uint256 i = 0; i < top; i++) {
-      _betDataUser[i] = userStruct[userAddress].trades[i];
+      _betDataUser[i] = userStruct[_userAddress].trades[i];
     }
   }
 
   /**  @dev this makes it easier for the front-end to present the status of past bets
-   * @return bool is true if the bet generated a win or tie and thus will move money back to the user's balance
+   * @param _subkID is the contracts bytes32 ID created with bet
+   * @return bool is true if the bet generated a win or tie and thus will
+   * move money back to the user's balance
    */
   function checkRedeem(bytes32 _subkID) external view returns (bool) {
     uint32 epochMatchWinner = betContracts[_subkID].epoch *
@@ -411,9 +426,12 @@ contract Betting {
     return redeemable;
   }
 
-  // @dev unpacks uint256 to reveal match's odds and bet amounts
+  /**  @dev unpacks uint256 to 4 uint64 to reveal match's bet amounts
+   * @param _matchNumber is the match number from 0 to 31
+   * 0 is amt bet on team0, 1 amt bet on team1, 2 payoff for team0, 3 payoff for team1
+   */
   function decodeNumber(
-    uint256 _matchNumber
+    uint32 _matchNumber
   ) internal view returns (uint64[4] memory _vec1) {
     uint256 _encoded = betData[_matchNumber];
     _vec1[0] = uint64(_encoded >> 192);

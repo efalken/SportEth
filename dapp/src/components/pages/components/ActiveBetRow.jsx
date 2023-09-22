@@ -5,7 +5,7 @@ import {
 } from "../../../abis/Betting.json";
 import { useEffect, useState } from "react";
 
-export default function ActiveBetRow({ contractHash, currW4, teamSplit }) {
+export default function ActiveBetRow({ contractHash, betEpoch, teamSplit }) {
   const betSubContract = useContractRead({
     abi: bettingContractABI,
     address: bettingContractAddress,
@@ -31,7 +31,7 @@ export default function ActiveBetRow({ contractHash, currW4, teamSplit }) {
     });
   }, [betSubContract?.data]);
 
-  if (!event || event.epoch < currW4) return <></>;
+  if (!event || event.epoch < betEpoch) return <></>;
 
   return (
     <tr style={{ width: "33%", color: "#ffffff" }}>

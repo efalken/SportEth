@@ -19,6 +19,7 @@ import {
   address as oracleContractAddress,
 } from "../../abis/Oracle.json";
 import TeamTable from "../blocks/TeamTable";
+import TeamTableNa from "../blocks/TeamTableNa";
 import { Link } from "react-router-dom";
 import { useAccount, useContractReads, useWalletClient } from "wagmi";
 import { parseEther } from "viem";
@@ -46,10 +47,11 @@ function BetPage() {
   );
   const [betData, setBetData] = useState([]);
   const [userBalance, setUserBalance] = useState(0);
-  const [totalLpCapital, setUnlockedLpCapital] = useState(0);
+  const [totalLpCapital, setTotalLpCapital] = useState(0);
   const [lockedLpCapital, setUsedCapital] = useState(0);
-  const [currW4, setCurrW4] = useState(0);
+  const [betEpoch, setbetEpoch] = useState(0);
   const [concentrationLimit, setConcentrationLimit] = useState(0);
+  const [bettingStatus, setBettingStatus] = useState(0);
   const [teamSplit, setTeamSplit] = useState([]);
   const [oddsVector, setOddsVector] = useState([]);
   const [startTime, setStartTime] = useState([]);
@@ -77,20 +79,56 @@ function BetPage() {
     100, 100,
   ]);
   let netLiab = [liab0, liab1];
+  const [haltedColumn, setHaltedColumn] = useState([
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
 
   let xdecode256 = [0, 1, 2, 3];
   let odds999 = 0;
   let oddsTot = [odds0, odds1];
-
+  console.log(bettingStatus, "betting status");
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
       if (betData) xdecode256 = unpack256(betData[ii]);
-      if (oddsVector) odds999 = Number(oddsVector[ii]) || 1000;
-      odds0[ii] = odds999;
-      odds1[ii] = Math.floor(1000000 / (odds999 + 45) - 45);
+      if (oddsVector) odds999 = Number(oddsVector[ii]) || 0;
+      haltedColumn[ii] = oddsVector[ii] % 10 === 1 ? true : false;
+      odds0[ii] = odds999 / 10;
+      odds1[ii] = Math.floor(1e8 / (odds999 + 450) - 450) / 10;
       netLiab[0][ii] = Number(xdecode256[2]) - Number(xdecode256[1]);
       netLiab[1][ii] = Number(xdecode256[3]) - Number(xdecode256[0]);
     }
+    setHaltedColumn(haltedColumn);
     setOdds0(odds0);
     setOdds1(odds1);
     setLiab0(liab0);
@@ -117,48 +155,47 @@ function BetPage() {
   }
 
   async function updateTransactionHashDialogBox(hash) {
-    setHash(
-      <div>
-        <div onClick={() => setHash(null)}>
-          <a
-            target="_blank"
-            style={{
-              color: "yellow",
-              font: "Arial",
-              fontStyle: "Italic",
-              fontSize: "14px",
-            }}
-            href={`${defaultNetwork.blockExplorers.default.url}/tx/${hash}`}
-          >
-            click here to txn on the blockchain
-          </a>
-        </div>
-        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div
-          style={{
-            color: "yellow",
-            font: "Arial",
-            fontStyle: "Italic",
-            fontSize: "14px",
-          }}
-          onClick={() => setHash(null)}
-        >
-          click here to dismiss
-        </div>
-      </div>
-    );
+    // setHash(
+    //   <div>
+    //     <div onClick={() => setHash(null)}>
+    //       <a
+    //         target="_blank"
+    //         style={{
+    //           color: "yellow",
+    //           font: "Arial",
+    //           fontStyle: "Italic",
+    //           fontSize: "14px",
+    //         }}
+    //         href={`${defaultNetwork.blockExplorers.default.url}/tx/${hash}`}
+    //       >
+    //         click here to txn on the blockchain
+    //       </a>
+    //     </div>
+    //     <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+    //     <div
+    //       style={{
+    //         color: "yellow",
+    //         font: "Arial",
+    //         fontStyle: "Italic",
+    //         fontSize: "14px",
+    //       }}
+    //       onClick={() => setHash(null)}
+    //     >
+    //       click here to dismiss
+    //     </div>
+    //   </div>
+    // );
   }
 
   async function withdrawBettor() {
+    let wdamt = Number(wdAmount * 10000);
     try {
-      console.log(wdAmount);
       const txHash = await writeContract(walletClient, {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "withdrawBettor",
-        args: [wdAmount * 10000],
+        args: [wdamt],
       });
-      console.log("A");
       updateTransactionHashDialogBox(txHash);
     } catch (err) {
       console.log(err);
@@ -167,13 +204,13 @@ function BetPage() {
 
   async function takeBet() {
     setHash(null);
-    let betAmount2 = Math.round(betAmount);
+    let betAmount2 = Math.round(betAmount * 10000);
     try {
       const txHash = await writeContract(walletClient, {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "bet",
-        args: [matchPick, teamPick, betAmount2 * 10000],
+        args: [matchPick, teamPick, betAmount2],
       });
 
       updateTransactionHashDialogBox(txHash);
@@ -194,6 +231,7 @@ function BetPage() {
     } catch (err) {
       console.log(err);
     }
+    totalLpCapital;
   }
 
   const { data, refetch: refetchAll } = useContractReads({
@@ -224,12 +262,6 @@ function BetPage() {
       {
         abi: bettingContractABI,
         address: bettingContractAddress,
-        functionName: "params",
-        args: [3],
-      },
-      {
-        abi: bettingContractABI,
-        address: bettingContractAddress,
         functionName: "showStartTime",
       },
       {
@@ -246,19 +278,22 @@ function BetPage() {
       {
         abi: bettingContractABI,
         address: bettingContractAddress,
-        functionName: "params",
-        args: [0],
+        functionName: "bettingEpoch",
       },
       {
         abi: bettingContractABI,
         address: bettingContractAddress,
-        functionName: "params",
-        args: [1],
+        functionName: "concFactor",
       },
       {
         abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "showSchedString",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "bettingStatus",
       },
     ],
   });
@@ -271,13 +306,13 @@ function BetPage() {
       { result: _bettorHashes },
       { result: _betData },
       { result: _totalLpCapital },
-      { result: _gameStart },
       { result: _startTimes },
       { result: _oddsvector },
       { result: _lockedLpCapital },
-      { result: _currW4 },
+      { result: _betEpoch },
       { result: _concentrationLimit },
       { result: sctring },
+      { result: _bettingStatus },
     ] = data;
 
     const _counter = us ? Number(us[0]) : 0;
@@ -293,9 +328,7 @@ function BetPage() {
 
     setBetData(_betData || []);
 
-    setUnlockedLpCapital(Number(_totalLpCapital || 0n));
-
-    setGameStart(Number(_gameStart || 0n));
+    setTotalLpCapital(Number(_totalLpCapital || 0n));
 
     setStartTime(_startTimes || []);
 
@@ -303,11 +336,13 @@ function BetPage() {
 
     setUsedCapital(Number(_lockedLpCapital || 0n));
 
-    setCurrW4(Number(_currW4 || 0n));
+    setbetEpoch(Number(_betEpoch || 0n));
 
     setConcentrationLimit(Number(_concentrationLimit || 0n));
 
     setScheduleString(sctring || Array(32).fill("check later...: n/a: n/a"));
+
+    setBettingStatus(Number(_bettingStatus || 0n));
   }, [data, counter]);
 
   useEffect(() => {
@@ -326,14 +361,15 @@ function BetPage() {
   function getMaxSize(liabOpponent, liabPick, oddsPick) {
     liabOpponent = isNaN(liabOpponent) ? 0 : Number(liabOpponent);
     liabPick = isNaN(liabPick) ? 1 : Number(liabPick);
-    oddsPick = isNaN(oddsPick) ? 1 : Number(oddsPick) / 1000;
+    oddsPick = isNaN(oddsPick) ? 1 : Number(oddsPick) / 10000;
     let _maxSize =
       Math.max(liabOpponent - liabPick, 0) +
       Math.min(
         totalLpCapital / concentrationLimit - Math.max(liabOpponent, liabPick),
         totalLpCapital - lockedLpCapital
       );
-    _maxSize = _maxSize / oddsPick / 10000;
+    _maxSize = _maxSize / oddsPick / 100000;
+    if (bettingStatus < 2) _maxSize = 0;
     return _maxSize;
   }
 
@@ -359,6 +395,7 @@ function BetPage() {
     if (moneyline > 0) {
       moneyline = "+" + moneyline;
     }
+    if (bettingStatus < 2) moneyline = 999;
     return moneyline;
   }
 
@@ -409,18 +446,23 @@ function BetPage() {
             </Box>
             <Box>
               <Flex>
-                <Text size="14px" color="#000">
-                  <Link
-                    className="nav-header"
-                    style={{
-                      cursor: "pointer",
-                      color: "#fff000",
-                      fontStyle: "italic",
-                    }}
-                    to="/bookiepage"
-                  >
-                    LP Page
-                  </Link>
+                <Text style={{ color: "white", fontSize: "14px" }}>
+                  LP book has {Number(totalLpCapital / 1e4).toFixed(2)} avax
+                  <br />
+                  to invest in the book, go to{" "}
+                  <Text size="14px" color="#000">
+                    <Link
+                      className="nav-header"
+                      style={{
+                        cursor: "pointer",
+                        color: "#fff000",
+                        fontStyle: "italic",
+                      }}
+                      to="/bookiepage"
+                    >
+                      LP Page
+                    </Link>
+                  </Text>
                 </Text>
               </Flex>
             </Box>
@@ -477,6 +519,8 @@ function BetPage() {
               <Text size="14px" className="style">
                 Your free capital on contract:{" "}
                 {(Number(userBalance) / 1e4).toFixed(3)} AVAX
+                <br />
+                Unredeemed bets: {counter}
               </Text>
             </Box>
             <Box>
@@ -529,6 +573,28 @@ function BetPage() {
               >
                 <Box>
                   <Form
+                    onChange={(e) => setFundAmount(Number(e.target.value))}
+                    value={fundAmount}
+                    onSubmit={fundBettor}
+                    mb="10px"
+                    justifycontent="flex-start"
+                    buttonWidth="95px"
+                    inputWidth="100px"
+                    borderradius="1px"
+                    placeholder="# avax"
+                    //backgroundColor = "#fff"
+                    buttonLabel="Fund"
+                  />
+                </Box>
+              </Flex>
+              <Flex
+                mt="1px"
+                flexdirection="row"
+                justifycontent="flex-start"
+                alignitems="center"
+              >
+                <Box>
+                  <Form
                     onChange={(e) => setWdAmount(Number(e.target.value))}
                     value={wdAmount}
                     onSubmit={withdrawBettor}
@@ -544,32 +610,10 @@ function BetPage() {
                   />
                 </Box>
               </Flex>
-              <Flex
-                mt="1px"
-                flexdirection="row"
-                justifycontent="flex-start"
-                alignitems="center"
-              >
-                <Box>
-                  <Form
-                    onChange={(e) => setFundAmount(Number(e.target.value))}
-                    value={fundAmount}
-                    onSubmit={fundBettor}
-                    mb="10px"
-                    justifycontent="flex-start"
-                    buttonWidth="95px"
-                    inputWidth="100px"
-                    borderradius="1px"
-                    placeholder="# avax"
-                    //backgroundColor = "#fff"
-                    buttonLabel="Fund"
-                  />
-                </Box>
-              </Flex>
               <Flex mb="10px" style={{ borderTop: `thin solid ${G}` }}></Flex>
               <Flex justifycontent="left">
                 <Text size="14px" color="#ffffff">
-                  Current Epoch: {currW4}
+                  Current Epoch: {betEpoch}
                 </Text>
               </Flex>
             </Box>
@@ -602,7 +646,7 @@ function BetPage() {
                             <ActiveBetRow
                               key={index}
                               contractHash={contractHash}
-                              currW4={currW4}
+                              betEpoch={betEpoch}
                               teamSplit={teamSplit}
                             />
                           )
@@ -653,14 +697,9 @@ function BetPage() {
             <Box>
               <Flex>
                 <div style={{ width: "100%", float: "left" }}>
-                  <Text size="14px" className="style">
-                    Bets in stack: {counter}
-                  </Text>
-                  <br />
-
                   <Text className="style" size="14px">
                     {" "}
-                    resolved bets to be processed via redeem
+                    settled bets
                   </Text>
                   <br />
                   <table
@@ -684,7 +723,7 @@ function BetPage() {
                             <BetHistoryRow
                               key={index}
                               contractHash={contractHash}
-                              currW4={currW4}
+                              betEpoch={betEpoch}
                               teamSplit={teamSplit}
                             />
                           )
@@ -897,8 +936,7 @@ function BetPage() {
               ).toFixed(2)}
               {"  "} <br />
               pick: {teamSplit[matchPick][teamPick + 1]}
-              {"  "}
-              Decimal Odds:{" "}
+              {",  "} Decimal Odds:{" "}
               {((0.95 * oddsTot[teamPick][matchPick]) / 1000 + 1).toFixed(3)}
               {";  "} MoneyLine Odds:{" "}
               {getMoneyLine(0.95 * oddsTot[teamPick][matchPick])}
@@ -906,7 +944,7 @@ function BetPage() {
             </Text>
           ) : null}
         </Flex>
-
+ 
         <Box>
           <Flex
             mt="20px"
@@ -918,15 +956,28 @@ function BetPage() {
           <Box>
             {" "}
             <Flex>
-              <TeamTable
-                teamSplit={teamSplit}
-                startTimeColumn={startTime}
-                radioFavePick={radioFavePick}
-                showDecimalOdds={showDecimalOdds}
-                oddsTot={oddsTot}
-                radioUnderPick={radioUnderPick}
-                getMoneyLine={getMoneyLine}
-              />
+              {bettingStatus == 2 ? (
+                <TeamTable
+                  teamSplit={teamSplit}
+                  startTimeColumn={startTime}
+                  radioFavePick={radioFavePick}
+                  showDecimalOdds={showDecimalOdds}
+                  oddsTot={oddsTot}
+                  radioUnderPick={radioUnderPick}
+                  getMoneyLine={getMoneyLine}
+                  haltedColumn={haltedColumn}
+                />
+              ) : (
+                <TeamTableNa
+                  teamSplit={teamSplit}
+                  startTimeColumn={startTime}
+                  radioFavePick={radioFavePick}
+                  showDecimalOdds={showDecimalOdds}
+                  oddsTot={oddsTot}
+                  radioUnderPick={radioUnderPick}
+                  getMoneyLine={getMoneyLine}
+                />
+              )}
             </Flex>{" "}
           </Box>
         </div>

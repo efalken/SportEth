@@ -31,17 +31,17 @@ function BookiePage() {
   const [fundAmount, setFundAmount] = useState("");
   const [sharesToSell, setSharesToSell] = useState("");
   const [currentWeek, setCurrentWeek] = useState("");
-  const [totalLpCapital, setUnlockedLpCapital] = useState(0);
+  const [totalLpCapital, setTotalLpCapital] = useState(0);
   const [lockedLpCapital, setUsedCapital] = useState(0);
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
   const [betData, setBetData] = useState([]);
+  const [startTime, setStartTime] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
   const [bookieShares, setBookieShares] = useState("0");
   const [bookieEpoch, setBookieEpoch] = useState("0");
-  const [claimEpoch, setClaimEpoch] = useState("0");
   // const [tokenAmount, setTokenAmount] = useState("0");
   const [eoaTokens, setEoaTokens] = useState("0");
   const [tokensInK, setTokensInK] = useState("0");
@@ -93,7 +93,6 @@ function BookiePage() {
   }
 
   async function fundBook(value) {
-    console.log(fundAmount, "fundAmount");
     try {
       const txHash = await writeContract(walletClient, {
         abi: bettingContractABI,
@@ -145,6 +144,11 @@ function BookiePage() {
         functionName: "showBetData",
       },
       {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showPropStartTimes",
+      },
+      {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "margin",
@@ -165,14 +169,17 @@ function BookiePage() {
       {
         abi: bettingContractABI,
         address: bettingContractAddress,
-        functionName: "margin",
-        args: [3],
+        functionName: "liqProvShares",
       },
       {
         abi: bettingContractABI,
         address: bettingContractAddress,
-        functionName: "params",
-        args: [0],
+        functionName: "bettingEpoch",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "concFactor",
       },
       {
         abi: oracleContractABI,
@@ -202,29 +209,31 @@ function BookiePage() {
 
   useEffect(() => {
     if (!data) return;
-    console.log(data);
 
     const [
       { result: _betData },
+      { result: _startTimes },
       { result: _margin0 },
       { result: _margin1 },
       { result: _margin2 },
-      { result: _margin3 },
+      { result: _lpShares },
       { result: _params0 },
+      { result: _concFactor },
       { result: _schedString },
       { result: _lpStruct },
-      { result: _balanceOfUser },
-      { result: _balanceOfContract },
+      { result: _eoaTokens },
+      { result: _tokensInK },
     ] = data;
 
     setBetData(_betData || []);
+    setStartTime(_startTimes || []);
     setCurrentWeek(Number(_params0));
-    setUnlockedLpCapital(Number(_margin0 || 0n) / 10000);
+    setTotalLpCapital(Number(_margin0 || 0n) / 10000);
     setUsedCapital(Number(_margin1 || 0n) / 10000);
     setBetCapital(Number(_margin2 || 0n) / 10000);
-    setTotalShares(_margin3 || 0n);
-    setEoaTokens(_balanceOfUser || 0n);
-    setTokensInK(_balanceOfContract || 0n);
+    setTotalShares(_lpShares || 0n);
+    setEoaTokens(Number(_eoaTokens || 0n) / 1000);
+    setTokensInK(Number(_tokensInK || 0n) / 1000);
     if (_schedString) setScheduleString(_schedString);
 
     const _bookieShares = _lpStruct[0] || "0";
@@ -232,10 +241,9 @@ function BookiePage() {
 
     const _bookieEpoch = _lpStruct[1] || "0";
     setBookieEpoch(_bookieEpoch);
-
-    const _claimEpoch = _lpStruct[2] || "0";
-    setClaimEpoch(_claimEpoch);
   }, [data]);
+  console.log(tokensInK, "bookieEpoch");
+  console.log(currentWeek, "currentEpoch");
 
   function unpack256(src) {
     if (!src) return [0, 0, 0, 0];
@@ -303,7 +311,7 @@ function BookiePage() {
 
   for (let i = 0; i < 32; i++) {
     allMatches.push(
-      teamSplit[i][1] !== "0" ? (
+      teamSplit[i][0] !== "AAA" ? (
         <tr key={i} style={{ width: "25%", textAlign: "left" }}>
           <td>{i}</td>
           <td>{teamSplit[i][1]}</td>
@@ -504,11 +512,15 @@ function BookiePage() {
                   Current Epoch: {currentWeek}{" "}
                 </Text>
                 <br></br>
-                {bookieEpoch > 0 ? (
+                {bookieEpoch === currentWeek ? (
                   <Text size="14px" color={cwhite}>
-                    you can withdraw after epoch {bookieEpoch}
+                    you can withdraw after settlement
                   </Text>
-                ) : null}
+                ) : (
+                  <Text size="14px" color={cwhite}>
+                    you can withdraw before betting starts
+                  </Text>
+                )}
               </Box>
             </Box>
             <Box>
@@ -536,7 +548,8 @@ function BookiePage() {
                   <Box>
                     {eoaTokens > 0 ? (
                       <Text size="14px" color={cwhite}>
-                        oracle tokens in your Wallet {eoaTokens}
+                        oracle tokens in your Wallet:
+                        {Number(eoaTokens).toLocaleString()}
                       </Text>
                     ) : null}
                     <LabeledText
@@ -546,9 +559,7 @@ function BookiePage() {
                       spacing="1px"
                     />{" "}
                     <br />
-                    {ethBookie > 0 &&
-                    tokensInK > 0 &&
-                    claimEpoch < currentWeek ? (
+                    {ethBookie > 0 && bookieEpoch < currentWeek ? (
                       <button
                         style={{
                           backgroundColor: "black",
@@ -567,16 +578,20 @@ function BookiePage() {
                       >
                         Claim Reward
                       </button>
-                    ) : (
-                      <Text size="14px" color={cwhite}>
-                        you can claim rewards after epoch {claimEpoch}
-                      </Text>
-                    )}
+                    ) : null}
                   </Box>
                 </Flex>
               ) : null}
             </Box>
-
+            <Box>
+              {tokensInK > 0 &&
+              bookieEpoch == currentWeek &&
+              bookieShares > 0 ? (
+                <Text size="14px" color={cwhite}>
+                  you can claim rewards after next settlement
+                </Text>
+              ) : null}
+            </Box>
             <Box>
               <Flex
                 mt="20px"

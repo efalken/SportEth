@@ -10,8 +10,8 @@ import json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-CONTRACT_ADDRESS = "0x59D7e7C2e9e33AC920d6Ee23C41B33463e399F11"
-RPC_URL = "https://avalanche-mainnet.infura.io"
+CONTRACT_ADDRESS = "0xFE3d2603B41cD8cE28E753979A2AA56D03dE1733"
+RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 with open("AbiBetting.json", "r") as f:
@@ -40,7 +40,7 @@ def getUserBetData():
 
 
 def showUserBetData():
-    tx_odds = contract.functions.showUserBetData().call()
+    tx_odds = contract.functions.showUserBetData(0xa72D870f07b757B9Dc69b2dE123814Ce8f227e51).call()
     return tx_odds
 
 

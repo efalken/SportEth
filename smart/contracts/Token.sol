@@ -1,6 +1,5 @@
 /**
-SPDX-License-Identifier: MIT License
-@author Eric Falkenstein
+SPDX-License-Identifier: WTFPL License
 */
 pragma solidity 0.8.19;
 
@@ -8,14 +7,12 @@ contract Token {
   uint8 public decimals;
   uint256 public totalSupply;
   uint256 public constant MINT_AMT = 1e9;
-  address public oracleAdmin;
   mapping(address => uint256) public balanceOf;
   mapping(address => mapping(address => uint256)) public allowance;
   string public name;
   string public symbol;
 
   event Transfer(address indexed _from, address indexed _to, uint256 _value);
-  event Burn(address indexed _from, uint256 _value);
   event Approval(
     address indexed _owner,
     address indexed _spender,
@@ -28,23 +25,6 @@ contract Token {
     name = "AvaxSportsBook";
     symbol = "ASB";
     decimals = 3;
-  }
-
-  /**
-   * @dev applied to tokenDeposit function only
-   */
-  modifier onlyAdmin() {
-    require(oracleAdmin == msg.sender);
-    _;
-  }
-
-  /**
-   * @dev sets oracleAdmin to allow simple transfer to the oracle contract
-   * without approval
-   */
-  function setAdmin(address _oracle) external {
-    require(oracleAdmin == address(0));
-    oracleAdmin = _oracle;
   }
 
   function approve(
@@ -86,25 +66,14 @@ contract Token {
     return true;
   }
 
-  function tokenDeposit(
-    address _from,
-    uint256 _value
-  ) external onlyAdmin returns (bool) {
-    uint256 senderBalance = balanceOf[_from];
-    require(senderBalance >= _value);
-    unchecked {
-      balanceOf[_from] = senderBalance - _value;
-      balanceOf[oracleAdmin] += _value;
-    }
-    emit Transfer(_from, oracleAdmin, _value);
-    return true;
-  }
-
   function increaseAllowance(
     address _spender,
     uint256 _addedValue
   ) public returns (bool) {
-    allowance[msg.sender][_spender] += _addedValue;
+    uint256 _value = allowance[msg.sender][_spender];
+    _value += _addedValue;
+    allowance[msg.sender][_spender] = _value;
+    emit Approval(msg.sender, _spender, _value);
     return true;
   }
 
@@ -112,8 +81,11 @@ contract Token {
     address _spender,
     uint256 _subtractedValue
   ) public returns (bool) {
-    require(_subtractedValue <= allowance[msg.sender][_spender], "too large");
-    allowance[msg.sender][_spender] -= _subtractedValue;
+    uint256 _value = allowance[msg.sender][_spender];
+    require(_subtractedValue <= _value, "too large");
+    _value -= _subtractedValue;
+    allowance[msg.sender][_spender] = _value;
+    emit Approval(msg.sender, _spender, _value);
     return true;
   }
 }

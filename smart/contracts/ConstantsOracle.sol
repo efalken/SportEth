@@ -1,34 +1,35 @@
 /**
 SPDX-License-Identifier: MIT License
-@author Eric Falkenstein
+@author Eric G Falkenstein
 */
 pragma solidity 0.8.19;
 
 // hour of day in GMT one can post new data
-uint32 constant HOUR_POST = 23;
-// this makes sure the post is processed 14 hours later
+uint32 constant HOUR_POST = 22;
+// posts cannot be processed until after this hour, before above hour
 uint32 constant HOUR_PROCESS = 12;
-// min/max for initial favorite
-uint16 constant MAX_DEC_ODDS_INIT = 1000;
-uint16 constant MIN_DEC_ODDS_INIT = 125;
-// min/max for updates to favorite
-uint16 constant MAX_DEC_ODDS_UPDATE = 1200;
-uint16 constant MIN_DEC_ODDS_UPDATE = 75;
-// tells processVote() to process init post
-uint8 constant STATUS_PROC_INIT = 10;
-// tells processVote() to process update post
-uint8 constant STATUS_PROC_UPDATE = 20;
-// tells processVote() to process settle
-uint8 constant STATUS_PROC_SETTLE = 30;
-// only an odds update or settlement post allowed
-uint8 constant STATUS_POST_2 = 2;
-// only an initial slate post possible
-uint8 constant STATUS_POST_0 = 0;
-// this encourages token holders to join vaults,
-uint32 constant MIN_DEPOSIT = 5e7;
+// odds on favorite must be lower than 2.0 in decimal odds
+// odds in system are x=(decimalOdds -1)*1000
+uint16 constant MAX_DEC_ODDS = 1000;
+// odds on favorite must be higher than 1.125, lower odds events excluded
+uint16 constant MIN_DEC_ODDS = 125;
+// next post must be an initial slate post
+uint8 constant STATUS_INIT = 0;
+// next post must be an odds post
+uint8 constant STATUS_ODDS = 1;
+// next post must be an outcomes post  post
+uint8 constant STATUS_SETTLE = 2;
 // min amount for submitting data, 10% of supply
 uint32 constant MIN_SUBMIT = 1e8;
-//  prevents any oracle account from being greater than 14% of oracle
-uint32 constant MAX_DEPOSIT = 15e7;
-// used to calculate next friday events start
-uint32 constant DAY_IN_SECONDS = 86400;
+// min deposit of 5% of token supply encourages token holders to join vaults,
+uint32 constant MIN_TOKEN_DEPOSIT = 5e7;
+//  encourages but does not guarantee independence among oracle accounts
+uint32 constant MAX_TOKEN_DEPOSIT = 15e7;
+// used to calculate next friday start, 9 PM GMT in seconds
+uint32 constant FRIDAY_21_GMT = 1687554000;
+// used to calculate next friday start
+uint32 constant SECONDS_IN_HOUR = 3600;
+uint32 constant SECONDS_IN_DAY = 86400;
+uint32 constant SECONDS_TWO_DAYS = 172800;
+uint32 constant SECONDS_FOUR_DAYS = 345600;
+uint32 constant SECONDS_IN_WEEK = 604800;
