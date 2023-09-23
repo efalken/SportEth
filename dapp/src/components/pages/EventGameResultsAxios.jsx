@@ -21,7 +21,6 @@ export default function EventGameoutcomes() {
           timestamp: event.blockNumber,
           outcome: Number(event.winner),
           Epoch: Number(event.epoch),
-          outcome: event.winner,
         });
       }
       setPriceHistory(pricedata);

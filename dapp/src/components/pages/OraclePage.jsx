@@ -367,17 +367,10 @@ function OraclePage() {
   }, [data]);
 
   function getMoneyLine(decOddsi) {
-    let moneyline = 1;
-    if (decOddsi < 1000) {
-      moneyline = -1e5 / decOddsi;
-    } else {
-      moneyline = decOddsi / 10;
+    if (decOddsi > 0) {
+      if (decOddsi < 1000) return (-1e5 / decOddsi).toFixed(0);
+      return (decOddsi / 10).toFixed(0);
     }
-    moneyline = moneyline.toFixed(0);
-    if (moneyline > 0) {
-      moneyline = "+" + moneyline;
-    }
-    return moneyline;
   }
 
   function ethToClaim() {
@@ -390,8 +383,7 @@ function OraclePage() {
     coeff = (coeff * x) / 1e5;
     return coeff;
   }
-  console.log(feeData0, "fee0");
-  console.log(feeData1, "fee1");
+  // console.log(feeData0, "fee0");
 
   function switchOdds() {
     setShowDecimalOdds(!showDecimalOdds);

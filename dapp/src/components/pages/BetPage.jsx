@@ -155,36 +155,36 @@ function BetPage() {
   }
 
   async function updateTransactionHashDialogBox(hash) {
-    // setHash(
-    //   <div>
-    //     <div onClick={() => setHash(null)}>
-    //       <a
-    //         target="_blank"
-    //         style={{
-    //           color: "yellow",
-    //           font: "Arial",
-    //           fontStyle: "Italic",
-    //           fontSize: "14px",
-    //         }}
-    //         href={`${defaultNetwork.blockExplorers.default.url}/tx/${hash}`}
-    //       >
-    //         click here to txn on the blockchain
-    //       </a>
-    //     </div>
-    //     <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-    //     <div
-    //       style={{
-    //         color: "yellow",
-    //         font: "Arial",
-    //         fontStyle: "Italic",
-    //         fontSize: "14px",
-    //       }}
-    //       onClick={() => setHash(null)}
-    //     >
-    //       click here to dismiss
-    //     </div>
-    //   </div>
-    // );
+    setHash(
+      <div>
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+            href={`${defaultNetwork.blockExplorers.default.url}/tx/${hash}`}
+          >
+            click here to txn on the blockchain
+          </a>
+        </div>
+        <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
+        <div
+          style={{
+            color: "yellow",
+            font: "Arial",
+            fontStyle: "Italic",
+            fontSize: "14px",
+          }}
+          onClick={() => setHash(null)}
+        >
+          click here to dismiss
+        </div>
+      </div>
+    );
   }
 
   async function withdrawBettor() {
@@ -385,18 +385,10 @@ function BetPage() {
   }
 
   function getMoneyLine(decOddsi) {
-    let moneyline = 0;
-    if (decOddsi < 1000) {
-      moneyline = -1e5 / decOddsi;
-    } else {
-      moneyline = decOddsi / 10;
+    if (decOddsi > 0) {
+      if (decOddsi < 1000) return (-1e5 / decOddsi).toFixed(0);
+      return (decOddsi / 10).toFixed(0);
     }
-    moneyline = moneyline.toFixed(0);
-    if (moneyline > 0) {
-      moneyline = "+" + moneyline;
-    }
-    if (bettingStatus < 2) moneyline = 999;
-    return moneyline;
   }
 
   function switchOdds() {
@@ -944,7 +936,7 @@ function BetPage() {
             </Text>
           ) : null}
         </Flex>
- 
+
         <Box>
           <Flex
             mt="20px"

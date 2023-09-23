@@ -61,38 +61,38 @@ export default function EventOdds() {
             <Text size="12px" weight="200">
               {" "}
               {moment.unix(event.time).format("DD-MM-YYTHH:mm")}, {event.Epoch}
-              {": "} {(1 + Number(event.decOdds[0]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[1]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[2]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[3]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[4]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[5]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[6]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[7]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[8]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[9]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[10]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[11]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[12]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[13]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[14]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[15]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[16]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[17]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[18]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[19]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[20]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[21]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[22]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[23]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[24]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[25]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[26]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[27]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[28]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[29]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[30]) / 1000).toFixed(3)},{" "}
-              {(1 + Number(event.decOdds[31]) / 1000).toFixed(3)}
+              {": "} {(1 + Number(event.decOdds[0]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[1]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[2]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[3]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[4]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[5]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[6]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[7]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[8]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[9]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[10]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[11]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[12]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[13]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[14]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[15]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[16]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[17]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[18]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[19]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[20]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[21]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[22]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[23]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[24]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[25]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[26]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[27]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[28]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[29]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[30]) / 1000).toFixed(0)},{" "}
+              {(1 + Number(event.decOdds[31]) / 1000).toFixed(0)}
             </Text>
             <br />
           </div>
