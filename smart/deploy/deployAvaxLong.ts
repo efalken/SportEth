@@ -6,7 +6,7 @@ var receipt, _timestamp, result;
 const eths = BigInt("100000000000000");
 const million = BigInt("1000000");
 
-const confirmationBlocks = 1;
+const confirmationBlocks = 2;
 
 function saveABIFile(
   fileName: string,
@@ -624,6 +624,11 @@ async function main() {
     networks: { [chainId]: { address: oracle.address } },
   };
   saveABIFile("Oracle.json", JSON.stringify(oracleABI));
+  saveABIFile(
+    "Oracle.json",
+    JSON.stringify(oracleABI),
+    "../desktop_indexer/backend/src/abis"
+  );
 
   const bettingABI = {
     name: "BettingMain",

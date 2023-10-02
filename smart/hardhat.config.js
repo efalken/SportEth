@@ -80,7 +80,7 @@ module.exports = {
       avaxtest: true,
       chainId: 43113,
       accounts: {
-        mnemonic: `${process.env.temp1}`,
+        mnemonic: `${process.env.DEFAULT_WALLET_MNEMONIC}`,
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 20,
