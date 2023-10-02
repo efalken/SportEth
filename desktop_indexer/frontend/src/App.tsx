@@ -1,35 +1,84 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import {
+  Outlet,
+  Route,
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements,
+} from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import EventPage from "./pages/EventPage";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const supportedEvents = [
+    {
+      name: "DecOddsPosted",
+      contract: "oracle",
+      args: [
+        ["epoch", "int"],
+        ["propnum", "int"],
+        ["decOdds", "int[]"],
+      ],
+    },
+    {
+      name: "ResultsPosted",
+      contract: "oracle",
+      args: [
+        ["epoch", "int"],
+        ["propnum", "int"],
+        ["winner", "int[]"],
+      ],
+    },
+    {
+      name: "SchedulePosted",
+      contract: "oracle",
+      args: [
+        ["epoch", "int"],
+        ["propnum", "int"],
+        ["sched", "string[]"],
+      ],
+    },
+    {
+      name: "StartTimesPosted",
+      contract: "oracle",
+      args: [
+        ["epoch", "int"],
+        ["propnum", "int"],
+        ["starttimes", "int[]"],
+      ],
+    },
+  ];
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<Root />}>
+        <Route index element={<HomePage events={supportedEvents} />} />
+        {supportedEvents.map((event) => (
+          <Route
+            key={event.name}
+            path={`/events/${event.name}`}
+            element={
+              <EventPage
+                args={event.args}
+                contract={event.contract}
+                name={event.name}
+              />
+            }
+          />
+        ))}
+      </Route>
+    )
+  );
+
+  return <RouterProvider router={router} />;
 }
 
-export default App
+function Root() {
+  return (
+    <>
+      <Outlet />
+    </>
+  );
+}
+
+export default App;
