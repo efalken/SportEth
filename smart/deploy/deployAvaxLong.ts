@@ -37,17 +37,23 @@ async function main() {
 
   const Token = await ethers.getContractFactory("Token");
   const token = await Token.deploy();
-  await waitFor(token.deployTransaction);
+  const { blockNumber: tokenBlockNumber } = await waitFor(
+    token.deployTransaction
+  );
   console.log(`Token contract was deployed to ${token.address}`);
 
   const Betting = await ethers.getContractFactory("BettingFuji");
   const betting = await Betting.deploy(token.address);
-  await waitFor(betting.deployTransaction);
+  const { blockNumber: bettingBlockNumber } = await waitFor(
+    betting.deployTransaction
+  );
   console.log(`Betting contract was deployed to ${betting.address}`);
 
   const Oracle = await ethers.getContractFactory("OracleFuji");
   const oracle = await Oracle.deploy(betting.address, token.address);
-  await waitFor(oracle.deployTransaction);
+  const { blockNumber: oracleBlockNumber } = await waitFor(
+    oracle.deployTransaction
+  );
   console.log(`Oracle contract was deployed to ${oracle.address}`);
 
   await waitFor(betting.setOracleAddress(oracle.address));
@@ -621,13 +627,20 @@ async function main() {
     abi: JSON.parse(
       oracle.interface.format(ethers.utils.FormatTypes.json) as string
     ),
-    networks: { [chainId]: { address: oracle.address } },
+    networks: {
+      [chainId]: { address: oracle.address, block: oracleBlockNumber },
+    },
   };
   saveABIFile("Oracle.json", JSON.stringify(oracleABI));
   saveABIFile(
     "Oracle.json",
     JSON.stringify(oracleABI),
     "../desktop_indexer/backend/src/abis"
+  );
+  saveABIFile(
+    "Oracle.json",
+    JSON.stringify(oracleABI),
+    "../desktop_indexer_2/backend/src/abis"
   );
 
   const bettingABI = {
@@ -636,7 +649,9 @@ async function main() {
     abi: JSON.parse(
       betting.interface.format(ethers.utils.FormatTypes.json) as string
     ),
-    networks: { [chainId]: { address: betting.address } },
+    networks: {
+      [chainId]: { address: betting.address, block: bettingBlockNumber },
+    },
   };
   saveABIFile("Betting.json", JSON.stringify(bettingABI));
 
@@ -646,7 +661,9 @@ async function main() {
     abi: JSON.parse(
       token.interface.format(ethers.utils.FormatTypes.json) as string
     ),
-    networks: { [chainId]: { address: token.address } },
+    networks: {
+      [chainId]: { address: token.address, block: tokenBlockNumber },
+    },
   };
   saveABIFile("Token.json", JSON.stringify(tokenABI));
 }
