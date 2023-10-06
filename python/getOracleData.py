@@ -2,7 +2,7 @@ import json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-CONTRACT_ADDRESS = "0x7503c36B43d39e49f888De25Ca88262b1c263fc8"
+CONTRACT_ADDRESS = "0xda593fE3BcddfB16ce1a9749ea28F0d267690c3F"
 RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -31,8 +31,8 @@ def getScheduleString():
     return tx_scheduleString
 
 
-def getAdminStruct(x):
-    tx_adminstruct = contract.functions.adminStruct(x).call()
+def getGameStart(x):
+    tx_adminstruct = contract.functions.gameStart.call()
     return tx_adminstruct
 
 
@@ -43,14 +43,5 @@ if __name__ == "__main__":
     print(tx_odds)
     tx_odds = getScheduleString()
     print(tx_odds)
-    # tx_odds = getStartTimes()
-    # print(tx_odds)
-    (
-        propnum,
-        epoch,
-        votelast,
-        totvote,
-        tokens,
-    ) = getAdminStruct("0x2572eE2A871fCC586722C3E57d43831d78E7219c")
-    print(propnum)
-    print(tokens)
+    tx_odds = getGameStart()
+    print(tx_odds)

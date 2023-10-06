@@ -1,5 +1,5 @@
 import { Box, Flex } from "@rebass/grid";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Input from "./Input";
 import Button from "./Button";
 import Text from "./Text";
@@ -16,6 +16,10 @@ export default function Form({
 }) {
   const [value, setValue] = useState("");
 
+  useEffect(() => {
+    setValue(props.value);
+  }, [props]);
+
   return (
     <Box {...props}>
       <Text>{label}</Text>
@@ -25,7 +29,7 @@ export default function Form({
             onChange={({ target: { value } }) => setValue(value)}
             width={inputWidth}
             placeholder={placeholder}
-            value={value}
+            value={props.value}
           />
         </Box>
         <Box>

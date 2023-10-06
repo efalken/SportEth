@@ -36,14 +36,13 @@ function BookiePage() {
   const [betCapital, setBetCapital] = useState(0);
   const [totalShares, setTotalShares] = useState(0);
   const [betData, setBetData] = useState([]);
-  const [startTime, setStartTime] = useState([]);
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
   const [bookieShares, setBookieShares] = useState("0");
   const [bookieEpoch, setBookieEpoch] = useState("0");
-  // const [tokenAmount, setTokenAmount] = useState("0");
-  const [eoaTokens, setEoaTokens] = useState("0");
+  const [bettingActive, setbettingActive] = useState(0);
+  const [eoaTokens, setEoaTokens] = useState(0);
   const [tokensInK, setTokensInK] = useState("0");
   const [txnHash, setHash] = useState();
 
@@ -92,19 +91,22 @@ function BookiePage() {
     );
   }
 
-  async function fundBook(value) {
+  async function fundBook() {
+    // let value2 = Number(fundAmount / 10000);
+    //value = value2.toString();
     try {
       const txHash = await writeContract(walletClient, {
         abi: bettingContractABI,
         address: bettingContractAddress,
         functionName: "fundBook",
-        value: parseEther(value),
+        value: parseEther(fundAmount),
       });
 
       updateTransactionHashDialogBox(txHash);
     } catch (err) {
       console.log(err);
     }
+    setFundAmount("");
   }
 
   async function wdBook() {
@@ -120,6 +122,7 @@ function BookiePage() {
     } catch (err) {
       console.log(err);
     }
+    setSharesToSell("");
   }
 
   async function claimRewards() {
@@ -165,6 +168,11 @@ function BookiePage() {
         address: bettingContractAddress,
         functionName: "margin",
         args: [2],
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "bettingActive",
       },
       {
         abi: bettingContractABI,
@@ -216,6 +224,7 @@ function BookiePage() {
       { result: _margin0 },
       { result: _margin1 },
       { result: _margin2 },
+      { result: _bettingActive },
       { result: _lpShares },
       { result: _params0 },
       { result: _concFactor },
@@ -226,13 +235,13 @@ function BookiePage() {
     ] = data;
 
     setBetData(_betData || []);
-    setStartTime(_startTimes || []);
     setCurrentWeek(Number(_params0));
     setTotalLpCapital(Number(_margin0 || 0n) / 10000);
     setUsedCapital(Number(_margin1 || 0n) / 10000);
     setBetCapital(Number(_margin2 || 0n) / 10000);
+    setbettingActive(Number(_bettingActive || 0));
     setTotalShares(_lpShares || 0n);
-    setEoaTokens(Number(_eoaTokens || 0n) / 1000);
+    setEoaTokens(Number(_eoaTokens) / 1000 || 0);
     setTokensInK(Number(_tokensInK || 0n) / 1000);
     if (_schedString) setScheduleString(_schedString);
 
@@ -243,8 +252,14 @@ function BookiePage() {
     setBookieEpoch(_bookieEpoch);
   }, [data]);
   console.log(tokensInK, "bookieEpoch");
-  console.log(currentWeek, "currentEpoch");
+  console.log(bettingActive, "bettingActive");
 
+  function statusCheck() {
+    if (!bettingActive) return "Betting inactive, can withdraw or fund.";
+    if (bettingActive) return "Betting active, cannot withdraw or fund";
+    return "na";
+  }
+  console.log("bettingActive", bettingActive);
   function unpack256(src) {
     if (!src) return [0, 0, 0, 0];
     //const str = bn.toString(16);
@@ -397,9 +412,9 @@ function BookiePage() {
                       color: "#fff000",
                       fontStyle: "italic",
                     }}
-                    to="/"
+                    to="/FAQ"
                   >
-                    Home Page
+                    FAQs
                   </Link>
                 </Text>
               </Flex>
@@ -427,34 +442,54 @@ function BookiePage() {
             </Box>
 
             <Box>
-              <Form
-                onChange={(e) => setFundAmount(Number(e.target.value))}
-                value={fundAmount}
-                onSubmit={fundBook}
-                mb="20px"
-                justifycontent="flex-start"
-                padding="4px"
-                placeholder="# avax"
-                buttonLabel="Fund"
-              />
-            </Box>
-            <Box>
-              <Text size="14px" color={cwhite}>
-                {"Your:"}
-              </Text>
-              <br />{" "}
-              <Text size="14px" color={cwhite}>
-                {"LP shares: " + Number(bookieShares).toLocaleString()}
-              </Text>
-              <br />
-              <Text size="14px" color={cwhite}>
-                {"LP percent: " +
-                  Math.floor(
-                    (Number(bookieShares) * 100) / Number(totalShares)
-                  ).toFixed(1) +
-                  "%"}
+              <button
+                style={{
+                  backgroundColor: "black",
+                  borderradius: "5px",
+                  padding: "4px",
+                  cursor: "pointer",
+                  color: "#ccff99",
+                  border: "1px solid #ccff99",
+                }}
+              >
+                {Number(bookieShares).toLocaleString()}
+              </button>
+              <Text size="14px" className="style">
+                {"  "}
+                Account LP Share Balance
               </Text>
             </Box>
+
+            {bettingActive !== 2 ? (
+              <Box>
+                <Form
+                  onChange={(e) => setFundAmount(e.target.value)}
+                  value={fundAmount}
+                  onSubmit={fundBook}
+                  mb="5px"
+                  justifycontent="flex-start"
+                  buttonWidth="95px"
+                  inputWidth="100px"
+                  placeholder="0.00 avax"
+                  buttonLabel="Fund"
+                />
+                <Form
+                  onChange={(e) => setSharesToSell(Number(e.target.value))}
+                  value={sharesToSell}
+                  onSubmit={wdBook}
+                  mb="5px"
+                  justifycontent="flex-start"
+                  buttonWidth="95px"
+                  inputWidth="100px"
+                  placeholder="0.00 shares"
+                  buttonLabel="Withdraw"
+                />
+              </Box>
+            ) : (
+              <Text size="14px" className="style">
+                No funding or withdrawals while betting active
+              </Text>
+            )}
 
             <Box>
               {" "}
@@ -465,39 +500,26 @@ function BookiePage() {
                 <Box>
                   <Flex>
                     <Flex width="100%" flexdirection="column">
-                      <Flex
-                        mt="10px"
-                        pt="10px"
-                        alignitems="center"
-                        style={{
-                          borderTop: `thin solid ${G}`,
-                        }}
-                      ></Flex>
-                      <Flex pt="10px" justifycontent="left">
-                        <Box>
-                          {" "}
-                          <Text size="14px" color={cwhite}>
-                            {"Total LP Capital : " +
-                              Number(totalLpCapital).toFixed(4) +
-                              " avax"}
-                          </Text>
-                          <br />
-                          <Text size="14px" color={cwhite}>
-                            {"% Locked : " +
-                              (
-                                (Number(lockedLpCapital) * 100) /
-                                Number(totalLpCapital)
-                              ).toFixed(1) +
-                              "%"}
-                          </Text>
-                          <br />
-                          <Text size="14px" color={cwhite}>
-                            {"GrossBets : " +
-                              Number(betCapital).toFixed(1) +
-                              " avax"}
-                          </Text>
-                        </Box>
-                      </Flex>
+                      <Box>
+                        {" "}
+                        <Text size="14px" color={cwhite}>
+                          {"Total LP Capital : " +
+                            Number(totalLpCapital).toFixed(2) +
+                            " avax"}
+                        </Text>
+                        <br />
+                        <Text size="14px" color={cwhite}>
+                          {"Locked LP Capital: " +
+                            Number(lockedLpCapital).toFixed(2) +
+                            " avax"}
+                        </Text>
+                        <br />
+                        <Text size="14px" color={cwhite}>
+                          {"GrossBets : " +
+                            Number(betCapital).toFixed(1) +
+                            " avax"}
+                        </Text>
+                      </Box>
                     </Flex>
                   </Flex>
                 </Box>
@@ -523,41 +545,22 @@ function BookiePage() {
                 )}
               </Box>
             </Box>
-            <Box>
-              {Number(bookieShares) > 0 ? (
-                <Flex>
-                  <Box>
-                    <Form
-                      onChange={(e) => setSharesToSell(Number(e.target.value))}
-                      value={sharesToSell}
-                      onSubmit={wdBook}
-                      mb="20px"
-                      justifycontent="flex-start"
-                      buttonWidth="95px"
-                      inputWidth="100px"
-                      placeholder="# shares"
-                      buttonLabel="Withdraw"
-                    />
-                  </Box>
-                </Flex>
-              ) : null}
-            </Box>
+
             <Box>
               {Number(tokensInK) > 0 ? (
                 <Flex>
                   <Box>
                     {eoaTokens > 0 ? (
                       <Text size="14px" color={cwhite}>
-                        oracle tokens in your Wallet:
-                        {Number(eoaTokens).toLocaleString()}
+                        Oracle tokens in your Wallet:{" "}
+                        {Math.round(eoaTokens).toLocaleString()}
                       </Text>
                     ) : null}
-                    <LabeledText
-                      big
-                      label="Token Rewards Remaining"
-                      text={Number(tokensInK).toLocaleString()}
-                      spacing="1px"
-                    />{" "}
+                    <br />
+                    <Text size="14px" color={cwhite}>
+                      Token Rewards Remaining:{" "}
+                      {Math.round(tokensInK).toLocaleString()}
+                    </Text>
                     <br />
                     {ethBookie > 0 && bookieEpoch < currentWeek ? (
                       <button
@@ -612,15 +615,20 @@ function BookiePage() {
           <Box> {txnHash}</Box>
           <Box mt="14px" mx="30px">
             <Flex width="100%" justifycontent="marginLeft">
-              <Text size="14px" weight="300" color="#ffffff">
-                {" "}
-                This page helps LPs understand their netLiab exposure to this
-                week's events. The NetLiability is the amount paid out by the
-                contract if the Favorite or Underdog Team wins. If negative this
-                means the LPs are credited AVAX. LPs can fund and withdraw using
-                the left-hand fields.
+              <Text size="14px" className="style">
+                Status: {statusCheck()} <br />
               </Text>
             </Flex>
+            {Number(tokensInK) > 0 ? (
+              <Flex width="100%" justifycontent="marginLeft">
+                <Text size="14px" weight="300" color="#ffffff">
+                  <br />
+                  Token rewards can be claimed bottom left while tokens remain.
+                  Funds must sit for one settlement to claim. Once claimed user
+                  cannot withdraw for 1 settlement.
+                </Text>
+              </Flex>
+            ) : null}
           </Box>
 
           <Box>

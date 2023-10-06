@@ -1,6 +1,7 @@
 const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
+const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
 var hourOffset, _hourSolidity, _timestamp, nextStart, result, receipt, gasUsed;
 
 const { assert } = require("chai");
@@ -11,14 +12,13 @@ var eths = 1000000000000000000n;
 eths = eths / fujiAdjn;
 const million = BigInt("1000000");
 
-describe("BettingB", function () {
+describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
     const Betting = await ethers.getContractFactory("Betting");
     const Token = await ethers.getContractFactory("Token");
     const Oracle = await ethers.getContractFactory("Oracle");
-
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
     oracle = await Oracle.deploy(betting.address, token.address);
@@ -26,7 +26,7 @@ describe("BettingB", function () {
     [owner, account1, account2, account3, _] = await ethers.getSigners();
   });
 
-  describe("run", async () => {
+  describe("run transactions", async () => {
     it("create oracle accounts", async () => {
       await token.approve(oracle.address, 140n * million);
       await oracle.connect(owner).depositTokens(140n * million);
@@ -39,16 +39,23 @@ describe("BettingB", function () {
 
     it("send init", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       nextStart =
         _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
-
-      result = await oracle.initPost(
+      const betactive0 = await betting.bettingActive();
+      console.log(betactive0, "betactive");
+      const revStat = await oracle.reviewStatus();
+      console.log(revStat, "revStat");
+      result = await oracle.settleRefreshPost(
+        [
+          1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
         [
           "NFL:ARI:LAC",
           "MMA:Holloway:Kattar",
@@ -118,17 +125,21 @@ describe("BettingB", function () {
           nextStart,
         ]
       );
+      receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
     });
 
     it("Fund Contract", async () => {
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
+      const betactive0 = await betting.bettingActive();
+      console.log(betactive0, "betactive");
+      const revStat = await oracle.reviewStatus();
+      console.log(revStat, "revStat");
+      const ethcheck = 30n * eths;
       result = await betting.connect(owner).fundBook({
         value: 30n * eths,
       });
+
       result = await betting.connect(account2).fundBettor({
         value: 10n * eths,
       });
@@ -139,8 +150,8 @@ describe("BettingB", function () {
 
     it("send odds", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       result = await oracle
         .connect(account1)
@@ -194,6 +205,7 @@ describe("BettingB", function () {
       receipt = await result.wait();
       gasUsed = gasUsed.add(receipt.gasUsed);
       hash12 = receipt.events[0].args.contractHash;
+      console.log(`gas ${gasUsed / 12}`);
     });
 
     it("PreSettle", async () => {
@@ -226,14 +238,88 @@ describe("BettingB", function () {
 
     it("Send Event Results to oracle", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
-      await helper.advanceTimeAndBlock((hourOffset + 7 * 24) * secondsInHour);
-
-      await oracle.settlePost([
-        0, 0, 2, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-      ]);
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
+      await helper.advanceTimeAndBlock((hourOffset + 8 * 24) * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart =
+        _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
+      await oracle.settleRefreshPost(
+        [
+          0, 0, 2, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
+        [
+          "NFL:ARI:LAC",
+          "MMA:Holloway:Kattar",
+          "NFL:BAL:MIA",
+          "NFL:BUF:MIN",
+          "NFL:CAR:NE",
+          "NFL:CHI:NO",
+          "NFL:CIN:NYG",
+          "NFL:CLE:NYJ",
+          "NFL:DAL:OAK",
+          "NFL:DEN:PHI",
+          "NFL:DET:PIT",
+          "NFL:GB:SEA",
+          "NFL:HOU:SF",
+          "NFL:IND:TB",
+          "NFL:JAX:TEN",
+          "NFL:KC:WSH",
+          "MMA:Holloway:Kattar",
+          "MMA:Ponzinibbio:Li",
+          "MMA:Kelleher:Simon",
+          "MMA:Hernandez:Vieria",
+          "MMA:Akhemedov:Breese",
+          "NCAAF: Mich: OhioState",
+          "NCAAF: Minn : Illinois",
+          "NCAAF: MiamiU: Florida",
+          "NCAAF: USC: UCLA",
+          "NCAAF: Alabama: Auburn",
+          "NCAAF: ArizonaSt: UofAriz",
+          "NCAAF: Georgia: Clemson",
+          "NCAAF: PennState: Indiana",
+          "NCAAF: Texas: TexasA&M",
+          "NCAAF: Utah: BYU",
+          "NCAAF: Rutgers: VirgTech",
+        ],
+        [
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+        ]
+      );
     });
 
     it("send result data to betting contract", async () => {

@@ -39,15 +39,23 @@ describe("Betting", function () {
 
     it("send init", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       nextStart =
         _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
-      result = await oracle.initPost(
+      const betactive0 = await betting.bettingActive();
+      console.log(betactive0, "betactive");
+      const revStat = await oracle.reviewStatus();
+      console.log(revStat, "revStat");
+      result = await oracle.settleRefreshPost(
+        [
+          1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
         [
           "NFL:ARI:LAC",
           "MMA:Holloway:Kattar",
@@ -123,13 +131,15 @@ describe("Betting", function () {
     });
 
     it("Fund Contract", async () => {
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
+      const betactive0 = await betting.bettingActive();
+      console.log(betactive0, "betactive");
+      const revStat = await oracle.reviewStatus();
+      console.log(revStat, "revStat");
       const ethcheck = 30n * eths;
       result = await betting.connect(owner).fundBook({
         value: 30n * eths,
       });
+
       result = await betting.connect(account2).fundBettor({
         value: 10n * eths,
       });
@@ -140,8 +150,8 @@ describe("Betting", function () {
 
     it("send odds", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       result = await oracle
         .connect(account1)
@@ -228,13 +238,88 @@ describe("Betting", function () {
 
     it("Send Event Results to oracle", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
-      await helper.advanceTimeAndBlock((hourOffset + 7 * 24) * secondsInHour);
-      await oracle.settlePost([
-        1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-      ]);
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
+      await helper.advanceTimeAndBlock((hourOffset + 6 * 24) * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart =
+        _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
+      await oracle.settleRefreshPost(
+        [
+          1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
+        [
+          "NFL:ARI:LAC",
+          "MMA:Holloway:Kattar",
+          "NFL:BAL:MIA",
+          "NFL:BUF:MIN",
+          "NFL:CAR:NE",
+          "NFL:CHI:NO",
+          "NFL:CIN:NYG",
+          "NFL:CLE:NYJ",
+          "NFL:DAL:OAK",
+          "NFL:DEN:PHI",
+          "NFL:DET:PIT",
+          "NFL:GB:SEA",
+          "NFL:HOU:SF",
+          "NFL:IND:TB",
+          "NFL:JAX:TEN",
+          "NFL:KC:WSH",
+          "MMA:Holloway:Kattar",
+          "MMA:Ponzinibbio:Li",
+          "MMA:Kelleher:Simon",
+          "MMA:Hernandez:Vieria",
+          "MMA:Akhemedov:Breese",
+          "NCAAF: Mich: OhioState",
+          "NCAAF: Minn : Illinois",
+          "NCAAF: MiamiU: Florida",
+          "NCAAF: USC: UCLA",
+          "NCAAF: Alabama: Auburn",
+          "NCAAF: ArizonaSt: UofAriz",
+          "NCAAF: Georgia: Clemson",
+          "NCAAF: PennState: Indiana",
+          "NCAAF: Texas: TexasA&M",
+          "NCAAF: Utah: BYU",
+          "NCAAF: Rutgers: VirgTech",
+        ],
+        [
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+        ]
+      );
     });
 
     it("send result data to betting contract", async () => {

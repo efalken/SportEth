@@ -45,15 +45,19 @@ describe("Betting", function () {
 
     it("send init", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       nextStart =
         _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
-      await oracle.initPost(
+      await oracle.settleRefreshPost(
+        [
+          1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
         [
           "NFL:ARI:LAC",
           "MMA:Holloway:Kattar",
@@ -143,8 +147,8 @@ describe("Betting", function () {
 
     it("post odds", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
@@ -188,13 +192,88 @@ describe("Betting", function () {
 
     it("Send Event Results to oracle", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock((hourOffset + 7 * 24) * secondsInHour);
-      await oracle.settlePost([
-        1, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-      ]);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart =
+        _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
+      await oracle.settleRefreshPost(
+        [
+          1, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
+        [
+          "NFL:ARI:LAC",
+          "MMA:Holloway:Kattar",
+          "NFL:BAL:MIA",
+          "NFL:BUF:MIN",
+          "NFL:CAR:NE",
+          "NFL:CHI:NO",
+          "NFL:CIN:NYG",
+          "NFL:CLE:NYJ",
+          "NFL:DAL:OAK",
+          "NFL:DEN:PHI",
+          "NFL:DET:PIT",
+          "NFL:GB:SEA",
+          "NFL:HOU:SF",
+          "NFL:IND:TB",
+          "NFL:JAX:TEN",
+          "NFL:KC:WSH",
+          "MMA:Holloway:Kattar",
+          "MMA:Ponzinibbio:Li",
+          "MMA:Kelleher:Simon",
+          "MMA:Hernandez:Vieria",
+          "MMA:Akhemedov:Breese",
+          "NCAAF: Mich: OhioState",
+          "NCAAF: Minn : Illinois",
+          "NCAAF: MiamiU: Florida",
+          "NCAAF: USC: UCLA",
+          "NCAAF: Alabama: Auburn",
+          "NCAAF: ArizonaSt: UofAriz",
+          "NCAAF: Georgia: Clemson",
+          "NCAAF: PennState: Indiana",
+          "NCAAF: Texas: TexasA&M",
+          "NCAAF: Utah: BYU",
+          "NCAAF: Rutgers: VirgTech",
+        ],
+        [
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+        ]
+      );
     });
 
     it("fail: redeem attempt for account with active bets", async () => {

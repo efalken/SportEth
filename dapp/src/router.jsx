@@ -17,7 +17,10 @@ const router = createHashRouter([
     path: "/",
     element: <Splash />,
   },
-  { path: "/faqs", element: <FAQ /> },
+  {
+    path: "/FAQ",
+    element: <FAQ />,
+  },
   {
     path: "/betpage",
     element: (
@@ -43,7 +46,7 @@ const router = createHashRouter([
     ),
   },
   { path: "/bethistory", element: <EventBetRecord /> },
-  // { path: "/oddshistory", element: <EventBetRecordAxios /> },
+  // { path: "/FAQ", element: <EventBetRecordAxios /> },
   { path: "/oddshistory", element: <EventOdds /> },
   { path: "/schedhistory", element: <EventSchedule /> },
   { path: "/starthistory", element: <EventStartTime /> },

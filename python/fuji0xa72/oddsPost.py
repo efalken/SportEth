@@ -1,4 +1,4 @@
-from helpersOracleFuji import send_function
+from python.fuji0xa72.helperOracle0xa72 import send_function
 import json
 
 

@@ -1,14 +1,12 @@
 import React from "react";
 import moment from "moment";
 
-export default function TeamTable({
+export default function TeamTableNa({
   teamSplit,
   startTimeColumn,
   radioFavePick,
   showDecimalOdds,
-  oddsTot,
   radioUnderPick,
-  getMoneyLine,
 }) {
   let faveSplit = [];
   let underSplit = [];

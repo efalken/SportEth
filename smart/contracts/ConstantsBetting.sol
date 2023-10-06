@@ -17,3 +17,4 @@ uint256 constant UNITS_TRANS14 = 1e14;
 uint256 constant ORACLE_5PERC = 5e12;
 // 30k tokens allocated for rewards each epoch, given 3 decimals
 uint256 constant EPOCH_AMOUNT = 3e7;
+uint256 constant MAX_EVENTS = 32;

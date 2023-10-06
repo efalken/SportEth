@@ -1,4 +1,4 @@
-from helpersOracleFuji import send_function
+from python.fuji0x257.helperOracle0x257 import send_function
 
 
 def callProcessVote():

@@ -12,6 +12,9 @@ artifacts
 private
 bak
 backup.bat
+pythonPrivate
+bak
+backup.bat
 
 
 

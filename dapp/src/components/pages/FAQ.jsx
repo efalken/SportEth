@@ -1,6 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { defaultNetwork } from "../../config";
+import { Link } from "react-router-dom";
+import { writeContract } from "viem/actions";
+import { useAccount, useContractReads, useWalletClient } from "wagmi";
 
 function FAQ() {
+  document.title = "FAQs";
   return (
     <div style={{ color: "black" }}>
       <p>&nbsp;</p>

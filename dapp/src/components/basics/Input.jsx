@@ -28,9 +28,9 @@ export default function ({
           alignItems="center"
           px="9px"
           style={{
-            size:"14px",
-            font:"Arial",
-            color: "#00ff00"
+            size: "14px",
+            font: "Arial",
+            color: "#00ff00",
             //fontSize: size ? size : 14,
           }}
         >
@@ -73,16 +73,17 @@ export default function ({
       <Box {...props}>
         <input
           placeholder={placeholder}
+          value={props.value}
           style={{
             width: width ? width : 120,
             color: "#00ff00",
-            border: "1px solid #00ff00", 
-           // borderRadius: "2px",
-           // borderColor: "yellow",
+            border: "1px solid #00ff00",
+            // borderRadius: "2px",
+            // borderColor: "yellow",
             outline: "none",
             backgroundColor: cblack,
             padding: "5px 7px 5px 7px",
-          //  fontSize: size ? size : 14,
+            //  fontSize: size ? size : 14,
             size: 14,
             fontWeight: weight ? weight : "normal",
             borderRadius: Radius,

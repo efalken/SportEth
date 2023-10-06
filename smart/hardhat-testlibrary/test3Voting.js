@@ -42,14 +42,14 @@ describe("Betting", function () {
     });
 
     it("transfer tokens to acct1", async () => {
-      await token.transfer(account1.address, 80n * million);
-      await token.transfer(account2.address, 60n * million);
-      await token.approve(oracle.address, 140n * million);
-      await token.connect(account1).approve(oracle.address, 80n * million);
-      await token.connect(account2).approve(oracle.address, 60n * million);
-      await oracle.depositTokens(140n * million);
-      await oracle.connect(account1).depositTokens(80n * million);
-      await oracle.connect(account2).depositTokens(60n * million);
+      await token.transfer(account1.address, 130n * million);
+      await token.transfer(account2.address, 120n * million);
+      await token.approve(oracle.address, 250n * million);
+      await token.connect(account1).approve(oracle.address, 130n * million);
+      await token.connect(account2).approve(oracle.address, 120n * million);
+      await oracle.depositTokens(250n * million);
+      await oracle.connect(account1).depositTokens(130n * million);
+      await oracle.connect(account2).depositTokens(120n * million);
     });
 
     it("token balances", async () => {
@@ -75,23 +75,27 @@ describe("Betting", function () {
       console.log(`tokBal12 ${tokBal12}`);
       console.log(`tokBal13 ${tokBal13}`);
 
-      assert.equal(tokBal10, "0.14", "Must be equal");
-      assert.equal(tokBal11, "0.08", "Must be equal");
-      assert.equal(tokBal12, "0.06", "Must be equal");
-      assert.equal(tokBal13, "0.28", "Must be equal");
+      assert.equal(tokBal10, "0.25", "Must be equal");
+      assert.equal(tokBal11, "0.13", "Must be equal");
+      assert.equal(tokBal12, "0.12", "Must be equal");
+      assert.equal(tokBal13, "0.5", "Must be equal");
     });
 
     it("send init", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
       nextStart =
         _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
-      result = await oracle.initPost(
+      result = await oracle.settleRefreshPost(
+        [
+          1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
         [
           "NFL:ARI:LAC",
           "MMA:Holloway:Kattar",
@@ -169,14 +173,14 @@ describe("Betting", function () {
       console.log(`Yes Votes ${yesvote}: No Votes ${novote}`);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
-      const bettingStat = await betting.bettingStatus();
-      assert.equal(bettingStat, "1", "Must be equal");
+      const bettingStat = await betting.bettingActive();
+      assert.equal(bettingStat, false, "Must be equal");
     });
 
     it("send odds data", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       result = await oracle
         .connect(account1)
@@ -185,6 +189,7 @@ describe("Betting", function () {
           699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
           919, 720, 672, 800,
         ]);
+      await helper.advanceTimeAndBlock(3 * secondsInHour);
       result = await oracle.connect(owner).vote(true);
       result = await oracle.connect(account2).vote(false);
     });
@@ -193,8 +198,8 @@ describe("Betting", function () {
       const yesvote = await oracle.votes(0);
       const novote = await oracle.votes(1);
       console.log(`Yes Vote 1 ${yesvote}: No Vote 1 ${novote}`);
-      assert.equal(yesvote, "220000000", "Must be equal");
-      assert.equal(novote, "60000000", "Must be equal");
+      assert.equal(yesvote, "380000000", "Must be equal");
+      assert.equal(novote, "120000000", "Must be equal");
     });
 
     it("process vote, should send odds", async () => {
@@ -203,31 +208,107 @@ describe("Betting", function () {
       receipt = await result.wait();
       const result2 = await betting.odds(1);
       assert.equal(result2, "6000", "Must be equal");
-      const bettingStat = await betting.bettingStatus();
-      assert.equal(bettingStat, "2", "Must be equal");
+      const bettingStat = await betting.bettingActive();
+      assert.equal(bettingStat, true, "Must be equal");
     });
 
     it("vote post fail", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
-      await helper.advanceTimeAndBlock((hourOffset + 6 * 24) * secondsInHour);
-      result = await oracle.settlePost([
-        1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-      ]);
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
+      await helper.advanceTimeAndBlock((hourOffset + 8 * 24) * secondsInHour);
+      _timestamp = (
+        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
+      ).timestamp;
+      nextStart =
+        _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
+      result = await oracle.settleRefreshPost(
+        [
+          1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
+        [
+          "NFL:ARI:LAC",
+          "MMA:Holloway:Kattar",
+          "NFL:BAL:MIA",
+          "NFL:BUF:MIN",
+          "NFL:CAR:NE",
+          "NFL:CHI:NO",
+          "NFL:CIN:NYG",
+          "NFL:CLE:NYJ",
+          "NFL:DAL:OAK",
+          "NFL:DEN:PHI",
+          "NFL:DET:PIT",
+          "NFL:GB:SEA",
+          "NFL:HOU:SF",
+          "NFL:IND:TB",
+          "NFL:JAX:TEN",
+          "NFL:KC:WSH",
+          "MMA:Holloway:Kattar",
+          "MMA:Ponzinibbio:Li",
+          "MMA:Kelleher:Simon",
+          "MMA:Hernandez:Vieria",
+          "MMA:Akhemedov:Breese",
+          "NCAAF: Mich: OhioState",
+          "NCAAF: Minn : Illinois",
+          "NCAAF: MiamiU: Florida",
+          "NCAAF: USC: UCLA",
+          "NCAAF: Alabama: Auburn",
+          "NCAAF: ArizonaSt: UofAriz",
+          "NCAAF: Georgia: Clemson",
+          "NCAAF: PennState: Indiana",
+          "NCAAF: Texas: TexasA&M",
+          "NCAAF: Utah: BYU",
+          "NCAAF: Rutgers: VirgTech",
+        ],
+        [
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+          nextStart,
+        ]
+      );
+      await helper.advanceTimeAndBlock(secondsInHour * 3);
       result = await oracle.connect(account1).vote(false);
       result = await oracle.connect(account2).vote(false);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       const yesvote = await oracle.votes(0);
       const novote = await oracle.votes(1);
       console.log(`Yes Votes ${yesvote}: No Votes ${novote}`);
-      assert.equal(yesvote, "140000000", "Must be equal");
-      assert.equal(novote, "140000000", "Must be equal");
+      assert.equal(yesvote, "250000000", "Must be equal");
+      assert.equal(novote, "250000000", "Must be equal");
       result = await oracle.processVote();
       receipt = await result.wait();
-      const bettingStat = await betting.bettingStatus();
-      assert.equal(bettingStat, "2", "Must be equal");
+      const bettingStat = await betting.bettingActive();
+      assert.equal(bettingStat, true, "Must be equal");
     });
   });
 });

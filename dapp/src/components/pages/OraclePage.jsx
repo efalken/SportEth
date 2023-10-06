@@ -7,7 +7,9 @@ import { G } from "../basics/Colors";
 import Form from "../basics/Form";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
-import TeamTable2 from "../blocks/TeamTable2";
+import TeamTableWinner from "../blocks/TeamTableWinner";
+import TeamTableInit from "../blocks/TeamTableInit";
+import TeamTableOdds from "../blocks/TeamTableOdds";
 import { Link } from "react-router-dom";
 import { useAccount, useContractReads, useWalletClient } from "wagmi";
 import {
@@ -35,14 +37,19 @@ function OraclePage() {
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
+  const [haltedVector, setHaltedVector] = useState([]);
   const [outcomes, setOutcomes] = useState([]);
   const [voteNo, setVoteNo] = useState(0);
   const [voteYes, setVoteYes] = useState(0);
   const [propNumber, setPropNumber] = useState(0);
   const [reviewStatus, setReviewStatus] = useState(0);
+  const [bettingStatus, setBettingStatus] = useState(0);
   const [subNumber, setSubNumber] = useState(0);
-  const [currEpoch, setCurrEpoch] = useState(0);
-  const [concentrationLimit, setConcentrationLimit] = useState(0);
+  const [oracleEpoch, setOracleEpoch] = useState(0);
+  const [bettingEpoch, setBettingEpoch] = useState(0);
+  const [concFactor, setConcFactor] = useState(0);
+  const [totalTokens, setTotalTokens] = useState(0);
+  const [pOddsVector, setPOddsVector] = useState([]);
   const [oddsVector, setOddsVector] = useState([]);
   const [proposer, setProposer] = useState("0x123");
   const [startTime, setStartTime] = useState([]);
@@ -54,10 +61,11 @@ function OraclePage() {
   const [tokens, setTokens] = useState(0);
   const [totalVotes, setTotalVotes] = useState(0);
   const [initFeePool, setInitFeePool] = useState(0);
-  const [feeData0, setTotTokens] = useState(0);
-  const [feeData1, setTokRevTracker] = useState(0);
-  const [depositAmount, setDepositAmount] = useState(0);
-  const [withdrawAmount, setWithdrawAmount] = useState(0);
+  const [tokenRevTracker, setTokRevTracker] = useState(0);
+  const [approveAmount, setApproveAmount] = useState("");
+  const [depositAmount, setDepositAmount] = useState("");
+  const [changeMatch, setChangeMatch] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
   const [txnHash, setHash] = useState();
 
   useEffect(() => {
@@ -120,15 +128,17 @@ function OraclePage() {
 
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
-      if (oddsVector) odds999 = Number(oddsVector[ii]) || 0;
+      if (pOddsVector) odds999 = Number(pOddsVector[ii]) || 0;
       haltedColumn[ii] = oddsVector[ii] % 10 === 1 ? true : false;
+      if (haltedColumn[ii]) haltedVector.push(ii);
       odds0[ii] = odds999 / 10;
       odds1[ii] = Math.floor(1e8 / (odds999 + 450) - 450) / 10 || 0;
     }
     setHaltedColumn(haltedColumn);
+
     setOdds0(odds0);
     setOdds1(odds1);
-  }, [oddsVector]);
+  }, [pOddsVector]);
 
   useEffect(() => {
     let _teamSplit = scheduleString.map((s) => (s ? s.split(":") : undefined));
@@ -171,14 +181,32 @@ function OraclePage() {
   const { data: walletClient } = useWalletClient();
 
   async function votefn(voteType) {
-    console.log(voteNo, "voteNo");
-    const txHash = await writeContract(walletClient, {
-      abi: oracleContractABI,
-      address: oracleContractAddress,
-      functionName: "vote",
-      args: [voteType],
-    });
-    updateTransactionHashDialogBox(txHash);
+    try {
+      const txHash = await writeContract(walletClient, {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "vote",
+        args: [voteType],
+      });
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function haltMach(_match) {
+    try {
+      const txHash = await writeContract(walletClient, {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "haltBetting",
+        args: [changeMatch],
+      });
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
+    setChangeMatch("");
   }
 
   async function processVote() {
@@ -191,46 +219,50 @@ function OraclePage() {
   }
 
   async function depositTokens() {
-    console.log(depositAmount, "depoAmt");
-    const txHash = await writeContract(walletClient, {
-      abi: oracleContractABI,
-      address: oracleContractAddress,
-      functionName: "depositTokens",
-      args: [depositAmount.toString()],
-    });
-    updateTransactionHashDialogBox(txHash);
+    try {
+      const txHash = await writeContract(walletClient, {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "depositTokens",
+        args: [depositAmount.toString()],
+      });
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
+    setDepositAmount("");
   }
 
   async function withdrawTokens() {
-    const txHash = await writeContract(walletClient, {
-      abi: oracleContractABI,
-      address: oracleContractAddress,
-      functionName: "withdrawTokens",
-      args: [withdrawAmount.toString()],
-    });
-    updateTransactionHashDialogBox(txHash);
+    let wdamt = (Number(withdrawAmount) * 1000).toString();
+    try {
+      const txHash = await writeContract(walletClient, {
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "withdrawTokens",
+        args: [wdamt],
+      });
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
+    setWithdrawAmount("");
   }
 
   async function approveTokens() {
-    console.log(depositAmount, "approveAmt");
-    const txHash = await writeContract(walletClient, {
-      abi: tokenContractABI,
-      address: tokenContractAddress,
-      functionName: "approve",
-      args: [oracleContractAddress, depositAmount.toString()],
-    });
-    updateTransactionHashDialogBox(txHash);
+    try {
+      const txHash = await writeContract(walletClient, {
+        abi: tokenContractABI,
+        address: tokenContractAddress,
+        functionName: "approve",
+        args: [oracleContractAddress, approveAmount.toString()],
+      });
+      updateTransactionHashDialogBox(txHash);
+    } catch (err) {
+      console.log(err);
+    }
+    setApproveAmount("");
   }
-
-  // async function withdrawTokens() {
-  //   const txHash = await writeContract(walletClient, {
-  //     abi: oracleContractABI,
-  //     address: oracleContractAddress,
-  //     functionName: "withdrawTokens",
-  //     args: [withdrawAmount.toString()],
-  //   });
-  //   updateTransactionHashDialogBox(txHash);
-  // }
 
   const { data, refetch: refetchAll } = useContractReads({
     contracts: [
@@ -257,6 +289,11 @@ function OraclePage() {
         functionName: "reviewStatus",
       },
       {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "bettingStatus",
+      },
+      {
         abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "subNumber",
@@ -272,14 +309,24 @@ function OraclePage() {
         functionName: "showPropOdds",
       },
       {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "showOdds",
+      },
+      {
         abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "showPropResults",
       },
       {
-        abi: bettingContractABI,
+        abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "oracleEpoch",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "bettingEpoch",
       },
       {
         abi: bettingContractABI,
@@ -329,17 +376,20 @@ function OraclePage() {
       { result: _votes1 },
       { result: _propNumber },
       { result: _reviewStatus },
+      { result: _bettingStatus },
       { result: _subNumber },
       { result: _startTimes },
-      { result: _oddsvector },
+      { result: _pOddsVector },
+      { result: _oddsVector },
       { result: _outcomes },
       { result: _oracleEpoch },
+      { result: _bettingEpoch },
       { result: _concFactor },
-      { result: _totTokens },
+      { result: _totalTokens },
       { result: _tokRevTracker },
       { result: _proposer },
       { result: _adminStruct },
-      { result: _balance },
+      { result: _eoaTokens },
       { result: _sctring },
     ] = data;
 
@@ -347,13 +397,16 @@ function OraclePage() {
     setVoteNo(Number(_votes1) || 0);
     setPropNumber(Number(_propNumber) || 0);
     setReviewStatus(Number(_reviewStatus) || 0);
+    setBettingStatus(Number(_bettingStatus || 0));
     setSubNumber(Number(_subNumber) || 0);
     setStartTime(_startTimes || []);
-    setOddsVector(_oddsvector || []);
+    setPOddsVector(_pOddsVector || []);
+    setOddsVector(_oddsVector || []);
     setOutcomes(_outcomes || []);
-    setCurrEpoch(Number(_oracleEpoch) || 0);
-    setConcentrationLimit(Number(_concFactor) || 0);
-    setTotTokens(Number(_totTokens) || 0);
+    setOracleEpoch(Number(_oracleEpoch) || 0);
+    setBettingEpoch(Number(_bettingEpoch) || 0);
+    setConcFactor(Number(_concFactor) || 0);
+    setTotalTokens(Number(_totalTokens) / 1000 || 0);
     setTokRevTracker(Number(_tokRevTracker) || 0);
     setProposer(_proposer || "0x123");
     setBasePropNumber(_adminStruct[0] || 0);
@@ -362,7 +415,7 @@ function OraclePage() {
     setTotalVotes(_adminStruct[3] || 0);
     setTokens(_adminStruct[4] || 0);
     setInitFeePool(Number(_adminStruct[5]) || 0);
-    setEoaTokens((_balance || 0n).toString());
+    setEoaTokens(Number(_eoaTokens) / 1000 || 0);
     setScheduleString(_sctring);
   }, [data]);
 
@@ -379,49 +432,26 @@ function OraclePage() {
       coeff = totalVotes / (propNumber - basePropNumber);
     }
     coeff = coeff > 1 ? 1 : coeff;
-    let x = (tokens / 1e9) * (feeData1 - initFeePool);
+    let x = (tokens / 1e9) * (tokenRevTracker - initFeePool);
     coeff = (coeff * x) / 1e5;
     return coeff;
   }
-  // console.log(feeData0, "fee0");
 
   function switchOdds() {
     setShowDecimalOdds(!showDecimalOdds);
   }
 
-  function getOutcome(outcomei) {
-    let outx = "lose";
-    let outnum = Number(outcomei);
-    if (outnum === 1) {
-      outx = "win";
-    } else if (outnum === 2) {
-      outx = "tie";
-    }
-    return outx;
-  }
-
-  function reviewStatusWord() {
-    let statusWord = "na";
-    if (reviewStatus === 0) {
-      statusWord = "init next";
-    } else if (reviewStatus === 1) {
-      statusWord = "odds next";
-    } else if (reviewStatus === 2) {
-      statusWord = "settlement next";
-    }
-    return statusWord;
-  }
-  console.log("subnumber", subNumber);
   function subNumberWord() {
-    let status2Word = "na";
     if (subNumber === 0) {
-      status2Word = "no data";
-    } else if (subNumber === 1) {
-      status2Word = "first data submitted";
-    } else if (subNumber === 2) {
-      status2Word = "second data submitted";
+      if (reviewStatus === 0)
+        return "settle completed, waiting for new schedule.";
+      if (reviewStatus === 2) return "odds finalized, waiting for settlement.";
+      if (reviewStatus === 1) return "Schedule finalized, waiting for odds.";
+    } else {
+      if (reviewStatus === 0) return "Schedule posted, voting on ";
+      if (reviewStatus === 2) return "settle posted, voting on ";
+      if (reviewStatus === 1) return "odds posted, voting on ";
     }
-    return status2Word;
   }
 
   function needToVote() {
@@ -435,52 +465,17 @@ function OraclePage() {
     }
     return needtovote;
   }
+  // let haltedV = haltedColumn.indexOf(true);
+  console.log("halted", haltedColumn);
+  console.log("BettingOdds", oddsVector);
+  console.log("OracleOdds", pOddsVector);
+  // console.log("subnumber", subNumber);
+  // console.log("revStatus", reviewStatus);
+  // console.log("bettingActive", bettingStatus);
+  // console.log("propNumber", propNumber);
+  // console.log("concFactor", concFactor);
+  // console.log("proposer", proposer);
 
-  function Voted() {
-    let voted = true;
-    if (Number(voteTracker) === Number(propNumber) && Number(tokens) > 0) {
-      voted = true;
-    }
-    return voted;
-  }
-
-  function needToProcess() {
-    let needtovote = true;
-    if (reviewStatus < 9) {
-      needtovote = false;
-    }
-    return needtovote;
-  }
-  /* bla
-function needToVote() {
-    let needtovote = true;
-    if (
-      Number(voteTracker) === Number(propNumber) ||
-      Number(tokens) === 0 ||
-      reviewStatus < 9
-    ) {
-      needtovote = false;
-    }
-    return needtovote;
-  }
-
-  function Voted() {
-    let voted = true;
-    if (Number(voteTracker) === Number(propNumber) && Number(tokens) > 0) {
-      voted = true;
-    }
-    return voted;
-  }
-
-  function needToProcess() {
-    let needtovote = true;
-    if (reviewStatus < 9) {
-      needtovote = false;
-    }
-     needtovote = false;
-    return needtovote;
-  }
-  */
   return (
     <div>
       <VBackgroundCom />
@@ -575,6 +570,7 @@ function needToVote() {
                 transform="uppercase"
                 spacing="1px"
               />
+              <br />
             </Box>
             <Box>
               <Flex
@@ -606,62 +602,68 @@ function needToVote() {
             </Flex>{" "}
             <Box>
               <Flex
-                mt="20px"
+                mt="10px"
                 flexdirection="row"
                 justifycontent="space-between"
               ></Flex>
               <Box>
-                <Form
-                  onChange={(e) => setDepositAmount(Number(e.target.value))}
-                  value={depositAmount}
-                  onSubmit={depositTokens}
-                  mb="20px"
-                  justifycontent="flex-start"
-                  padding="4px"
-                  placeholder="# oracle tokens"
-                  buttonLabel="Deposit"
-                  buttonWidth="70px"
-                />
+                <button
+                  style={{
+                    backgroundColor: "black",
+                    borderradius: "5px",
+                    padding: "2px",
+                    cursor: "pointer",
+                    color: "#ccff99",
+                    border: "1px solid #ccff99",
+                  }}
+                >
+                  {Number(tokens / 1e3).toFixed(3)}
+                </button>
+                <Text size="14px" className="style">
+                  {"  "}
+                  Account Token Balance
+                </Text>
               </Box>
               <Box>
                 <Form
-                  onChange={(e) => setDepositAmount(Number(e.target.value))}
-                  value={depositAmount}
+                  onChange={(e) => setApproveAmount(e.target.value)}
+                  value={approveAmount}
                   onSubmit={approveTokens}
-                  mb="20px"
+                  mb="1px"
                   justifycontent="flex-start"
                   padding="4px"
-                  placeholder="# oracle tokens"
+                  placeholder="0.00 oracle tokens"
                   buttonLabel="Approve"
                   buttonWidth="70px"
                 />
               </Box>
               <Box>
                 <Form
-                  onChange={(e) => setWithdrawAmount(Number(e.target.value))}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  value={depositAmount}
+                  onSubmit={depositTokens}
+                  mb="1px"
+                  justifycontent="flex-start"
+                  padding="4px"
+                  placeholder="0.00 oracle tokens"
+                  buttonLabel="Deposit"
+                  buttonWidth="70px"
+                />
+              </Box>
+              <Box>
+                <Form
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
                   value={withdrawAmount}
                   onSubmit={withdrawTokens}
                   mb="20px"
                   justifycontent="flex-start"
                   padding="4px"
-                  placeholder="# oracle tokens"
+                  placeholder="0.00 oracle tokens"
                   buttonLabel="WithDraw"
                   buttonWidth="70px"
                 />
               </Box>
 
-              <Flex justifycontent="left">
-                <Box mb="10px" mt="10px">
-                  <Text size="14px" color="#ffffff">
-                    Active Epoch: {currEpoch}
-                  </Text>
-                  <br />
-                  <Text size="14px" className="style">
-                    Your Tokens in Contract:{" "}
-                    {Number(tokens / 1000).toLocaleString()}
-                  </Text>
-                </Box>
-              </Flex>
               <Flex justifycontent="left">
                 {tokens > 0 ? (
                   <Box>
@@ -672,11 +674,14 @@ function needToVote() {
                       </Text>
                     ) : null}
                     <Text size="14px" className="style">
-                      your base Epoch: {baseEpoch}
-                    </Text>
-                    <br />
-                    <Text size="14px" className="style">
-                      Your Voting %:{" "}
+                      total tokens deposited:{" "}
+                      {Math.round(totalTokens).toLocaleString()}
+                      <br />
+                      Current Epoch: {oracleEpoch}
+                      <br />
+                      Your base epoch: {baseEpoch}
+                      <br />
+                      Your voting record:{" "}
                       {Number(
                         (Number(totalVotes) * 100) /
                           (propNumber - basePropNumber)
@@ -689,11 +694,19 @@ function needToVote() {
                   </Box>
                 ) : null}
               </Flex>
-              <Flex
-                mt="10px"
-                flexdirection="row"
-                justifycontent="space-between"
-              ></Flex>
+            </Box>
+            <Box>
+              <Form
+                onChange={(e) => setChangeMatch(e.target.value)}
+                value={changeMatch}
+                onSubmit={haltMach}
+                mb="1px"
+                justifycontent="flex-start"
+                padding="4px"
+                placeholder="match #"
+                buttonLabel="halt"
+                buttonWidth="50px"
+              />
             </Box>
             <Flex
               mt="5px"
@@ -757,7 +770,19 @@ function needToVote() {
                 />
               </Text>
               <Text size="14px" className="style">
-                ConcentrationLimit: {concentrationLimit}
+                ConcentrationLimit: {concFactor}
+              </Text>{" "}
+              <br />
+              <Text size="14px" className="style">
+                reviewStatus: {reviewStatus}
+              </Text>{" "}
+              <br />
+              <Text size="14px" className="style">
+                subNumber: {subNumber}
+              </Text>{" "}
+              <br />
+              <Text size="14px" className="style">
+                ConcentrationLimit: {concFactor}
               </Text>{" "}
               <br />
               <Text size="14px" className="style">
@@ -769,7 +794,11 @@ function needToVote() {
               </Text>
               <br />
               <Text size="14px" className="style">
-                Tokens in EOA: {Number(eoaTokens / 1000).toLocaleString()}
+                Tokens in EOA: {Math.round(eoaTokens).toLocaleString()}
+              </Text>
+              <br />
+              <Text size="14px" className="style">
+                HaltedMatches: {haltedVector.toString()}
               </Text>
             </Box>
           </Box>
@@ -793,40 +822,37 @@ function needToVote() {
           }}
         ></Flex>
         <Box mb="10px" mt="10px">
-          {subNumber == 0 ? (
-            <Text size="14px" className="style">
-              {reviewStatusWord()}
-            </Text>
-          ) : (
-            <Text size="14px" className="style" color="#00ff00">
-              Submission Status: {subNumberWord()} submissions
-              <br />
-              <Text size="14px" className="style">
-                No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
-                {Number(voteYes).toLocaleString()}
-              </Text>
-              <Box>
-                <button
-                  style={{
-                    backgroundColor: "black",
-                    borderradius: "5px",
-                    padding: "4px",
-                    //borderradius: "1px",
-                    cursor: "pointer",
-                    color: "yellow",
-                    border: "1px solid #ffff00",
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    processVote();
-                  }}
-                >
-                  Process Vote
-                </button>
-              </Box>
-            </Text>
-          )}
+          <Text size="14px" className="style">
+            Status: {subNumberWord()}
+          </Text>
         </Box>
+
+        {subNumber > 0 ? (
+          <Box>
+            <button
+              style={{
+                backgroundColor: "black",
+                borderradius: "5px",
+                padding: "4px",
+                //borderradius: "1px",
+                cursor: "pointer",
+                color: "yellow",
+                border: "1px solid #ffff00",
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                processVote();
+              }}
+            >
+              Process Vote
+            </button>
+            <Text size="14px" className="style">
+              <br />
+              No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
+              {Number(voteYes).toLocaleString()}
+            </Text>
+          </Box>
+        ) : null}
 
         <Box>
           {" "}
@@ -837,29 +863,46 @@ function needToVote() {
           ></Flex>
         </Box>
 
-        <Box>
-          <Flex
-            mt="20px"
-            flexdirection="row"
-            justifycontent="space-between"
-          ></Flex>
-        </Box>
         <div>
           <Box>
-            {" "}
-            <Flex>
-              <TeamTable2
-                teamSplit={teamSplit}
-                startTimeColumn={startTime}
-                showDecimalOdds={showDecimalOdds}
-                oddsTot={oddsTot}
-                getMoneyLine={getMoneyLine}
-                outcomev={outcomes}
-                getOutcome={getOutcome}
-                subNumber={subNumber}
-                reviewStatus={reviewStatus}
-              />
-            </Flex>{" "}
+            {reviewStatus + subNumber == 2 ? (
+              <Flex>
+                <TeamTableOdds
+                  teamSplit={teamSplit}
+                  startTimeColumn={startTime}
+                  showDecimalOdds={showDecimalOdds}
+                  oddsTot={oddsTot}
+                  getMoneyLine={getMoneyLine}
+                  outcomev={outcomes}
+                  subNumber={subNumber}
+                  reviewStatus={reviewStatus}
+                />
+              </Flex>
+            ) : null}
+            {reviewStatus + subNumber == 1 ? (
+              <Flex>
+                <TeamTableInit
+                  teamSplit={teamSplit}
+                  startTimeColumn={startTime}
+                  subNumber={subNumber}
+                  reviewStatus={reviewStatus}
+                />
+              </Flex>
+            ) : null}
+            {reviewStatus + subNumber == 0 || reviewStatus + subNumber == 3 ? (
+              <Flex>
+                <TeamTableWinner
+                  teamSplit={teamSplit}
+                  startTimeColumn={startTime}
+                  showDecimalOdds={showDecimalOdds}
+                  oddsTot={oddsTot}
+                  getMoneyLine={getMoneyLine}
+                  outcomev={outcomes}
+                  subNumber={subNumber}
+                  reviewStatus={reviewStatus}
+                />
+              </Flex>
+            ) : null}
           </Box>
         </div>
       </Split>

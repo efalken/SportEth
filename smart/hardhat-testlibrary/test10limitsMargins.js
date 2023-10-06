@@ -2,35 +2,9 @@ const helper = require("../hardhat-helpers");
 const secondsInHour = 3600;
 _dateo = new Date();
 const offset = (_dateo.getTimezoneOffset() * 60 * 1000 - 7200000) / 1000;
-var hourOffset,
-  _hourSolidity,
-  _timestamp,
-  nextStart,
-  _date,
-  _hour,
-  hash1,
-  hash2,
-  hash3,
-  hash4,
-  hash5,
-  hash6,
-  hash7,
-  hash8,
-  hash9,
-  hash10,
-  hash11,
-  hash12,
-  result,
-  receipt,
-  gasUsed,
-  gas0,
-  gas1,
-  gas2,
-  gas3,
-  margin0,
-  margin1;
+var hourOffset, _hourSolidity, _timestamp, nextStart, margin0, margin1;
 const finneys = BigInt("1000000000000000");
-const eths = BigInt("100000000000000");
+const eths = BigInt("1000000000000000000");
 const million = BigInt("1000000");
 
 const { assert } = require("chai");
@@ -41,9 +15,9 @@ describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
-    const Betting = await ethers.getContractFactory("BettingFuji");
+    const Betting = await ethers.getContractFactory("Betting");
     const Token = await ethers.getContractFactory("Token");
-    const Oracle = await ethers.getContractFactory("OracleFuji");
+    const Oracle = await ethers.getContractFactory("Oracle");
 
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
@@ -72,18 +46,23 @@ describe("Betting", function () {
   });
 
   describe("set up contract for taking bets", async () => {
-    it("checkHour", async () => {
+    it("send initial slate", async () => {
       _hourSolidity = Number(await oracle.hourOfDay());
-      hourOffset = 22 - _hourSolidity;
-      if (hourOffset < 0) hourOffset = 25;
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
       console.log(`hourAdj ${hourOffset}`);
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       _timestamp = (
         await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
       ).timestamp;
-
-      console.log(`time is ${nextStart}`);
-      result = await oracle.initPost(
+      nextStart =
+        _timestamp - ((_timestamp - 1687554000) % 604800) + 604800 + 86400;
+      _hourSolidity = Number(await oracle.hourOfDay());
+      result = await oracle.settleRefreshPost(
+        [
+          1, 1, 0, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ],
         [
           "NFL:ARI:LAC",
           "MMA:Holloway:Kattar",
@@ -153,7 +132,11 @@ describe("Betting", function () {
           nextStart,
         ]
       );
-      result = await oracle.processVote();
+    });
+
+    it("fast forward 15 hours procVote", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
+      await oracle.connect(owner).processVote();
     });
 
     it("Fund Contract", async () => {
@@ -171,6 +154,10 @@ describe("Betting", function () {
       console.log(`margin0 is ${margin0}`);
       console.log(`margin1 is ${margin1}`);
       console.log(`acct1 is ${account1.address}`);
+      _hourSolidity = Number(await oracle.hourOfDay());
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
       result = await oracle
         .connect(account1)
         .oddsPost([
@@ -178,6 +165,10 @@ describe("Betting", function () {
           699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
           919, 720, 672, 800,
         ]);
+    });
+
+    it("process", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 18);
       result = await oracle.processVote();
     });
 
@@ -218,6 +209,7 @@ describe("Betting", function () {
       result = await betting.connect(account2).bet(0, 0, "120121");
       result = await betting.connect(account2).bet(1, 0, "60061");
       result = await betting.connect(account2).bet(2, 0, "60061");
+      await expect(betting.connect(account2).bet(3, 0, "60062")).to.be.reverted;
       result = await betting.connect(account2).bet(3, 0, "60061");
       result = await betting.connect(account2).bet(4, 0, "50062");
       margin0 = await betting.margin(0);

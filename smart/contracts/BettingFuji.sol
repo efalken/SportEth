@@ -1,6 +1,6 @@
 /**
 SPDX-License-Identifier: MIT License
-@author Eric Falkenstein
+@author Eric G Falkenstein
 */
 pragma solidity 0.8.19;
 
@@ -10,7 +10,7 @@ import "./ConstantsBetting.sol";
 contract BettingFuji {
   // 0 post-settle/pre-init, 1 post-initial slate/pre-odds
   // 2 post-odds/pre-settle
-  uint32 public bettingStatus;
+  bool public bettingActive;
   // increments by one each settlement
   uint32 public bettingEpoch;
   // increments each bet
@@ -126,14 +126,17 @@ contract BettingFuji {
   ) external returns (bytes32) {
     int64 betPayoff = int64(uint64(odds[_matchNumber]));
     require(betPayoff % 10 == 0, "match halted");
-    require(bettingStatus == 2, "odds not ready");
-    require(userStruct[msg.sender].counter < 16, "betstack full, redeem bets");
+    require(bettingActive, "odds not ready");
+    require(
+      userStruct[msg.sender].counter < MAX_EVENTS,
+      "betstack full, redeem bets"
+    );
     require(
       (_betAmt <= int64(userStruct[msg.sender].userBalance) &&
         _betAmt >= MIN_BET),
       "too big or too small"
     );
-    // require(uint256(startTime[_matchNumber]) > block.timestamp, "game started");
+    require(uint256(startTime[_matchNumber]) > block.timestamp, "game started");
     uint64[4] memory _betData = decodeNumber(_matchNumber);
     if (_team0or1 == 0) {
       betPayoff = (_betAmt * betPayoff) / 10000;
@@ -195,8 +198,6 @@ contract BettingFuji {
 
   /// @dev bettor funds account for bets
   function fundBettor() external payable {
-    //uint64 amt = uint64(msg.value / UNITS_TRANS14);
-    // to save on test avax
     uint64 amt = uint64(msg.value / 1e10);
     require(amt >= MIN_DEPOSIT, "need at least one avax");
     userStruct[msg.sender].userBalance += amt;
@@ -205,9 +206,7 @@ contract BettingFuji {
 
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
-    require(margin[2] == 0, "betting active");
-    //uint64 netinvestment = uint64(msg.value / UNITS_TRANS14);
-    // to save on test avax
+    require(!bettingActive, "not while betting active");
     uint64 netinvestment = uint64(msg.value / 1e10);
     uint64 _shares = 0;
     require(netinvestment >= uint256(MIN_DEPOSIT), "need at least one avax");
@@ -231,8 +230,6 @@ contract BettingFuji {
   function withdrawBettor(uint64 _amt) external {
     require(_amt <= userStruct[msg.sender].userBalance);
     userStruct[msg.sender].userBalance -= _amt;
-    // to save on test avax
-    //uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     uint256 amt256 = uint256(_amt) * 1e10;
     payable(msg.sender).transfer(amt256);
     emit Funding(msg.sender, bettingEpoch, _amt, 2);
@@ -242,9 +239,8 @@ contract BettingFuji {
    * @param _sharesToSell is the LP's ownership stake withdrawn.
    */
   function withdrawBook(uint64 _sharesToSell) external {
-    require(margin[2] == 0, "betting active");
+    require(!bettingActive, "not while betting active");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
-    require(bettingEpoch > lpStruct[msg.sender].lpEpoch, "no wd w/in epoch");
     uint64 avaxWithdraw = uint64(
       (uint256(_sharesToSell) * uint256(margin[0])) / uint256(liqProvShares)
     );
@@ -254,9 +250,10 @@ contract BettingFuji {
     );
     liqProvShares -= _sharesToSell;
     lpStruct[msg.sender].shares -= _sharesToSell;
+    if (bettingEpoch == lpStruct[msg.sender].lpEpoch) {
+      avaxWithdraw = (avaxWithdraw * 99) / 100;
+    }
     margin[0] -= avaxWithdraw;
-    // save on test avax
-    //uint256 avaxWithdraw256 = uint256(avaxWithdraw) * UNITS_TRANS14;
     uint256 avaxWithdraw256 = uint256(avaxWithdraw) * 1e10;
     payable(msg.sender).transfer(avaxWithdraw256);
     emit Funding(msg.sender, bettingEpoch, avaxWithdraw, 3);
@@ -294,28 +291,6 @@ contract BettingFuji {
     userStruct[msg.sender].counter = 0;
   }
 
-  /** @dev processes initial start times
-   * @param _starts are the start times
-   */
-  function transmitInit(
-    uint32[32] calldata _starts
-  ) external onlyAdmin returns (bool) {
-    startTime = _starts;
-    bettingStatus = 1;
-    return true;
-  }
-
-  /** @dev processes odds
-   * @param _odds gross dec odds for favorite (team0)
-   */
-  function transmitOdds(
-    uint16[32] calldata _odds
-  ) external onlyAdmin returns (bool) {
-    odds = _odds;
-    bettingStatus = 2;
-    return true;
-  }
-
   /**  @dev assigns results to matches, enabling withdrawal, removes capital for this purpose
    * @param _winner is the epoch's entry of results: 0 for team 0 win, 1 for team 1 win,
    * 2 for tie or no contest
@@ -345,17 +320,36 @@ contract BettingFuji {
         }
       }
     }
-    // accomodating units_trans14 adj for test avax
-    //uint256 oracleDiv = ORACLE_5PERC * uint256(winningsPot);
-    uint256 oracleDiv = 5e8 * uint256(winningsPot);
+    uint256 oracleDiv = 1e8 * uint256(winningsPot);
     margin[0] = margin[0] + margin[2] - betReturnPot - winningsPot;
     margin[1] = 0;
     margin[2] = 0;
     bettingEpoch++;
-    bettingStatus = 0;
     delete betData;
     payable(oracleAdmin).transfer(oracleDiv);
     return (bettingEpoch, oracleDiv);
+  }
+
+  /** @dev processes initial start times
+   * @param _starts are the start times
+   */
+  function transmitInit(
+    uint32[32] calldata _starts
+  ) external onlyAdmin returns (bool) {
+    startTime = _starts;
+    bettingActive = false;
+    return true;
+  }
+
+  /** @dev processes odds
+   * @param _odds gross dec odds for favorite (team0)
+   */
+  function transmitOdds(
+    uint16[32] calldata _odds
+  ) external onlyAdmin returns (bool) {
+    odds = _odds;
+    bettingActive = true;
+    return true;
   }
 
   /** @dev for distributing 60% of tokens to LPs. Once tokens are depleted 
@@ -364,7 +358,8 @@ contract BettingFuji {
   function tokenReward() external {
     uint256 tokensLeft = token.balanceOf(address(this));
     require(tokensLeft > 0, "no token rewards left");
-    //require(bettingEpoch > 5, "starts in epoch 6!");
+    // comment out for test4LPRevRewards
+    require(bettingEpoch > 5, "starts in epoch 6!");
     uint256 lpShares = uint256(lpStruct[msg.sender].shares);
     require(lpShares > 0, "only for liq providers");
     require(bettingEpoch > lpStruct[msg.sender].lpEpoch, "one claim per epoch");
@@ -386,10 +381,8 @@ contract BettingFuji {
   /** @dev this allows oracle to prevent new bets on contests that have bad odds
    * @param _match is the reset match
    */
-  function pauseMatch(uint256 _match) external onlyAdmin {
-    uint16 oddsi = odds[_match] % 10;
-    oddsi = (oddsi == 0) ? 1 : 0;
-    odds[_match] = (odds[_match] / 10) * 10 + oddsi;
+  function haltMatch(uint256 _match) external onlyAdmin {
+    odds[_match] = (odds[_match] / 10) * 10 + 1;
   }
 
   function showBetData() external view returns (uint256[32] memory _betData) {
