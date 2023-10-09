@@ -180,12 +180,8 @@ async function main() {
   await result.wait();
   await new Promise((resolve) => setTimeout(resolve, 20000));
 
-
-  
   result = await oracle.processVote();
   await new Promise((resolve) => setTimeout(resolve, 20000));
-  
-
   result = await betting.connect(signers[1]).fundBettor({
     value: 20n*eths,
   });

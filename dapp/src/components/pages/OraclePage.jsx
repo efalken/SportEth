@@ -42,11 +42,11 @@ function OraclePage() {
   const [voteNo, setVoteNo] = useState(0);
   const [voteYes, setVoteYes] = useState(0);
   const [propNumber, setPropNumber] = useState(0);
-  const [reviewStatus, setReviewStatus] = useState(0);
-  const [bettingStatus, setBettingStatus] = useState(0);
+  const [reviewStatus, setReviewStatus] = useState(false);
+  //const [bettingStatus, setBettingStatus] = useState(0);
   const [subNumber, setSubNumber] = useState(0);
   const [oracleEpoch, setOracleEpoch] = useState(0);
-  const [bettingEpoch, setBettingEpoch] = useState(0);
+  //const [bettingEpoch, setBettingEpoch] = useState(0);
   const [concFactor, setConcFactor] = useState(0);
   const [totalTokens, setTotalTokens] = useState(0);
   const [pOddsVector, setPOddsVector] = useState([]);
@@ -219,12 +219,13 @@ function OraclePage() {
   }
 
   async function depositTokens() {
+    let depositAmt = (Number(depositAmount) * 1000).toString();
     try {
       const txHash = await writeContract(walletClient, {
         abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "depositTokens",
-        args: [depositAmount.toString()],
+        args: [depositAmt],
       });
       updateTransactionHashDialogBox(txHash);
     } catch (err) {
@@ -250,12 +251,13 @@ function OraclePage() {
   }
 
   async function approveTokens() {
+    let approveAmt = (Number(approveAmount) * 1000).toString();
     try {
       const txHash = await writeContract(walletClient, {
         abi: tokenContractABI,
         address: tokenContractAddress,
         functionName: "approve",
-        args: [oracleContractAddress, approveAmount.toString()],
+        args: [oracleContractAddress, approveAmt],
       });
       updateTransactionHashDialogBox(txHash);
     } catch (err) {
@@ -289,11 +291,6 @@ function OraclePage() {
         functionName: "reviewStatus",
       },
       {
-        abi: bettingContractABI,
-        address: bettingContractAddress,
-        functionName: "bettingStatus",
-      },
-      {
         abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "subNumber",
@@ -322,11 +319,6 @@ function OraclePage() {
         abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "oracleEpoch",
-      },
-      {
-        abi: bettingContractABI,
-        address: bettingContractAddress,
-        functionName: "bettingEpoch",
       },
       {
         abi: bettingContractABI,
@@ -376,14 +368,12 @@ function OraclePage() {
       { result: _votes1 },
       { result: _propNumber },
       { result: _reviewStatus },
-      { result: _bettingStatus },
       { result: _subNumber },
       { result: _startTimes },
       { result: _pOddsVector },
       { result: _oddsVector },
       { result: _outcomes },
       { result: _oracleEpoch },
-      { result: _bettingEpoch },
       { result: _concFactor },
       { result: _totalTokens },
       { result: _tokRevTracker },
@@ -396,15 +386,13 @@ function OraclePage() {
     setVoteYes(Number(_votes0) || 0);
     setVoteNo(Number(_votes1) || 0);
     setPropNumber(Number(_propNumber) || 0);
-    setReviewStatus(Number(_reviewStatus) || 0);
-    setBettingStatus(Number(_bettingStatus || 0));
+    setReviewStatus(_reviewStatus);
     setSubNumber(Number(_subNumber) || 0);
     setStartTime(_startTimes || []);
     setPOddsVector(_pOddsVector || []);
     setOddsVector(_oddsVector || []);
     setOutcomes(_outcomes || []);
     setOracleEpoch(Number(_oracleEpoch) || 0);
-    setBettingEpoch(Number(_bettingEpoch) || 0);
     setConcFactor(Number(_concFactor) || 0);
     setTotalTokens(Number(_totalTokens) / 1000 || 0);
     setTokRevTracker(Number(_tokRevTracker) || 0);
@@ -442,15 +430,12 @@ function OraclePage() {
   }
 
   function subNumberWord() {
-    if (subNumber === 0) {
-      if (reviewStatus === 0)
-        return "settle completed, waiting for new schedule.";
-      if (reviewStatus === 2) return "odds finalized, waiting for settlement.";
-      if (reviewStatus === 1) return "Schedule finalized, waiting for odds.";
+    if (subNumber > 0) {
+      if (!reviewStatus) return "odds sent, voting now";
+      if (reviewStatus) return "outcome/schedule sent, voting now";
     } else {
-      if (reviewStatus === 0) return "Schedule posted, voting on ";
-      if (reviewStatus === 2) return "settle posted, voting on ";
-      if (reviewStatus === 1) return "odds posted, voting on ";
+      if (!reviewStatus) return "Outcomes/Schedule posted, waiting on odds ";
+      if (reviewStatus) return "odds sent, waiting for settlement";
     }
   }
 
@@ -466,8 +451,8 @@ function OraclePage() {
     return needtovote;
   }
   // let haltedV = haltedColumn.indexOf(true);
-  console.log("halted", haltedColumn);
-  console.log("BettingOdds", oddsVector);
+  console.log("reviewStatus", reviewStatus);
+  console.log("subNumber", subNumber);
   console.log("OracleOdds", pOddsVector);
   // console.log("subnumber", subNumber);
   // console.log("revStatus", reviewStatus);
@@ -774,15 +759,11 @@ function OraclePage() {
               </Text>{" "}
               <br />
               <Text size="14px" className="style">
-                reviewStatus: {reviewStatus}
+                reviewStatus: {reviewStatus.toLocaleString()}
               </Text>{" "}
               <br />
               <Text size="14px" className="style">
                 subNumber: {subNumber}
-              </Text>{" "}
-              <br />
-              <Text size="14px" className="style">
-                ConcentrationLimit: {concFactor}
               </Text>{" "}
               <br />
               <Text size="14px" className="style">
@@ -865,7 +846,7 @@ function OraclePage() {
 
         <div>
           <Box>
-            {reviewStatus + subNumber == 2 ? (
+            {reviewStatus && subNumber === 0 ? (
               <Flex>
                 <TeamTableOdds
                   teamSplit={teamSplit}
@@ -879,17 +860,7 @@ function OraclePage() {
                 />
               </Flex>
             ) : null}
-            {reviewStatus + subNumber == 1 ? (
-              <Flex>
-                <TeamTableInit
-                  teamSplit={teamSplit}
-                  startTimeColumn={startTime}
-                  subNumber={subNumber}
-                  reviewStatus={reviewStatus}
-                />
-              </Flex>
-            ) : null}
-            {reviewStatus + subNumber == 0 || reviewStatus + subNumber == 3 ? (
+            {subNumber > 0 ? (
               <Flex>
                 <TeamTableWinner
                   teamSplit={teamSplit}

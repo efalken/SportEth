@@ -4,9 +4,11 @@ SPDX-License-Identifier: MIT License
 */
 pragma solidity 0.8.19;
 
+import "./Token.sol";
+import "./BettingFuji.sol";
 import "./ConstantsOracle.sol";
 
-contract fuckfuck {
+contract OracleFuji {
   // true means odds were last submission, false implies settle&init last
   bool public reviewStatus;
   // tracks whether voting active, allows corrective replacement submissions
@@ -40,6 +42,9 @@ contract fuckfuck {
   // track token holders: ownership metric, whether they voted, their basis for the token fees
   mapping(address => AdminStruct) public adminStruct;
   // this allows the contract to send and receive
+  Token public token;
+  // link to communicate with the betting contract
+  BettingFuji public bettingContract;
 
   struct AdminStruct {
     uint32 basePropNumber;
@@ -103,6 +108,8 @@ contract fuckfuck {
   );
 
   constructor(address payable bettingk, address payable _token) {
+    bettingContract = BettingFuji(bettingk);
+    token = Token(_token);
     oracleEpoch = 1;
     propNumber = 1;
     reviewStatus = true;
@@ -116,7 +123,7 @@ contract fuckfuck {
   function vote(bool _vote) external {
     require(adminStruct[msg.sender].tokens > 0, "need tokens");
     require(subNumber > 0, "nothing to vote on");
-    require(hourOfDay() > GMT_2, "need gmt hour > 2");
+    //  require(hourOfDay() > GMT_2, "need gmt hour > 2");
     require(adminStruct[msg.sender].voteTracker != propNumber, "only one vote");
     adminStruct[msg.sender].voteTracker = propNumber;
     if (_vote) {
@@ -137,7 +144,7 @@ contract fuckfuck {
   function oddsPost(uint16[32] memory _decimalOdds) external {
     require(!reviewStatus, "WRONG ORDER");
     post();
-    for (uint256 i = 0; i < 32; i++) {
+    for (uint256 i = 0; i < MAX_EVENTS; i++) {
       require(
         _decimalOdds[i] <= MAX_DEC_ODDS && _decimalOdds[i] >= MIN_DEC_ODDS,
         "bad odds"
@@ -169,14 +176,13 @@ contract fuckfuck {
       block.timestamp > uint256(gamesStart + SECONDS_TWO_DAYS),
       "only when weekend over"
     );
-    gamesStart =
-      _blocktime -
+    uint32 _gamesStart = _blocktime -
       ((_blocktime - FRIDAY_21_GMT) % SECONDS_IN_WEEK) +
       SECONDS_IN_WEEK;
-    for (uint256 i = 0; i < 32; i++) {
+    for (uint256 i = 0; i < MAX_EVENTS; i++) {
       require(
-        _starts[i] >= gamesStart &&
-          _starts[i] < (gamesStart + SECONDS_FOUR_DAYS),
+        _starts[i] >= _gamesStart &&
+          _starts[i] < (_gamesStart + SECONDS_FOUR_DAYS),
         "start time error"
       );
     }
@@ -213,19 +219,28 @@ contract fuckfuck {
    * if the vote rejects, it does not affect the betting contract
    */
   function processVote() external {
-    require(hourOfDay() >= GMT_15, "need gmt hour >= 15");
+    // require(hourOfDay() >= GMT_15, "need gmt hour >= 15");
     require(subNumber > 0, "nothing to send");
     subNumber = 0;
     uint32 thisEpoch = oracleEpoch;
     if (votes[0] > votes[1]) {
       if (!reviewStatus) {
+        bool success = bettingContract.transmitOdds(propOdds);
+        require(success);
         reviewStatus = !reviewStatus;
+        gamesStart = uint32(block.timestamp);
       } else {
-        tokenRevTracker += uint64(100 / uint256(totalTokens));
+        (uint32 _oracleEpoch, uint256 ethDividend) = bettingContract.settle(
+          propResults
+        );
+        oracleEpoch = _oracleEpoch;
+        tokenRevTracker += uint64(ethDividend / uint256(totalTokens));
+        bool success = bettingContract.transmitInit(propStartTimes);
+        require(success && _oracleEpoch > 0);
         reviewStatus = !reviewStatus;
       }
     } else {
-      adminStruct[proposer].probation = propNumber + 3;
+      // adminStruct[proposer].probation = propNumber + 3;
     }
     emit VoteOutcome(thisEpoch, propNumber, votes[0], votes[1], proposer);
     propNumber++;
@@ -240,11 +255,12 @@ contract fuckfuck {
   function adjConcLimit(uint32 _concentrationLim) external {
     require(adminStruct[msg.sender].tokens > 0, "need a balance");
     require(
-      _concentrationLim >= 5 && _concentrationLim <= 32,
+      _concentrationLim >= 5 && _concentrationLim <= MAX_EVENTS,
       "between 5 and 32"
     );
     require(propNumber > adminStruct[msg.sender].probation, "on probation");
-    adminStruct[msg.sender].probation = propNumber;
+    // adminStruct[msg.sender].probation = propNumber;
+    bettingContract.adjustConcentrationFactor(_concentrationLim);
     emit ParamsPosted(oracleEpoch, _concentrationLim, msg.sender);
   }
 
@@ -256,8 +272,65 @@ contract fuckfuck {
   function haltBetting(uint256 _match) external {
     require(adminStruct[msg.sender].tokens > 0, "need a balance");
     require(propNumber > adminStruct[msg.sender].probation, "on probation");
-    adminStruct[msg.sender].probation = propNumber;
+    // adminStruct[msg.sender].probation = propNumber;
+    bettingContract.haltMatch(_match);
     emit PausePosted(oracleEpoch, _match, msg.sender);
+  }
+
+  /**  @dev token deposits for oracle
+   * @param  _amt is the token amount deposited
+   * it uses the token contract's exclusive transfer function for this
+   * contract, and so does not require the standard approval function
+   * it distributes accrued avax if there, as it has to reset the metric used
+   * to calculate the fees/tokens relevant to this account's new token amount
+   */
+  function depositTokens(uint32 _amt) external {
+    require(
+      (_amt + adminStruct[msg.sender].tokens) >= MIN_TOKEN_DEPOSIT &&
+        (_amt + adminStruct[msg.sender].tokens) <= MAX_TOKEN_DEPOSIT,
+      "accounts restricted to between 100k and 250k"
+    );
+    bool success = token.transferFrom(msg.sender, address(this), uint256(_amt));
+    require(success, "token transfer failed");
+    uint256 _ethOutDeposit;
+    totalTokens += uint64(_amt);
+    if (adminStruct[msg.sender].totalVotes > 0) {
+      _ethOutDeposit = ethClaim();
+    }
+    adminStruct[msg.sender].initFeePool = tokenRevTracker;
+    adminStruct[msg.sender].tokens += _amt;
+    adminStruct[msg.sender].totalVotes = 0;
+    adminStruct[msg.sender].basePropNumber = propNumber;
+    payable(msg.sender).transfer(_ethOutDeposit);
+    emit Funding(oracleEpoch, _amt, false, _ethOutDeposit, msg.sender);
+  }
+
+  /**  @dev token holder withdrawals
+   * @param  _amt is the token amount withdrawn
+   * it also sends accrued avax, and resets the account
+   */
+  function withdrawTokens(uint32 _amt) external {
+    require(_amt <= adminStruct[msg.sender].tokens, "nsf tokens");
+    require(subNumber == 0, "no wd during vote");
+    require(
+      (adminStruct[msg.sender].tokens - _amt >= MIN_TOKEN_DEPOSIT) ||
+        (adminStruct[msg.sender].tokens == _amt),
+      "accounts restricted to min 50k"
+    );
+    require(propNumber > adminStruct[msg.sender].probation, "on probation");
+    uint256 _ethOutWd;
+    totalTokens -= uint64(_amt);
+    if (adminStruct[msg.sender].totalVotes > 0) {
+      _ethOutWd = ethClaim();
+    }
+    adminStruct[msg.sender].initFeePool = tokenRevTracker;
+    adminStruct[msg.sender].tokens -= _amt;
+    adminStruct[msg.sender].totalVotes = 0;
+    adminStruct[msg.sender].basePropNumber = propNumber;
+    bool success = token.transfer(msg.sender, uint256(_amt));
+    require(success, "token transfer failed");
+    payable(msg.sender).transfer(_ethOutWd);
+    emit Funding(oracleEpoch, _amt, true, _ethOutWd, msg.sender);
   }
 
   function showSchedString() external view returns (string[32] memory) {
@@ -283,13 +356,13 @@ contract fuckfuck {
       propNumber > adminStruct[msg.sender].probation,
       "still on probation"
     );
-    require(hourOfDay() <= GMT_2, "need gmt hour <= 2");
-    require(
-      (subNumber == 0 && msg.sender != proposer) ||
-        (subNumber > 0 && msg.sender == proposer) ||
-        (adminStruct[msg.sender].tokens >= adminStruct[proposer].tokens),
-      "no consecutive acct posting"
-    );
+    //   require(hourOfDay() <= GMT_2, "need gmt hour <= 2");
+    // require(
+    //   (subNumber == 0 && msg.sender != proposer) ||
+    //     (subNumber > 0 && msg.sender == proposer) ||
+    //     (adminStruct[msg.sender].tokens >= adminStruct[proposer].tokens),
+    //   "no consecutive acct posting"
+    // );
     require(adminStruct[msg.sender].tokens > 0);
     votes[0] = adminStruct[msg.sender].tokens;
     proposer = msg.sender;

@@ -172,10 +172,10 @@ contract OracleFuji {
   ) external returns (bool) {
     require(reviewStatus, "wrong sequence");
     uint32 _blocktime = uint32(block.timestamp);
-    require(
-      block.timestamp > uint256(gamesStart + SECONDS_TWO_DAYS),
-      "only when weekend over"
-    );
+    // require(
+    //   block.timestamp > uint256(gamesStart + SECONDS_TWO_DAYS),
+    //   "only when weekend over"
+    // );
     uint32 _gamesStart = _blocktime -
       ((_blocktime - FRIDAY_21_GMT) % SECONDS_IN_WEEK) +
       SECONDS_IN_WEEK;
@@ -240,7 +240,7 @@ contract OracleFuji {
         reviewStatus = !reviewStatus;
       }
     } else {
-      // adminStruct[proposer].probation = propNumber + 3;
+      adminStruct[proposer].probation = propNumber + 3;
     }
     emit VoteOutcome(thisEpoch, propNumber, votes[0], votes[1], proposer);
     propNumber++;
@@ -259,7 +259,7 @@ contract OracleFuji {
       "between 5 and 32"
     );
     require(propNumber > adminStruct[msg.sender].probation, "on probation");
-    // adminStruct[msg.sender].probation = propNumber;
+    adminStruct[msg.sender].probation = propNumber;
     bettingContract.adjustConcentrationFactor(_concentrationLim);
     emit ParamsPosted(oracleEpoch, _concentrationLim, msg.sender);
   }
@@ -272,7 +272,7 @@ contract OracleFuji {
   function haltBetting(uint256 _match) external {
     require(adminStruct[msg.sender].tokens > 0, "need a balance");
     require(propNumber > adminStruct[msg.sender].probation, "on probation");
-    // adminStruct[msg.sender].probation = propNumber;
+    adminStruct[msg.sender].probation = propNumber;
     bettingContract.haltMatch(_match);
     emit PausePosted(oracleEpoch, _match, msg.sender);
   }
@@ -306,7 +306,7 @@ contract OracleFuji {
   }
 
   /**  @dev token holder withdrawals
-   * @param  _amt is the token amount withdrawn
+   *  @param  _amt is the token amount withdrawn
    * it also sends accrued avax, and resets the account
    */
   function withdrawTokens(uint32 _amt) external {

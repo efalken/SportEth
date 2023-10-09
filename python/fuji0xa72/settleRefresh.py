@@ -1,4 +1,4 @@
-from python.fuji0xa72.helperOracle0xa72 import send_function
+from helperOracle0xa72 import send_function
 import json
 
 
@@ -10,7 +10,7 @@ def settleRefreshPost():
         args["_resultVector"],
         args["_teamsched"],
         args["_starts"],
-        gas=3600000,
+        gas=1000000,
     )
     return tx_hash
 

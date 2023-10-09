@@ -198,7 +198,7 @@ contract Betting {
 
   /// @dev bettor funds account for bets
   function fundBettor() external payable {
-    uint64 amt = uint64(msg.value / 1e10);
+    uint64 amt = uint64(msg.value / UNITS_TRANS14);
     require(amt >= MIN_DEPOSIT, "need at least one avax");
     userStruct[msg.sender].userBalance += amt;
     emit Funding(msg.sender, bettingEpoch, amt, 0);
@@ -207,7 +207,7 @@ contract Betting {
   /// @dev funds LP for supplying capital to take bets
   function fundBook() external payable {
     require(!bettingActive, "not while betting active");
-    uint64 netinvestment = uint64(msg.value / 1e10);
+    uint64 netinvestment = uint64(msg.value / UNITS_TRANS14);
     uint64 _shares = 0;
     require(netinvestment >= uint256(MIN_DEPOSIT), "need at least one avax");
     if (margin[0] > 0) {
@@ -230,7 +230,7 @@ contract Betting {
   function withdrawBettor(uint64 _amt) external {
     require(_amt <= userStruct[msg.sender].userBalance);
     userStruct[msg.sender].userBalance -= _amt;
-    uint256 amt256 = uint256(_amt) * 1e10;
+    uint256 amt256 = uint256(_amt) * UNITS_TRANS14;
     payable(msg.sender).transfer(amt256);
     emit Funding(msg.sender, bettingEpoch, _amt, 2);
   }
@@ -254,7 +254,7 @@ contract Betting {
       avaxWithdraw = (avaxWithdraw * 99) / 100;
     }
     margin[0] -= avaxWithdraw;
-    uint256 avaxWithdraw256 = uint256(avaxWithdraw) * 1e10;
+    uint256 avaxWithdraw256 = uint256(avaxWithdraw) * UNITS_TRANS14;
     payable(msg.sender).transfer(avaxWithdraw256);
     emit Funding(msg.sender, bettingEpoch, avaxWithdraw, 3);
   }
@@ -320,7 +320,7 @@ contract Betting {
         }
       }
     }
-    uint256 oracleDiv = 1e8 * uint256(winningsPot);
+    uint256 oracleDiv = ORACLE_5PERC * uint256(winningsPot);
     margin[0] = margin[0] + margin[2] - betReturnPot - winningsPot;
     margin[1] = 0;
     margin[2] = 0;

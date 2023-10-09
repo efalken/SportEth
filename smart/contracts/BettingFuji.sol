@@ -320,7 +320,7 @@ contract BettingFuji {
         }
       }
     }
-    uint256 oracleDiv = 1e8 * uint256(winningsPot);
+    uint256 oracleDiv = 5e8 * uint256(winningsPot);
     margin[0] = margin[0] + margin[2] - betReturnPot - winningsPot;
     margin[1] = 0;
     margin[2] = 0;

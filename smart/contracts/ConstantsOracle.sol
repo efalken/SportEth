@@ -12,7 +12,7 @@ uint16 constant MIN_DEC_ODDS = 125;
 // min deposit of 5% of token supply encourages token holders to join vaults,
 uint32 constant MIN_TOKEN_DEPOSIT = 10e7;
 //  encourages but does not guarantee independence among oracle accounts
-uint32 constant MAX_TOKEN_DEPOSIT = 25e7;
+uint32 constant MAX_TOKEN_DEPOSIT = 22e7;
 // used to calculate next friday start, 9 PM GMT in seconds
 uint32 constant FRIDAY_21_GMT = 1687554000;
 // used to calculate next friday start

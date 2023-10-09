@@ -39,14 +39,13 @@ export default function TeamTableWinner({
     }
   }
 
-  if (reviewStatus === 0 && subNumber > 0) {
+  if (reviewStatus && subNumber > 0) {
     colorFave = "#00ff00";
     colorUnd = "#00ff00";
     colorStart = "#00ff00";
-  } else if (reviewStatus === 1 && subNumber > 0) {
-    colorOdds = "#00ff00";
-  } else if (reviewStatus === 2 && subNumber > 0) {
     colorOutcome = "#00ff00";
+  } else if (!reviewStatus && subNumber > 0) {
+    colorOdds = "#00ff00";
   }
 
   const borderCells = 5;
@@ -64,16 +63,16 @@ export default function TeamTableWinner({
       <tbody className="style">
         <tr style={{ width: "50%", textAlign: "left" }}>
           <th>Match</th>
-          <th style={{ color: colorOutcome }}>Winner</th>
-          <th style={{ textAlign: "left", color: colorFave }}>Favorite</th>
+          <th style={{ color: colorOutcome }}>Past Winner</th>
+          <th style={{ textAlign: "left", color: colorFave }}>New Favorite</th>
           <th style={{ textAlign: "left", color: colorOdds }}>
             {showDecimalOdds ? "DecOdds" : "MoneyLine"}
           </th>
-          <th style={{ textAlign: "left", color: colorUnd }}>Underdog</th>
+          <th style={{ textAlign: "left", color: colorUnd }}>New Underdog</th>
           <th style={{ textAlign: "left", color: colorOdds }}>
             {showDecimalOdds ? "DecOdds" : "MoneyLine"}
           </th>
-          <th style={{ textAlign: "left", color: colorStart }}>Start</th>
+          <th style={{ textAlign: "left", color: colorStart }}>New Start</th>
         </tr>
 
         {[...Array(32)].map((_value, i) =>

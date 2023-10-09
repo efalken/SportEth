@@ -310,9 +310,13 @@ describe("Betting", function () {
       ).to.be.reverted;
     });
 
-    it("init post", async () => {
+    it("init post2", async () => {
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       await oracle.processVote();
+    });
+
+    it("init post3", async () => {
+      await helper.advanceTimeAndBlock(secondsInHour * 24 * 6);
       _hourSolidity = Number(await oracle.hourOfDay());
       hourOffset = 24 - _hourSolidity;
       if (hourOffset > 21) hourOffset = 0;

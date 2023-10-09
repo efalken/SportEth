@@ -42,14 +42,14 @@ describe("Betting", function () {
     });
 
     it("transfer tokens to acct1", async () => {
-      await token.transfer(account1.address, 130n * million);
-      await token.transfer(account2.address, 120n * million);
-      await token.approve(oracle.address, 250n * million);
-      await token.connect(account1).approve(oracle.address, 130n * million);
-      await token.connect(account2).approve(oracle.address, 120n * million);
-      await oracle.depositTokens(250n * million);
-      await oracle.connect(account1).depositTokens(130n * million);
-      await oracle.connect(account2).depositTokens(120n * million);
+      await token.transfer(account1.address, 120n * million);
+      await token.transfer(account2.address, 100n * million);
+      await token.approve(oracle.address, 220n * million);
+      await token.connect(account1).approve(oracle.address, 120n * million);
+      await token.connect(account2).approve(oracle.address, 100n * million);
+      await oracle.depositTokens(220n * million);
+      await oracle.connect(account1).depositTokens(120n * million);
+      await oracle.connect(account2).depositTokens(100n * million);
     });
 
     it("token balances", async () => {
@@ -75,10 +75,10 @@ describe("Betting", function () {
       console.log(`tokBal12 ${tokBal12}`);
       console.log(`tokBal13 ${tokBal13}`);
 
-      assert.equal(tokBal10, "0.25", "Must be equal");
-      assert.equal(tokBal11, "0.13", "Must be equal");
-      assert.equal(tokBal12, "0.12", "Must be equal");
-      assert.equal(tokBal13, "0.5", "Must be equal");
+      assert.equal(tokBal10, "0.22", "Must be equal");
+      assert.equal(tokBal11, "0.12", "Must be equal");
+      assert.equal(tokBal12, "0.1", "Must be equal");
+      assert.equal(tokBal13, "0.44", "Must be equal");
     });
 
     it("send init", async () => {
@@ -198,8 +198,8 @@ describe("Betting", function () {
       const yesvote = await oracle.votes(0);
       const novote = await oracle.votes(1);
       console.log(`Yes Vote 1 ${yesvote}: No Vote 1 ${novote}`);
-      assert.equal(yesvote, "380000000", "Must be equal");
-      assert.equal(novote, "120000000", "Must be equal");
+      assert.equal(yesvote, "340000000", "Must be equal");
+      assert.equal(novote, "100000000", "Must be equal");
     });
 
     it("process vote, should send odds", async () => {
@@ -303,8 +303,8 @@ describe("Betting", function () {
       const yesvote = await oracle.votes(0);
       const novote = await oracle.votes(1);
       console.log(`Yes Votes ${yesvote}: No Votes ${novote}`);
-      assert.equal(yesvote, "250000000", "Must be equal");
-      assert.equal(novote, "250000000", "Must be equal");
+      assert.equal(yesvote, "220000000", "Must be equal");
+      assert.equal(novote, "220000000", "Must be equal");
       result = await oracle.processVote();
       receipt = await result.wait();
       const bettingStat = await betting.bettingActive();

@@ -1,11 +1,11 @@
-from python.fuji0xa72.helperOracle0xa72 import send_function
+from helperOracle0xa72 import send_function
 import json
 
 
 def oddsPost():
     with open("../odds.json", "r") as f:
         args = json.load(f)
-    tx_hash = send_function("oddsPost", args["_decimalOdds"], gas=150000)
+    tx_hash = send_function("oddsPost", args["_decimalOdds"], gas=500000)
     return tx_hash
 
 
