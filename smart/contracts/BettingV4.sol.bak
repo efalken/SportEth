@@ -7,7 +7,7 @@ pragma solidity 0.8.19;
 import "./Token.sol";
 import "./ConstantsBetting.sol";
 
-contract Betting {
+contract BettingV4 {
   // 0 post-settle/pre-init, 1 post-initial slate/pre-odds
   // 2 post-odds/pre-settle
   bool public bettingActive;
@@ -127,10 +127,8 @@ contract Betting {
     int64 betPayoff = int64(uint64(odds[_matchNumber]));
     require(betPayoff % 10 == 0, "match halted");
     require(bettingActive, "odds not ready");
-    require(
-      userStruct[msg.sender].counter < MAX_BETS,
-      "betstack full, redeem bets"
-    );
+    // changed for test
+    require(userStruct[msg.sender].counter < 99, "betstack full, redeem bets");
     require(
       (_betAmt <= int64(userStruct[msg.sender].userBalance) &&
         _betAmt >= MIN_BET),
@@ -358,7 +356,8 @@ contract Betting {
   function tokenReward() external {
     uint256 tokensLeft = token.balanceOf(address(this));
     require(tokensLeft > 0, "no token rewards left");
-    require(bettingEpoch > 4, "starts in epoch 5!");
+    // comment out for test4LPRevRewards
+    //require(bettingEpoch > 5, "starts in epoch 6!");
     uint256 lpShares = uint256(lpStruct[msg.sender].shares);
     require(lpShares > 0, "only for liq providers");
     require(bettingEpoch > lpStruct[msg.sender].lpEpoch, "one claim per epoch");

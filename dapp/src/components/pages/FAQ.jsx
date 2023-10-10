@@ -1,8 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { defaultNetwork } from "../../config";
-import { Link } from "react-router-dom";
-import { writeContract } from "viem/actions";
-import { useAccount, useContractReads, useWalletClient } from "wagmi";
+import VBackgroundCom from "../basics/VBackgroundCom";
 
 function FAQ() {
   document.title = "FAQs";

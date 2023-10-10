@@ -14,7 +14,7 @@ describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
-    const Betting = await ethers.getContractFactory("Betting");
+    const Betting = await ethers.getContractFactory("BettingV4");
     const Token = await ethers.getContractFactory("Token");
     const Oracle = await ethers.getContractFactory("Oracle");
 
@@ -308,6 +308,10 @@ describe("Betting", function () {
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
       console.log(`gas on bet ${gasUsed}`);
+      result = await betting.connect(account2).bet(5, 1, "10000");
+      receipt = await result.wait();
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on bet 2 ${gasUsed}`);
       //await expect(betting.connect(account2).bet(31, 0, "10000")).to.be
       //  .reverted;
 
@@ -479,6 +483,31 @@ describe("Betting", function () {
       receipt = await result.wait();
       gasUsed = Number(receipt.gasUsed);
       console.log(`gas redeem ${gasUsed}`);
+    });
+
+    it("send odds 2", async () => {
+      _hourSolidity = Number(await oracle.hourOfDay());
+      hourOffset = 24 - _hourSolidity;
+      if (hourOffset > 21) hourOffset = 0;
+      await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      result = await oracle
+        .connect(account1)
+        .oddsPost([
+          950, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
+          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
+          919, 720, 672, 800, 999, 500, 500, 919, 909, 800, 510, 739, 620, 960,
+          650, 688, 970, 730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790,
+          730, 690, 970, 760, 919, 720, 672, 800,
+        ]);
+      receipt = await result.wait();
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on oddsPost = ${gasUsed}`);
+      await helper.advanceTimeAndBlock(secondsInHour * 15);
+      result = await oracle.processVote();
+
+      receipt = await result.wait();
+      gasUsed = receipt.gasUsed;
+      console.log(`gas on oddsProcess = ${gasUsed}`);
     });
   });
 });

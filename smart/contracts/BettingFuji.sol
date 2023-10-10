@@ -127,10 +127,7 @@ contract BettingFuji {
     int64 betPayoff = int64(uint64(odds[_matchNumber]));
     require(betPayoff % 10 == 0, "match halted");
     require(bettingActive, "odds not ready");
-    require(
-      userStruct[msg.sender].counter < MAX_EVENTS,
-      "betstack full, redeem bets"
-    );
+    require(userStruct[msg.sender].counter < MAX_BETS, "betstack full, redeem bets");
     require(
       (_betAmt <= int64(userStruct[msg.sender].userBalance) &&
         _betAmt >= MIN_BET),
@@ -358,8 +355,7 @@ contract BettingFuji {
   function tokenReward() external {
     uint256 tokensLeft = token.balanceOf(address(this));
     require(tokensLeft > 0, "no token rewards left");
-    // comment out for test4LPRevRewards
-    require(bettingEpoch > 5, "starts in epoch 6!");
+    require(bettingEpoch > 4, "starts in epoch 5!");
     uint256 lpShares = uint256(lpStruct[msg.sender].shares);
     require(lpShares > 0, "only for liq providers");
     require(bettingEpoch > lpStruct[msg.sender].lpEpoch, "one claim per epoch");

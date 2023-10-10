@@ -146,7 +146,7 @@ contract OracleFuji {
     post();
     for (uint256 i = 0; i < MAX_EVENTS; i++) {
       require(
-        _decimalOdds[i] <= MAX_DEC_ODDS && _decimalOdds[i] >= MIN_DEC_ODDS,
+        _decimalOdds[i] <= 1000 && _decimalOdds[i] >= MIN_DEC_ODDS,
         "bad odds"
       );
       propOdds[i] = _decimalOdds[i] * 10;

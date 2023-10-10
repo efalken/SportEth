@@ -71,7 +71,7 @@ contract Oracle {
     address transactor
   );
 
-  event ParamsPosted(uint32 epoch, uint32 concLimit, address msgsender);
+  event ParamsPosted(uint32 epoch, uint64 concLimit, address msgsender);
 
   event PausePosted(uint32 epoch, uint256 pausedMatch, address msgsender);
 
@@ -240,7 +240,7 @@ contract Oracle {
         reviewStatus = !reviewStatus;
       }
     } else {
-      adminStruct[proposer].probation = propNumber + 3;
+      adminStruct[proposer].probation = propNumber + 2;
     }
     emit VoteOutcome(thisEpoch, propNumber, votes[0], votes[1], proposer);
     propNumber++;
@@ -252,10 +252,11 @@ contract Oracle {
    * and 15.0 avax supplied by the LPs, each event can handle up to 3.2 avax on
    * any single match. Its optimal setting will be discovered by experience.
    */
-  function adjConcLimit(uint32 _concentrationLim) external {
+  function adjConcLimit(uint64 _concentrationLim) external {
     require(adminStruct[msg.sender].tokens > 0, "need a balance");
     require(
-      _concentrationLim >= 5 && _concentrationLim <= MAX_EVENTS,
+      _concentrationLim >= MIN_CONC_FACTOR &&
+        _concentrationLim <= MAX_CONC_FACTOR,
       "between 5 and 32"
     );
     require(propNumber > adminStruct[msg.sender].probation, "on probation");
