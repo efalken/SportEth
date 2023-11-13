@@ -8,7 +8,6 @@ import Form from "../basics/Form";
 import TruncatedAddress from "../basics/TruncatedAddress";
 import VBackgroundCom from "../basics/VBackgroundCom";
 import TeamTableWinner from "../blocks/TeamTableWinner";
-import TeamTableInit from "../blocks/TeamTableInit";
 import TeamTableOdds from "../blocks/TeamTableOdds";
 import { Link } from "react-router-dom";
 import { useAccount, useContractReads, useWalletClient } from "wagmi";
@@ -37,13 +36,12 @@ function OraclePage() {
   const [scheduleString, setScheduleString] = useState(
     Array(32).fill("check later...: n/a: n/a")
   );
-  const [haltedVector, setHaltedVector] = useState([]);
   const [outcomes, setOutcomes] = useState([]);
   const [voteNo, setVoteNo] = useState(0);
   const [voteYes, setVoteYes] = useState(0);
   const [propNumber, setPropNumber] = useState(0);
   const [reviewStatus, setReviewStatus] = useState(false);
-  //const [bettingStatus, setBettingStatus] = useState(0);
+  const [bettingActive, setBettingActive] = useState(false);
   const [subNumber, setSubNumber] = useState(0);
   const [oracleEpoch, setOracleEpoch] = useState(0);
   //const [bettingEpoch, setBettingEpoch] = useState(0);
@@ -57,6 +55,8 @@ function OraclePage() {
   const [basePropNumber, setBasePropNumber] = useState(0);
   const [eoaTokens, setEoaTokens] = useState(0);
   const [baseEpoch, setBaseEpoch] = useState(0);
+  const [probation, setProbation] = useState(0);
+  const [probation2, setProbation2] = useState(0);
   const [voteTracker, setVoteTracker] = useState(0);
   const [tokens, setTokens] = useState(0);
   const [totalVotes, setTotalVotes] = useState(0);
@@ -78,64 +78,26 @@ function OraclePage() {
   }, []);
 
   let [odds0, setOdds0] = useState([
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957,
+    355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355,
+    355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355,
+    355, 355,
   ]);
 
   let [odds1, setOdds1] = useState([
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957, 957,
-    957, 957,
+    355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355,
+    355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355, 355,
+    355, 355,
   ]);
 
   let odds999 = 0;
   let oddsTot = [odds0, odds1];
-  const [haltedColumn, setHaltedColumn] = useState([
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-  ]);
 
   useEffect(() => {
     for (let ii = 0; ii < 32; ii++) {
       if (pOddsVector) odds999 = Number(pOddsVector[ii]) || 0;
-      haltedColumn[ii] = oddsVector[ii] % 10 === 1 ? true : false;
-      if (haltedColumn[ii]) haltedVector.push(ii);
-      odds0[ii] = odds999 / 10;
-      odds1[ii] = Math.floor(1e8 / (odds999 + 450) - 450) / 10 || 0;
+      odds0[ii] = Math.floor(1e7 / (512 + odds999) - 10000) || 0;
+      odds1[ii] = Math.floor(1e7 / (512 - odds999) - 10000) || 0;
     }
-    setHaltedColumn(haltedColumn);
-
     setOdds0(odds0);
     setOdds1(odds1);
   }, [pOddsVector]);
@@ -163,16 +125,18 @@ function OraclePage() {
           </a>
         </div>
         <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div
-          style={{
-            color: "yellow",
-            font: "Arial",
-            fontStyle: "Italic",
-            fontSize: "14px",
-          }}
-          onClick={() => setHash(null)}
-        >
-          click here to dismiss
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+          >
+            <u>click here to dismiss</u>
+          </a>
         </div>
       </div>
     );
@@ -194,19 +158,34 @@ function OraclePage() {
     }
   }
 
-  async function haltMach(_match) {
+  // async function haltMach(_match) {
+  //   try {
+  //     const txHash = await writeContract(walletClient, {
+  //       abi: oracleContractABI,
+  //       address: oracleContractAddress,
+  //       functionName: "haltBetting",
+  //       args: [changeMatch],
+  //     });
+  //     updateTransactionHashDialogBox(txHash);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  //   setChangeMatch("");
+  // }
+
+  async function adjConcFactor(_match) {
     try {
       const txHash = await writeContract(walletClient, {
         abi: oracleContractABI,
         address: oracleContractAddress,
-        functionName: "haltBetting",
-        args: [changeMatch],
+        functionName: "adjConcLimit",
+        args: [concFactor],
       });
       updateTransactionHashDialogBox(txHash);
     } catch (err) {
       console.log(err);
     }
-    setChangeMatch("");
+    setConcFactor("");
   }
 
   async function processVote() {
@@ -291,6 +270,11 @@ function OraclePage() {
         functionName: "reviewStatus",
       },
       {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
+        functionName: "bettingActive",
+      },
+      {
         abi: oracleContractABI,
         address: oracleContractAddress,
         functionName: "subNumber",
@@ -303,7 +287,7 @@ function OraclePage() {
       {
         abi: oracleContractABI,
         address: oracleContractAddress,
-        functionName: "showPropOdds",
+        functionName: "showprobSpreadDiv2",
       },
       {
         abi: bettingContractABI,
@@ -368,6 +352,7 @@ function OraclePage() {
       { result: _votes1 },
       { result: _propNumber },
       { result: _reviewStatus },
+      { result: _bettingActive },
       { result: _subNumber },
       { result: _startTimes },
       { result: _pOddsVector },
@@ -387,6 +372,7 @@ function OraclePage() {
     setVoteNo(Number(_votes1) || 0);
     setPropNumber(Number(_propNumber) || 0);
     setReviewStatus(_reviewStatus);
+    setBettingActive(_bettingActive);
     setSubNumber(Number(_subNumber) || 0);
     setStartTime(_startTimes || []);
     setPOddsVector(_pOddsVector || []);
@@ -398,11 +384,12 @@ function OraclePage() {
     setTokRevTracker(Number(_tokRevTracker) || 0);
     setProposer(_proposer || "0x123");
     setBasePropNumber(_adminStruct[0] || 0);
-    setBaseEpoch(_adminStruct[1] || 0);
-    setVoteTracker(_adminStruct[2] || 0);
-    setTotalVotes(_adminStruct[3] || 0);
-    setTokens(_adminStruct[4] || 0);
-    setInitFeePool(Number(_adminStruct[5]) || 0);
+    setProbation(_adminStruct[1] || 0);
+    setProbation2(_adminStruct[2] || 0);
+    setVoteTracker(_adminStruct[3] || 0);
+    setTotalVotes(_adminStruct[4] || 0);
+    setTokens(_adminStruct[5] || 0);
+    setInitFeePool(Number(_adminStruct[6]) || 0);
     setEoaTokens(Number(_eoaTokens) / 1000 || 0);
     setScheduleString(_sctring);
   }, [data]);
@@ -415,14 +402,14 @@ function OraclePage() {
   }
 
   function ethToClaim() {
-    let coeff = 0;
+    let avaxAP = 0;
     if (propNumber > basePropNumber) {
-      coeff = totalVotes / (propNumber - basePropNumber);
+      avaxAP = totalVotes / (propNumber - basePropNumber);
     }
-    coeff = coeff > 1 ? 1 : coeff;
+    avaxAP = avaxAP > 1 ? 1 : avaxAP;
     let x = (tokens / 1e9) * (tokenRevTracker - initFeePool);
-    coeff = (coeff * x) / 1e5;
-    return coeff;
+    avaxAP = (avaxAP * x) / 1e5;
+    return avaxAP;
   }
 
   function switchOdds() {
@@ -435,7 +422,8 @@ function OraclePage() {
       if (reviewStatus) return "outcome/schedule sent, voting now";
     } else {
       if (!reviewStatus) return "Outcomes/Schedule posted, waiting on odds ";
-      if (reviewStatus) return "odds sent, waiting for settlement";
+      if (reviewStatus)
+        return "odds sent, waiting for settlement and new schedule";
     }
   }
 
@@ -451,9 +439,9 @@ function OraclePage() {
     return needtovote;
   }
   // let haltedV = haltedColumn.indexOf(true);
-  console.log("reviewStatus", reviewStatus);
-  console.log("subNumber", subNumber);
-  console.log("OracleOdds", pOddsVector);
+
+  console.log("initFeePool", initFeePool);
+  console.log("tokenRevTracker", tokenRevTracker);
   // console.log("subnumber", subNumber);
   // console.log("revStatus", reviewStatus);
   // console.log("bettingActive", bettingStatus);
@@ -550,8 +538,8 @@ function OraclePage() {
               </Text>
               <TruncatedAddress
                 addr={address}
-                start="8"
-                end="0"
+                start="6"
+                end="3"
                 transform="uppercase"
                 spacing="1px"
               />
@@ -602,7 +590,7 @@ function OraclePage() {
                     border: "1px solid #ccff99",
                   }}
                 >
-                  {Number(tokens / 1e3).toFixed(3)}
+                  {Number(tokens / 1e3).toLocaleString()}
                 </button>
                 <Text size="14px" className="style">
                   {"  "}
@@ -662,15 +650,6 @@ function OraclePage() {
                       total tokens deposited:{" "}
                       {Math.round(totalTokens).toLocaleString()}
                       <br />
-                      Current Epoch: {oracleEpoch}
-                      <br />
-                      Your base epoch: {baseEpoch}
-                      <br />
-                      Your voting record:{" "}
-                      {Number(
-                        (Number(totalVotes) * 100) /
-                          (propNumber - basePropNumber)
-                      ).toFixed(0) + " %"}
                     </Text>
                     <br />
                     <Text size="14px" className="style">
@@ -680,7 +659,7 @@ function OraclePage() {
                 ) : null}
               </Flex>
             </Box>
-            <Box>
+            {/* <Box>
               <Form
                 onChange={(e) => setChangeMatch(e.target.value)}
                 value={changeMatch}
@@ -691,6 +670,19 @@ function OraclePage() {
                 placeholder="match #"
                 buttonLabel="halt"
                 buttonWidth="50px"
+              />
+            </Box> */}
+            <Box>
+              <Form
+                onChange={(e) => setConcFactor(e.target.value)}
+                value={concFactor}
+                onSubmit={adjConcFactor}
+                mb="1px"
+                justifycontent="flex-start"
+                padding="4px"
+                placeholder="match #"
+                buttonLabel="conc factor"
+                buttonWidth="100px"
               />
             </Box>
             <Flex
@@ -744,42 +736,56 @@ function OraclePage() {
               )}
             </Flex>
             <Box mb="10px" mt="10px">
+              <Text size="16px" className="style">
+                Contract state
+                <br />
+              </Text>
               <Text size="14px" className="style">
                 last submitter:
                 <TruncatedAddress
                   addr={proposer}
-                  start="8"
-                  end="0"
+                  start="6"
+                  end="3"
                   transform="uppercase"
                   spacing="1px"
                 />
               </Text>
               <Text size="14px" className="style">
-                ConcentrationLimit: {concFactor}
-              </Text>{" "}
-              <br />
-              <Text size="14px" className="style">
+                concentration factor: {concFactor}
+                <br />
                 reviewStatus: {reviewStatus.toLocaleString()}
-              </Text>{" "}
-              <br />
-              <Text size="14px" className="style">
+                <br />
+                bettingActive: {bettingActive.toLocaleString()}
+                <br />
                 subNumber: {subNumber}
-              </Text>{" "}
-              <br />
-              <Text size="14px" className="style">
-                current Submission Number: {propNumber}
+                <br />
+                current epoch: {oracleEpoch}
+                <br />
+                current prop number: {propNumber}
+                <br />
+                <br />
               </Text>
-              <br />
-              <Text size="14px" className="style">
-                Your last Proposal Vote: {voteTracker}
+              <Text size="16px" className="style">
+                Connected account state
+                <br />
               </Text>
-              <br />
               <Text size="14px" className="style">
-                Tokens in EOA: {Math.round(eoaTokens).toLocaleString()}
-              </Text>
-              <br />
-              <Text size="14px" className="style">
-                HaltedMatches: {haltedVector.toString()}
+                base prop number: {basePropNumber}
+                <br />
+                probation number: {probation}
+                <br />
+                probation2: {probation2}
+                <br />
+                last vote prop num: {voteTracker}
+                <br />
+                total votes: {totalVotes}
+                <br />
+                voting record:{" "}
+                {Number(
+                  (Number(totalVotes) * 100) / (propNumber - basePropNumber)
+                ).toFixed(0) + " %"}
+                <br />
+                tokens in EOA: {Math.round(eoaTokens).toLocaleString()}
               </Text>
             </Box>
           </Box>
@@ -829,8 +835,8 @@ function OraclePage() {
             </button>
             <Text size="14px" className="style">
               <br />
-              No Votes: {Number(voteNo).toLocaleString()} Yes Votes:{" "}
-              {Number(voteYes).toLocaleString()}
+              No Votes: {Math.floor(Number(voteNo / 1000)).toLocaleString()} Yes
+              Votes: {Math.floor(Number(voteYes / 1000)).toLocaleString()}
             </Text>
           </Box>
         ) : null}
@@ -846,28 +852,24 @@ function OraclePage() {
 
         <div>
           <Box>
-            {reviewStatus && subNumber === 0 ? (
+            {!reviewStatus && subNumber > 0 ? (
               <Flex>
                 <TeamTableOdds
                   teamSplit={teamSplit}
                   startTimeColumn={startTime}
                   showDecimalOdds={showDecimalOdds}
                   oddsTot={oddsTot}
-                  getMoneyLine={getMoneyLine}
                   outcomev={outcomes}
                   subNumber={subNumber}
                   reviewStatus={reviewStatus}
                 />
               </Flex>
             ) : null}
-            {subNumber > 0 ? (
+            {subNumber > 0 && reviewStatus ? (
               <Flex>
                 <TeamTableWinner
                   teamSplit={teamSplit}
                   startTimeColumn={startTime}
-                  showDecimalOdds={showDecimalOdds}
-                  oddsTot={oddsTot}
-                  getMoneyLine={getMoneyLine}
                   outcomev={outcomes}
                   subNumber={subNumber}
                   reviewStatus={reviewStatus}

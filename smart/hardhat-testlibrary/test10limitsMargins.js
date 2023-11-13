@@ -21,9 +21,16 @@ describe("Betting", function () {
 
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
-    oracle = await Oracle.deploy(betting.address, token.address);
+    [owner, account1, account2, account3, account4, account5, account6, _] =
+      await ethers.getSigners();
+    oracle = await Oracle.deploy(
+      betting.address,
+      token.address,
+      owner.address,
+      account1.address,
+      account2.address
+    );
     await betting.setOracleAddress(oracle.address);
-    [owner, account1, account2, account3, _] = await ethers.getSigners();
   });
 
   describe("set up contract", async () => {
@@ -161,9 +168,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 999, 999, 999, 999, 999, 999, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
     });
 
@@ -183,10 +189,12 @@ describe("Betting", function () {
       margin1 = await betting.margin(1);
       console.log(`freeCapital:${margin0 - margin1}`);
 
-      await expect(betting.connect(account2).bet(0, 0, "60062")).to.be.reverted;
-      result = await betting.connect(account2).bet(0, 0, "60061");
+      await expect(betting.connect(account2).bet(0, 0, "62954")).to.be.reverted;
+      result = await betting.connect(account2).bet(0, 0, "62950");
+    });
 
-      result = await betting.connect(account3).bet(0, 1, "120000");
+    it("bets2", async () => {
+      result = await betting.connect(account3).bet(0, 1, "125000");
 
       const acct2Bal = (await betting.userStruct(account2.address)).userBalance;
       console.log(`acct2: ${acct2Bal} `);
@@ -203,31 +211,40 @@ describe("Betting", function () {
       const bigIntsa = piecesa.map((s) => BigInt("0x" + s)).reverse();
       const numbersa = bigIntsa.map((bigInt) => bigInt.toString());
       console.log("LpExposure to 0-0", numbersa[2] - numbersa[1]);
-      await expect(betting.connect(account2).bet(0, 0, "120122")).to.be
+      await expect(betting.connect(account2).bet(0, 0, "131160")).to.be
         .reverted;
+    });
+
+    it("bets3", async () => {
       console.log(`margin0: ${margin0} margin1: ${margin1}`);
-      result = await betting.connect(account2).bet(0, 0, "120121");
-      result = await betting.connect(account2).bet(1, 0, "60061");
-      result = await betting.connect(account2).bet(2, 0, "60061");
-      await expect(betting.connect(account2).bet(3, 0, "60062")).to.be.reverted;
-      result = await betting.connect(account2).bet(3, 0, "60061");
-      result = await betting.connect(account2).bet(4, 0, "50062");
+      result = await betting.connect(account2).bet(0, 0, "131148");
       margin0 = await betting.margin(0);
       margin1 = await betting.margin(1);
-      console.log(`freeCapital:${margin0 - margin1}`);
+      console.log(`freeCapital0: ${margin0 - margin1}`);
+      result = await betting.connect(account2).bet(1, 0, "62951");
+      result = await betting.connect(account2).bet(2, 0, "62951");
+      result = await betting.connect(account2).bet(3, 0, "62952");
+      margin0 = await betting.margin(0);
+      margin1 = await betting.margin(1);
+      console.log(`margin0: ${margin0} margin1: ${margin1}`);
+      console.log(`freeCapital1: ${margin0 - margin1}`);
+      result = await betting.connect(account2).bet(4, 0, "40000");
+      margin0 = await betting.margin(0);
+      margin1 = await betting.margin(1);
+      console.log(`margin0: ${margin0} margin1: ${margin1}`);
+      console.log(`freeCapital2: ${margin0 - margin1}`);
       const betData7 = await betting.betData(5);
       const str = betData7.toHexString(16).slice(2).padStart(64, "0");
       const pieces = str
         .toString(16)
         .match(/.{1,16}/g)
         .reverse();
-
       const bigInts = pieces.map((s) => BigInt("0x" + s)).reverse();
       const numbers = bigInts.map((bigInt) => bigInt.toString());
       console.log("LpExposure to 0-1", numbers[2] - numbers[1]);
-      result = await expect(betting.connect(account3).bet(5, 0, "10000")).to.be
+      result = await expect(betting.connect(account3).bet(5, 0, "22994")).to.be
         .reverted;
-
+      result = await betting.connect(account2).bet(5, 0, "22964");
       margin0 = await betting.betData(0);
     });
   });

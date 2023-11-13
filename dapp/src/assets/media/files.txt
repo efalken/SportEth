@@ -1,0 +1,27 @@
+ Volume in drive C is OS
+ Volume Serial Number is 4CF5-9B0C
+
+ Directory of C:\Users\Eric\Documents\Github\fuji\src\assets\media
+
+11/10/2023  01:04 PM    <DIR>          .
+11/10/2023  12:30 PM    <DIR>          ..
+11/09/2023  10:54 AM         6,452,488 09b972eb336758e7cd077735c4ee63eb.gif
+11/09/2023  10:54 AM            30,666 2418fc8e423ecdc18c4180e86179dadd.png
+11/09/2023  10:54 AM         7,186,626 252d0fcb378d2a08da1268a9d8db43a3.gif
+11/09/2023  10:54 AM         7,740,779 30839efc9a9798f3ed3a599478586920.gif
+11/09/2023  10:54 AM         8,096,666 3bae482de52c8023a43be5d6484316e7.gif
+11/09/2023  10:54 AM            11,343 41e6514f259cf0bea7660928f2a5966d.png
+11/09/2023  10:54 AM         6,986,593 4d6a8cb7b986a87bc5d4c174454e7f02.gif
+11/09/2023  10:54 AM            28,557 4f278544f60a28920649cef53dc9cd7d.png
+11/09/2023  10:54 AM            10,051 5567ba8d59306412ac4389b0f5fc1188.png
+11/10/2023  11:10 AM            20,284 5d154464d5d9b8b7044c9947a2b55740.png
+11/10/2023  11:10 AM            20,954 6bf927c46c070f047e82bbae9e29997d.png
+11/09/2023  10:54 AM            24,200 96fc6a4340df566966d9524061b3cdef.png
+11/09/2023  10:54 AM         7,273,089 a47621a42e8af1b8b995d349ad3feddd.gif
+11/09/2023  10:54 AM         8,086,179 c10518bc72a739a5b642033d2fa0d75e.gif
+11/09/2023  10:54 AM            21,646 c984187af307f32cd199b508b5c5965b.png
+11/09/2023  10:54 AM            26,435 dac08a05883193246d9b61d7f7df8ccc.png
+11/10/2023  01:04 PM               134 files.txt
+11/16/2022  01:16 PM                15 printFilenames.bat
+              18 File(s)     52,016,705 bytes
+               2 Dir(s)  19,371,094,016 bytes free

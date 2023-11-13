@@ -127,16 +127,12 @@ describe("Betting", function () {
     });
 
     it("Fund Contract", async () => {
-      _timestamp = (
-        await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
-      ).timestamp;
-      console.log(`currTime is ${_timestamp}`);
       result = await betting.connect(owner).fundBook({
         value: 30n * eths,
       });
       receipt = await result.wait();
       gasUsed = receipt.gasUsed;
-      console.log(`gas ${gasUsed}`);
+      console.log(`gas on fundbook  ${gasUsed}`);
 
       result = await betting.connect(account2).fundBettor({
         value: 35n * eths,

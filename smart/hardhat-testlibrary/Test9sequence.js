@@ -29,9 +29,16 @@ describe("Betting", function () {
     const Oracle = await ethers.getContractFactory("Oracle");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
-    oracle = await Oracle.deploy(betting.address, token.address);
+    [owner, account1, account2, account3, account4, account5, account6, _] =
+      await ethers.getSigners();
+    oracle = await Oracle.deploy(
+      betting.address,
+      token.address,
+      owner.address,
+      account1.address,
+      account2.address
+    );
     await betting.setOracleAddress(oracle.address);
-    [owner, account1, account2, account3, _] = await ethers.getSigners();
     console.log(`oracle contract was deployed to ${oracle.address}`);
     console.log(`owner contract was deployed to ${owner.address}`);
     console.log(`account1 contract was deployed to ${account1.address}`);
@@ -200,9 +207,8 @@ describe("Betting", function () {
         oracle
           .connect(account1)
           .oddsPost([
-            900, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-            730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690,
-            970, 760, 919, 720, 672, 800,
+            43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
           ])
       ).to.be.reverted;
     });
@@ -215,9 +221,8 @@ describe("Betting", function () {
       await oracle
         .connect(account1)
         .oddsPost([
-          900, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
     });
 
@@ -418,9 +423,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
     });
 
@@ -703,9 +707,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
@@ -1002,18 +1005,16 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          911, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour);
       result = await oracle
         .connect(account1)
         .oddsPost([
-          922, 777, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
@@ -1030,9 +1031,8 @@ describe("Betting", function () {
         oracle
           .connect(account1)
           .oddsPost([
-            911, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970,
-            730, 699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690,
-            970, 760, 919, 720, 672, 800,
+            43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+            20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
           ])
       ).to.be.reverted;
     });
@@ -1047,44 +1047,33 @@ describe("Betting", function () {
       hourOffset = 24 - _hourSolidity;
       if (hourOffset > 21) hourOffset = 0;
       await helper.advanceTimeAndBlock(hourOffset * secondsInHour);
+      result = await expect(
+        oracle.oddsPost([
+          356, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+        ])
+      ).to.be.reverted;
+
       result = await oracle
         .connect(account2)
         .oddsPost([
-          911, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
-      console.log("line 1043");
       receipt = await result.wait();
-      result = await expect(
-        oracle.oddsPost([
-          1000, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
-        ])
-      ).to.be.reverted;
-      console.log("line 1052");
-      result = await expect(
-        oracle.oddsPost([
-          125, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
-        ])
-      ).to.be.reverted;
       console.log("line 1060");
       // await helper.advanceTimeAndBlock(3 * secondsInHour);
       result = await oracle
-        .connect(account3)
+        .connect(account2)
         .oddsPost([
-          922, 777, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          0, 0, 44, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.connect(owner).processVote();
-      const odds0 = await betting.odds(0);
-      assert.equal(odds0, "9220", "mustBe equal");
+      const odds0 = await betting.probSpread2(0);
+      assert.equal(odds0, "41", "mustBe equal");
     });
   });
 });

@@ -5,7 +5,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 
-CONTRACT_ADDRESS = "0xa9736ca1c1851c0C84bdFF0479eaD585bD9AE288"
+CONTRACT_ADDRESS = "0xB73Cb2696726b7356e03c697672e2Dcc751407D0"
 PRIVATE_KEY = (
     "0xdc63c0436707975689036ad87b2dcbec81ac4ff488501115995ae84e7f9a1286"  # 257
 )

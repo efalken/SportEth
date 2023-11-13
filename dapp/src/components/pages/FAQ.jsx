@@ -1,705 +1,899 @@
-import VBackgroundCom from "../basics/VBackgroundCom";
+import Split from "../layout/Split";
+import { Box, Flex } from "@rebass/grid";
+import Icon from "../basics/Icon";
+import Logo from "../basics/Logo";
+import { Black, G } from "../basics/Colors";
+import Text from "../basics/Text";
+
+import bettorFund from "../../assets/media/30839efc9a9798f3ed3a599478586920.gif";
+import bettorWD from "../../assets/media/a47621a42e8af1b8b995d349ad3feddd.gif";
+import claimRewards from "../../assets/media/4d6a8cb7b986a87bc5d4c174454e7f02.gif";
+import LPexposure from "../../assets/media/4f278544f60a28920649cef53dc9cd7d.png";
+import LPfund from "../../assets/media/252d0fcb378d2a08da1268a9d8db43a3.gif";
+import LPshareVal from "../../assets/media/96fc6a4340df566966d9524061b3cdef.png";
+import LPWD from "../../assets/media/3bae482de52c8023a43be5d6484316e7.gif";
+import maxBet from "../../assets/media/2418fc8e423ecdc18c4180e86179dadd.png";
+import noRedeem from "../../assets/media/5d154464d5d9b8b7044c9947a2b55740.png";
+import oracleAcctState from "../../assets/media/41e6514f259cf0bea7660928f2a5966d.png";
+import oracleKState from "../../assets/media/5567ba8d59306412ac4389b0f5fc1188.png";
+import placeBet from "../../assets/media/c10518bc72a739a5b642033d2fa0d75e.gif";
+import redeem from "../../assets/media/09b972eb336758e7cd077735c4ee63eb.gif";
+import yesRedeem from "../../assets/media/6bf927c46c070f047e82bbae9e29997d.png";
+
+import { Link } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 
 function FAQ() {
   document.title = "FAQs";
   return (
-    <div style={{ color: "black" }}>
-      <p>&nbsp;</p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        What is SportEth?
-      </p>
-
-      <p>
-        SportEth is a platform for allowing people to bet on popular sports. The
-        oracle is administered by SportEth token holders, and the book is funded
-        by ethereum holders. They are paid via the 'vig' one sees in sport book
-        odds. Bettors get quick and easy access to place bets.{" "}
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Do I have to use the SportEth.co front end?
-      </p>
-
-      <p>&nbsp;</p>
-
-      <p>
-        SportEth.co is all open source code that connects directly to the
-        Ethereum blockchain. If one downloads the front-end from GitHub to one’s
-        PC , you can avoid the website and run it locally. One can also access
-        the contract via Remix, Web3.js, Truffle, etc.
-      </p>
-
-      <p>&nbsp;</p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Why should we trust the Oracle?
-      </p>
-
-      <p>
-        For the same reason you trust the Ethereum Blockchain: it’s uncensorable
-        and its administrators make the most money acting honestly. Honest play
-        for the oracle is more profitable and easier than dishonesty. A cheat
-        would be easily observable in the price history of the Oracle that is
-        easy to query. You should trust that it will report honestly because
-        reporting true prices allows it to make more money, which is the best
-        way to further whatever evil, benign, or salutary plans the Oracle has.{" "}
-      </p>
-
-      <p>
-        All oracle actions--schedule, odds, results--are in easy-to-read event
-        logs one can query on the website. A user who sees a bad price about to
-        be applied to their weekly settlement has a 4 hour window to burn their
-        PNL debit rather than send it to their counterparty, which is presumably
-        a sock-puppet address of the oracle. While burning requires an
-        out-of-pocket cost (it is a payable function), it is the optimal
-        response because if you do not pay—burning the cheater’s payoff rather
-        than sending it to him—the evil oracle will infer he can cheat you again
-        next period by more than the cost of burning.{" "}
-      </p>
-
-      <p>
-        Given an investor would burn in a cheat and prevent the evil oracle a
-        final period windfall, there is still a positive value to the strategy
-        of entering a derivative contract and then walking away from a loss. For
-        example, a simple cheat strategy would be to play until the evil oracle
-        experienced a loss, and effectively walk-away from that final negative
-        PNL. This simple strategy has a very limited expected value, about a
-        1-standard deviation weekly PNL, but it is within 10% of the optimal
-        risk-adjusted payout. Considering rational outsiders will avoid an
-        easily observed cheating oracle, such a swindle is an exit scam.
-      </p>
-
-      <p>
-        The optimal cheat return can be compared to the present value of future
-        oracle revenue via closing fees, and the cost-benefit ratio for cheating
-        is around 1:10, implying honesty is the Oracle's dominant selfish
-        strategy.  This is discussed in more detail in the Technical Appendix.
-      </p>
-
-      <p>Contract Logic to Control Risk:</p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Oracle Contract price updates are prohibited between 0.5 and 18 hours
-        after last update.
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        This allows correction to obvious mistakes, but prevents price changes
-        that could be snuck in just before settlement.{" "}
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Settlement can only occur 4 hours after the most recent Oracle update.
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        This provides counterparties time to burn their PNL rather than send to
-        an obviously evil Oracle. If the Oracle posts obviously fraudulent
-        prices, any counterparty with more than ¼ of their margin over-funded
-        will find it cheaper to burn than continue or default. This minimizes a
-        potential Oracle exit scam payoff.
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Settlement can only occur 5 days after the most recent settlement.{" "}
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        This prevents a cheating Oracle/admin from sneaking a fraudulent
-        settlement in at an unexpected time, such as at 2 AM Sunday. Such a
-        scenario would allow an evil Oracle/admin to escape without
-        counterparties having much time to burn their PNLs. It also prevents the
-        scenario where an evil Oracle/admin might apply several fraudulent
-        settlements quickly, effectively overcoming the RM cap on PNL.
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        PNL is capped at the Required Margin.{" "}
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        This not only provides leverage but minimizes the potential size of an
-        Oracle exit scam payoff (those counterparties who, for some reason,
-        might not burn their PNL when cheated). No matter how much ETH is in a
-        player’s margin, settlement can only transfer up to the RM regardless of
-        asset price movement.
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        After 9 days without a settlement any player can withdraw their entire
-        margin, including their Required Margin.
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        This protects counterparties in the case of a DDoS attack, or if the
-        oracle/admin becomes incapacitated or negligent.{" "}
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Oracle Prices are easily audited.
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        Blockchain queries of event logs are provided at SportEth.co, and pull
-        all the Oracle’s prices. One can easily see if a price is fraudulent.
-        Note that crypto prices are taken at 4 PM ET, on New York Stock Exchange
-        business days.
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        Link to OraclePrice History query
-      </p>
-
-      <p>&nbsp;</p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Videos
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        How to Take
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        How to Provide Liquidity
-      </p>
-
-      <p>
-        <span>
-          o<span>&nbsp;&nbsp;</span>
-        </span>
-        How to Withdraw
-      </p>
-
-      <p>&nbsp;</p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        What is a Swap?
-      </p>
-
-      <p>
-        Hedge funds will often have ‘equity swap accounts’ with Prime Brokers
-        who hold a basket of long and short equity positions that are
-        marked-to-market daily and require a margin. They are called swap
-        accounts because they swap the cashflows between the long and short
-        holdings, though sometimes these swap accounts merely hold long or short
-        positions. Each stock position in an equity swap is technically a
-        Contract-for-Difference (CFD): it pays the difference in price for a
-        reference asset times the number of shares held. CFD is an unnecessary
-        acronym, so I prefer the term swap, as crypto traders should be familiar
-        with it via BitMEX’s popular swap contracts.
-      </p>
-
-      <p>
-        The long and short positions in an equity swap have funding rates based
-        off of Fed Funds that is charged to the long positions and credited to
-        the short. This funding cost is directly related to the basis (spot –
-        futures) one sees in futures markets, in that as the futures price
-        converges to the spot price at expiration, this amount can be converted
-        to a rate. The many institutional constraints on arbitraging blockchain
-        traded assets and contracts with those on traditional exchanges will
-        create a significant basis outside of the mere effect from Fed Funds.
-        That is, the inability of large investors arbitrage a large basis due to
-        institutional rigidities allows the basis to deviate significantly from
-        interest rates, so that the basis will be determined more by supply and
-        demand.{" "}
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        PNL calculation
-      </p>
-
-      <p>The general PNL formula is </p>
-
-      <p align="center">
-        Taker PNL=RM*LR*ETH
-        <sub>
-          <span>t-1</span>
-        </sub>
-        *(TakerSide*(P
-        <sub>
-          <span>t</span>
-        </sub>
-        /P
-        <sub>
-          <span>t-1 </span>
-        </sub>
-        -1) – Funding Rate)/ETH
-        <sub>
-          <span>t</span>
-        </sub>
-      </p>
-
-      <p align="center">
-        LP PNL= &#8210;<sub> </sub>Taker PNL
-      </p>
-
-      <p>Walking through the equation we have the following:</p>
-
-      <p>
-        <b>RM*LR</b>: notional of exposure in ETH due to Required Margin (RM)
-        and Leverage Ratio (LR). Actual margin can be much higher than RM, so
-        one’s actual leverage can always be lower than the LR.{" "}
-      </p>
-
-      <p>
-        <b>
-          *ETH<sub>t-1</sub>
-        </b>
-        : This turns the ETH notional into the notional of the asset, valued at
-        the beginning of the period. If the asset price is denominated in USD,
-        the notional must be in USD, but if in ETH (as in the BTCETH contract),
-        this adjustment is excluded. This implies the notional for USD
-        denominated contracts will change over time as the price of ETH changes.
-        If we were to have a constant USD or BTC notional, this would imply
-        either a changing RM, or a changing volatility/RM, and this formulation
-        is simpler.
-      </p>
-
-      <p>
-        <b>TakerSide: </b>+1 for long, -1 for short
-      </p>
-
-      <p>
-        <b>(P</b>
-        <b>
-          <sub>
-            <span>t</span>
-          </sub>
-          /P
-        </b>
-        <b>
-          <sub>
-            <span>t-1 </span>
-          </sub>
-          -1):{" "}
-        </b>
-        the asset’s net return. For continuing subcontracts it will use the
-        Wednesday to Wednesday prices, while for new contracts it will use the
-        date from the Price Initialization settlement as its open price.
-      </p>
-
-      <p>
-        <b>Funding Rate</b>: weekly rate charged to the taker. Will vary by
-        long/short designation and asset. Funding rates are the same across LPs
-        within an asset.{" "}
-      </p>
-
-      <p>
-        <b>/ETH</b>
-        <b>
-          <sub>
-            <span>t</span>
-          </sub>
-        </b>{" "}
-        : This translates the PNL back into ETH at the end of the period for
-        weekly settlement. Settlement is via ETH, so using the ETH price on both
-        sides of the transaction effectively generates a linear return in the
-        reference asset in its unit of denomination. If the ETH return
-        abstracted from this currency adjustment it would create a complex
-        adjustment term to preclude arbitrage, and be implicit within the basis.
-        This term would involve the expected covariance of the ETH and asset
-        price, which is a construct most investors neither understand nor want
-        to.
-      </p>
-
-      <p>There are several examples given in the Technical Appendix.</p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Default
-      </p>
-
-      <p>
-        Default can only occur on the Wednesday Settlement (around 9 PM New York
-        time). This occurs when the player’s Actual Margin&lt;Required Margin,
-        which can only happen at settlement, because players cannon withdraw
-        their margin below their RM, so actual Margin can only fall below the RM
-        via a PNL attribution, or if a Liquidity Provider (LP) a change in the
-        net margin.{" "}
-      </p>
-
-      <p>
-        For example, if the RM=10 and a player—LP or Taker—has 11 in their
-        margin, an impending PNL= <span>-</span> 2 implies they need to add at
-        least 1 ETH to their margin at settlement to avoid default. For an LP
-        the situation is more complex, as an LP could have a balanced book with
-        two takers with one long RM=100 the other short with RM=100. As the LP’s
-        RM is netted it would have an RM=0 and could therefore be adequately
-        margined at 0 ETH. In this case, if one taker cancelled, their new RM
-        would be 100, and so while previous to settlement the LP could have an
-        adequate margin whatever their Margin, it would need to make sure they
-        had 100 ETH at settlement.{" "}
-      </p>
-
-      <p>
-        Parties must cure prior to Wednesday Settlement at 9 PM. They will know
-        exactly how much they owe given the Prices reported at 4:15 PM.{" "}
-      </p>
-
-      <p>
-        <span>
-          In a default the subcontract is terminated at settlement and the
-          defaulting party’s margin is debited a default fee of 5 times the
-          cancellation fee (12.5% of RM) to make canceling dominate defaulting
-          as a way of exiting subcontracts.{" "}
-        </span>
-      </p>
-
-      <p>
-        <span>
-          A default does not cost the non-defaulting counterparty anything, just
-          stops their contract; given no open fee, the counterparty can replace
-          it at no cost.
-        </span>
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        How, Why, and When to Burn your PNL
-      </p>
-
-      <p>
-        Burning one’s PNL requires a payment, but it saves the typical player
-        from getting cheated in the next settlement. A clear cheat by the Oracle
-        signals the Oracle is untrustworthy, and given its prices are easily
-        observed, future players will be discouraged. Thus the cheating oracle
-        has nothing to lose by cheating again and probably will. The value of
-        this cheat will be greater than the cost of a burn, which can be deduced
-        via the game theoretic concept of common knowledge. The self-interested
-        rational response to a cheating oracle is to burn. There is no appeal to
-        morality, retribution, or rehabilitation, just cold self-interest.{" "}
-      </p>
-
-      <p>
-        Given a cheater’s actions are easily observed and punishment is quick,
-        it has the nice property of making sure even an evil oracle behave
-        honestly in this contract (so it can make more money to fund other evil
-        plans).
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Burn History
-      </p>
-
-      <p>
-        Check here to see if anyone has burned their PNL. As burns are
-        uncensored they could be groundless, so they are not necessarily proof
-        of a cheating oracle. One can assess the cheat allegation by looking at
-        Oracle prices on the date of the burn.{" "}
-      </p>
-
-      <p>
-        Note that ETH and BTC prices use 4 PM New York time using
-        Bitwise-approved exchanges. These have a standard error of about 0.1%
-        when take at the exact same time, but as we use a couple-minute window
-        around 4 PM, the standard error may be around 0.2%.{" "}
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Settlement times
-      </p>
-
-      <p>
-        New Trades are recorded each business day around 3:45 PM New York time.
-        New trades that have not been processed will use the first Price
-        Initialization settlement. Thus, a trade taken at 3:30 PM Monday will
-        use the Monday close as its first price, while a trade taken at 4 PM
-        Monday will use the Tuesday close, and a trade take Saturday morning at
-        3 AM will use the Monday close. Business days are New York Stock
-        Exchange business days (link to NYSE exchange holidays). {" "}
-      </p>
-
-      <p>
-        PNL is calculated and applied to subcontracts on Wednesday around 9 PM
-        (Tuesday if holiday).{" "}
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Fees
-      </p>
-
-      <p>
-        Two parties to this contract need to be paid. The Liquidity Providers
-        and the Oracle. The LP is paid via the Target Rate, which is part of the
-        funding rate. This is different than most exchanges where the liquidity
-        providers are called ‘market makers’, and have to also supply limit
-        orders. The slow and expensive blockchain makes limit orders books
-        infeasible, and so the LP gets no revenue via a bid-ask spread or maker
-        rebate. This approach incentivizes the LP to keep their position open as
-        long as possible.
-      </p>
-
-      <p>The funding rate paid by the takers is as follows:</p>
-
-      <p>
-        FR
-        <sub>
-          <span>long</span>
-        </sub>
-        =Target Rate +Basis
-      </p>
-
-      <p>
-        FR
-        <sub>
-          <span>short</span>
-        </sub>
-        =Target Rate – Basis
-      </p>
-
-      <p>
-        The target rate is to incent the LPs, while the basis rate is to
-        equilibrate the long and short taker demand.  Takers pay the FR to the
-        LPs, so the basis is a debit to longs, a credit to shorts.
-      </p>
-
-      <p>
-        There is no open fee. Closing a position, however, necessitate a 1.5% RM
-        fee from the initiator of the close, which given leverage implies a
-        0.15%, 0.60%, and 0.75% notional cost for SPX, BTC (both USD and ETH),
-        and ETH contract respectively. This goes to the Oracle, as without such
-        a payment it would lose nothing by destroying its reputation via
-        dishonest reporting. For comparison, note these costs are the only ones
-        applied round-trip, and there are no inexplicit costs via the bid-ask
-        spread, price impact, having to move from one currency into another, or
-        withdrawing money from the contract.
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        When are Prices Taken?
-      </p>
-
-      <p>
-        ETH and BTC prices use a couple minute window of prices from
-        Bitwise-approved exchanges around 4 PM New York time, while the SPX
-        Index price is recorded around 4:10 PM but refers to the 4 PM close (it
-        is a composite of around 500 stock prices, so often is slightly adjusted
-        from what is shows at 4:00 PM).  The crypto prices will have a standard
-        error of about 0.1% when taken at the same time.
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Minimum Size
-      </p>
-
-      <p>
-        10 ETH. All RM is in ETH integer amounts, though players can initialize
-        a position by sending more than their RM
-      </p>
-
-      <p>
-        LPs can set their own minimum size. As an LP’s book has a maximum number
-        of takers at 80, this allows a large LP to post and not be constrained
-        by small subcontracts, and also allowing smaller LPs to{" "}
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        Maximum Take
-      </p>
-
-      <p>
-        The LP provides ‘unsided’ offers, so she can post 100 ETH, but does not
-        know whether it will initially be long or short. To prevent the case
-        where she would get taken on 100 long, we limit a taker amount to that
-        which would take he above 50% of her book given her current positions
-        and open balance.{" "}
-      </p>
-
-      <p>The maximum amount a taker can take is as follows:</p>
-
-      <p align="center">Max Long Take = ½ ExcessMargin + Short – Long </p>
-
-      <p align="center">Max Short Take = ½ Excess Margin - Short + Long</p>
-
-      <p>
-        The maximum amount a taker can take is shown below. Note that the Excess
-        Margin is just the Total minus Required margin.
-      </p>
-
-      <p></p>
-
-      <p>
-        <span>
-                                             {" "}
-          <span>Margin                                          Max Take</span>
-        </span>
-      </p>
-
-      <p>
-        <span>
-          Long        Short           Required       Total    Excess       
-          Long       Short
-        </span>
-      </p>
-
-      <p>
-        <span>
-          0              0                  0                    100      
-          100             50           50
-        </span>
-      </p>
-
-      <p>
-        <span>
-          0              100              100                100      
-          0                 100         0
-        </span>
-      </p>
-
-      <p>
-        <span>
-          100          0                  100                100      
-          0                 0             100
-        </span>
-      </p>
-
-      <p>
-        <span>
-          0              0                  0                    250      
-          250             125         125
-        </span>
-      </p>
-
-      <p>
-        <span>
-          0              100              100                250      
-          150             175         0
-        </span>
-      </p>
-
-      <p>
-        <span>
-          100          0                  100                250      
-          150             0             175
-        </span>
-      </p>
-
-      <p>
-        <span>
-          100          100              0                    250      
-          250             125         125
-        </span>
-      </p>
-
-      <p>&nbsp;</p>
-
-      <p>                                                </p>
-
-      <p>&nbsp;</p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        How to Withdraw
-      </p>
-
-      <p>
-        For all players, taker or LP, removing ETH from either Margin or Open
-        Balance in the same two-step process. First they withdraw to a Withdraw
-        Balance, and then from their Withdrawal to their private address. This
-        is to prevent re-entry attacks.
-      </p>
-
-      <p>
-        <span>
-          ·<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        </span>
-        How to contact
-      </p>
-
-      <p>
-        The creator of this contract is at ericf@efalken.com dot com. Please
-        keep questions and comments focused on product functionality.
-      </p>
-    </div>
+    <>
+      <Split
+        page={"FAQ"}
+        side={
+          <Box mt="30px" ml="25px" mr="30px">
+            <div style={{ display: "flex", background: Black }}>
+              <Icon />
+              <Logo />
+            </div>
+            <Box>
+              <Flex
+                mt="20px"
+                flexdirection="row"
+                justifycontent="space-between"
+              ></Flex>
+              <Flex style={{ borderTop: `thin solid ${G}` }}></Flex>
+            </Box>
+            <Box>
+              <Flex
+                mt="20px"
+                flexdirection="row"
+                justifycontent="space-between"
+              ></Flex>
+            </Box>
+          </Box>
+        }
+      ></Split>
+      <div style={{ color: "black" }}>
+        <Box>
+          <Flex width="100%" alignitems="center" justifycontent="marginLeft">
+            <Text size="16px">
+              <Link
+                className="nav-header"
+                style={{
+                  // textDecoration: "none",
+                  cursor: "pointer",
+                  color: "#00004d",
+                  fontStyle: "italic",
+                }}
+                to="/betpage"
+              >
+                Back to Betting Page
+              </Link>
+            </Text>
+          </Flex>
+        </Box>
+        <h2 id="topofpage">Links go to bookmarks on this page</h2>
+
+        <p>
+          <HashLink to="#howtobet">How to bet</HashLink>
+          <br />
+          <HashLink to="#howtoredeemyourbets">How to redeem your bets</HashLink>
+          <br />
+          <HashLink to="#howtowithdrawfromyourbettingaccount">
+            How to withdraw from your betting account
+          </HashLink>
+          <br />
+          <HashLink to="#betsizelimit">bet size limit</HashLink>
+          <br />
+          <HashLink to="#howtoinvestinthehouse">
+            How to invest in the house
+          </HashLink>
+          <br />
+          <HashLink to="#withdrawingaslp">Withdrawing as LP</HashLink>
+          <br />
+          <HashLink to="#howtoclaimoracletokenrewards">
+            How to claim Oracle Token Rewards
+          </HashLink>
+          <br />
+          <HashLink to="#oraclepageexplainer">Oracle page explainer</HashLink>
+          <br />
+          <HashLink to="#pythontools">Python Tools</HashLink>
+          <br />
+          <HashLink to="#todownloadtherepogotoacommandlineandtype">
+            Using the repo
+          </HashLink>
+          <br />
+          <HashLink to="#howtorunlocaltestsonthecontract">
+            How to run hardhat tests on the contract
+          </HashLink>
+          <br />
+          <HashLink to="#howtorunlocalfrontendtocontracts">
+            How to run local browser front end to contracts
+          </HashLink>
+          <br />
+          <HashLink to="#howtoruneventlogqueriesusingrepo">
+            How to run event log queries
+          </HashLink>
+          <br />
+          <HashLink to="#howtoruncontracttests">
+            How to run hardhat contract tests
+          </HashLink>
+          <br />
+          <HashLink to="#bettingrestrictions">Betting Restrictions</HashLink>
+          <br />
+          <HashLink to="#lprestrictions">LP Restrictions</HashLink>
+          <br />
+          <HashLink to="#oddsrestrictions">Odds Restrictions</HashLink>
+          <br />
+          <HashLink to="#oddstranslation">Odds Translation</HashLink>
+          <br />
+          <HashLink to="#oddsinthecontract">Odds in the contract</HashLink>
+          <br />
+          <HashLink to="#lpaccounting">LP Accounting</HashLink>
+          <br />
+          <HashLink to="#oracleaccounting">Oracle Accounting</HashLink>
+        </p>
+        <h2 id="howtobet">How to bet.</h2>
+        <p>
+          Betting can only occur once the oracle has voted on the odds. This
+          should happen around 10 am NY Time, Friday, give or take a day (the
+          schedule is posted Monday or Tuesday with the prior week's
+          settlement). It can also only happen before the game starts.
+        </p>
+        <p>
+          To bet, you first need to deposit money into the contract. Bettors and
+          LPs only use native avax, so no token approvals are needed to fund the
+          contract (one click). Users can deposit and withdraw from their
+          betting accounts at any time.
+        </p>
+        <p>
+          <strong>Funding to bet</strong>
+        </p>
+        <p>
+          <strong>
+            <img src={bettorFund} alt="" />
+          </strong>
+        </p>
+        <p>
+          A bet removes avax from a bettor's account and is unavailable for
+          withdrawals or other bets. If you win, you receive your bet and payoff
+          after redeeming your bets. To bet, you toggle on the yellow circle of
+          the team/player you think will win, enter the amount of avax you wish
+          to bet in the above box, and click the 'bet now' button (yellow
+          buttons are for doing stuff; white is just information).
+        </p>
+        <p>
+          <strong>Betting</strong>
+        </p>
+        <strong>
+          <img src={placeBet} alt="" />
+        </strong>
+        <h2 id="howtoredeemyourbets">How to redeem your bets</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          Bets are stored in a mapping within a better's struct, and after 16
+          bets, no further bets can be made until they are redeemed. Redemptions
+          can only occur when a bettor has no active bets, so a bettor should
+          redeem his bets after settlement if he anticipates a problem. All bets
+          in the array are settled for the bettor. Each bet is represented by
+          the unique combination of epoch, match, and pick. At settlement, a
+          bets hash refers to a struct containing this information, and a
+          mapping generated at settlement allows redemption. Users redeem bets
+          by clicking a single button (it is one transaction).
+        </p>
+        <p>
+          <strong>Redeeming</strong>
+        </p>
+        <p>
+          <strong>
+            <img src={redeem} alt="redeeming" />
+          </strong>
+        </p>
+        <p>
+          Note if you have active bets (below left), you cannot withdraw. If all
+          of your bets are settled, the redeem button is displayed. Click once
+          to redeem all bets. At 16 unredeemed bets, the user must redeem so the
+          account can bet again. One can redeem whenever. Funds do not disappear
+          if never claimed.
+        </p>
+        <p>Cannot redeem due to active bets, so the redeem button is hidden.</p>
+        <p>
+          <strong>
+            <img src={noRedeem} alt="" />
+          </strong>
+        </p>
+        <p>
+          Can redeem as there are no active bets, so the redeem button is
+          presented.
+        </p>
+        <p>
+          <strong>
+            <img src={yesRedeem} alt="" />
+          </strong>
+        </p>
+        <h2 id="howtowithdrawfromyourbettingaccount">
+          How to withdraw from your betting account
+        </h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>Enter how much avax you wish to withdraw and click enter.</p>
+        <p>
+          <strong>Withdraw after betting</strong>
+        </p>
+        <p>
+          <strong>
+            <strong>
+              <img src={bettorWD} alt="" />
+            </strong>
+          </strong>
+        </p>
+        <h2 id="betsizelimit">bet size limit</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          Two constraints limit bet size. One is the amount of free LP capital
+          remaining as if nothing is left; no one can bet until bettors take the
+          other side of maxed out contests. This is because a new bettor on the
+          other side replaces LP capital, allowing it to back different
+          contests. The other constraint is an exogenous limit of the LP's total
+          capital divided by a constant, which prevents a single contest from
+          using all the LP capital, which would also expose the LPs to
+          significant risk. The limit is presented under 'MaxBet", and any bets
+          sent for that amount or above will be rejected.
+        </p>
+        <p>
+          <strong>MaxBet presented in Gui</strong>
+        </p>
+        <p>
+          <strong>
+            <img src={maxBet} alt="" />
+          </strong>
+        </p>
+        <h2 id="howtoinvestinthehouse">How to invest in the house</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          LP funding and withdrawals can only be made when betting is not
+          active. Betting is active when the odds are sent to the betting
+          contract after voting. This will be around 10 am NY time on Tuesday
+          through 10 am NY Friday, though these can move by a day in either
+          direction. Thursday, Friday, or Saturday. As for bettors, it's all
+          native avax, so no token approval is needed. Just click the amount you
+          want to deposit and click 'fund.'
+        </p>
+        <p>
+          <strong>Funding as an LP</strong>
+        </p>
+        <p>
+          <strong>
+            <img src={LPfund} alt="" />
+          </strong>
+        </p>
+        <h2 id="withdrawingaslp">Withdrawing as LP</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          If you invest 123.45 avax, it is translated into 'shares' representing
+          your pro-rata ownership of the total LP capital, which will look
+          nothing like 123.45. The user has 300k of 416k shares, or 72%, in the
+          case below. It is multiplied by the total LP capital amount of 50.35,
+          which gets you to 36.2 avax.
+        </p>
+        <p>
+          Copy and paste from the LP share box, but remove the comma. There are
+          no decimals for shares; shares are nonfungible and nontradeable.
+        </p>
+        <p>
+          <strong>
+            <img src={LPWD} alt="" />
+          </strong>
+        </p>
+
+        <h2 id="howtoclaimoracletokenrewards">
+          How to claim Oracle Token Rewards
+        </h2>
+        <p>
+          The betting contract contains 50% of the lifetime supply of tokens,
+          which are allotted weekly based on pro-rata LP size (e.g., if you are
+          33% of the LP liquidity, you get 33% of the token rewards that week).
+          This gets immediately sent to your EOA (i.e., check MetaMask and
+          import the token). Users need 10k tokens to deposit in the oracle
+          contract to earn oracle dividends. Someone should create a vault
+          contract to aggregate smaller token holders (alternatively, sell
+          them). Once tokens are claimed, an LP cannot withdraw until after
+          settlement.
+        </p>
+        <p>
+          <strong>LP claiming rewards</strong>
+        </p>
+        <p>
+          <strong>
+            <img src={claimRewards} alt="" />
+          </strong>
+        </p>
+        <p>LP exposure</p>
+        <p>
+          <strong>
+            <img src={LPexposure} alt="" />
+          </strong>
+        </p>
+        <h2 id="oraclepageexplainer">Oracle page explainer</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          The oracle page gives all users more information about the contract's
+          state. I initially thought it would be a portal for oracle
+          transactions, but decided oracle depositors should use automated
+          methods, like my Python programs. The information is still potentially
+          useful for the oracle.
+        </p>
+        <p>
+          <strong>Contract State</strong> refers to parameters independent of
+          any user.
+        </p>
+        <p>
+          <strong>Last submitter</strong> is the last account to send oracle
+          data. Accounts cannot send consecutive oracle data submissions. This
+          is to encourage all oracle accounts to prepare data, which is helpful
+          to validate submissions even when not sending (no waste!).
+        </p>
+        <p>
+          <strong>Concentration factor</strong> sets a ceiling on how much LP
+          exposure is to any match. For example, if the total LP capital is 15,
+          and the concentration factor is 10, the most the house can lose in any
+          contest is 1.5.
+        </p>
+        <p>
+          <strong>ReviewStatus</strong> is a boolean in the oracle contract that
+          tracks whether the next submission is "odds" or "settleRefresh." When
+          true, a settleRefresh submission is next; when false an odds
+          submission is next. It changes when the submission is processed.
+        </p>
+        <p>
+          <strong>BettingActive</strong> is a boolean in the betting contract
+          and is true when odds are sent to the betting contract, and false when
+          the outcomes and new schedule are sent.
+        </p>
+        <p>
+          <strong>subNumber</strong> is the submission number. An initial
+          submission takes this to 1; that same agent can resubmit if he
+          discovers an error. Additional submissions generate event logs, and
+          the submission number is presented. Only the last submission is voted
+          on and potentially sent to the betting contract.
+        </p>
+        <p>
+          <strong>current epoch</strong> is the current week. Linking event logs
+          by epoch is necessary for auditing, and the epoch is also essential in
+          mapping an event to its outcome.
+        </p>
+        <p>
+          <strong>Current prop number</strong>. This number increments with each
+          data submission. If everything goes well, there will be increments in
+          a week. This makes it easy to see which oracle accounts have voted is
+          used to calculate an oracle account's voting frequency.
+        </p>
+        <p>
+          <strong>
+            <img src={oracleKState} alt="" />
+          </strong>
+        </p>
+        <p>
+          Connected Account State presents data for the viewer's oracle account.
+        </p>
+        <p>
+          <strong>Base prop number</strong> is the propNumber when the account
+          last claimed ether.
+        </p>
+        <p>
+          <strong>Probation</strong> number tracks if a user sends bad data. If
+          the accounts proposal is rejected, it is put into a "time out": they
+          cannot withdraw or send oracle submissions for 3 epochs. This is to
+          prevent a single, mischievous account from monopolizing the contract.
+          Such a person would be unable to stop a majority from administering
+          the contract as intended.
+        </p>
+        <p>
+          <strong>Probation2</strong> tracks if an oracle account changed the
+          concentration factor or halted betting on a single match. It limits
+          accounts to one such change per epoch, and users cannot withdraw until
+          the next epoch. This prevents a malicious account from turning the
+          slate off.
+        </p>
+        <p>
+          <strong>Last vote</strong> tells the oracle account the last proposal
+          they voted on.
+        </p>
+        <p>
+          <strong>Total votes</strong> is the number of votes by this account
+          since their last ether claim. Total votes divided by the number of
+          proposals since the last ether claim gives the percentage used to
+          adjust an oracle account's earnings.
+        </p>
+        <p>
+          <strong>Voting record</strong> puts the voting into percentages, so
+          they know what to expect when claiming avax.
+        </p>
+        <p>
+          <strong>Tokens in EOA</strong> tell the user how many tokens their
+          account currently has in their wallet, off the contract.
+        </p>
+        <p>
+          <strong>
+            <img src={oracleAcctState} alt="" />
+          </strong>
+        </p>
+        <h2 id="pythontools">Python Tools</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          In the Python directory, there are several useful programs. Given the
+          inputs needed for data submissions, these are best done via Python as
+          opposed to Remix, as it is easy to miss a set of quotes or commas, and
+          then one gets an error that is not explained. Further, this should be
+          automated as much as possible, as this investment makes it easier to
+          evaluate the data.
+        </p>
+        <ul>
+          <li>getBettingData.py</li>
+        </ul>
+        <p>Pulls betting contract state data.</p>
+        <ul>
+          <li>oddsPost.py</li>
+        </ul>
+        <p>
+          Sends weekly odds, formatted in the probability difference between the
+          two teams, multiplied by 1000.
+        </p>
+        <ul>
+          <li>settleRefresh.py</li>
+        </ul>
+        <p>
+          Sends the outcomes of the prior week and the upcoming schedule for the
+          next weekend.
+        </p>
+        <ul>
+          <li>Createjson.xlm.</li>
+        </ul>
+        <p>
+          Contains macros that create. You can pull raw data to be pasted into
+          the ASB.accdb database and then take the query from the final query
+          and paste it back into this spreadsheet. A worksheet-embedded macros
+          create the .json files used for sending odds and settleRefresh to the
+          oracle contract using the Python files above.
+        </p>
+        <ul>
+          <li>ASB.accdb</li>
+        </ul>
+        <p>
+          This database takes in raw data on schedules and odds, which is in
+          decimal odds, and generates the data in the format the contract
+          requires
+        </p>
+        <p>Puts the favorite in the first position</p>
+        <p>
+          Translates decimal odds into the probability of winning for the
+          favorite, which is the difference between the favorite's probability
+          of winning and the base probability of winning (51.2%).
+        </p>
+        <ul>
+          <li>oddsTranslation:</li>
+        </ul>
+        <p>
+          Contains functions for translating between decimal, moneyline,
+          fractional, and probability of winning. It gives an example of how raw
+          decimal odds are transformed into the probability of a win.
+        </p>
+        <p>To create a set of data for a settle/refresh submission.</p>
+        <ul>
+          <li>ContractTests.xlsm</li>
+        </ul>
+        <p>
+          Contains worksheets that match the testing scenarios in smart/testLib.
+        </p>
+        <h2 id="todownloadtherepogotoacommandlineandtype">
+          To download the repo, go to a command line and type
+        </h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>Git clone</p>
+        <h2 id="howtorunlocaltestsonthecontract">
+          How to run local tests on the contract
+        </h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>Go to the 'smart' director</p>
+        <p>type</p>
+        <p>cd smart</p>
+        <p>Type "npm I" to install node modules.</p>
+        <p>Take the 'dotenv' file in smart to ".env"</p>
+        <p>
+          Add your seed phrase. This will create a wallet used by the test
+          contracts.
+        </p>
+        <h2 id="howtorunlocalfrontendtocontracts">
+          How to run local front end to contracts
+        </h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>Go to the 'dapp' directory</p>
+        <p>Cd dapp</p>
+        <p>Type "npm I" to install node modules.</p>
+        <p>Yarn dev</p>
+        <h2 id="howtoruneventlogqueriesusingrepo">
+          How to run event log queries using repo
+        </h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>Go to eventLogQueries directory.</p>
+        <p>Go to backend, type "npm i"</p>
+        <p>Got to frontend, type "npm I"</p>
+        <h2 id="howtoruncontracttests">How to run contract tests</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>Go to smart directory</p>
+        <p>
+          Type "npx hardhat test" and it will run the files in the 'test'
+          folder.
+        </p>
+        <h2 id="contractrestrictions">Contract Restrictions</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <h2 id="bettingrestrictions">Betting Restrictions</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <h3 id="-1"> </h3>
+        <h3 id="minbetsize1avax">Min bet size 1 avax</h3>
+        <p>
+          While testing with trace amounts can be fun, there are DDOS-type of
+          risks generated by allowing trace-amount transactions.
+        </p>
+        <h3 id="nobettingafterthegamestarttime">
+          No betting after the game start time
+        </h3>
+        <p>
+          A match with fixed odds is easier to bet on when it is partially
+          completed. The ambiguity of block time is insignificant to this
+          requirement, as a mere couple of seconds would not expose the contract
+          to risk. Oracles should be aware that times for MMA fights are often
+          wrong by 2 or 3 hours, so check multiple sources, especially when
+          these are in Dubai.
+        </p>
+        <h3 id="betsconstrainedbybookiecapital">
+          bets constrained by bookie capital
+        </h3>
+        <ul>
+          <li>
+            ex-ante limit of LPcapital/x per match, where x is a number the
+            oracle chooses. For example, if x=10 and total capital were 100,
+            then the LPs would have at most 10 avax at risk to any one event. X
+            must be between 2 and 16.
+            <ul>
+              <li>
+                If 10 units were available, and the concentration parameter was
+                set to 5, then five matches could have 2 units of exposure to
+                the LPs and use up all of the LP capital. A further bet of 1
+                unit would not be possible because no more free LP capital would
+                be left.
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <h2 id="lprestrictions">LP Restrictions</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <h3 id="lpsarechargeda1feeiftheywithdrawinthesameepoch">
+          LPs are charged a 1% fee if they withdraw in the same epoch
+        </h3>
+        <p>
+          Suppose LPs could deposit and withdraw quickly without a fee. In that
+          case, some LPs might find it profitable to scare away other LPs by
+          depositing large amounts to discourage other LPs, who would see low
+          expected returns given a large capital base. Once scared away, the
+          malicious LP would withdraw capital to make the return attractive.
+          This tactic would not help the LP collective, so they are explicitly
+          discouraged via this fee.
+        </p>
+        <h3 id="lpscannotwithdrawinthesameepochtheyclaimtokenrewards">
+          LPs cannot withdraw in the same epoch they claim token rewards
+        </h3>
+        <p>
+          This prevents LPs from claiming rewards multiple times. There is a
+          fixed amount of token rewards in the betting contract.
+        </p>
+        <h3 id="lpscannotfundorwithdrawwhenbettingisactive">
+          LPs cannot fund or withdraw when betting is active
+        </h3>
+        <p>
+          This prevents LPs from avoiding or taking advantage of information
+          about bet outcomes as they accrue.
+        </p>
+        <h3 id="lpcapitalexposureislimitedonanyonematch">
+          LP capital exposure is limited on any one match.
+        </h3>
+        <p>
+          If the LPs have 100 ETH, an adjustable concentration factor prevents
+          the LPs from having an exposure greater than 100/concFactor in any
+          event.[^1] This helps control diversification risk. The concentration
+          factor is constrained to be between 2 and 16, as the optimal number
+          will be determined by experience.
+        </p>
+        <p>
+          [^1]: This number is arbitrary, and experience will reveal the best
+          parameter. This protects LPs as diversification lowers risk in the
+          standard way--This factor can be adjusted, as experience will generate
+          useful information on the best diversification factor.
+        </p>
+        <h2 id="oddsrestrictions">Odds Restrictions</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <h3 id="oneoddsnumberinthecontract">One odds number in the contract</h3>
+        <p>
+          Standard odds are presented as a pair, with a spread so that
+          simultaneous bets on both teams lose money for the bettor and make
+          money for the house. A prominent attack surface for a smart contract
+          would be for the odds to imply an arbitrage, as the offsetting bets
+          would generate a sure profit, enabling the hacker to drain virtually
+          all the LP's capital at settlement. By using a single number, that
+          attack is eliminated. The 4.5% vig creates a competitive two-sided
+          offer, a standard requirement for market makers on centralized
+          exchanges.
+        </p>
+        <p>
+          The odds for the opponent are calculated via an algorithm. By
+          restricting the odds to apply to the favorite, we can restrict the
+          range of allowable odds, as no favorite has decimal odds greater than
+          2.000. This makes it easier to exclude bogus odds.
+        </p>
+        <h3 id="noextremeodds">No extreme odds</h3>
+        <p>
+          Matches with extreme underdogs (e.g., 10-1) are attractive for
+          hackers, as they generate the most revenue for the smallest amount of
+          capital. Initial decimal odds on favorites greater than 7:1 are not
+          accepted. Such matches will not be covered. This would eliminate about
+          5% of NFL games historically but is common among college football and
+          MMA. This also eliminates bets like "who will win the next golfing
+          event" because these improbable bets require too much LP collateral.
+        </p>
+        <p>
+          The frontend is helpful but not necessary. One can use Remix, Python,
+          or any other method of transacting with the contract, which is
+          permissionless.
+        </p>
+        <h2 id="oddstranslation">Odds Translation</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          To convert moneyline odds into Decimal odds, we have the following.
+        </p>
+        <p>
+          For positive moneyline odds: (Moneyline odds/100) + 1 = Decimal odds
+        </p>
+        <p>
+          For negative moneyline odds: (100/Moneyline odds) + 1 = Decimal odds
+        </p>
+        <p>
+          To translate decimal odds into moneyline odds that are prominent on
+          NFL betting sites, we have the following adjustment mechanism:
+        </p>
+        <p>
+          If decimal odds are greater than 2.0: 100 × (decimal odds – 1) =
+          Moneyline odds
+        </p>
+        <p>
+          If decimal odds are less than 2.0: -100/(decimal odds -1) = Moneyline
+          odds
+        </p>
+        <p>To translate moneyline odds to fractional odds:</p>
+        <p>For positive moneyline odds: Moneyline odds/100 = Fractional odds</p>
+        <p>
+          For negative moneyline odds: -100/Moneyline odds = Fractional odds
+        </p>
+        <p>To convert decimal odds into winning probability.</p>
+        <p>prob(win) = 1 / Decimal odds</p>
+        <p>Decimal odds = 1 / prob(win)</p>
+        <p>
+          The most common odds offered for the NFL are presented in moneyline
+          form as 110 for both teams, which would be 1.909 in decimal odds or
+          10/11 in fractional odds. A flat book on such a wager would receive
+          220 and payout 210. In this way, the 'house' makes money used to pay
+          for various costs and a profit from the house. In this case, the
+          implicit profit ('vig') would be 4.55%, 10/220. The general formula
+          for estimating the vig is given by the following formula: <em>p</em>{" "}
+          and <em>q</em> are decimal payouts (e.g., 1.909 for a standard even
+          money bet) for opposing teams.
+        </p>
+        <p>vig = 1 – pq/(p+q)</p>
+        <p>
+          The spreadsheet 'ASB.xlsx' presents a page where people can see how
+          these transformations are applied. Those interested in sending odds to
+          the contract will find it a helpful template.
+        </p>
+        <h2 id="oddsinthecontract">Odds in the contract</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          The odds format is based on two primitives. First, the reciprocal of
+          decimal odds is the fair probability of winning that would make the
+          bet have zero expected value.
+        </p>
+        <p>Prob(win) = 1 / decimalOdds</p>
+        <p>
+          The second is that the sum probability of betting on both teams equals
+          "1 + vig', or 1.048.
+        </p>
+        <p>Prob(win|teamA) + prob(win|teamB) = 1 + vig</p>
+        <p>
+          Thus, for an even bet, the odds for both teams would be 52.4%, as
+          0.524+0.524=1.048. Both teams cannot have 52.4% win probabilities, so
+          the 2.4% premium reflects the vig and tells one how much of an edge
+          one needs to beat the house.
+        </p>
+        <p>
+          We need the LPs and oracle to split the vig. This is done by setting
+          the vig at 2.25% regarding the odds the LPs experienced in the betting
+          contract. This implies the even bet probability of winning is 51.2%.
+          The contract applies this logic at the time of the bet.
+        </p>
+        <p>
+          When a bettor wins, his payout is then taxed at 5%. As payouts on
+          average are 50% of the total amount bet on both teams, one-half of 5%
+          is 2.5%, which is the total vig in the contract, 4.8%. This is applied
+          at redemption.
+        </p>
+        <p>
+          By sending a single number representing the difference in win
+          probability between the favorite and underdog, we get a number from
+          zero to one. ASB adds this probability spread, divided by two, to the
+          base 51.2% probability for the favorite and subtracts the same
+          'probability spread divided by two' from the win probability of the
+          underdog. One then takes the reciprocal to get the decimal odds for
+          the favorite and underdog.
+        </p>
+        <p>
+          The ASB repo contains an MS Access database that takes raw decimal
+          odds data and transforms it into the probability difference divided by
+          two. When pasted into its Excel spreadsheet, it generates the data in
+          the correct format for sending via a Python program. The basic
+          algorithm is this:
+        </p>
+        <ol>
+          <li>
+            Take an initial set of odds
+            <ul>
+              <li>Home team: +135 moneyline, 2.350 decimal</li>
+              <li>Away team: -150 moneyline, 1.667 decimal</li>
+            </ul>
+          </li>
+          <li>
+            rearrange so that the favorite team is first
+            <ol>
+              <li>team[0]: 1.667, team[1]: 2.350</li>
+            </ol>
+          </li>
+          <li>
+            Translate into win probability
+            <ol>
+              <li>Prob(win) = 1/decimalOdds</li>
+              <li>team[0]: 60.00%, team[1]: 42.55%</li>
+            </ol>
+          </li>
+          <li>
+            calculate probability spread/2
+            <ol>
+              <li>spread = 0.60 – 0.4255 = 0.1745</li>
+              <li>spread/2 = 0.0872</li>
+            </ol>
+          </li>
+          <li>
+            Calculate new favorite, team[0], prob(win)
+            <ol>
+              <li>prob(team[0] win) = 51.2% + 8.72% = 59.92%</li>
+              <li>prob(team[1] win) = 51.2% - 8.72% = 42.48%</li>
+            </ol>
+          </li>
+          <li>
+            Translate prob(team[0] win) into decimal odds.
+            <ol>
+              <li>Gross decimal Odds(team[0]) = 1 / 0.5993 = 1.669</li>
+              <li>Gross decimal Odds(team[0]) = 1 / 0.4248 = 2.354</li>
+            </ol>
+          </li>
+          <li>
+            Adjust for the 5% oracle fee applied to winnings
+            <ol>
+              <li>Net decimal Odds(team[0]) = 1+0.6690.95=1.635</li>
+              <li>Net decimal Odds(team[1]) = 1+1.3540.95=2.287</li>
+            </ol>
+          </li>
+        </ol>
+        <p>
+          In this example, the vig is 4.66%: 1 - 1.635 2.287 / (2.287 + 1.635).
+          The above algorithm generates a vig near 4.5% across the range of odds
+          covered in this contract. The tricky part of the above algorithm is
+          that the raw odds spread, in the probability of a win, is added to
+          51.1%. If there were no oracle payment, this number would be 52.5%.
+        </p>
+        <p>
+          The website AVAXsportsbook.com displays the decimal odds users
+          receive—net odds—if they win, though the odds are stored as the win
+          probability spread divided by two times 1000.
+        </p>
+        <p>
+          The website avaxsportsbook.com displays the decimal odds users receive
+          if they win. For example, a user seeing odds of 1.900 will receive
+          back 1.900 times their bet amount.
+        </p>
+        <h2 id="lpaccounting">LP Accounting</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          LPs own a pro-rata portion of the contract's revenue based on their
+          percentage of LP capital before that week's events. Statistically, the
+          LP capital will grow each settlement due to the vig; this is how LPs
+          make money. As the relevant LP credit/debit occurs at settlement, the
+          LP's AVAX/share value is fixed each week when users can withdraw or
+          invest.
+        </p>
+        <p>An initial investment generates the following shares:</p>
+        <p>LPshares = AVAX invested × TotalLpShares / TotalLpAvax</p>
+        <p>
+          For example, assume the contract has 123 AVAX owned by its LPs, who
+          have 100 shares. This AVAX may be free or locked up as collateral for
+          upcoming contests. This implies each LP share is worth 1.23 AVAX.
+        </p>
+        <p>LP AVAX LP TotalShares AVAX/Share</p>
+        <p>123 100 1.23</p>
+        <p>
+          Suppose Alice wishes to invest 10 AVAX into this pool. The above
+          formula implies she would receive 8.13 shares (10/1.23). This would
+          change the pool's balance sheet to
+        </p>
+        <p>LP AVAX LP TotalShares AVAX/Share</p>
+        <p>133 108.13 1.23</p>
+        <p>
+          Note the ratio of AVAX/share is the same after Alice's investment, so
+          existing shareholders do not lose or gain money via Alice's new
+          investment.
+        </p>
+        <p>
+          If we assume the LP collective gained 2 AVAX that week, the new
+          balance sheet after a settlement will look like this:
+        </p>
+        <p>LP AVAX LP TotalShares AVAX/Share</p>
+        <p>135 108.13 1.25</p>
+        <p>
+          The increase from 133 to 135 reflects a 1.5% profit from that epoch's
+          games. If Alice then sold her shares, she would receive AVAX using a
+          transformation of the above formula:
+        </p>
+        <p>AVAX Withdrawal = TotalLpAvax × SharesSold / TotalLpShares</p>
+        <p>
+          Selling 8.13 shares would generate 10.15 AVAX, a 1.5% return on their
+          investment, identical to how much the AVAX LP pool rose over that
+          period.
+        </p>
+        <p>
+          In this way, any LP investment or withdrawal reflects the percent
+          change in the size of the LP pool's AVAX/share over the investment
+          period.
+        </p>
+        <h2 id="oracleaccounting">Oracle Accounting</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
+        <p>
+          Oracle token holders must deposit their tokens in the oracle contract
+          to vote and vote to receive revenue. When a weekly settlement
+          transaction is executed, the oracle's 5% fee is applied to the
+          winnings and sent to the oracle contract. The '<em>feePool'</em> state
+          variable reflects the lifetime amount of AVAX per token paid to the
+          oracle contract, like how an LP's fees are calculated on Uniswap.
+        </p>
+        <p>
+          When an oracle token holder deposits into the contract, their account
+          notes the current value of <em>feePool</em>. When that oracle token
+          holder withdraws or adds to their account, the token holder is sent
+          their entire accrued AVAX using the formula
+        </p>
+        <p>PotentialTokenRevenue = tokens (feePool(now) feePool(initial))</p>
+        <p>
+          Having tokens in the oracle is a necessary but insufficient condition
+          for being paid. The contract then takes the total number of tokens
+        </p>
+        <p>OraclePayout = votesCast / VotesPossible * PotentialTokenRevenue</p>
+        <p>OraclePloughBack = PotentialTokenRevenue OraclePayout</p>
+        <p>
+          This account's <em>OraclePoughback</em> is sent to the Oracle{" "}
+          <em>feePool</em> as if it were revenue from a settlement.
+        </p>
+        <p>
+          There is no scenario where the token holders can lose accrued revenue,
+          either due to a lucky win streak by bettors or an oracle hack. Token
+          holders can be sure the contract is in balance, where accounts payable
+          are always equal to AVAX in the contract.
+        </p>
+      </div>
+    </>
   );
 }
 

@@ -4,11 +4,8 @@ SPDX-License-Identifier: MIT License
 */
 pragma solidity 0.8.19;
 
-// odds on favorite must be lower than 2.0 in decimal odds
-// odds in system are x=(decimalOdds -1)*1000
-uint16 constant MAX_DEC_ODDS = 1000;
-// odds on favorite must be higher than 1.125, lower odds events excluded
-uint16 constant MIN_DEC_ODDS = 125;
+// odds on favorite must be lower than 90% win prob
+uint16 constant MAX_SPREAD_2 = 335;
 // min deposit of 5% of token supply encourages token holders to join vaults,
 uint32 constant MIN_TOKEN_DEPOSIT = 10e7;
 //  encourages but does not guarantee independence among oracle accounts

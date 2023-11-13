@@ -21,9 +21,15 @@ describe("Betting", function () {
     const Oracle = await ethers.getContractFactory("Oracle");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
-    oracle = await Oracle.deploy(betting.address, token.address);
-    await betting.setOracleAddress(oracle.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
+    oracle = await Oracle.deploy(
+      betting.address,
+      token.address,
+      owner.address,
+      account1.address,
+      account2.address
+    );
+    await betting.setOracleAddress(oracle.address);
   });
 
   describe("run transactions", async () => {
@@ -35,6 +41,15 @@ describe("Betting", function () {
         .connect(account1)
         .approve(oracle.address, 140n * million);
       result = await oracle.connect(account1).depositTokens(140n * million);
+      result = await betting.connect(owner).fundBook({
+        value: 30n * eths,
+      });
+      result = await betting.connect(account2).fundBettor({
+        value: 10n * eths,
+      });
+      result = await betting.connect(account3).fundBettor({
+        value: 10n * eths,
+      });
     });
 
     it("send init", async () => {
@@ -136,16 +151,6 @@ describe("Betting", function () {
       const revStat = await oracle.reviewStatus();
       console.log(revStat, "revStat");
       const ethcheck = 30n * eths;
-      result = await betting.connect(owner).fundBook({
-        value: 30n * eths,
-      });
-
-      result = await betting.connect(account2).fundBettor({
-        value: 10n * eths,
-      });
-      result = await betting.connect(account3).fundBettor({
-        value: 10n * eths,
-      });
     });
 
     it("send odds", async () => {
@@ -156,9 +161,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
@@ -359,27 +363,27 @@ describe("Betting", function () {
       console.log(`acct2 Bal ${userBalanceAcct2}`);
       console.log(`acct3 Bal ${userBalanceAcct3}`);
 
-      assert.equal(Number(bookiePool).toFixed(2), "29.59", "mustBe equal");
+      assert.equal(Number(bookiePool).toFixed(2), "29.17", "mustBe equal");
       assert.equal(Number(bettorLocked).toFixed(0), "0", "Must be equal");
       assert.equal(Number(bookieLocked).toFixed(0), "0", "Must be equal");
       assert.equal(
         Number(oracleBal * fujiAdj).toFixed(2),
-        "0.32",
+        "0.34",
         "Must be equal"
       );
       assert.equal(
         Number(ethbal * fujiAdj).toFixed(2),
-        "49.68",
+        "49.66",
         "Must be equal"
       );
       assert.equal(
         Number(userBalanceAcct2).toFixed(2),
-        "6.95",
+        "7.20",
         "Must be equal"
       );
       assert.equal(
         Number(userBalanceAcct3).toFixed(2),
-        "13.13",
+        "13.28",
         "Must be equal"
       );
     });

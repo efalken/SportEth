@@ -30,9 +30,15 @@ describe("Betting", function () {
     const Oracle = await ethers.getContractFactory("Oracle");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
-    oracle = await Oracle.deploy(betting.address, token.address);
-    await betting.setOracleAddress(oracle.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
+    oracle = await Oracle.deploy(
+      betting.address,
+      token.address,
+      owner.address,
+      account1.address,
+      account2.address
+    );
+    await betting.setOracleAddress(oracle.address);
   });
 
   describe("run trans", async () => {
@@ -185,9 +191,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          800, 600, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       await helper.advanceTimeAndBlock(3 * secondsInHour);
       result = await oracle.connect(owner).vote(true);
@@ -206,8 +211,8 @@ describe("Betting", function () {
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
       receipt = await result.wait();
-      const result2 = await betting.odds(1);
-      assert.equal(result2, "6000", "Must be equal");
+      const result2 = await betting.probSpread2(1);
+      assert.equal(result2, "153", "Must be equal");
       const bettingStat = await betting.bettingActive();
       assert.equal(bettingStat, true, "Must be equal");
     });

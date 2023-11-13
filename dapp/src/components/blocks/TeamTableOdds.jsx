@@ -7,7 +7,6 @@ export default function TeamTableOdds({
   startTimeColumn,
   showDecimalOdds,
   oddsTot,
-  getMoneyLine,
   outcomev,
   subNumber,
   reviewStatus,
@@ -21,6 +20,15 @@ export default function TeamTableOdds({
   var colorOdds = "white";
   var colorStart = "white";
   var colorOutcome = "white";
+
+  function getMoneyLineTable(decOddsi) {
+    if (decOddsi < 1e4) {
+      return (-1e6 / decOddsi).toFixed(0);
+      //return decOddsi;
+    } else {
+      return Number((decOddsi - 1) / 1e2).toFixed(0);
+    }
+  }
 
   for (let i = 0; i < 32; i++) {
     if (teamSplit[i]) {
@@ -36,14 +44,12 @@ export default function TeamTableOdds({
     }
   }
 
-  if (reviewStatus === 0 && subNumber > 0) {
+  if (reviewStatus && subNumber > 0) {
     colorFave = "#00ff00";
     colorUnd = "#00ff00";
     colorStart = "#00ff00";
-  } else if (reviewStatus === 1 && subNumber > 0) {
+  } else if (!reviewStatus && subNumber > 0) {
     colorOdds = "#00ff00";
-  } else if (reviewStatus === 2 && subNumber > 0) {
-    colorOutcome = "#00ff00";
   }
 
   const borderCells = 5;
@@ -73,33 +79,31 @@ export default function TeamTableOdds({
           <th style={{ textAlign: "left", color: colorStart }}>Start</th>
         </tr>
 
-        {[...Array(32)].map((_value, i) =>
-          sport[i] !== "AAA" ? (
-            <tr
-              className={(i + 1) % borderCells === 0 ? "border-row" : ""}
-              key={i}
-              style={{ width: "60%", textAlign: "left" }}
-            >
-              <td>{i}</td>
-              <td>{sport[i]}</td>
-              <td>{faveSplit[i]}</td>
-              <td>
-                {showDecimalOdds
-                  ? (1 + (95 * oddsTot[0][i]) / 100000).toFixed(3)
-                  : getMoneyLine((95 * oddsTot[0][i]) / 100)}
-              </td>
-              <td>{underSplit[i]}</td>
-              <td>
-                {showDecimalOdds
-                  ? (1 + (95 * oddsTot[1][i]) / 100000).toFixed(3)
-                  : getMoneyLine((95 * oddsTot[1][i]) / 100)}
-              </td>
-              <td>
-                {moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}
-              </td>
-            </tr>
-          ) : null
-        )}
+        {[...Array(32)].map((_value, i) => (
+          <tr
+            className={(i + 1) % borderCells === 0 ? "border-row" : ""}
+            key={i}
+            style={{ width: "60%", textAlign: "left" }}
+          >
+            <td>{i}</td>
+            <td>{sport[i]}</td>
+            <td>{faveSplit[i]}</td>
+            <td>
+              {showDecimalOdds
+                ? (1 + (0.95 * oddsTot[0][i]) / 1e4).toFixed(3)
+                : getMoneyLineTable(0.95 * oddsTot[0][i])}
+            </td>
+            <td>{underSplit[i]}</td>
+            <td>
+              {showDecimalOdds
+                ? (1 + (0.95 * oddsTot[1][i]) / 1e4).toFixed(3)
+                : getMoneyLineTable(0.95 * oddsTot[1][i])}
+            </td>
+            <td>
+              {moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );

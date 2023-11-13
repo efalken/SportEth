@@ -27,9 +27,15 @@ describe("Betting", function () {
     const Oracle = await ethers.getContractFactory("Oracle");
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
-    oracle = await Oracle.deploy(betting.address, token.address);
-    await betting.setOracleAddress(oracle.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
+    oracle = await Oracle.deploy(
+      betting.address,
+      token.address,
+      owner.address,
+      account1.address,
+      account2.address
+    );
+    await betting.setOracleAddress(oracle.address);
   });
 
   describe("run trans", async () => {
@@ -156,9 +162,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          250, 500, 200, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          113, 52, 134, 3, 4, 14, 50, 20, 34, 0, 31, 26, 1, 21, 25, 6, 49, 5,
+          34, 18, 9, 12, 17, 15, 21, 26, 1, 18, 3, 22, 28, 88,
         ]);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
@@ -338,13 +343,9 @@ describe("Betting", function () {
       console.log(
         `Account2 increase in account value ${Number(Acct2Increase).toFixed(3)}`
       );
-      assert.equal(Number(oracleBal).toFixed(3), "0.394", "Must be equal");
-      assert.equal(
-        Number(bettingKethbal).toFixed(3),
-        "25.594",
-        "Must be equal"
-      );
-      assert.equal(Number(Acct2Increase).toFixed(3), "9.005", "Must be equal");
+      assert.equal(Number(oracleBal).toFixed(3), "0.196", "Must be equal");
+      assert.equal(Number(bettingKethbal).toFixed(2), "29.81", "Must be equal");
+      assert.equal(Number(Acct2Increase).toFixed(2), "4.99", "Must be equal");
     });
   });
 });

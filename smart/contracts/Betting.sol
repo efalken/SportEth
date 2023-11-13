@@ -17,8 +17,9 @@ contract Betting {
   uint64 public nonce;
   // adjustible factor for controlling concentration risk
   uint64 public concFactor;
-  /* decimal odds for favorite, formatted as decimal odds minus one times 1000 */
-  uint16[32] public odds;
+  /** decimal odds for favorite, formatted as fave win probability w/ 
+  one-half the vig */
+  uint16[32] public probSpread2;
   // UTC GMT aka Zulu time. In ISO 8601 it is distinguished by the Z suffix
   uint32[32] public startTime;
   // 0 total LPcapital, 1 LPcapitalLocked, 2 bettorLocked
@@ -62,6 +63,7 @@ contract Betting {
   struct LPStruct {
     uint64 shares;
     uint32 lpEpoch;
+    uint32 claimEpoch;
   }
 
   event BetRecord(
@@ -124,8 +126,7 @@ contract Betting {
     uint32 _team0or1,
     int64 _betAmt
   ) external returns (bytes32) {
-    int64 betPayoff = int64(uint64(odds[_matchNumber]));
-    require(betPayoff % 10 == 0, "match halted");
+    int64 betPayoff = int64(uint64(probSpread2[_matchNumber]));
     require(bettingActive, "odds not ready");
     require(
       userStruct[msg.sender].counter < MAX_BETS,
@@ -139,11 +140,9 @@ contract Betting {
     require(uint256(startTime[_matchNumber]) > block.timestamp, "game started");
     uint64[4] memory _betData = decodeNumber(_matchNumber);
     if (_team0or1 == 0) {
-      betPayoff = (_betAmt * betPayoff) / 10000;
+      betPayoff = ((1e7 / (512 + betPayoff) - 1e4) * _betAmt) / 1e4;
     } else {
-      betPayoff =
-        (_betAmt * (ODDS_FACTOR1 / (betPayoff + ODDS_FACTOR2) - ODDS_FACTOR2)) /
-        10000;
+      betPayoff = ((1e7 / (512 - betPayoff) - 1e4) * _betAmt) / 1e4;
     }
     int64 currLpBetExposure = int64(_betData[2 + _team0or1]) -
       int64(_betData[1 - _team0or1]);
@@ -241,6 +240,10 @@ contract Betting {
   function withdrawBook(uint64 _sharesToSell) external {
     require(!bettingActive, "not while betting active");
     require(lpStruct[msg.sender].shares >= _sharesToSell, "NSF");
+    require(
+      lpStruct[msg.sender].claimEpoch < bettingEpoch,
+      "claimed reward, must wait 1 epoch"
+    );
     uint64 avaxWithdraw = uint64(
       (uint256(_sharesToSell) * uint256(margin[0])) / uint256(liqProvShares)
     );
@@ -341,13 +344,13 @@ contract Betting {
     return true;
   }
 
-  /** @dev processes odds
-   * @param _odds gross dec odds for favorite (team0)
+  /** @dev processes probSpread2
+   * @param _spread2  mean diff between prob(win) favorite and 0.512%  (team0)
    */
   function transmitOdds(
-    uint16[32] calldata _odds
+    uint16[32] calldata _spread2
   ) external onlyAdmin returns (bool) {
-    odds = _odds;
+    probSpread2 = _spread2;
     bettingActive = true;
     return true;
   }
@@ -358,11 +361,14 @@ contract Betting {
   function tokenReward() external {
     uint256 tokensLeft = token.balanceOf(address(this));
     require(tokensLeft > 0, "no token rewards left");
-    require(bettingEpoch > 4, "starts in epoch 5!");
+    require(bettingEpoch > 3, "starts in epoch 4!");
     uint256 lpShares = uint256(lpStruct[msg.sender].shares);
     require(lpShares > 0, "only for liq providers");
-    require(bettingEpoch > lpStruct[msg.sender].lpEpoch, "one claim per epoch");
-    lpStruct[msg.sender].lpEpoch = bettingEpoch;
+    require(
+      bettingEpoch > lpStruct[msg.sender].claimEpoch,
+      "one claim per epoch"
+    );
+    lpStruct[msg.sender].claimEpoch = bettingEpoch;
     uint256 _amt = ((lpShares * EPOCH_AMOUNT) / uint256(liqProvShares));
     if (_amt > tokensLeft) _amt = tokensLeft;
     token.transfer(msg.sender, _amt);
@@ -377,11 +383,11 @@ contract Betting {
     concFactor = _concFactor;
   }
 
-  /** @dev this allows oracle to prevent new bets on contests that have bad odds
+  /** @dev this allows oracle to prevent new bets on contests that
    * @param _match is the reset match
    */
   function haltMatch(uint256 _match) external onlyAdmin {
-    odds[_match] = (odds[_match] / 10) * 10 + 1;
+    startTime[_match] -= 345600;
   }
 
   function showBetData() external view returns (uint256[32] memory _betData) {
@@ -389,7 +395,7 @@ contract Betting {
   }
 
   function showOdds() external view returns (uint16[32] memory _odds) {
-    _odds = odds;
+    _odds = probSpread2;
   }
 
   function showStartTime()

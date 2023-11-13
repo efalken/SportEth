@@ -8,12 +8,19 @@ export default function TeamTable({
   showDecimalOdds,
   oddsTot,
   radioUnderPick,
-  getMoneyLine,
-  haltedColumn,
 }) {
   let faveSplit = [];
   let underSplit = [];
   let sport = [];
+
+  function getMoneyLineTable(decOddsi) {
+    if (decOddsi < 1e4) {
+      return (-1e6 / decOddsi).toFixed(0);
+      //return decOddsi;
+    } else {
+      return Number((decOddsi - 1) / 1e2).toFixed(0);
+    }
+  }
 
   for (let i = 0; i < 32; i++) {
     if (teamSplit[i]) {
@@ -63,7 +70,7 @@ export default function TeamTable({
               <td>{i}</td>
               <td>{sport[i]}</td>
               <td style={{ textAlign: "left", paddingLeft: "2px" }}>
-                {startTimeColumn[i] > moment().unix() && !haltedColumn[i] ? (
+                {startTimeColumn[i] > moment().unix() ? (
                   <input
                     type="radio"
                     value={i}
@@ -78,11 +85,11 @@ export default function TeamTable({
               </td>
               <td>
                 {showDecimalOdds
-                  ? (1 + (95 * oddsTot[0][i]) / 100000).toFixed(3)
-                  : getMoneyLine((95 * oddsTot[0][i]) / 100)}
+                  ? (1 + (0.95 * oddsTot[0][i]) / 1e4).toFixed(3)
+                  : getMoneyLineTable(0.95 * oddsTot[0][i])}
               </td>
               <td style={{ textAlign: "left", paddingLeft: "2px" }}>
-                {startTimeColumn[i] > moment().unix() && !haltedColumn[i] ? (
+                {startTimeColumn[i] > moment().unix() ? (
                   <input
                     type="radio"
                     value={i}
@@ -97,8 +104,8 @@ export default function TeamTable({
               </td>
               <td>
                 {showDecimalOdds
-                  ? (1 + (95 * oddsTot[1][i]) / 100000).toFixed(3)
-                  : getMoneyLine((95 * oddsTot[1][i]) / 100)}
+                  ? (1 + (0.95 * oddsTot[1][i]) / 1e4).toFixed(3)
+                  : getMoneyLineTable(0.95 * oddsTot[1][i])}
               </td>
               <td>
                 {moment.unix(Number(startTimeColumn[i])).format("ddd h:mm a")}

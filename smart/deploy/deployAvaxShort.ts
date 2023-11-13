@@ -36,17 +36,18 @@ async function main() {
   await token.deployed();
   await new Promise((resolve) => setTimeout(resolve, 20000));
   console.log(`Token contract was deployed to ${token.address}`);
-  const Betting = await ethers.getContractFactory("BettingFuji");
+  const Betting = await ethers.getContractFactory("Betting");
   const betting = await Betting.deploy(token.address);
   await betting.deployed();
   console.log(`Betting contract was deployed to ${betting.address}`);
   await new Promise((resolve) => setTimeout(resolve, 20000));
-  const Oracle = await ethers.getContractFactory("OracleFuji");
+  const Oracle = await ethers.getContractFactory("Oracle");
   const oracle = await Oracle.deploy(betting.address, token.address);
   await oracle.deployed();
   await new Promise((resolve) => setTimeout(resolve, 20000));
   console.log(`Oracle contract was deployed to ${oracle.address}`);
   await betting.setOracleAddress(oracle.address);
+  /*
   await new Promise((resolve) => setTimeout(resolve, 20000));
   await token.approve(oracle.address, 140n * million);
   await new Promise((resolve) => setTimeout(resolve, 20000));
@@ -198,7 +199,7 @@ async function main() {
       await new Promise((resolve) => setTimeout(resolve, 20000));
       result = await betting.connect(signers[2]).bet(2, 0, 10000);
       receipt = await result.wait();
-      
+      */
       // ***************************************
 
   const chainId = (await ethers.provider.getNetwork()).chainId;

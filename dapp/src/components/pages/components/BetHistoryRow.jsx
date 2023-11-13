@@ -44,14 +44,14 @@ export default function BetHistoryRow({ contractHash, betEpoch, teamSplit }) {
   return (
     <tr style={{ width: "33%", color: "#ffffff" }}>
       <td>{event.epoch}</td>
-      <td>{teamSplit[event.matchNum][Number(event.pick) + 1]}</td>
+      <td>{Number(event.betAmount) / 10000}</td>
       <td>
         {(
           (0.95 * Number(event.payoff) + Number(event.betAmount)) /
           10000
         ).toFixed(3)}
       </td>
-      <td>{event.redeemable ? "yes" : "no"}</td>
+      <td>{Boolean(event.redeemable).toLocaleString()}</td>
     </tr>
   );
 }

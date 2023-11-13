@@ -2,7 +2,7 @@ import json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-CONTRACT_ADDRESS = "0xda593fE3BcddfB16ce1a9749ea28F0d267690c3F"
+CONTRACT_ADDRESS = "0xB73Cb2696726b7356e03c697672e2Dcc751407D0"
 RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)

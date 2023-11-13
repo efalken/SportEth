@@ -32,8 +32,11 @@ contract Oracle {
   // results refer to match result; 0 for team 0 win, 1 for team 1 winning,
   // 2 for a tie or no contest
   uint8[32] public propResults;
-  // gross decimal odd, eg even odds 957 => 1 + 0.95*957 => 1.909
-  uint16[32] public propOdds;
+  /** odds primitive, when added to 0.512, generates the prob fave, slot 0, wins, 
+  given 2.3% vig, 1/(prob(win) + probSpreadDiv/2) = decimal odds fave
+  1/(prob(win)- probSpreadDiv/2) = decimal odds dog
+  */
+  uint16[32] public probSpreadDiv2;
   /** the schedule is a record of "sport:initialFavorite:InitialUnderdog", 
   such as "NFL:Giants:Bears" for us football
    */
@@ -41,6 +44,7 @@ contract Oracle {
   address public proposer;
   // track token holders: ownership metric, whether they voted, their basis for the token fees
   mapping(address => AdminStruct) public adminStruct;
+  mapping(address => bool) public whiteList;
   // this allows the contract to send and receive
   Token public token;
   // link to communicate with the betting contract
@@ -49,17 +53,18 @@ contract Oracle {
   struct AdminStruct {
     uint32 basePropNumber;
     uint32 probation;
+    uint32 probation2;
     uint32 voteTracker;
     uint32 totalVotes;
     uint32 tokens;
     uint64 initFeePool;
   }
 
-  event DecOddsPosted(
+  event probSpreadDiv2Posted(
     uint32 epoch,
     uint32 propnum,
     uint8 subNumber,
-    uint16[32] decOdds,
+    uint16[32] probSpread,
     address msgsender
   );
 
@@ -107,12 +112,21 @@ contract Oracle {
     address dataProposer
   );
 
-  constructor(address payable bettingk, address payable _token) {
+  constructor(
+    address payable bettingk,
+    address payable _token,
+    address acct1,
+    address acct2,
+    address acct3
+  ) {
     bettingContract = Betting(bettingk);
     token = Token(_token);
     oracleEpoch = 1;
     propNumber = 1;
     reviewStatus = true;
+    whiteList[acct1] = true;
+    whiteList[acct2] = true;
+    whiteList[acct3] = true;
   }
 
   receive() external payable {}
@@ -135,27 +149,23 @@ contract Oracle {
   }
 
   /**  @dev sends odds for weekend events
-   * @param _decimalOdds odds is the gross decimial odds for the favorite
-   * the decimal odds here are peculiar, in that first, the are
-   * (decOdds -1)* 1000 They are also 'grossed up' to anticipate the
-   * oracle fee of 5% applied to  the winnings. they are multiplied by
-   * 10 to allow a mechanism to identify halted matches
+   * @param _probSpread2 odds is the gross decimial odds for the favorite
+   * the spread Prob probability of a win is for the favorite, given a
+   * vig of about 2.3%. This is half the total fee, needed to anticipate
+   * the oracle fee of 5% applied to  the winnings.
    */
-  function oddsPost(uint16[32] memory _decimalOdds) external {
+  function oddsPost(uint16[32] memory _probSpread2) external {
     require(!reviewStatus, "WRONG ORDER");
     post();
     for (uint256 i = 0; i < MAX_EVENTS; i++) {
-      require(
-        _decimalOdds[i] <= MAX_DEC_ODDS && _decimalOdds[i] >= MIN_DEC_ODDS,
-        "bad odds"
-      );
-      propOdds[i] = _decimalOdds[i] * 10;
+      require(_probSpread2[i] <= MAX_SPREAD_2, "bad odds");
+      probSpreadDiv2[i] = _probSpread2[i];
     }
-    emit DecOddsPosted(
+    emit probSpreadDiv2Posted(
       oracleEpoch,
       propNumber,
       subNumber,
-      _decimalOdds,
+      _probSpread2,
       msg.sender
     );
   }
@@ -225,7 +235,7 @@ contract Oracle {
     uint32 thisEpoch = oracleEpoch;
     if (votes[0] > votes[1]) {
       if (!reviewStatus) {
-        bool success = bettingContract.transmitOdds(propOdds);
+        bool success = bettingContract.transmitOdds(probSpreadDiv2);
         require(success);
         reviewStatus = !reviewStatus;
         gamesStart = uint32(block.timestamp);
@@ -240,7 +250,7 @@ contract Oracle {
         reviewStatus = !reviewStatus;
       }
     } else {
-      adminStruct[proposer].probation = propNumber + 2;
+      adminStruct[proposer].probation = propNumber + 3;
     }
     emit VoteOutcome(thisEpoch, propNumber, votes[0], votes[1], proposer);
     propNumber++;
@@ -257,10 +267,13 @@ contract Oracle {
     require(
       _concentrationLim >= MIN_CONC_FACTOR &&
         _concentrationLim <= MAX_CONC_FACTOR,
-      "between 5 and 32"
+      "between and including 2 and 16"
     );
-    require(propNumber > adminStruct[msg.sender].probation, "on probation");
-    adminStruct[msg.sender].probation = propNumber;
+    require(
+      propNumber > adminStruct[msg.sender].probation2 || whiteList[msg.sender],
+      "one change per epoch"
+    );
+    adminStruct[msg.sender].probation2 = propNumber;
     bettingContract.adjustConcentrationFactor(_concentrationLim);
     emit ParamsPosted(oracleEpoch, _concentrationLim, msg.sender);
   }
@@ -272,8 +285,11 @@ contract Oracle {
    */
   function haltBetting(uint256 _match) external {
     require(adminStruct[msg.sender].tokens > 0, "need a balance");
-    require(propNumber > adminStruct[msg.sender].probation, "on probation");
-    adminStruct[msg.sender].probation = propNumber;
+    require(
+      propNumber > adminStruct[msg.sender].probation2 || whiteList[msg.sender],
+      "one per epoch"
+    );
+    adminStruct[msg.sender].probation2 = propNumber;
     bettingContract.haltMatch(_match);
     emit PausePosted(oracleEpoch, _match, msg.sender);
   }
@@ -318,7 +334,11 @@ contract Oracle {
         (adminStruct[msg.sender].tokens == _amt),
       "accounts restricted to min 50k"
     );
-    require(propNumber > adminStruct[msg.sender].probation, "on probation");
+    require(
+      propNumber > adminStruct[msg.sender].probation &&
+        propNumber > adminStruct[msg.sender].probation2,
+      "on probation"
+    );
     uint256 _ethOutWd;
     totalTokens -= uint64(_amt);
     if (adminStruct[msg.sender].totalVotes > 0) {
@@ -338,8 +358,8 @@ contract Oracle {
     return matchSchedule;
   }
 
-  function showPropOdds() external view returns (uint16[32] memory) {
-    return propOdds;
+  function showprobSpreadDiv2() external view returns (uint16[32] memory) {
+    return probSpreadDiv2;
   }
 
   function showPropResults() external view returns (uint8[32] memory) {
@@ -360,22 +380,20 @@ contract Oracle {
     require(hourOfDay() <= GMT_2, "need gmt hour <= 2");
     require(
       (subNumber == 0 && msg.sender != proposer) ||
-        (subNumber > 0 && msg.sender == proposer) ||
-        (adminStruct[msg.sender].tokens >= adminStruct[proposer].tokens),
+        (subNumber > 0 && msg.sender == proposer),
       "no consecutive acct posting"
     );
     require(adminStruct[msg.sender].tokens > 0);
     votes[0] = adminStruct[msg.sender].tokens;
-    proposer = msg.sender;
-    if (subNumber == 0) {
+    if (msg.sender != proposer) {
       adminStruct[msg.sender].totalVotes++;
     }
+    proposer = msg.sender;
     subNumber++;
     adminStruct[msg.sender].voteTracker = propNumber;
   }
 
-  /**  @dev internal function that calculates and sends the account's accrued
-   * avax to reset the account
+  /**  @dev internal function that calculates and sends the account's accrued avax to reset the account
    */
   function ethClaim() internal returns (uint256 _ethOut) {
     uint256 votePercentx10000 = (uint256(adminStruct[msg.sender].totalVotes) *

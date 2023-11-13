@@ -39,10 +39,16 @@ describe("Betting", function () {
 
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
-    oracle = await Oracle.deploy(betting.address, token.address);
-    await betting.setOracleAddress(oracle.address);
     [owner, account1, account2, account3, account4, account5, account6, _] =
       await ethers.getSigners();
+    oracle = await Oracle.deploy(
+      betting.address,
+      token.address,
+      owner.address,
+      account1.address,
+      account2.address
+    );
+    await betting.setOracleAddress(oracle.address);
   });
 
   describe("run trans", async () => {
@@ -159,9 +165,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
@@ -271,9 +276,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
@@ -394,9 +398,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
@@ -505,7 +508,7 @@ describe("Betting", function () {
         "ether"
       );
       console.log(`acct0 wd ${ethout}`);
-      assert.equal(Number(ethout).toFixed(3), "0.126", "Must be equal");
+      assert.equal(Number(ethout).toFixed(3), "0.127", "Must be equal");
     });
   });
 
@@ -518,9 +521,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
@@ -635,9 +637,8 @@ describe("Betting", function () {
       result = await oracle
         .connect(account2)
         .oddsPost([
-          800, 448, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          43, 43, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
@@ -754,7 +755,7 @@ describe("Betting", function () {
         "ether"
       );
       console.log(`acct0 final wd ${ethout}`);
-      assert.equal(Number(ethout).toFixed(3), "0.135", "Must be equal");
+      assert.equal(Number(ethout).toFixed(3), "0.136", "Must be equal");
     });
   });
 });

@@ -26,9 +26,9 @@ export default ({ label, addr, start, end, transform, spacing, big }) => (
       >
         {addr
           ? addr.substring(0, 2) +
-            addr.substring(2, start).toUpperCase() +
+            addr.substring(2, start) +
             "..." +
-            addr.substring(addr.length - end, addr.length).toUpperCase()
+            addr.substring(addr.length - end, addr.length)
           : ""}
       </Text>
     </Box>
@@ -36,7 +36,8 @@ export default ({ label, addr, start, end, transform, spacing, big }) => (
 );
 
 /*class TruncatedAddress extends React.Component {
-
+.toUpperCase()
+transform="uppercase"
   constructor(props, context) {
     super(props)
   }

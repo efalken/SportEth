@@ -32,9 +32,15 @@ describe("test rewards 0", function () {
 
     token = await Token.deploy();
     betting = await Betting.deploy(token.address);
-    oracle = await Oracle.deploy(betting.address, token.address);
-    await betting.setOracleAddress(oracle.address);
     [owner, account1, account2, account3, _] = await ethers.getSigners();
+    oracle = await Oracle.deploy(
+      betting.address,
+      token.address,
+      owner.address,
+      account1.address,
+      account2.address
+    );
+    await betting.setOracleAddress(oracle.address);
   });
 
   describe("run trans", async () => {
@@ -156,9 +162,8 @@ describe("test rewards 0", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
@@ -265,9 +270,8 @@ describe("test rewards 0", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
@@ -378,9 +382,8 @@ describe("test rewards 0", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.processVote();
@@ -486,9 +489,8 @@ describe("test rewards 0", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       result = await betting.connect(account2).fundBook({
         value: 20n * eths,
@@ -612,9 +614,8 @@ describe("test rewards 0", function () {
       result = await oracle
         .connect(account1)
         .oddsPost([
-          999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-          699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-          919, 720, 672, 800,
+          11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
 
       await helper.advanceTimeAndBlock(secondsInHour * 15);

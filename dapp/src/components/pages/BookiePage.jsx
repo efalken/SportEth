@@ -76,16 +76,18 @@ function BookiePage() {
           </a>
         </div>
         <Text style={{ color: "white", fontSize: "14px" }}>or</Text>
-        <div
-          style={{
-            color: "yellow",
-            font: "Arial",
-            fontStyle: "Italic",
-            fontSize: "14px",
-          }}
-          onClick={() => setHash(null)}
-        >
-          click here to dismiss
+        <div onClick={() => setHash(null)}>
+          <a
+            target="_blank"
+            style={{
+              color: "yellow",
+              font: "Arial",
+              fontStyle: "Italic",
+              fontSize: "14px",
+            }}
+          >
+            <u>click here to dismiss</u>
+          </a>
         </div>
       </div>
     );
@@ -248,11 +250,11 @@ function BookiePage() {
     const _bookieShares = _lpStruct[0] || "0";
     setBookieShares(_bookieShares);
 
-    const _bookieEpoch = _lpStruct[1] || "0";
+    const _bookieEpoch = _lpStruct[2] || "0";
     setBookieEpoch(_bookieEpoch);
   }, [data]);
-  console.log(tokensInK, "bookieEpoch");
-  console.log(bettingActive, "bettingActive");
+  console.log(tokensInK, "tokensInK");
+  console.log(bookieShares, "bookieShares");
 
   function statusCheck() {
     if (!bettingActive) return "Betting inactive, can withdraw or fund.";
@@ -331,10 +333,10 @@ function BookiePage() {
           <td>{i}</td>
           <td>{teamSplit[i][1]}</td>
           <td>{teamSplit[i][2]}</td>
-          <td>{(bets0[i] / 10000).toFixed(1)}</td>
-          <td>{(bets1[i] / 10000).toFixed(1)}</td>
-          <td>{(payoff0[i] / 10000 - bets1[i] / 10000).toFixed(1)}</td>
-          <td>{(payoff1[i] / 10000 - bets0[i] / 10000).toFixed(1)}</td>
+          <td>{(bets0[i] / 10000).toFixed(3)}</td>
+          <td>{(bets1[i] / 10000).toFixed(3)}</td>
+          <td>{(payoff0[i] / 10000 - bets1[i] / 10000).toFixed(3)}</td>
+          <td>{(payoff1[i] / 10000 - bets0[i] / 10000).toFixed(3)}</td>
         </tr>
       ) : (
         ""
@@ -425,8 +427,8 @@ function BookiePage() {
               </Text>
               <TruncatedAddress
                 addr={address}
-                start="8"
-                end="0"
+                start="6"
+                end="3"
                 transform="uppercase"
                 spacing="1px"
               />
@@ -457,10 +459,14 @@ function BookiePage() {
               <Text size="14px" className="style">
                 {"  "}
                 Account LP Share Balance
+                <br />
+                <br />
+                {"total shares in contract: " +
+                  Number(totalShares).toLocaleString()}
               </Text>
             </Box>
 
-            {bettingActive !== 2 ? (
+            {!bettingActive ? (
               <Box>
                 <Form
                   onChange={(e) => setFundAmount(e.target.value)}
@@ -487,14 +493,19 @@ function BookiePage() {
               </Box>
             ) : (
               <Text size="14px" className="style">
+                <br />
                 No funding or withdrawals while betting active
+                <br />
+                <br />
               </Text>
             )}
 
             <Box>
               {" "}
               <Text size="14px" color={cwhite}>
-                {"share value: " + Number(ethBookie).toFixed(1) + " avax "}
+                {"connected acct value: " +
+                  Number(ethBookie).toFixed(1) +
+                  " avax "}
               </Text>
               <Box>
                 <Box>
@@ -534,7 +545,7 @@ function BookiePage() {
                   Current Epoch: {currentWeek}{" "}
                 </Text>
                 <br></br>
-                {bookieEpoch === currentWeek ? (
+                {/* {bookieEpoch === currentWeek ? (
                   <Text size="14px" color={cwhite}>
                     you can withdraw after settlement
                   </Text>
@@ -542,7 +553,7 @@ function BookiePage() {
                   <Text size="14px" color={cwhite}>
                     you can withdraw before betting starts
                   </Text>
-                )}
+                )} */}
               </Box>
             </Box>
 
@@ -561,6 +572,14 @@ function BookiePage() {
                       Token Rewards Remaining:{" "}
                       {Math.round(tokensInK).toLocaleString()}
                     </Text>
+                    <br />
+                    <Text size="14px" weight="300" color="#ffffff">
+                      <br />
+                      Token rewards can be claimed while tokens remain. Claiming
+                      rewards sends tokens to your EOA. After claiming, user
+                      cannot withdraw until after the next settlement.
+                    </Text>
+                    <br />
                     <br />
                     {ethBookie > 0 && bookieEpoch < currentWeek ? (
                       <button
@@ -619,16 +638,6 @@ function BookiePage() {
                 Status: {statusCheck()} <br />
               </Text>
             </Flex>
-            {Number(tokensInK) > 0 ? (
-              <Flex width="100%" justifycontent="marginLeft">
-                <Text size="14px" weight="300" color="#ffffff">
-                  <br />
-                  Token rewards can be claimed bottom left while tokens remain.
-                  Funds must sit for one settlement to claim. Once claimed user
-                  cannot withdraw for 1 settlement.
-                </Text>
-              </Flex>
-            ) : null}
           </Box>
 
           <Box>
