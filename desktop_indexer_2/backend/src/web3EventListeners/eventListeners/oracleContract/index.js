@@ -25,10 +25,10 @@ export const oracleDecOddsPostedEventHandler = new EventHandler(
   [
     ["epoch", "epoch", "int"],
     ["propnum", "propnum", "int"],
-    ["decOdds", "decOdds", "int[]"],
+    ["probSpread", "probSpread", "int[]"],
   ],
   "oracleDecOddsPostedEvent",
-  "DecOddsPosted"
+  "probSpreadDiv2Posted"
 );
 
 export const oracleStartTimesPostedEventHandler = new EventHandler(
