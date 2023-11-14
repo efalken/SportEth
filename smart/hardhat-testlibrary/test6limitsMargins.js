@@ -189,7 +189,7 @@ describe("Betting", function () {
       margin1 = await betting.margin(1);
       console.log(`freeCapital:${margin0 - margin1}`);
 
-      await expect(betting.connect(account2).bet(0, 0, "62954")).to.be.reverted;
+      await expect(betting.connect(account2).bet(0, 0, "62953")).to.be.reverted;
       result = await betting.connect(account2).bet(0, 0, "62950");
     });
 

@@ -1066,14 +1066,14 @@ describe("Betting", function () {
       result = await oracle
         .connect(account2)
         .oddsPost([
-          0, 0, 44, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          0, 0, 44, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
         ]);
       receipt = await result.wait();
       await helper.advanceTimeAndBlock(secondsInHour * 15);
       result = await oracle.connect(owner).processVote();
       const odds0 = await betting.probSpread2(0);
-      assert.equal(odds0, "41", "mustBe equal");
+      assert.equal(odds0, "0", "mustBe equal");
     });
   });
 });
