@@ -635,7 +635,9 @@ function BookiePage() {
           <Box mt="14px" mx="30px">
             <Flex width="100%" justifycontent="marginLeft">
               <Text size="14px" className="style">
-                Status: {statusCheck()} <br />
+                Status: {statusCheck()} <br />A positive net liability number
+                implies how much the LPs lose if the team wins. If negative, LPs
+                profit if the team wins.
               </Text>
             </Flex>
           </Box>

@@ -1,11 +1,11 @@
-from helperOracle0x257 import send_function
+from helperOracle import send_function
 import json
 
 
 def oddsPost():
-    with open("../odds.json", "r") as f:
+    with open("odds.json", "r") as f:
         args = json.load(f)
-    tx_hash = send_function("oddsPost", args["_decimalOdds"], gas=500000)
+    tx_hash = send_function("oddsPost", args["_probSpread2"], gas=500000)
     return tx_hash
 
 

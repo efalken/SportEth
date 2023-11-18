@@ -4,13 +4,10 @@ from eth_account import Account
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
-
 CONTRACT_ADDRESS = "0xB73Cb2696726b7356e03c697672e2Dcc751407D0"
-PRIVATE_KEY = (
-    "0xdc63c0436707975689036ad87b2dcbec81ac4ff488501115995ae84e7f9a1286"  # 257
-)
-RPC_URL = "https://api.avax-test.network/ext/bc/C/rpc"
-# RPC_URL = "http://127.0.0.1:8545/"
+# put your private key here
+PRIVATE_KEY = "0xdc63c0436707975689036ad87b2dcbec81ac4ff488501115995ae84e7f9a1286"
+RPC_URL = "https://api.avax.network/ext/bc/C/rpc"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 account = Account.from_key(PRIVATE_KEY)
@@ -29,7 +26,7 @@ def send_transaction(data, gas):
         "to": CONTRACT_ADDRESS,
         "value": 0,
         "data": data,
-        "chainId": 43113,
+        "chainId": 43114,
     }
     signed_tx = w3.eth.account.sign_transaction(txn, PRIVATE_KEY)
     tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)

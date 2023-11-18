@@ -1,9 +1,9 @@
-from helperOracle0x257 import send_function
+from helperOracle import send_function
 import json
 
 
 def settleRefreshPost():
-    with open("../settleRefresh.json", "r") as f:
+    with open("settleRefresh.json", "r") as f:
         args = json.load(f)
     tx_hash = send_function(
         "settleRefreshPost",

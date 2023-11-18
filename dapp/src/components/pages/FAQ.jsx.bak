@@ -171,15 +171,15 @@ function FAQ() {
         <h2 id="howtoredeemyourbets">How to redeem your bets</h2>
         <HashLink to="#topofpage">back to top </HashLink>
         <p>
-          An account can have up to 16 active and unredeemed old bets (whether
-          wins or losses), after which no further bets can be made until they
-          are redeemed. Redemptions can only occur when a bettor has no active
-          bets, so a bettor should redeem his bets after settlement if he
-          anticipates betting again. At settlement, a bets hash refers to a
-          struct containing this information, and a mapping generated at
-          settlement allows redemption. Users redeem bets by clicking a single
-          button (it is one transaction). All unredeemed bets in a user's
-          account are redeemed in a redemption.
+          Bets are stored in a mapping within a better's struct, and after 16
+          bets, no further bets can be made until they are redeemed. Redemptions
+          can only occur when a bettor has no active bets, so a bettor should
+          redeem his bets after settlement if he anticipates a problem. All bets
+          in the array are settled for the bettor. Each bet is represented by
+          the unique combination of epoch, match, and pick. At settlement, a
+          bets hash refers to a struct containing this information, and a
+          mapping generated at settlement allows redemption. Users redeem bets
+          by clicking a single button (it is one transaction).
         </p>
         <p>
           <strong>Redeeming</strong>
@@ -190,23 +190,21 @@ function FAQ() {
           </strong>
         </p>
         <p>
-          If you have active bets (below), you cannot withdraw. If all of your
-          bets are settled, the redeem button is displayed. Click once to redeem
-          all bets. At 16 unredeemed bets, the user must redeem so the account
-          can bet again. One can redeem whenever. Funds do not disappear if
-          never claimed.
+          Note if you have active bets (below left), you cannot withdraw. If all
+          of your bets are settled, the redeem button is displayed. Click once
+          to redeem all bets. At 16 unredeemed bets, the user must redeem so the
+          account can bet again. One can redeem whenever. Funds do not disappear
+          if never claimed.
         </p>
-        <p>
-          Here the redeem button is hidden because the user cannot redeem due to
-          active bets.
-        </p>
+        <p>Cannot redeem due to active bets, so the redeem button is hidden.</p>
         <p>
           <strong>
             <img src={noRedeem} alt="" />
           </strong>
         </p>
         <p>
-          Here the user has no active bets, so the redeem button is presented.
+          Can redeem as there are no active bets, so the redeem button is
+          presented.
         </p>
         <p>
           <strong>
@@ -536,6 +534,8 @@ function FAQ() {
           Type "npx hardhat test" and it will run the files in the 'test'
           folder.
         </p>
+        <h2 id="contractrestrictions">Contract Restrictions</h2>
+        <HashLink to="#topofpage">back to top </HashLink>
         <h2 id="bettingrestrictions">Betting Restrictions</h2>
         <HashLink to="#topofpage">back to top </HashLink>
         <h3 id="-1"> </h3>
@@ -582,13 +582,13 @@ function FAQ() {
           LPs are charged a 1% fee if they withdraw in the same epoch
         </h3>
         <p>
-          If LPs could deposit and withdraw quickly without a fee, some LPs
-          might find it profitable to scare away other LPs by depositing large
-          amounts to discourage other LPs, who would see low expected returns
-          given a large capital base. Once scared away, the malicious LP would
-          withdraw capital to make the return attractive. This tactic would not
-          help the LP collective, so this tactic is explicitly discouraged via
-          this fee.
+          Suppose LPs could deposit and withdraw quickly without a fee. In that
+          case, some LPs might find it profitable to scare away other LPs by
+          depositing large amounts to discourage other LPs, who would see low
+          expected returns given a large capital base. Once scared away, the
+          malicious LP would withdraw capital to make the return attractive.
+          This tactic would not help the LP collective, so they are explicitly
+          discouraged via this fee.
         </p>
         <h3 id="lpscannotwithdrawinthesameepochtheyclaimtokenrewards">
           LPs cannot withdraw in the same epoch they claim token rewards
@@ -605,17 +605,14 @@ function FAQ() {
         </h3>
         <p>
           This prevents LPs from avoiding or taking advantage of information
-          about bet outcomes as they accrue. Betting is active from the time
-          odds are sent to the betting contract upon a successful oracle vote,
-          through to when the settlement/new scedule is posted (about Friday
-          through Monday).
+          about bet outcomes as they accrue.
         </p>
         <h3 id="lpcapitalexposureislimitedonanyonematch">
           LP capital exposure is limited on any one match.
         </h3>
         <p>
-          If the LPs have 100 ETH, an adjustable concentration factor, cf,
-          prevents the LPs from having an exposure greater than 100/cf in any
+          If the LPs have 100 ETH, an adjustable concentration factor prevents
+          the LPs from having an exposure greater than 100/concFactor in any
           event. This helps control diversification risk. The concentration
           factor is constrained to be between 2 and 16, as the optimal number
           will be determined by experience.
@@ -628,6 +625,7 @@ function FAQ() {
           events that weekend would be of much less interest.
         </p>
         <h2 id="oddsrestrictions">Odds Restrictions</h2>
+
         <HashLink to="#topofpage">back to top </HashLink>
         <h3 id="oneoddsnumberinthecontract">One odds number in the contract</h3>
         <p>

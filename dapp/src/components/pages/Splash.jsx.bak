@@ -120,7 +120,9 @@ export default function Splash() {
                 display: "flex",
                 //  color: "#white",
               }}
-              href={new URL(`ASBWhitePaper.pdf`, import.meta.url).href}
+              href={
+                new URL(`../../../../docs/ASBWhitePaper.pdf`, import.meta.url).href
+              }
               download=""
             >
               Whitepaper
@@ -142,7 +144,7 @@ export default function Splash() {
                 alignItems: "flex-start",
                 display: "flex",
               }}
-              href="/FAQ"
+              href="/faqs"
             >
               FAQs
             </a>

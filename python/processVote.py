@@ -1,8 +1,8 @@
-from helperOracle0x257 import send_function
+from helperOracle import send_function
 
 
 def callProcessVote():
-    tx_hash = send_function("processVote", gas=500000)
+    tx_hash = send_function("processVote", gas=700000)
     return tx_hash
 
 
