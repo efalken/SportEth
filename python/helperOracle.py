@@ -5,7 +5,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 CONTRACT_ADDRESS = "0xB73Cb2696726b7356e03c697672e2Dcc751407D0"
-# put your private key here
+# put your private key here, this one is for 0x2572eE2A871fCC586722C3E57d43831d78E7219c
 PRIVATE_KEY = "0xdc63c0436707975689036ad87b2dcbec81ac4ff488501115995ae84e7f9a1286"
 RPC_URL = "https://api.avax.network/ext/bc/C/rpc"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))

@@ -3,9 +3,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 CONTRACT_ADDRESS = "0xD8Fc0B73066D090520428e4F6809be92af9fda95"
-EOA_ADDRESS4 = "0xc67eB510b7e5CFB3304494166a1f96B6Fc7037CC"
-EOA_ADDRESS5 = "0x8A0362aa49ce1AeAa4A2E95b8394b125159B1019"
-EOA_ADDRESS6 = "0x63368Be2bC9D95e44B10EbaBeb29A62B8e4655B5"
+EOA_ADDRESS4 = "0x2572eE2A871fCC586722C3E57d43831d78E7219c"
 RPC_URL = "https://api.avax.network/ext/bc/C/rpc"
 w3 = Web3(Web3.HTTPProvider(RPC_URL))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -35,7 +33,7 @@ def getUserBetData():
 
 
 def showUserBetData0():
-    tx_odds = contract.functions.showUserBetData(EOA_ADDRESS3).call()
+    tx_odds = contract.functions.showUserBetData(EOA_ADDRESS4).call()
     tx_odds = tx_odds[0]
     tx_odds = tx_odds.hex()
     # tx_odds = tx_odds.hex().rstrip("0")
@@ -46,7 +44,7 @@ def showUserBetData0():
 
 
 def showUserBetData1():
-    tx_odds = contract.functions.showUserBetData(EOA_ADDRESS3).call()
+    tx_odds = contract.functions.showUserBetData(EOA_ADDRESS4).call()
     tx_odds = tx_odds[1]
     tx_odds = tx_odds.hex()
 
@@ -72,17 +70,17 @@ def showAvax():
 
 
 def getBettingBalance():
-    tx_adminstruct = contract.functions.userStruct(EOA_ADDRESS3).call()
+    tx_adminstruct = contract.functions.userStruct(EOA_ADDRESS4).call()
     return tx_adminstruct[1]
 
 
 def getCounter():
-    tx_adminstruct = contract.functions.userStruct(EOA_ADDRESS3).call()
+    tx_adminstruct = contract.functions.userStruct(EOA_ADDRESS4).call()
     return tx_adminstruct[0]
 
 
 def getShares():
-    tx_adminstruct = contract.functions.lpStruct(EOA_ADDRESS3).call()
+    tx_adminstruct = contract.functions.lpStruct(EOA_ADDRESS4).call()
     return tx_adminstruct[0]
 
 
