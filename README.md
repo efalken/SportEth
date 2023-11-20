@@ -13,8 +13,8 @@ Smart: hardhat tests, deployment script for the contracts.
 
 Download the repo by typing
 - `git clone git@github.com:efalken/sporteth.git`
-Pull the solidity contracts into Remix via
-`https://gist.github.com/efalken/2ff6493990de46a28bd5ae2121bdfd9c`
+Pull the solidity contracts into Remix via gist by clicking on `gist` in remix and pasting this URL into the input box (see pic below):
+`https://gist.github.com/efalken/1f658d097963f0d8e690e871685d7fec`
 <img src="/docs/remix1.png" alt="Solidity gist" style="height: 100px; width:100px;"/>
 
 ### Dapp
