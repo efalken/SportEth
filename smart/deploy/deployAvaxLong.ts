@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
 const helper = require("../hardhat-helpers");
 import fs from "fs";
-var nextStart = 1690656253;
-var receipt, _timestamp, result;
+var nextStart;
+var  _timestamp, result;
 const eths =    BigInt('100000000000000');
 const million = BigInt('1000000');
 

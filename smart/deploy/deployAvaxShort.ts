@@ -34,50 +34,50 @@ async function main() {
   const Token = await ethers.getContractFactory("Token");
   const token = await Token.deploy();
   await token.deployed();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   console.log(`Token contract was deployed to ${token.address}`);
-  const Betting = await ethers.getContractFactory("Betting");
+  const Betting = await ethers.getContractFactory("BettingFuji");
   const betting = await Betting.deploy(token.address);
   await betting.deployed();
   console.log(`Betting contract was deployed to ${betting.address}`);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
-  const Oracle = await ethers.getContractFactory("Oracle");
-  const oracle = await Oracle.deploy(betting.address, token.address);
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const Oracle = await ethers.getContractFactory("OracleFuji");
+  const oracle = await Oracle.deploy(betting.address, token.address, signers[0].address,signers[1].address,signers[2].address);
   await oracle.deployed();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   console.log(`Oracle contract was deployed to ${oracle.address}`);
   await betting.setOracleAddress(oracle.address);
-  /*
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await token.approve(oracle.address, 140n * million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await oracle.depositTokens(140n*million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await token.transfer(accounts[1], 130n * million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await token.connect(signers[1]).approve(oracle.address, 130n * million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await oracle.connect(signers[1]).depositTokens(130n * million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await token.transfer(accounts[2], 130n * million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await token.connect(signers[2]).approve(oracle.address, 130n * million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await oracle.connect(signers[2]).depositTokens(130n * million);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   console.log(`got here2`);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   result = await token.transfer(accounts[2], 130n * million);
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   await token.transfer(betting.address, 80n * million);
 
   console.log(`got here3`);
   
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   _timestamp = (
     await ethers.provider.getBlock(await ethers.provider.getBlockNumber())
   ).timestamp;
@@ -158,48 +158,47 @@ async function main() {
   );
   await result.wait();
 
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   console.log("line149");
   await oracle.connect(signers[1]).vote(true);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await oracle.processVote();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await oracle.connect(signers[1]).oddsPost([
-    999, 500, 500, 919, 909, 800, 510, 739, 620, 960, 650, 688, 970, 730,
-    699, 884, 520, 901, 620, 764, 851, 820, 770, 790, 730, 690, 970, 760,
-    919, 720, 672, 800,
+    11, 153, 100, 77, 20, 0, 0, 0, 0, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+          20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
   ]);
   receipt = await result.wait();
   
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await oracle.vote(true);
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
    result = await betting.fundBook({
     value: 20n*eths,
   });
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   result = await oracle.processVote();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await betting.connect(signers[1]).fundBettor({
     value: 20n*eths,
   });
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await betting.connect(signers[2]).fundBettor({
     value: 20n*eths,
   });
   await result.wait();
-  await new Promise((resolve) => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   result = await betting.connect(signers[1]).bet(2, 1, 10000);
       receipt = await result.wait();
       console.log(`line 214`);
-      await new Promise((resolve) => setTimeout(resolve, 20000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       result = await betting.connect(signers[2]).bet(2, 0, 10000);
       receipt = await result.wait();
-      */
+      
       // ***************************************
 
   const chainId = (await ethers.provider.getNetwork()).chainId;
