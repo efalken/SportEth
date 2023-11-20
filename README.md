@@ -1,11 +1,13 @@
 # Tools for interacting with the AvaxSportsBook contract on Avalanche C-chain.
 
-## Directories
-### Dapp: the frontend for bettors and LPs. 
-### eventlogs: Tools for pulling event logs.
-### Docs: tools for oracles, explanations of hardhat tests.
-### Python: Python tools, primarily for oracles. 
-### Smart: hardhat tests, deployment script for the contracts.
+```shell
+Directories
+Dapp: the frontend for bettors and LPs. 
+eventlogs: Tools for pulling event logs.
+Docs: tools for oracles, explanations of hardhat tests.
+Python: Python tools, primarily for oracles. 
+Smart: hardhat tests, deployment script for the contracts.
+```
 
 ## How to use
 
@@ -92,10 +94,4 @@ ContractTests.xls: Contains worksheets that match the testing scenarios in smart
 
 
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
+

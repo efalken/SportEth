@@ -1,9 +1,5 @@
 This repo contains tools for interacting with the avaxsportsbook contract on Avalanche C-chain.
 
-**Dapp**
-
-the frontend for bettors and LPs. This is currently accessible on avaxsportsbook.io, and on vercel and spheron, as will as the IPFS. If one is worried about the security on those sites, you can run this locally, and be able to see the code and know it is secure.
-
 **Desktop_indexer_2**
 
 Tools for pulling event logs.
