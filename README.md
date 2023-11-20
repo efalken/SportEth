@@ -13,7 +13,7 @@ Smart: hardhat tests, deployment script for the contracts.
 
 Download the repo by typing
 - `git clone https://github.com:efalken/asb.git`
-Pull the solidity contracts into Remix via gist by clicking on `gist` in remix and pasting this URL into the input box (see pic below):
+- Pull the solidity contracts into Remix via gist by clicking on `gist` in remix and pasting this URL into the input box (see pic below):
 `https://gist.github.com/efalken/1f658d097963f0d8e690e871685d7fec`
 <img src="/docs/remix1.png" alt="Solidity gist" style="height: 244px; width:400px;"/>
 
