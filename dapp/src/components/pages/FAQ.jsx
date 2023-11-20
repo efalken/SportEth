@@ -97,28 +97,6 @@ function FAQ() {
           <br />
           <HashLink to="#oraclepageexplainer">Oracle page explainer</HashLink>
           <br />
-          <HashLink to="#pythontools">Python Tools</HashLink>
-          <br />
-          <HashLink to="#todownloadtherepogotoacommandlineandtype">
-            Using the repo
-          </HashLink>
-          <br />
-          <HashLink to="#howtorunlocaltestsonthecontract">
-            How to run hardhat tests on the contract
-          </HashLink>
-          <br />
-          <HashLink to="#howtorunlocalfrontendtocontracts">
-            How to run local browser front end to contracts
-          </HashLink>
-          <br />
-          <HashLink to="#howtoruneventlogqueriesusingrepo">
-            How to run event log queries
-          </HashLink>
-          <br />
-          <HashLink to="#howtoruncontracttests">
-            How to run hardhat contract tests
-          </HashLink>
-          <br />
           <HashLink to="#bettingrestrictions">Betting Restrictions</HashLink>
           <br />
           <HashLink to="#lprestrictions">LP Restrictions</HashLink>
@@ -429,113 +407,7 @@ function FAQ() {
             <img src={oracleAcctState} alt="" />
           </strong>
         </p>
-        <h2 id="pythontools">Python Tools</h2>
-        <HashLink to="#topofpage">back to top </HashLink>
-        <p>
-          In the Python directory, there are several useful programs. Given the
-          inputs needed for data submissions, these are best done via Python as
-          opposed to Remix, as it is easy to miss a set of quotes or commas, and
-          then one gets an error that is not explained. Further, this should be
-          automated as much as possible, as this investment makes it easier to
-          evaluate the data.
-        </p>
-        <ul>
-          <li>getBettingData.py</li>
-        </ul>
-        <p>Pulls betting contract state data.</p>
-        <ul>
-          <li>oddsPost.py</li>
-        </ul>
-        <p>
-          Sends weekly odds, formatted in the probability difference between the
-          two teams, multiplied by 1000.
-        </p>
-        <ul>
-          <li>settleRefresh.py</li>
-        </ul>
-        <p>
-          Sends the outcomes of the prior week and the upcoming schedule for the
-          next weekend.
-        </p>
-        <ul>
-          <li>Createjson.xlm.</li>
-        </ul>
-        <p>
-          Contains macros that create. You can pull raw data to be pasted into
-          the ASB.accdb database and then take the query from the final query
-          and paste it back into this spreadsheet. A worksheet-embedded macros
-          create the .json files used for sending odds and settleRefresh to the
-          oracle contract using the Python files above.
-        </p>
-        <ul>
-          <li>ASB.accdb</li>
-        </ul>
-        <p>
-          This database takes in raw data on schedules and odds, which is in
-          decimal odds, and generates the data in the format the contract
-          requires
-        </p>
-        <p>Puts the favorite in the first position</p>
-        <p>
-          Translates decimal odds into the probability of winning for the
-          favorite, which is the difference between the favorite's probability
-          of winning and the base probability of winning (51.2%).
-        </p>
-        <ul>
-          <li>oddsTranslation:</li>
-        </ul>
-        <p>
-          Contains functions for translating between decimal, moneyline,
-          fractional, and probability of winning. It gives an example of how raw
-          decimal odds are transformed into the probability of a win.
-        </p>
-        <p>To create a set of data for a settle/refresh submission.</p>
-        <ul>
-          <li>ContractTests.xlsm</li>
-        </ul>
-        <p>
-          Contains worksheets that match the testing scenarios in smart/testLib.
-        </p>
-        <h2 id="todownloadtherepogotoacommandlineandtype">
-          To download the repo, go to a command line and type
-        </h2>
-        <HashLink to="#topofpage">back to top </HashLink>
-        <p>Git clone</p>
-        <h2 id="howtorunlocaltestsonthecontract">
-          How to run local tests on the contract
-        </h2>
-        <HashLink to="#topofpage">back to top </HashLink>
-        <p>Go to the 'smart' director</p>
-        <p>type</p>
-        <p>cd smart</p>
-        <p>Type "npm I" to install node modules.</p>
-        <p>Take the 'dotenv' file in smart to ".env"</p>
-        <p>
-          Add your seed phrase. This will create a wallet used by the test
-          contracts.
-        </p>
-        <h2 id="howtorunlocalfrontendtocontracts">
-          How to run local front end to contracts
-        </h2>
-        <HashLink to="#topofpage">back to top </HashLink>
-        <p>Go to the 'dapp' directory</p>
-        <p>Cd dapp</p>
-        <p>Type "npm I" to install node modules.</p>
-        <p>Yarn dev</p>
-        <h2 id="howtoruneventlogqueriesusingrepo">
-          How to run event log queries using repo
-        </h2>
-        <HashLink to="#topofpage">back to top </HashLink>
-        <p>Go to eventLogQueries directory.</p>
-        <p>Go to backend, type "npm i"</p>
-        <p>Got to frontend, type "npm I"</p>
-        <h2 id="howtoruncontracttests">How to run contract tests</h2>
-        <HashLink to="#topofpage">back to top </HashLink>
-        <p>Go to smart directory</p>
-        <p>
-          Type "npx hardhat test" and it will run the files in the 'test'
-          folder.
-        </p>
+
         <h2 id="bettingrestrictions">Betting Restrictions</h2>
         <HashLink to="#topofpage">back to top </HashLink>
         <h3 id="-1"> </h3>
