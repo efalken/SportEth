@@ -235,9 +235,9 @@ function BetPage() {
         args: [0],
       },
       {
-        abi: bettingContractABI,
-        address: bettingContractAddress,
-        functionName: "showStartTime",
+        abi: oracleContractABI,
+        address: oracleContractAddress,
+        functionName: "showPropStartTimes",
       },
       {
         abi: bettingContractABI,
