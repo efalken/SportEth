@@ -3,7 +3,7 @@ import { oracleContract } from "../../../config.js";
 
 // event ResultsPosted(uint32 epoch, uint32 propnum, uint8[32] winner);
 
-// event DecOddsPosted(uint32 epoch, uint32 propnum, uint16[32] decOdds);
+// event probSpreadDiv2Posted(uint32 epoch, uint32 propnum, uint16[32] decOdds);
 
 // event SchedulePosted(uint32 epoch, uint32 propnum, string[32] sched);
 
@@ -20,14 +20,14 @@ export const oracleResultsPostedEventHandler = new EventHandler(
   "ResultsPosted"
 );
 
-export const oracleDecOddsPostedEventHandler = new EventHandler(
+export const oracleprobSpreadDiv2PostedEventHandler = new EventHandler(
   oracleContract,
   [
     ["epoch", "epoch", "int"],
     ["propnum", "propnum", "int"],
     ["probSpread", "probSpread", "int[]"],
   ],
-  "oracleDecOddsPostedEvent",
+  "oracleprobSpreadDiv2PostedEvent",
   "probSpreadDiv2Posted"
 );
 
@@ -56,7 +56,7 @@ export const oracleSchedulePostedEventHandler = new EventHandler(
 export async function oracleContractEventListener() {
   // sync old events and start the event listener for the new events
   await oracleResultsPostedEventHandler.syncEvent();
-  await oracleDecOddsPostedEventHandler.syncEvent();
+  await oracleprobSpreadDiv2PostedEventHandler.syncEvent();
   await oracleStartTimesPostedEventHandler.syncEvent();
   await oracleSchedulePostedEventHandler.syncEvent();
 }

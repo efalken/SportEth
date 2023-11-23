@@ -12,12 +12,12 @@ import EventPage from "./pages/EventPage";
 function App() {
   const supportedEvents = [
     {
-      name: "DecOddsPosted",
+      name: "probSpreadDiv2Posted",
       contract: "oracle",
       args: [
         ["epoch", "int"],
-        ["propnum", "int"],
-        ["decOdds", "int[]"],
+        ["propnum", "int"], 
+        ["probSpread", "int[]"],
       ],
     },
     {

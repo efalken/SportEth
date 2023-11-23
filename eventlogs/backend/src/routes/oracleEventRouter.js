@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  oracleDecOddsPostedEventHandler,
+  oracleprobSpreadDiv2PostedEventHandler,
   oracleResultsPostedEventHandler,
   oracleSchedulePostedEventHandler,
   oracleStartTimesPostedEventHandler,
@@ -13,8 +13,8 @@ router.get(
   oracleResultsPostedEventHandler.getAllRouteHandler()
 );
 router.get(
-  "/DecOddsPosted",
-  oracleDecOddsPostedEventHandler.getAllRouteHandler()
+  "/probSpreadDiv2Posted",
+  oracleprobSpreadDiv2PostedEventHandler.getAllRouteHandler()
 );
 router.get(
   "/StartTimesPosted",

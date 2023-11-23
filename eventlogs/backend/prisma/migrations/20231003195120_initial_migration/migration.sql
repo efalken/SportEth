@@ -13,14 +13,14 @@ CREATE TABLE `OracleResultsPostedEvent` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `OracleDecOddsPostedEvent` (
+CREATE TABLE `OracleprobSpreadDiv2PostedEvent` (
     `blockNumber` INTEGER NOT NULL,
     `transactionHash` VARCHAR(191) NOT NULL,
     `transactionIndex` INTEGER NOT NULL,
     `logIndex` INTEGER NOT NULL,
     `epoch` INTEGER NOT NULL,
     `propnum` INTEGER NOT NULL,
-    `decOdds` VARCHAR(3000) NOT NULL,
+    `probSpread` VARCHAR(3000) NOT NULL,
     `manualEntry` BOOLEAN NOT NULL DEFAULT false,
 
     PRIMARY KEY (`blockNumber`, `transactionHash`, `transactionIndex`, `logIndex`)

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  oracleDecOddsPostedEventHandler,
+  oracleprobSpreadDiv2PostedEventHandler,
   oracleResultsPostedEventHandler,
   oracleSchedulePostedEventHandler,
   oracleStartTimesPostedEventHandler,
@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
   }
 
   await Promise.all([
-    oracleDecOddsPostedEventHandler.syncEventsFromTransaction(
+    oracleprobSpreadDiv2PostedEventHandler.syncEventsFromTransaction(
       transactionReceipt
     ),
     oracleStartTimesPostedEventHandler.syncEventsFromTransaction(

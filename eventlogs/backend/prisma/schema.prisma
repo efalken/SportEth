@@ -23,14 +23,14 @@ model OracleResultsPostedEvent {
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
 }
 
-model OracleDecOddsPostedEvent {
+model OracleprobSpreadDiv2PostedEvent {
   blockNumber      Int
   transactionHash  String
   transactionIndex Int
   logIndex         Int
   epoch            Int
   propnum          Int
-  decOdds          String  @db.VarChar(3000) // encode int[] to string
+  probSpread       String  @db.VarChar(3000) // encode int[] to string
   manualEntry      Boolean @default(false)
 
   @@id([blockNumber, transactionHash, transactionIndex, logIndex])
