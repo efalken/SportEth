@@ -20,7 +20,7 @@ Download the repo by typing
 <img src="/docs/remix1.png" alt="Solidity gist" style="height: 244px; width:400px;"/>
 
 ### Dapp
-https://sporteth.vercel.app/
+
 This frontend is currently accessible via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), and the IPFS, which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the dapp folder on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). If one is worried about the security on those sites, you can run this locally, and be able to see the code and know it is secure.
 
 - cd into dapp directory
