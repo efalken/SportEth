@@ -72,7 +72,18 @@ function FAQ() {
             </Text>
           </Flex>
         </Box>
-        <h2 id="topofpage">Links go to bookmarks on this page</h2>
+        <br />
+        <Box>
+          <Flex width="100%" alignitems="center" justifycontent="marginLeft">
+            <a
+              href={new URL(`ASBWhitePaper.pdf`, import.meta.url).href}
+              download=""
+            >
+              download white paper
+            </a>
+          </Flex>
+        </Box>
+        <h2 id="topofpage">Links below go to bookmarks on this page</h2>
 
         <p>
           <HashLink to="#howtobet">How to bet</HashLink>
