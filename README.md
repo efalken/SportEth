@@ -1,5 +1,7 @@
 # Tools for interacting with the AvaxSportsBook contract on Avalanche C-chain.
 
+This repo is archived, meaning it is read-only for all users and no longer maintained. 
+
 ```shell
 Directories
 Dapp: the frontend for bettors and LPs. 
@@ -30,29 +32,28 @@ If you want to use the fuji test net, or a local hardhat chain, specify this in 
 
 ### eventlogs
 
+- must have mysql installed
 - start a terminal and cd into the `eventlogs/backend` folder
 - install the node dependencies using `npm i`
-- copy the .env.template file to `.env` file, and fill the name of your mysql table
-must have mysql installed
+- open the .env.template file and fill the name of your mysql table and your websocket API key. Then save as `.env` 
 - run `npm run start`
 - create another terminal and cd to the `eventlogs/frontend`
 - install the dependencies using `npm i`
-- type `npm run dev` in the frontend director
+- type `npm run dev` in the frontend directory
+- follow link to browser, see four event log queries
 
 ### Python
 
-Given the inputs needed for data submissions, these are best done via Python as opposed to Remix, as it is easy to miss a set of quotes or commas, and then one gets an error that is not explained. Further, this should be automated as much as possible, as this investment makes it easier to evaluate the data.
+Oracles should use Python as opposed to the frontend or Remix, as some amount of automation is necessary to avoid unintentional errors. The python files presented can be extended and customized.
 
 reading contract state data
 - getBettingData.py: Pulls betting contract state data.       
 - getOracleData.py: pull data from the oracle contract
 - getTokenData.py: pulls token and AVAX accounting data from contract
 
-Oracle transactions
-Oracles should automate their tasks as much as possible. The python files cover the main oracle functions, except depositing and withdrawing. 
-
-- helperOracle.py: contain user's private key, which is needed for non-getter functions, as they require gas. It also has the oracle address
-- processVote.py: evaluates vote, sends data to betting contract if majority true
+transactions
+- helperOracle.py: contain oracle depositor's private key, which is needed for non-getter functions, as they require gas. It also has the oracle address
+- processVote.py: evaluates vote and sends data to betting contract if majority true
 - voteNo.py: sends no vote from oracle
 - voteYes.py: sends yes vote from oracle
 - settleRefresh.py: Sends the outcomes of the prior week and the upcoming schedule for the
@@ -64,8 +65,8 @@ next weekend.
 There are several test scripts in smart/hardhat-testlibrary. You can put them into the smart/hardhat-test folder and this will execute those scripts.
 cd into the smart directory
 - type `npm i`
-put seed phrase in `smart/.env` file (creates your fake accounts in tests)
-- type `yarn hardhat test`
+put a seed phrase in `smart/.env.template` file (creates your fake accounts in tests) and save as `.env`
+- type `yarn hardhat test` in the smart directory to execute tests in the `smart/hardhat-test` directory
 The tests are described in the ContractTests.xls and ContractTests.docx files in the docs directory. 
 
 To deploy new contract instantiations using localhost you first must start a local chain 
@@ -76,19 +77,14 @@ Once completed, cd over to the dapp folder
 - make sure `localhost` is specified in the dapp/src/config.js file
 - in the dapp directory, type `yarn dev` and you can interact to with the contract via your browser via http://localhost:5173/
 
-Deploying on a external chains 
+Deploying a contract on external chains 
 To deploy on Fuji
 - in the smart directory, type `npx hardhat run ./deploy/deployAvax.ts --network avaxtest`
-[chain info is in smart/hardhat.config.js, you can add others like Sepolia, etc., but I'm not sure how to interact with them in the dapp folder, which is only configured for Avax C-chain, Fuji, and localhost.]
-Once completed, cd over to the dapp folder
-- make sure `avalancheFuji` is specified in the dapp/src/config.js file
+Chain info is in smart/hardhat.config.js. you can add others like Sepolia, etc., as these run th esame EVM as Avax's fuji and C-chain. It is configured for Avax C-chain, Fuji, and localhost. You will see avaxtest is set to Fuji in the hardhat.config.js file.
+cd over to the dapp folder
+- specify  `avalancheFuji` in the dapp/src/config.js file
 - in the dapp directory, type `yarn dev` and you can interact to with the contract via your browser via http://localhost:5173/
 
-
-To deploy on Avax C-chain
-- type `npx hardhat run ./deploy/deployAvax.ts --network avax`
-- make sure `avalanche` is specified in the dapp/src/config.js file
-- in the dapp directory, type `yarn dev` and you can interact to with the contract via your browser via http://localhost:5173/
         
 ### Docs
 Createjson.xlsm: Contains macros that create the input files needed to send the settle/newschedule and odds data to the oracle. It is meant to be used in conjunction with the ASB.accdb MSAccess database. A worksheet-embedded macros create the json files `odds.json` and `settleRefresh.json`, and puts them in the python directory. 

@@ -114,9 +114,9 @@ function FAQ() {
         <h2 id="howtobet">How to bet.</h2>
         <p>
           Betting can only occur once the oracle has voted on the odds. This
-          should happen around 10 am NY Time, Friday, give or take a day (the
-          schedule is posted Monday or Tuesday with the prior week's
-          settlement). It can also only happen before the game starts.
+          should happen around 10 am NY Time, Friday (potentially Saturday,
+          depending on data rejections). It can also only happen before the game
+          starts.
         </p>
         <p>
           To bet, you first need to deposit money into the contract. Bettors and
@@ -234,9 +234,9 @@ function FAQ() {
           active. Betting is active when the odds are sent to the betting
           contract after voting. This will be around 10 am NY time on Tuesday
           through 10 am NY Friday, though these can move by a day in either
-          direction. Thursday, Friday, or Saturday. As for bettors, it's all
-          native avax, so no token approval is needed. Just click the amount you
-          want to deposit and click 'fund.'
+          direction. Thursday, Friday, or Saturday. It only uses native avax, so
+          no token approval is needed. Just click the amount you want to deposit
+          and click 'fund.'
         </p>
         <p>
           <strong>Funding as an LP</strong>

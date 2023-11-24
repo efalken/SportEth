@@ -52,6 +52,11 @@ def getPropNumber():
     return tx_adminstruct
 
 
+def getEpoch():
+    tx_adminstruct = contract.functions.oracleEpoch().call()
+    return tx_adminstruct
+
+
 def getProposer():
     tx_adminstruct = contract.functions.proposer().call()
     return tx_adminstruct
@@ -114,6 +119,8 @@ if __name__ == "__main__":
     print("reviewStatus:", tx_odds)
     tx_odds = getSubNumber()
     print("subNumber:", tx_odds)
+    tx_odds = getEpoch()
+    print("Epoch:", tx_odds)
     tx_odds = getPropNumber()
     print("propNumber:", tx_odds)
     tx_odds = getInitFeePool()
