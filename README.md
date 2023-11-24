@@ -4,11 +4,11 @@ This repo is archived, meaning it is read-only for all users and no longer maint
 
 ```shell
 Directories
-Dapp: the frontend for bettors and LPs. 
+dapp: the frontend for bettors and LPs. 
 eventlogs: scipts for pulling ASB event logs.
-Docs: tools for oracles, explanations of hardhat tests.
-Python: Python tools, primarily for oracles. 
-Smart: hardhat tests, deployment script for the contracts.
+docs: tools for oracles, explanations of hardhat tests.
+python: Python tools, primarily for oracles. 
+smart: hardhat tests, deployment script for the contracts.
 ```
 
 ## How to use
