@@ -10,7 +10,7 @@ def settleRefreshPost():
         args["_resultVector"],
         args["_teamsched"],
         args["_starts"],
-        gas=3600000,
+        gas=1500000,
     )
     return tx_hash
 

@@ -24,25 +24,25 @@ export default function Splash() {
     navigate(redirectURL);
   }, [address, chain]);
 
-  function openWhitepaper() {
-    console.log("Opened whitepaper");
-    // TODO
-  }
+  // function openWhitepaper() {
+  //   console.log("Opened whitepaper");
+  //   // TODO
+  // }
 
-  function openCheatSpreadsheet() {
-    console.log("Opened cheat spreadsheet");
-    // TODO
-  }
+  // function openCheatSpreadsheet() {
+  //   console.log("Opened cheat spreadsheet");
+  //   // TODO
+  // }
 
-  function openSimulationSheet() {
-    console.log("Opened simulation sheet");
-    // TODO
-  }
+  // function openSimulationSheet() {
+  //   console.log("Opened simulation sheet");
+  //   // TODO
+  // }
 
-  function openContract(id) {
-    console.log("Opened contract", id);
-    // TODO
-  }
+  // function openContract(id) {
+  //   console.log("Opened contract", id);
+  //   // TODO
+  // }
 
   return (
     <div>
@@ -131,7 +131,7 @@ export default function Splash() {
           <Box>" "</Box>
         </Flex>
 
-        <Flex width="100%" alignItems="center" justifyContent="center">
+        {/* <Flex width="100%" alignItems="center" justifyContent="center">
           <Text size="16px">
             <a
               className="nav-header"
@@ -147,7 +147,7 @@ export default function Splash() {
               FAQs
             </a>
           </Text>
-        </Flex>
+        </Flex> */}
         <Flex>
           <Text> </Text>
         </Flex>
@@ -165,10 +165,10 @@ export default function Splash() {
                 alignItems: "flex-start",
                 display: "flex",
               }}
-              href="http://github.com/efalken/SportEth"
+              href="http://github.com/efalken/asb"
               //    href="FAQ.js"
             >
-              Github Codebase and Docs
+              Github Repo
             </a>
           </Text>
         </Flex>

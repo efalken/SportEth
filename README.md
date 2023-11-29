@@ -26,7 +26,7 @@ This frontend is currently accessible via [vercel](https://sporteth.vercel.app/)
 - cd into dapp directory
 - type `npm i` to create node_modules folder
 - create a `.env` file in dapp directory, add a Vite project ID
-- type `yarn dev` and follow link into browser, 
+- type `yarn dev` and follow link into browser, and it will behave just like the frontend links listed above
 
 If you want to use the fuji test net, or a local hardhat chain, specify this in the dapp/src/config.js file
 
@@ -73,7 +73,7 @@ To deploy new contract instantiations using localhost you first must start a loc
 - in the smart directory, type `npm hardhat node`
 create a new terminal
 - type `npx hardhat run ./deploy/deployAvaxShort.ts --network localhost`
-Once completed, cd over to the dapp folder
+- Once completed, cd over to the dapp folder
 - make sure `localhost` is specified in the dapp/src/config.js file
 - in the dapp directory, type `yarn dev` and you can interact to with the contract via your browser via http://localhost:5173/
 
@@ -81,7 +81,7 @@ Deploying a contract on external chains
 To deploy on Fuji
 - in the smart directory, type `npx hardhat run ./deploy/deployAvax.ts --network avaxtest`
 Chain info is in smart/hardhat.config.js. you can add others like Sepolia, etc., as these run th esame EVM as Avax's fuji and C-chain. It is configured for Avax C-chain, Fuji, and localhost. You will see avaxtest is set to Fuji in the hardhat.config.js file.
-cd over to the dapp folder
+- cd over to the dapp folder
 - specify  `avalancheFuji` in the dapp/src/config.js file
 - in the dapp directory, type `yarn dev` and you can interact to with the contract via your browser via http://localhost:5173/
 

@@ -56,6 +56,7 @@ function BetPage() {
   const [teamSplit, setTeamSplit] = useState([]);
   const [oddsVector, setOddsVector] = useState([]);
   const [startTime, setStartTime] = useState([]);
+  const [startTimeB, setStartTimeB] = useState([]);
   const [counter, setCounter] = useState(0);
   const [txnHash, setHash] = useState();
   const [betHashes, setBetHashes] = useState([]);
@@ -242,6 +243,11 @@ function BetPage() {
       {
         abi: bettingContractABI,
         address: bettingContractAddress,
+        functionName: "showStartTime",
+      },
+      {
+        abi: bettingContractABI,
+        address: bettingContractAddress,
         functionName: "showOdds",
       },
       {
@@ -298,6 +304,7 @@ function BetPage() {
       { result: _totBetData },
       { result: _totalLpCapital },
       { result: _startTimes },
+      { result: _startTimesB },
       { result: _oddsvector },
       { result: _lockedLpCapital },
       { result: _betEpoch },
@@ -325,6 +332,8 @@ function BetPage() {
     setTotalLpCapital(Number(_totalLpCapital || 0n));
 
     setStartTime(_startTimes || []);
+
+    setStartTimeB(_startTimesB || []);
 
     setOddsVector(_oddsvector || []);
 
@@ -951,7 +960,7 @@ function BetPage() {
               {reviewStatus && subNumber == 0 ? (
                 <TeamTable
                   teamSplit={teamSplit}
-                  startTimeColumn={startTime}
+                  startTimeColumn={startTimeB}
                   radioFavePick={radioFavePick}
                   showDecimalOdds={showDecimalOdds}
                   oddsTot={oddsTot}

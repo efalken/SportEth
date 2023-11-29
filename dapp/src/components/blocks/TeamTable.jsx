@@ -12,6 +12,7 @@ export default function TeamTable({
   let faveSplit = [];
   let underSplit = [];
   let sport = [];
+  let bettingOver = "no new bets";
 
   function getMoneyLineTable(decOddsi) {
     if (decOddsi < 1e4) {
@@ -108,7 +109,11 @@ export default function TeamTable({
                   : getMoneyLineTable(0.95 * oddsTot[1][i])}
               </td>
               <td>
-                {moment.unix(Number(startTimeColumn[i])).format("ddd h:mm a")}
+                {startTimeColumn[i] < moment().unix()
+                  ? bettingOver
+                  : moment
+                      .unix(Number(startTimeColumn[i]))
+                      .format("ddd h:mm a")}
               </td>
             </tr>
           ) : null

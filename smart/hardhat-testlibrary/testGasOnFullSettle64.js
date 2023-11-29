@@ -14,7 +14,7 @@ describe("Betting", function () {
   let betting, oracle, token, owner, account1, account2, account3;
 
   before(async () => {
-    const Betting = await ethers.getContractFactory("BettingV4");
+    const Betting = await ethers.getContractFactory("BettingFuji2");
     const Token = await ethers.getContractFactory("Token");
     const Oracle = await ethers.getContractFactory("Oracle");
 

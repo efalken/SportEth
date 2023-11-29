@@ -2,7 +2,7 @@ from helperOracle import send_function
 
 
 def callVoteNo():
-    tx_hash = send_function("vote", False, gas=150000)
+    tx_hash = send_function("vote", False, gas=99000)
     return tx_hash
 
 

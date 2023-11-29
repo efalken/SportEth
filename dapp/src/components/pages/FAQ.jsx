@@ -179,11 +179,11 @@ function FAQ() {
           </strong>
         </p>
         <p>
-          If you have active bets (below), you cannot withdraw. If all of your
-          bets are settled, the redeem button is displayed. Click once to redeem
-          all bets. At 16 unredeemed bets, the user must redeem so the account
-          can bet again. One can redeem whenever. Funds do not disappear if
-          never claimed.
+          If you have active bets (below), you cannot redeem, but if you have no
+          active bets you can redeem at any time. Click once to redeem all bets.
+          At 16 unredeemed bets, the user must redeem so the account can bet
+          again. If the user does not redeem, their AVAX will stay in the
+          contract forever, as there is no mechanism to sweep inactive accounts.
         </p>
         <p>
           Here the redeem button is hidden because the user cannot redeem due to
@@ -220,15 +220,18 @@ function FAQ() {
         <h2 id="betsizelimit">bet size limit</h2>
         <HashLink to="#topofpage">back to top </HashLink>
         <p>
-          Two constraints limit bet size. One is the amount of free LP capital
-          remaining as if nothing is left; no one can bet until bettors take the
-          other side of maxed out contests. This is because a new bettor on the
-          other side replaces LP capital, allowing it to back different
-          contests. The other constraint is an exogenous limit of the LP's total
-          capital divided by a constant, which prevents a single contest from
-          using all the LP capital, which would also expose the LPs to
-          significant risk. The limit is presented under 'MaxBet", and any bets
-          sent for that amount or above will be rejected.
+          Two constraints limit bet size. One is a per-event limit, set at the
+          LP's total capital divided by a constant, which prevents a single
+          contest from using all the LP capital, and also diversifies the LP's
+          risk. The other constraint is the total amount of free LP capital
+          remaining. If there is 100 avax available, and 20 events are each
+          using 5 AVAX from the LPs, then an event with no exposure cannot
+          accomodate any bets; no one can bet until bettors take the other side
+          of outstanding contests, releasing LP capital. This is because a new
+          bettor on the other side replaces LP capital, allowing that LP capital
+          to back different contests. The limit is the smaller of these two
+          constraints, and is presented under MaxBet. Any bets sent for that
+          amount or above will be rejected.
         </p>
         <p>
           <strong>MaxBet presented in Gui</strong>
@@ -245,9 +248,8 @@ function FAQ() {
           active. Betting is active when the odds are sent to the betting
           contract after voting. This will be around 10 am NY time on Tuesday
           through 10 am NY Friday, though these can move by a day in either
-          direction. Thursday, Friday, or Saturday. It only uses native avax, so
-          no token approval is needed. Just click the amount you want to deposit
-          and click 'fund.'
+          direction. It only uses native avax, so no token approval is needed.
+          Just click the amount you want to deposit and click 'fund.'
         </p>
         <p>
           <strong>Funding as an LP</strong>
@@ -260,15 +262,11 @@ function FAQ() {
         <h2 id="withdrawingaslp">Withdrawing as LP</h2>
         <HashLink to="#topofpage">back to top </HashLink>
         <p>
-          If you invest 123.45 avax, it is translated into 'shares' representing
-          your pro-rata ownership of the total LP capital, which will look
-          nothing like 123.45. The user has 300k of 416k shares, or 72%, in the
-          case below. It is multiplied by the total LP capital amount of 50.35,
-          which gets you to 36.2 avax.
-        </p>
-        <p>
-          Copy and paste from the LP share box, but remove the comma. There are
-          no decimals for shares; shares are nonfungible and nontradeable.
+          When a new LP funds their account it is translated into shares
+          representing pro-rata ownership of the total LP capital. You can copy
+          and paste your shares from the LP share box, but remove the comma.
+          There are no decimals for shares; shares are nonfungible and
+          nontradeable.
         </p>
         <p>
           <strong>
@@ -277,7 +275,7 @@ function FAQ() {
         </p>
 
         <h2 id="howtoclaimoracletokenrewards">
-          How to claim Oracle Token Rewards
+          How LP's claim Oracle Token Rewards
         </h2>
         <p>
           The betting contract contains 50% of the lifetime supply of tokens,
@@ -578,14 +576,12 @@ function FAQ() {
         <p>Decimal odds = 1 / prob(win)</p>
         <p>
           The most common odds offered for the NFL are presented in moneyline
-          form as 110 for both teams, which would be 1.909 in decimal odds or
+          form as -110 for both teams, which would be 1.909 in decimal odds or
           10/11 in fractional odds. A flat book on such a wager would receive
-          220 and payout 210. In this way, the 'house' makes money used to pay
-          for various costs and a profit from the house. In this case, the
-          implicit profit ('vig') would be 4.55%, 10/220. The general formula
-          for estimating the vig is given by the following formula: <em>p</em>{" "}
-          and <em>q</em> are decimal payouts (e.g., 1.909 for a standard even
-          money bet) for opposing teams.
+          220 and payout 210. The implicit profit ('vig') would be 4.55%,
+          10/220. The general formula for estimating the vig is given by the
+          following formula: <em>p</em> and <em>q</em> are decimal payouts
+          (e.g., 1.909 for a standard even money bet) for opposing teams.
         </p>
         <p>vig = 1 – pq/(p+q)</p>
         <p>
@@ -666,6 +662,7 @@ function FAQ() {
             <ol>
               <li>spread = 0.60 – 0.4255 = 0.1745</li>
               <li>spread/2 = 0.0872</li>
+              <li>'87' would be sent to the contract</li>
             </ol>
           </li>
           <li>
@@ -787,7 +784,7 @@ function FAQ() {
           holder withdraws or adds to their account, the token holder is sent
           their entire accrued AVAX using the formula
         </p>
-        <p>PotentialTokenRevenue = tokens (feePool(now) feePool(initial))</p>
+        <p>PotentialTokenRevenue = tokens (feePool(now) - feePool(initial))</p>
         <p>
           Having tokens in the oracle is a necessary but insufficient condition
           for being paid. The contract then takes the total number of tokens
@@ -802,7 +799,13 @@ function FAQ() {
           There is no scenario where the token holders can lose accrued revenue,
           either due to a lucky win streak by bettors or an oracle hack. Token
           holders can be sure the contract is in balance, where accounts payable
-          are always equal to AVAX in the contract.
+          are always equal to AVAX in the contract.If a user loses access to
+          their private key, that account's AVAX will be locked in the contract
+          forever.
+        </p>
+        <p>
+          More information on submitting data to the Oracle, see OracleFAQs.pdf
+          in the repo docs folder.
         </p>
       </div>
     </>
