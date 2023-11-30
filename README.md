@@ -21,11 +21,11 @@ Download the repo by typing
 
 ### Dapp
 
-This frontend is currently accessible via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), and the IPFS, which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the dapp folder on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). If one is worried about the security on those sites, you can run this locally, and be able to see the code and know it is secure.
+The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek] (https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS] (https://bafybeigletmxso7b4fzw5tc7eikyvhg4uugm3lgvxrkh56ynuhpitug5ju.ipfs.sphn.link/#/betpage), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). If one is worried about the security on those sites (DNS hijacking), you can run this locally by downloading the repo (see main ReadMe in asb Repo) or by using Remix. 
 
 - cd into dapp directory
 - type `npm i` to create node_modules folder
-- create a `.env` file in dapp directory, add a Vite project ID
+- create a `.env` file in dapp directory, add a Vite project ID. I have one in there, but it was free, so if used too much it will stop working (I am not paying for an update, or updating this repo).
 - type `yarn dev` and follow link into browser, and it will behave just like the frontend links listed above
 
 If you want to use the fuji test net, or a local hardhat chain, specify this in the dapp/src/config.js file
@@ -35,7 +35,7 @@ If you want to use the fuji test net, or a local hardhat chain, specify this in 
 - must have mysql installed
 - start a terminal and cd into the `eventlogs/backend` folder
 - install the node dependencies using `npm i`
-- open the .env.template file and fill the name of your mysql table and your websocket API key. Then save as `.env` 
+- open the .env.template file and fill the name of your mysql table and your websocket API key. You can get one for free at https://chainstack.com/. Then save as `.env` . I have one in there but if too many people use it, it will stop workingg.
 - run `npm run start`
 - create another terminal and cd to the `eventlogs/frontend`
 - install the dependencies using `npm i`
@@ -63,7 +63,7 @@ next weekend.
 ### Smart
 
 There are several test scripts in smart/hardhat-testlibrary. You can put them into the smart/hardhat-test folder and this will execute those scripts.
-cd into the smart directory
+- cd into the smart directory
 - type `npm i`
 - put a seed phrase in `smart/.env.template` file (creates your fake accounts in tests) and save as `.env`
 - type `yarn hardhat test` in the smart directory to execute tests in the `smart/hardhat-test` directory
@@ -102,6 +102,8 @@ ContractTests.xls: Contains worksheets that correspond to the data in the hardha
 ContractTests.docx: explains the tests. 
 
 MaxBet.xlsx: shows how the maximum bet is calculated.
+
+OracleFAQs.pdf: detail on processing data as an oracle
 
 
 
