@@ -44,7 +44,7 @@ If you want to use the fuji test net, or a local hardhat chain, specify this in 
 
 ### Python
 
-Oracles should use Python as opposed to the frontend or Remix, as some amount of automation is necessary to avoid unintentional errors. The python files presented can be extended and customized.
+Oracles should use Python as opposed to the frontend or Remix, as some amount of automation is necessary to avoid unintentional errors. The python files presented can be extended and customized. Users need to have the various python packages installed, which you can do using pip install.
 
 reading contract state data
 - getBettingData.py: Pulls betting contract state data.       
@@ -52,7 +52,7 @@ reading contract state data
 - getTokenData.py: pulls token and AVAX accounting data from contract
 
 transactions
-- helperOracle.py: contain oracle depositor's private key, which is needed for non-getter functions, as they require gas. It also has the oracle address
+- helperOracle.py:  oracle must add their private key, which is needed for non-getter functions, as they require gas. I provide one, but it's an empty account, but it shows where to put it (open and see). It also has the oracle address
 - processVote.py: evaluates vote and sends data to betting contract if majority true
 - voteNo.py: sends no vote from oracle
 - voteYes.py: sends yes vote from oracle
@@ -65,9 +65,9 @@ next weekend.
 There are several test scripts in smart/hardhat-testlibrary. You can put them into the smart/hardhat-test folder and this will execute those scripts.
 cd into the smart directory
 - type `npm i`
-put a seed phrase in `smart/.env.template` file (creates your fake accounts in tests) and save as `.env`
+- put a seed phrase in `smart/.env.template` file (creates your fake accounts in tests) and save as `.env`
 - type `yarn hardhat test` in the smart directory to execute tests in the `smart/hardhat-test` directory
-The tests are described in the ContractTests.xls and ContractTests.docx files in the docs directory. 
+- The tests are described in the ContractTests.xls and ContractTests.docx files in the docs directory. 
 
 To deploy new contract instantiations using localhost you first must start a local chain 
 - in the smart directory, type `npm hardhat node`
