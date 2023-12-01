@@ -100,7 +100,7 @@ export default function TeamTableOdds({
                 : getMoneyLineTable(0.95 * oddsTot[1][i])}
             </td>
             <td>
-              {moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}
+              {moment.unix(Number(startTimeColumn[i]) + 60).format("MMMDD-ha")}
             </td>
           </tr>
         ))}

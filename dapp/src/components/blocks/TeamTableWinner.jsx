@@ -77,7 +77,7 @@ export default function TeamTableWinner({
             <td>{faveSplit[i]}</td>
             <td>{underSplit[i]}</td>
             <td>
-              {moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}
+              {moment.unix(Number(startTimeColumn[i]) + 60).format("MMMDD-ha")}
             </td>
           </tr>
         ))}

@@ -112,7 +112,7 @@ export default function TeamTable({
                 {startTimeColumn[i] < moment().unix()
                   ? bettingOver
                   : moment
-                      .unix(Number(startTimeColumn[i]))
+                      .unix(Number(startTimeColumn[i] + 300))
                       .format("ddd h:mm a")}
               </td>
             </tr>

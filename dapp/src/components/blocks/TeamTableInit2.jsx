@@ -50,7 +50,9 @@ export default function TeamTableInit2({ teamSplit, startTimeColumn }) {
               <td>{faveSplit[i]}</td>
               <td>{underSplit[i]}</td>
               <td>
-                {moment.unix(Number(startTimeColumn[i])).format("MMMDD-ha")}
+                {moment
+                  .unix(Number(startTimeColumn[i] + 300))
+                  .format("MMMDD-ha")}
               </td>
             </tr>
           ) : null
