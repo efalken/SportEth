@@ -23,7 +23,7 @@ Download the repo by typing
 
 The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek](https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS](https://bafybeigletmxso7b4fzw5tc7eikyvhg4uugm3lgvxrkh56ynuhpitug5ju.ipfs.sphn.link/#/betpage), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the same repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). The **only** difference between the repo frontend and the axasportsbook.io frontend is one has a different WalletConnect project ID. If one is worried about the security on those sites (DNS hijacking), you can run a frontend locally by downloading the repo (see main ReadMe in asb Repo) or by using Remix. 
 
-- cd into dapp directory
+- cd into `dapp` directory
 - type `npm i` to create node_modules folder
 - create a `.env` file in dapp directory, add a project ID. I have one in there, but it was free, so if used too much it will stop working (I am not paying for an update, or updating this repo). You can get one at https://cloud.walletconnect.com/
 - type `yarn dev` and follow link into browser, and it will behave just like the frontend links listed above
@@ -47,18 +47,18 @@ If you want to use the fuji test net, or a local hardhat chain, specify this in 
 Oracles should use Python as opposed to the frontend or Remix, as some amount of automation is necessary to avoid unintentional errors. The python files presented can be extended and customized. Users need to have the various python packages installed, which you can do using pip install.
 
 reading contract state data
-- getBettingData.py: Pulls betting contract state data.       
-- getOracleData.py: pull data from the oracle contract
-- getTokenData.py: pulls token and AVAX accounting data from contract
+- `getBettingData.py`: Pulls betting contract state data.       
+- `getOracleData.py`: pull data from the oracle contract
+- `getTokenData.py`: pulls token and AVAX accounting data from contract
 
 transactions
-- helperOracle.py:  oracle must add their private key, which is needed for non-getter functions, as they require gas. I provide one, but it's an empty account, but it shows where to put it (open and see). It also has the oracle address
-- processVote.py: evaluates vote and sends data to betting contract if majority true
-- voteNo.py: sends no vote from oracle
-- voteYes.py: sends yes vote from oracle
-- settleRefresh.py: Sends the outcomes of the prior week and the upcoming schedule for the
+- `helperOracle.py`:  oracle must add their private key, which is needed for non-getter functions, as they require gas. I provide a private only to show where to put it and what format it takes (do not use this private key!). 
+- `processVote.py`: evaluates vote and sends data to betting contract if majority true
+- `voteNo.py`: sends no vote from oracle
+- `voteYes.py`: sends yes vote from oracle
+- `settleRefresh.py`: Sends the outcomes of the prior week and the upcoming schedule for the
 next weekend.
-- oddsPost.py: Sends weekly odds, formatted in the probability difference between the two teams multiplied by 1000
+- `oddsPost.py`: Sends weekly odds, formatted in the probability difference between the two teams multiplied by 1000
 
 ### Smart
 
@@ -87,23 +87,21 @@ Chain info is in smart/hardhat.config.js. you can add others like Sepolia, etc.,
 
         
 ### Docs
-Createjson.xlsm: Contains macros that create the input files needed to send the settle/newschedule and odds data to the oracle. It is meant to be used in conjunction with the ASB.accdb MSAccess database. A worksheet-embedded macros create the json files `odds.json` and `settleRefresh.json`, and puts them in the python directory. 
+**Createjson.xlsm**: Contains macros that create the input files needed to send the settle/newschedule and odds data to the oracle. It is meant to be used in conjunction with the ASB.accdb MSAccess database. Worksheet-embedded macros create the json files `odds.json` and `settleRefresh.json`, and puts them in the python directory. 
 
-ASB.accdb: This database takes in raw data on schedules and decimal odds and generates the data in the format the contract requires. The end result are queries that are then pasted into the createjson.xlsm workbook, which the generates the json files. It averages the decimal odds for each team/event, puts the favorite into the first position, and translates the odds into the parochial input used in this contract. 
+`ASB.accdb`: This database takes in raw data on schedules and decimal odds and generates the data in the format the contract requires. The end result are queries that are then pasted into the createjson.xlsm workbook, which the generates the json files. It averages the decimal odds for each team/event, puts the favorite into the first position, and translates the odds into the parochial input used in this contract. 
 
-oddsTranslation.xls: Shows how to translate between decimal, moneyline,
+`oddsTranslation.xls`: Shows how to translate between decimal, moneyline,
 fractional, and probability of winning. It gives an example of how raw
 decimal odds are transformed into the probability of a win.
-        
-To create a set of data for a settle/refresh submission.
 
-ContractTests.xls: Contains worksheets that correspond to the data in the hardhat tests.
+`ContractTests.xls`: Contains worksheets that correspond to the data in the hardhat tests.
 
-ContractTests.docx: explains the tests. 
+`ContractTests.docx`: explains the tests. 
 
-MaxBet.xlsx: shows how the maximum bet is calculated.
+`MaxBet.xlsx`: shows how the maximum bet is calculated.
 
-OracleFAQs.pdf: detail on processing data as an oracle
+`OracleFAQs.pdf`: detail on processing data as an oracle
 
 
 
