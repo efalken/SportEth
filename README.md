@@ -21,8 +21,9 @@ Download the repo by typing
 
 ### Dapp
 
-The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek](https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS](https://bafybeifet2exx4d5n7rq7hqz2r75xh3fllwjy3schnm26k2nqqajsjz6u4.ipfs.sphn.link/), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with many browsers, and I suspect the free frontend/backends above won't be able to handle much volume, so I put the same repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). The **only** difference between the repo frontend and the axasportsbook.io frontend is one has a different WalletConnect project ID. If one is worried about the security on those sites (DNS hijacking), you can run a frontend locally by downloading the repo (see main ReadMe in asb Repo) or by using Remix. 
+The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek](https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS](https://bafybeifet2exx4d5n7rq7hqz2r75xh3fllwjy3schnm26k2nqqajsjz6u4.ipfs.sphn.link/), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with many browsers, and I suspect the free frontend/backends above won't be able to handle much volume, so I put the same repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). The **only** difference between the repo frontend and the axasportsbook.io frontend is one has a different WalletConnect project ID. If one is worried about the security on those sites (DNS hijacking), you can use Remix, but that's a pain. Here is how to run a frontend locally: 
 
+- clone repo onto desktop
 - cd into `dapp` directory
 - type `npm i` to create node_modules folder
 - create a `.env` file in dapp directory, add a project ID. I have one in there, but it was free, so if used too much it will stop working (I am not paying for an update, or updating this repo). You can get one at https://cloud.walletconnect.com/
