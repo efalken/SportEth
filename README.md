@@ -87,7 +87,7 @@ Chain info is in smart/hardhat.config.js. you can add others like Sepolia, etc.,
 
         
 ### Docs
-**Createjson.xlsm**: Contains macros that create the input files needed to send the settle/newschedule and odds data to the oracle. It is meant to be used in conjunction with the ASB.accdb MSAccess database. Worksheet-embedded macros create the json files `odds.json` and `settleRefresh.json`, and puts them in the python directory. 
+`Createjson.xlsm`: Contains macros that create the input files needed to send the settle/newschedule and odds data to the oracle. It is meant to be used in conjunction with the ASB.accdb MSAccess database. Worksheet-embedded macros create the json files `odds.json` and `settleRefresh.json`, and puts them in the python directory. 
 
 `ASB.accdb`: This database takes in raw data on schedules and decimal odds and generates the data in the format the contract requires. The end result are queries that are then pasted into the createjson.xlsm workbook, which the generates the json files. It averages the decimal odds for each team/event, puts the favorite into the first position, and translates the odds into the parochial input used in this contract. 
 
