@@ -322,8 +322,8 @@ function FAQ() {
           useful for the oracle.
         </p>
         <p>
-          <strong>Contract State</strong> refers to parameters independent of
-          any user.
+          <strong>Contract State</strong> parameters are those independent of
+          any user
         </p>
         <p>
           <strong>Last submitter</strong> is the last account to send oracle
@@ -371,12 +371,12 @@ function FAQ() {
             <img src={oracleKState} alt="" />
           </strong>
         </p>
-        <p>
-          Connected Account State presents data for the viewer's oracle account.
-        </p>
+        <p>Connected Account State presents data for the connected account.</p>
         <p>
           <strong>Base prop number</strong> is the propNumber when the account
-          last claimed ether.
+          last claimed ether. Claiming eth frequently, such as each week, does
+          not increase or decrease an oracle's revenue; it just moves the eth
+          into the accounts EOA.
         </p>
         <p>
           <strong>Probation</strong> number tracks if a user sends bad data. If
@@ -395,7 +395,7 @@ function FAQ() {
         </p>
         <p>
           <strong>Last vote</strong> tells the oracle account the last proposal
-          they voted on.
+          they voted on. They should vote on every one.
         </p>
         <p>
           <strong>Total votes</strong> is the number of votes by this account
@@ -408,8 +408,8 @@ function FAQ() {
           they know what to expect when claiming avax.
         </p>
         <p>
-          <strong>Tokens in EOA</strong> tell the user how many tokens their
-          account currently has in their wallet, off the contract.
+          <strong>Tokens in EOA</strong> tell the user how many oracle tokens
+          their account currently has in their wallet, off the contract.
         </p>
         <p>
           <strong>

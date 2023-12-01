@@ -21,11 +21,11 @@ Download the repo by typing
 
 ### Dapp
 
-The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek] (https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS] (https://bafybeigletmxso7b4fzw5tc7eikyvhg4uugm3lgvxrkh56ynuhpitug5ju.ipfs.sphn.link/#/betpage), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). If one is worried about the security on those sites (DNS hijacking), you can run this locally by downloading the repo (see main ReadMe in asb Repo) or by using Remix. 
+The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek] (https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS] (https://bafybeigletmxso7b4fzw5tc7eikyvhg4uugm3lgvxrkh56ynuhpitug5ju.ipfs.sphn.link/#/betpage), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the same repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). The **only** difference between the repo frontend and the axasportsbook.io frontend is one has a different WalletConnect project ID. If one is worried about the security on those sites (DNS hijacking), you can run a frontend locally by downloading the repo (see main ReadMe in asb Repo) or by using Remix. 
 
 - cd into dapp directory
 - type `npm i` to create node_modules folder
-- create a `.env` file in dapp directory, add a Vite project ID. I have one in there, but it was free, so if used too much it will stop working (I am not paying for an update, or updating this repo).
+- create a `.env` file in dapp directory, add a project ID. I have one in there, but it was free, so if used too much it will stop working (I am not paying for an update, or updating this repo). You can get one at https://cloud.walletconnect.com/
 - type `yarn dev` and follow link into browser, and it will behave just like the frontend links listed above
 
 If you want to use the fuji test net, or a local hardhat chain, specify this in the dapp/src/config.js file

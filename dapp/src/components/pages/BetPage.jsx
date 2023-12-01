@@ -153,6 +153,7 @@ function BetPage() {
               fontStyle: "Italic",
               fontSize: "14px",
             }}
+            href={null}
           >
             <u>click here to dismiss</u>
           </a>
