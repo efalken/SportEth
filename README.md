@@ -21,7 +21,7 @@ Download the repo by typing
 
 ### Dapp
 
-The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek] (https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS] (https://bafybeigletmxso7b4fzw5tc7eikyvhg4uugm3lgvxrkh56ynuhpitug5ju.ipfs.sphn.link/#/betpage), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the same repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). The **only** difference between the repo frontend and the axasportsbook.io frontend is one has a different WalletConnect project ID. If one is worried about the security on those sites (DNS hijacking), you can run a frontend locally by downloading the repo (see main ReadMe in asb Repo) or by using Remix. 
+The contract is accessible from your browser via [vercel](https://sporteth.vercel.app/), [spheron](https://sporteth-c66d8f.spheron.app/), [fleek](https://nameless-brook-7350.on.fleek.co/#/betpage), and the [IPFS](https://bafybeigletmxso7b4fzw5tc7eikyvhg4uugm3lgvxrkh56ynuhpitug5ju.ipfs.sphn.link/#/betpage), which all link to the dapp directory of this repo. The IPFS version is slow and not compatible with most browsers, so I put the same repo on a server at [avaxsportsbook.io](https://www.avaxsportsbook.io). The **only** difference between the repo frontend and the axasportsbook.io frontend is one has a different WalletConnect project ID. If one is worried about the security on those sites (DNS hijacking), you can run a frontend locally by downloading the repo (see main ReadMe in asb Repo) or by using Remix. 
 
 - cd into dapp directory
 - type `npm i` to create node_modules folder
